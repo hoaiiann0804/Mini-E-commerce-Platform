@@ -130,5 +130,5 @@ Nâng cao kỹ năng debug trong môi trường full-stack.
 Liên Hệ
 
 GitHub: https://github.com/hoaiiann0804
-Email: hoaiiann0804@gmail.comcom
+Email: hoaiiann0804@gmail.com
 
