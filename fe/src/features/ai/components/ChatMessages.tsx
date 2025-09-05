@@ -20,7 +20,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   user,
 }) => {
   return (
-    <div className="chat-messages flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-b from-neutral-50/80 via-white/50 to-neutral-50/80 dark:from-neutral-800/80 dark:via-neutral-900/50 dark:to-neutral-800/80 min-h-[300px] max-h-[50vh] sm:max-h-[400px] scrollbar-thin scrollbar-thumb-primary-200 dark:scrollbar-thumb-primary-800 scrollbar-track-transparent">
+    <div className="chat-messages flex-1 overflow-y-auto p-6 sm:p-6 space-y-4 bg-gradient-to-b from-neutral-50/80 via-white/50 to-neutral-50/80 dark:from-neutral-800/80 dark:via-neutral-900/50 dark:to-neutral-800/80 min-h-[300px] max-h-[50vh] sm:max-h-[400px] scrollbar-thin scrollbar-thumb-primary-200 dark:scrollbar-thumb-primary-800 scrollbar-track-transparent">
       {messages.map((message) => (
         <div
           key={message.id}

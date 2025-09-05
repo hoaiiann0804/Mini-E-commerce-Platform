@@ -47,7 +47,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="p-4 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-lg">
+    <div className="p-2 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-lg ">
       {/* Typing status indicator */}
       {isLoading && (
         <div className="flex items-center mb-2 text-xs text-neutral-500 dark:text-neutral-400 animate-pulse">
@@ -88,7 +88,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       </form>
 
       {/* Footer with branding and features */}
-      <div className="mt-3 flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-500">
+      <div className="mt-1 flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-500">
         <div className="flex items-center">
           <VerifiedIcon className="mr-1.5 text-primary-500" />
           <span>
