@@ -42,6 +42,7 @@
 ## 📸 Hình ảnh demo
 
 ![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/homepage.png)
+![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/ProductList_homepage.png)
 *Trang chủ với danh sách sản phẩm và thanh tìm kiếm*
 
 ![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
@@ -51,8 +52,11 @@
 *Quản lý sản phẩm trong giỏ hàng*
 
 ![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
- ![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
+![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
 *Thanh toán an toàn với Stripe*
+
+![Đơn hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/order.png)
+*Xem chi tiết đơn hàng, cập nhật trạng thái, và thanh toán*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin-home.png)
 *Dashboard quản trị với thống kê doanh thu*
