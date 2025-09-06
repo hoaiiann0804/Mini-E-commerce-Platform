@@ -41,7 +41,7 @@
 
 ## 📸 Hình ảnh demo
 
-![Trang chủ](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/homepage.png)
+![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/homepage.png)
 *Trang chủ với danh sách sản phẩm và thanh tìm kiếm*
 
 ![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
@@ -51,10 +51,26 @@
 *Quản lý sản phẩm trong giỏ hàng*
 
 ![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
+ ![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
 *Thanh toán an toàn với Stripe*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin-home.png)
 *Dashboard quản trị với thống kê doanh thu*
+
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_product.png)
+*Dashboard quản trị với danh sách sản phẩm*
+
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_categories.png)
+*Dashboard quản trị với danh sách danh mục
+
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_order.png)
+*Dashboard quản trị với danh sách đơn hàng*
+
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_user.png)
+*Dashboard quản trị với danh sách ngườin dùng*
+
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_warranty.png)
+*Dashboard quản trị với danh sách gói bảo hành*
 
 ![Chatbot AI](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/chatbot.png)
 *Tương tác với Gemini AI*
@@ -197,12 +213,8 @@ Commit thay đổi: git commit -m "feat: mô tả thay đổi".
 Push branch: git push origin feature/your-feature.
 Tạo Pull Request với mô tả chi tiết.
 
-Xem CONTRIBUTING.md để biết thêm chi tiết.
-📄 Giấy phép
-Dự án được cấp phép theo MIT License.
 📞 Liên hệ
-
 Tên: Nguyễn Hoài An
 GitHub: github.com/hoaiiann0804
 Email: hoaiiann0804@gmail.com
-Portfolio: your-portfolio.com (nếu có)
+
