@@ -4,7 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.x-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Project Status](https://img.shields.io/badge/status-active_development-yellowgreen)](https://github.com/hoaiiann0804/WebsiteBanHangMini)
+[![Project Status](https://img.shields.io/badge/status-active_development-yellowgreen)](https://github.com/hoaiiann0804/WebsiteE-Commerce-Mini-with-AI-Chatbot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🌟 Giới thiệu
@@ -101,8 +101,8 @@
 
 1. **Clone repository**
    ```bash
-   git clone https://github.com/hoaiiann0804/WebsiteBanHangMini.git
-   cd WebsiteBanHangMini
+   git clone https://github.com/hoaiiann0804/WebsiteE-Commerce-Mini-with-AI-Chatbot.git
+   cd WebsiteE-Commerce-Mini-with-AI-Chatbot
 
 Cài đặt dependencies
 bash# Frontend
