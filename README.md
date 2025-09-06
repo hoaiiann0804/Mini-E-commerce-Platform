@@ -43,40 +43,50 @@
 
 ![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/homepage.png)
 ![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/ProductList_homepage.png)
+
 *Trang chủ với danh sách sản phẩm và thanh tìm kiếm*
 
 ![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
+
 *Thông tin sản phẩm, variants, và đánh giá*
 
 ![Giỏ hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/cart.png)
+
 *Quản lý sản phẩm trong giỏ hàng*
 
 ![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
 ![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
+
 *Thanh toán an toàn với Stripe*
 
 ![Đơn hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/order.png)
+
 *Xem chi tiết đơn hàng, cập nhật trạng thái, và thanh toán*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin-home.png)
 *Dashboard quản trị với thống kê doanh thu*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_product.png)
+
 *Dashboard quản trị với danh sách sản phẩm*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_categories.png)
 *Dashboard quản trị với danh sách danh mục
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_order.png)
+
 *Dashboard quản trị với danh sách đơn hàng*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_user.png)
+
 *Dashboard quản trị với danh sách ngườin dùng*
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_warranty.png)
+
 *Dashboard quản trị với danh sách gói bảo hành*
 
 ![Chatbot AI](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/chatbot.png)
+
 *Tương tác với Gemini AI*
 
 ## 🛠️ Cài đặt và chạy local
