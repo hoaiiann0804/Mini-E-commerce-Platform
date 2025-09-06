@@ -181,25 +181,43 @@ Nâng cao kỹ năng debug trong môi trường full-stack.
 
 📂 Cấu trúc dự án
 
-textWebsiteBanHangMini/
-├── frontend/                     # Giao diện người dùng và quản trị
-│   ├── src/
-│   │   ├── components/         # Component dùng chung
-│   │   ├── pages/              # Các trang (trang chủ, sản phẩm, giỏ hàng, v.v.)
-│   │   ├── features/           # Tính năng chính (auth, cart, payment)
-│   │   └── assets/             # Hình ảnh, fonts
-│   └── public/                 # Tài nguyên tĩnh
-├── backend/                     # Backend Node.js
-│   ├── src/
-│   │   ├── controllers/        # API controllers
-│   │   ├── models/             # Sequelize models
-│   │   ├── routes/             # API routes
-│   │   ├── services/           # Business logic
-│   │   └── migrations/         # Database migrations
-│   └── .env                    # Cấu hình môi trường
-├── screenshots/                 # Ảnh chụp màn hình
-└── README.md                   # Tài liệu dự án
+### Frontend Architecture
 
+```
+src/
+├── components/          # UI Components tái sử dụng
+│   ├── common/         # Button, Input, Modal...
+│   ├── layout/         # Header, Footer, Sidebar
+│   └── forms/          # Form components
+├── pages/              # Các trang chính
+│   ├── auth/           # Login, Register
+│   ├── shop/           # Product listing, detail
+│   ├── admin/          # Admin dashboard
+│   └── checkout/       # Cart, Payment
+├── store/              # Zustand state management
+├── services/           # API calls
+├── hooks/              # Custom React hooks
+├── utils/              # Helper functions
+└── types/              # TypeScript definitions
+```
+
+### Backend Architecture
+
+```
+src/
+├── controllers/        # Route handlers
+│   ├── auth.js        # Authentication
+│   ├── products.js    # Product management
+│   ├── orders.js      # Order processing
+│   └── chat.js        # Chatbot
+├── middlewares/        # Express middlewares
+│   ├── auth.js        # JWT verification
+│   ├── upload.js      # File upload
+│   └── validation.js  # Input validation
+├── models/            # Database models
+├── services/          # Business logic
+├── routes/            # API routes
+└── utils/             # Helper functions
 🚀 Triển khai
 
 Lưu ý: Triển khai hiện cần API keys hợp lệ cho Stripe và Gemini AI.
