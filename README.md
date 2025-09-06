@@ -44,19 +44,19 @@
 ![Trang chủ](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/homepage.png)
 *Trang chủ với danh sách sản phẩm và thanh tìm kiếm*
 
-![Chi tiết sản phẩm](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/product-detail.png)
+![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
 *Thông tin sản phẩm, variants, và đánh giá*
 
-![Giỏ hàng](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/cart.png)
+![Giỏ hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/cart.png)
 *Quản lý sản phẩm trong giỏ hàng*
 
-![Thanh toán](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/payment.png)
+![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
 *Thanh toán an toàn với Stripe*
 
-![Admin Dashboard](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/admin-home.png)
+![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin-home.png)
 *Dashboard quản trị với thống kê doanh thu*
 
-![Chatbot AI](https://github.com/hoaiiann0804/WebsiteBanHangMini/raw/main/screenshots/chatbot.png)
+![Chatbot AI](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/chatbot.png)
 *Tương tác với Gemini AI*
 
 ## 🛠️ Cài đặt và chạy local
@@ -150,6 +150,7 @@ Giải quyết thách thức đa ngôn ngữ (i18n) với lazy loading translati
 Nâng cao kỹ năng debug trong môi trường full-stack.
 
 📂 Cấu trúc dự án
+
 textWebsiteBanHangMini/
 ├── frontend/                     # Giao diện người dùng và quản trị
 │   ├── src/
@@ -168,6 +169,7 @@ textWebsiteBanHangMini/
 │   └── .env                    # Cấu hình môi trường
 ├── screenshots/                 # Ảnh chụp màn hình
 └── README.md                   # Tài liệu dự án
+
 🚀 Triển khai
 
 Lưu ý: Triển khai hiện cần API keys hợp lệ cho Stripe và Gemini AI.
