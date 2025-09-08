@@ -12,6 +12,7 @@
 **Website Bán Hàng Mini** là một ứng dụng thương mại điện tử full-stack, tích hợp chatbot AI (Gemini) và thanh toán Stripe, mang đến trải nghiệm mua sắm trực tuyến mượt mà, an toàn và responsive.
 
 **Vai trò của tôi**:
+
 - Phát triển toàn bộ frontend (React, TypeScript, Zustand) và backend (Node.js, Express, PostgreSQL).
 - Tích hợp Stripe cho thanh toán và Gemini AI cho chatbot.
 - Tối ưu hiệu suất với lazy loading, database indexing, và API caching.
@@ -19,6 +20,7 @@
 ## 🎯 Tính năng chính
 
 ### Phía người dùng
+
 - 🔐 **Xác thực**: Đăng ký/đăng nhập với JWT, hỗ trợ vai trò khách hàng và admin.
 - 🔍 **Quản lý sản phẩm**: Tìm kiếm, lọc sản phẩm theo danh mục, giá, và thuộc tính.
 - 🛒 **Giỏ hàng**: Thêm/xóa sản phẩm, tính toán tổng tiền.
@@ -27,6 +29,7 @@
 - 🤖 **Chatbot AI**: Hỗ trợ khách hàng với Gemini AI, có chế độ fallback khi API không khả dụng.
 
 ### Phía quản trị
+
 - 📊 **Dashboard**: Thống kê doanh thu và phân tích dữ liệu.
 - 📦 **Quản lý sản phẩm**: CRUD sản phẩm, danh mục, và thuộc tính.
 - 📝 **Quản lý đơn hàng**: Theo dõi và cập nhật trạng thái đơn hàng.
@@ -44,54 +47,55 @@
 ![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/homepage.png)
 ![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/ProductList_homepage.png)
 
-*Trang chủ với danh sách sản phẩm và thanh tìm kiếm*
+_Trang chủ với danh sách sản phẩm và thanh tìm kiếm_
 
 ![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
 
-*Thông tin sản phẩm, variants, và đánh giá*
+_Thông tin sản phẩm, variants, và đánh giá_
 
 ![Giỏ hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/cart.png)
 
-*Quản lý sản phẩm trong giỏ hàng*
+_Quản lý sản phẩm trong giỏ hàng_
 
 ![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
 ![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
 
-*Thanh toán an toàn với Stripe*
+_Thanh toán an toàn với Stripe_
 
 ![Đơn hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/order.png)
 
-*Xem chi tiết đơn hàng, cập nhật trạng thái, và thanh toán*
+_Xem chi tiết đơn hàng, cập nhật trạng thái, và thanh toán_
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_home.png)
-*Dashboard quản trị với thống kê doanh thu*
+_Dashboard quản trị với thống kê doanh thu_
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_product.png)
 
-*Dashboard quản trị với danh sách sản phẩm*
+_Dashboard quản trị với danh sách sản phẩm_
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_categories.png)
-*Dashboard quản trị với danh sách danh mục
+\*Dashboard quản trị với danh sách danh mục
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_order.png)
 
-*Dashboard quản trị với danh sách đơn hàng*
+_Dashboard quản trị với danh sách đơn hàng_
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_user.png)
 
-*Dashboard quản trị với danh sách ngườin dùng*
+_Dashboard quản trị với danh sách ngườin dùng_
 
 ![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_warranty.png)
 
-*Dashboard quản trị với danh sách gói bảo hành*
+_Dashboard quản trị với danh sách gói bảo hành_
 
 ![Chatbot AI](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/chatbot.png)
 
-*Tương tác với Gemini AI*
+_Tương tác với Gemini AI_
 
 ## 🛠️ Cài đặt và chạy local
 
 ### Yêu cầu
+
 - Node.js >= 18.x
 - PostgreSQL >= 15.x
 - Yarn hoặc npm
@@ -103,6 +107,7 @@
    ```bash
    git clone https://github.com/hoaiiann0804/WebsiteE-Commerce-Mini-with-AI-Chatbot.git
    cd WebsiteE-Commerce-Mini-with-AI-Chatbot
+   ```
 
 Cài đặt dependencies
 bash# Frontend
@@ -110,6 +115,7 @@ cd frontend
 yarn install
 
 # Backend
+
 cd ../backend
 yarn install
 
@@ -117,22 +123,24 @@ Cấu hình môi trường
 
 Copy frontend/.env.example và backend/.env.example thành .env.
 Cập nhật biến môi trường trong backend/.env:
+```
 envDB_URL=postgres://user:password@localhost:5432/ecommerce
 STRIPE_KEY=your_stripe_key
 GEMINI_API_KEY=your_gemini_api_key
 JWT_SECRET=your_jwt_secret
-
-
+```
 
 Khởi tạo database
 bash# Tạo database
 psql -U postgres -c "CREATE DATABASE ecommerce;"
 
 # Chạy migrations
+
 cd backend
 yarn migrate
 
 # (Tùy chọn) Seed dữ liệu
+
 yarn seed
 
 Khởi động ứng dụng
@@ -141,6 +149,7 @@ cd backend
 yarn start
 
 # Frontend
+
 cd ../frontend
 yarn dev
 
@@ -153,17 +162,12 @@ Tài khoản thử nghiệm:
 Khách hàng: user@example.com / password123
 Admin: admin@example.com / admin123
 
-
-
-
-
 Lưu ý
 
 Đảm bảo PostgreSQL chạy trên localhost:5432 hoặc cập nhật DB_URL.
 Nếu thiếu API keys, ứng dụng chạy ở chế độ demo (thanh toán giả lập, chatbot fallback).
 Để kiểm tra webhook Stripe trên local, sử dụng ngrok:
 bashngrok http 3000
-
 
 🔍 Kết quả đạt được
 
@@ -250,3 +254,4 @@ Tên: Nguyễn Hoài An
 GitHub: github.com/hoaiiann0804
 Email: hoaiiann0804@gmail.com
 
+```
