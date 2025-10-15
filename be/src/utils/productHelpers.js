@@ -3,7 +3,7 @@
  * Utilities for managing product stock and variants
  */
 
-const { ProductVariant } = require('../models');
+const { ProductVariant } = require("../models");
 
 /**
  * Calculate total stock from variants
@@ -28,7 +28,7 @@ const updateProductTotalStock = async (productId, Product) => {
   try {
     const variants = await ProductVariant.findAll({
       where: { productId },
-      attributes: ['stockQuantity'],
+      attributes: ["stockQuantity"],
     });
 
     const totalStock = calculateTotalStock(variants);
@@ -43,7 +43,7 @@ const updateProductTotalStock = async (productId, Product) => {
 
     return totalStock;
   } catch (error) {
-    console.error('Error updating product total stock:', error);
+    console.error("Error updating product total stock:", error);
     throw error;
   }
 };
@@ -72,7 +72,7 @@ const validateVariantAttributes = (productAttributes, variantAttributes) => {
       // Kiểm tra nếu giá trị biến thể không nằm trong danh sách giá trị cho phép
       if (!productAttr.values.includes(variantValue)) {
         console.log(
-          `Giá trị biến thể không hợp lệ: ${variantValue} không nằm trong ${productAttr.values.join(', ')}`
+          `Giá trị biến thể không hợp lệ: ${variantValue} không nằm trong ${productAttr.values.join(", ")}`
         );
         return false;
       }
@@ -90,8 +90,8 @@ const validateVariantAttributes = (productAttributes, variantAttributes) => {
  */
 const generateVariantSku = (productSku, attributes) => {
   const suffix = Object.values(attributes)
-    .map((value) => value.toUpperCase().replace(/\s+/g, ''))
-    .join('-');
+    .map((value) => value.toUpperCase().replace(/\s+/g, ""))
+    .join("-");
 
   return `${productSku}-${suffix}`;
 };
