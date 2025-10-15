@@ -7,7 +7,7 @@
     "host": "localhost",
     "port": 5432,
     "dialect": "postgres",
-    "logging": false
+    "logging": false  
   },
   "test": {
     "username": "postgres",
