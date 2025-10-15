@@ -70,7 +70,7 @@ app.use(cookieParser());
 
 // Data sanitization against XSS
 app.use(xss());
-x
+
 // Compression middleware
 app.use(compression());
 
