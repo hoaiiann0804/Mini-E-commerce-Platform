@@ -1,11 +1,11 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // Create transporter
 const createTransporter = () => {
   // For development, use a test account
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
+      host: process.env.EMAIL_HOST || "smtp.gmail.com",
       port: process.env.EMAIL_PORT || 587,
       secure: false,
       auth: {
@@ -19,7 +19,7 @@ const createTransporter = () => {
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === 'true',
+    secure: process.env.EMAIL_SECURE === "true",
     auth: {
       user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
@@ -47,7 +47,7 @@ const sendVerificationEmail = async (email, token) => {
 
   await sendEmail({
     email,
-    subject: 'Xác thực tài khoản của bạn',
+    subject: "Xác thực tài khoản của bạn",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Xác thực tài khoản</h2>
@@ -66,11 +66,11 @@ const sendVerificationEmail = async (email, token) => {
 
 // Send reset password email
 const sendResetPasswordEmail = async (email, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
   await sendEmail({
     email,
-    subject: 'Đặt lại mật khẩu của bạn',
+    subject: "Đặt lại mật khẩu của bạn",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Đặt lại mật khẩu</h2>
@@ -98,12 +98,12 @@ const sendOrderConfirmationEmail = async (email, order) => {
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toLocaleString('vi-VN')}đ</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.subtotal.toLocaleString('vi-VN')}đ</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toLocaleString("vi-VN")}đ</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.subtotal.toLocaleString("vi-VN")}đ</td>
       </tr>
     `
     )
-    .join('');
+    .join("");
 
   await sendEmail({
     email,
@@ -115,8 +115,8 @@ const sendOrderConfirmationEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString('vi-VN')}</p>
-          <p><strong>Tổng tiền:</strong> ${total.toLocaleString('vi-VN')}đ</p>
+          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
+          <p><strong>Tổng tiền:</strong> ${total.toLocaleString("vi-VN")}đ</p>
         </div>
         
         <h3>Chi tiết đơn hàng</h3>
@@ -135,7 +135,7 @@ const sendOrderConfirmationEmail = async (email, order) => {
           <tfoot>
             <tr>
               <td colspan="3" style="padding: 10px; text-align: right;"><strong>Tổng cộng:</strong></td>
-              <td style="padding: 10px; text-align: right;"><strong>${total.toLocaleString('vi-VN')}đ</strong></td>
+              <td style="padding: 10px; text-align: right;"><strong>${total.toLocaleString("vi-VN")}đ</strong></td>
             </tr>
           </tfoot>
         </table>
@@ -144,7 +144,7 @@ const sendOrderConfirmationEmail = async (email, order) => {
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p>${shippingAddress.name}</p>
           <p>${shippingAddress.address1}</p>
-          ${shippingAddress.address2 ? `<p>${shippingAddress.address2}</p>` : ''}
+          ${shippingAddress.address2 ? `<p>${shippingAddress.address2}</p>` : ""}
           <p>${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zip}</p>
           <p>${shippingAddress.country}</p>
         </div>
@@ -162,12 +162,12 @@ const sendOrderStatusUpdateEmail = async (email, order) => {
 
   // Map status to Vietnamese
   const statusMap = {
-    pending: 'Chờ xử lý',
-    processing: 'Đang xử lý',
-    shipped: 'Đã giao cho đơn vị vận chuyển',
-    delivered: 'Đã giao hàng',
-    cancelled: 'Đã hủy',
-    completed: 'Hoàn thành',
+    pending: "Chờ xử lý",
+    processing: "Đang xử lý",
+    shipped: "Đã giao cho đơn vị vận chuyển",
+    delivered: "Đã giao hàng",
+    cancelled: "Đã hủy",
+    completed: "Hoàn thành",
   };
 
   const statusText = statusMap[status] || status;
@@ -182,7 +182,7 @@ const sendOrderStatusUpdateEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString('vi-VN')}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
           <p><strong>Trạng thái mới:</strong> ${statusText}</p>
         </div>
         
@@ -207,7 +207,7 @@ const sendOrderCancellationEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString('vi-VN')}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
         </div>
         
         <p>Nếu bạn đã thanh toán cho đơn hàng này, khoản tiền sẽ được hoàn lại trong vòng 5-7 ngày làm việc.</p>

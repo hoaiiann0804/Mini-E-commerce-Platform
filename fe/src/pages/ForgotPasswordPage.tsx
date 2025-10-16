@@ -3,15 +3,16 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import { useForgotPasswordMutation } from '@/services/authApi';
 
 const ForgotPasswordPage: React.FC = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
-
+  const [forgotPassword, {isLoading}] = useForgotPasswordMutation()
   const validateEmail = (email: string) => {
     if (!email) {
       return t('auth.forgotPassword.validation.emailRequired');
@@ -33,18 +34,18 @@ const ForgotPasswordPage: React.FC = () => {
 
     setEmailError('');
     setError('');
-    setIsLoading(true);
+
 
     try {
       // Simulate API call
-      setTimeout(() => {
+     
         // Mock success - in real app, call your API here
+        await forgotPassword({email}).unwrap()
         setIsSuccess(true);
-        setIsLoading(false);
-      }, 2000);
-    } catch (err) {
-      setError(t('auth.forgotPassword.errors.sendFailed'));
-      setIsLoading(false);
+
+    } catch (err: any) {
+      setError(t(typeof err === "string" ? err:(err?.data || 'Gửi liên kết thất bại') ));
+
     }
   };
 
