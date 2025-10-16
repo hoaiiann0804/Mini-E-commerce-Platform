@@ -120,6 +120,14 @@ const AppRoutes: React.FC = () => {
               </PublicOnlyRoute>
             }
           />
+          <Route
+            path="reset-password/:token"
+            element={
+              <PublicOnlyRoute>
+                <ResetPasswordPage />
+              </PublicOnlyRoute>
+            }
+          />
           <Route path="verify-email/:token" element={<VerifyEmailPage />} />
 
           {/* Protected routes (require authentication) */}

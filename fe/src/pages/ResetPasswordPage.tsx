@@ -1,29 +1,33 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
+import { useState, useEffect } from "react";
+import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import { useResetPasswordMutation } from "@/services/authApi";
 
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const { token: tokenFromParams } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  // const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [reserPassword, { isLoading }] = useResetPasswordMutation();
+  const [error, setError] = useState("");
   const [errors, setErrors] = useState<{
     password?: string;
     confirmPassword?: string;
   }>({});
 
-  const token = searchParams.get('token');
+  const token = tokenFromParams || searchParams.get("token");
+  console.log(token);
 
   useEffect(() => {
     // Check if token exists, if not redirect to forgot password
     if (!token) {
-      navigate('/forgot-password');
+      navigate("/forgot-password");
     }
   }, [token, navigate]);
 
@@ -35,21 +39,21 @@ const ResetPasswordPage: React.FC = () => {
     let isValid = true;
 
     if (!password) {
-      newErrors.password = t('auth.resetPassword.validation.passwordRequired');
+      newErrors.password = t("auth.resetPassword.validation.passwordRequired");
       isValid = false;
     } else if (password.length < 6) {
-      newErrors.password = t('auth.resetPassword.validation.passwordMinLength');
+      newErrors.password = t("auth.resetPassword.validation.passwordMinLength");
       isValid = false;
     }
 
     if (!confirmPassword) {
       newErrors.confirmPassword = t(
-        'auth.resetPassword.validation.confirmPasswordRequired'
+        "auth.resetPassword.validation.confirmPasswordRequired"
       );
       isValid = false;
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = t(
-        'auth.resetPassword.validation.passwordsNotMatch'
+        "auth.resetPassword.validation.passwordsNotMatch"
       );
       isValid = false;
     }
@@ -60,27 +64,24 @@ const ResetPasswordPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
-    setError('');
-    setIsLoading(true);
-
+    setError("");
     try {
-      // Simulate API call
+      await reserPassword({ token: token as string, password, confirmPassword });
+      // Mock success - in real app, call your API here with token and new password
+      setIsSuccess(true);
+      // Redirect to login after 3 seconds
       setTimeout(() => {
-        // Mock success - in real app, call your API here with token and new password
-        setIsSuccess(true);
-        setIsLoading(false);
-
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
-      }, 2000);
+        navigate("/login");
+      }, 3000);
     } catch (err) {
-      setError(t('auth.resetPassword.errors.resetFailed'));
-      setIsLoading(false);
+      setError(
+        t(
+          typeof err === "string"
+            ? err
+            : err?.data || "Đặt lại mật khẩu thất bại"
+        )
+      );
     }
   };
 
@@ -106,10 +107,10 @@ const ResetPasswordPage: React.FC = () => {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-                {t('common.success')}
+                {t("common.success")}
               </h1>
               <p className="text-neutral-600 dark:text-neutral-400 mb-8">
-                {t('auth.resetPassword.successMessage')}
+                {t("auth.resetPassword.successMessage")}
               </p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
                 Redirecting to login page...
@@ -131,7 +132,7 @@ const ResetPasswordPage: React.FC = () => {
                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
                 </svg>
-                {t('auth.resetPassword.backToLogin')}
+                {t("auth.resetPassword.backToLogin")}
               </Link>
             </div>
           </div>
@@ -161,10 +162,10 @@ const ResetPasswordPage: React.FC = () => {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-2">
-              {t('auth.resetPassword.title')}
+              {t("auth.resetPassword.title")}
             </h1>
             <p className="text-neutral-600 dark:text-neutral-400">
-              {t('auth.resetPassword.subtitle')}
+              {t("auth.resetPassword.subtitle")}
             </p>
           </div>
 
@@ -178,10 +179,10 @@ const ResetPasswordPage: React.FC = () => {
             <div className="mb-6">
               <Input
                 type="password"
-                label={t('auth.resetPassword.passwordLabel')}
+                label={t("auth.resetPassword.passwordLabel")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('auth.resetPassword.passwordPlaceholder')}
+                placeholder={t("auth.resetPassword.passwordPlaceholder")}
                 error={errors.password}
                 required
               />
@@ -190,10 +191,10 @@ const ResetPasswordPage: React.FC = () => {
             <div className="mb-6">
               <Input
                 type="password"
-                label={t('auth.resetPassword.confirmPasswordLabel')}
+                label={t("auth.resetPassword.confirmPasswordLabel")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
+                placeholder={t("auth.resetPassword.confirmPasswordPlaceholder")}
                 error={errors.confirmPassword}
                 required
               />
@@ -207,7 +208,7 @@ const ResetPasswordPage: React.FC = () => {
                 isLoading={isLoading}
                 fullWidth
               >
-                {t('auth.resetPassword.resetPasswordButton')}
+                {t("auth.resetPassword.resetPasswordButton")}
               </Button>
             </div>
           </form>
@@ -230,7 +231,7 @@ const ResetPasswordPage: React.FC = () => {
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              {t('auth.resetPassword.backToLogin')}
+              {t("auth.resetPassword.backToLogin")}
             </Link>
           </div>
         </div>
