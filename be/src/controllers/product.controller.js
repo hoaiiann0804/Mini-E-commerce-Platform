@@ -6,9 +6,9 @@ const {
   ProductSpecification,
   Review,
   sequelize,
-} = require('../models');
-const { AppError } = require('../middlewares/errorHandler');
-const { Op } = require('sequelize');
+} = require("../models");
+const { AppError } = require("../middlewares/errorHandler");
+const { Op } = require("sequelize");
 
 // Get all products with pagination
 const getAllProducts = async (req, res, next) => {
@@ -16,8 +16,8 @@ const getAllProducts = async (req, res, next) => {
     const {
       page = 1,
       limit = 10,
-      sort = 'createdAt',
-      order = 'DESC',
+      sort = "createdAt",
+      order = "DESC",
       category,
       search,
       minPrice,
@@ -58,19 +58,19 @@ const getAllProducts = async (req, res, next) => {
 
     // Stock filter
     if (inStock !== undefined) {
-      whereConditions.inStock = inStock === 'true';
+      whereConditions.inStock = inStock === "true";
     }
 
     // Featured filter
     if (featured !== undefined) {
-      whereConditions.featured = featured === 'true';
+      whereConditions.featured = featured === "true";
     }
 
     // Status filter - mặc định chỉ lấy sản phẩm active
     if (status !== undefined) {
       whereConditions.status = status;
     } else {
-      whereConditions.status = 'active';
+      whereConditions.status = "active";
     }
 
     // Category filter
@@ -84,41 +84,41 @@ const getAllProducts = async (req, res, next) => {
       if (isValidUUID) {
         // Nếu là UUID, tìm theo ID
         includeConditions.push({
-          association: 'categories',
+          association: "categories",
           where: { id: category },
           through: { attributes: [] },
         });
       } else {
         // Nếu không phải UUID, tìm theo slug
         includeConditions.push({
-          association: 'categories',
+          association: "categories",
           where: { slug: category },
           through: { attributes: [] },
         });
       }
     } else {
       includeConditions.push({
-        association: 'categories',
+        association: "categories",
         through: { attributes: [] },
       });
     }
 
     // Include attributes for product details (not for filtering)
     includeConditions.push({
-      association: 'attributes',
+      association: "attributes",
       required: false,
     });
 
     // Include variants for price range calculation
     includeConditions.push({
-      association: 'variants',
+      association: "variants",
       required: false,
     });
 
     // Include reviews for ratings
     includeConditions.push({
-      association: 'reviews',
-      attributes: ['rating'],
+      association: "reviews",
+      attributes: ["rating"],
     });
 
     // Get products
@@ -176,7 +176,7 @@ const getAllProducts = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total: count,
         pages: Math.ceil(count / limit),
@@ -197,32 +197,32 @@ const getProductById = async (req, res, next) => {
     const product = await Product.findByPk(id, {
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'attributes',
+          association: "attributes",
         },
         {
-          association: 'variants',
+          association: "variants",
         },
         {
-          association: 'productSpecifications',
+          association: "productSpecifications",
         },
         {
-          association: 'reviews',
+          association: "reviews",
           include: [
             {
-              association: 'user',
-              attributes: ['id', 'firstName', 'lastName', 'avatar'],
+              association: "user",
+              attributes: ["id", "firstName", "lastName", "avatar"],
             },
           ],
         },
         {
-          association: 'warrantyPackages',
+          association: "warrantyPackages",
           through: {
-            attributes: ['isDefault'],
-            as: 'productWarranty',
+            attributes: ["isDefault"],
+            as: "productWarranty",
           },
           where: { isActive: true },
           required: false,
@@ -231,7 +231,7 @@ const getProductById = async (req, res, next) => {
     });
 
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Process product to add ratings calculation
@@ -261,7 +261,7 @@ const getProductById = async (req, res, next) => {
     };
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: productWithRatings,
     });
   } catch (error) {
@@ -279,31 +279,31 @@ const getProductBySlug = async (req, res, next) => {
       where: { slug },
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'attributes',
+          association: "attributes",
         },
         {
-          association: 'variants',
+          association: "variants",
           where: { isAvailable: true },
           required: false,
         },
         {
-          association: 'reviews',
+          association: "reviews",
           include: [
             {
-              association: 'user',
-              attributes: ['id', 'firstName', 'lastName', 'avatar'],
+              association: "user",
+              attributes: ["id", "firstName", "lastName", "avatar"],
             },
           ],
         },
         {
-          association: 'warrantyPackages',
+          association: "warrantyPackages",
           through: {
-            attributes: ['isDefault'],
-            as: 'productWarranty',
+            attributes: ["isDefault"],
+            as: "productWarranty",
           },
           where: { isActive: true },
           required: false,
@@ -312,7 +312,7 @@ const getProductBySlug = async (req, res, next) => {
     });
 
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Process product to add ratings calculation
@@ -411,7 +411,7 @@ const getProductBySlug = async (req, res, next) => {
     }
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: responseData,
     });
   } catch (error) {
@@ -482,7 +482,7 @@ const createProduct = async (req, res, next) => {
       });
 
       if (categories.length !== categoryIds.length) {
-        throw new AppError('Một hoặc nhiều danh mục không tồn tại', 400);
+        throw new AppError("Một hoặc nhiều danh mục không tồn tại", 400);
       }
 
       await product.setCategories(categories, { transaction });
@@ -494,7 +494,7 @@ const createProduct = async (req, res, next) => {
         productId: product.id,
         name: spec.name,
         value: spec.value,
-        category: spec.category || 'General',
+        category: spec.category || "General",
         sortOrder: index,
       }));
 
@@ -555,13 +555,13 @@ const createProduct = async (req, res, next) => {
 
     // Add warranty packages
     if (warrantyPackageIds && warrantyPackageIds.length > 0) {
-      const { WarrantyPackage } = require('../models');
+      const { WarrantyPackage } = require("../models");
       const warranties = await WarrantyPackage.findAll({
         where: { id: { [Op.in]: warrantyPackageIds } },
       });
 
       if (warranties.length !== warrantyPackageIds.length) {
-        throw new AppError('Một hoặc nhiều gói bảo hành không tồn tại', 400);
+        throw new AppError("Một hoặc nhiều gói bảo hành không tồn tại", 400);
       }
 
       await product.setWarrantyPackages(warranties, { transaction });
@@ -573,23 +573,23 @@ const createProduct = async (req, res, next) => {
     const createdProduct = await Product.findByPk(product.id, {
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'attributes',
+          association: "attributes",
         },
         {
-          association: 'variants',
+          association: "variants",
         },
         {
-          association: 'productSpecifications',
+          association: "productSpecifications",
         },
         {
-          association: 'warrantyPackages',
+          association: "warrantyPackages",
           through: {
-            attributes: ['isDefault'],
-            as: 'productWarranty',
+            attributes: ["isDefault"],
+            as: "productWarranty",
           },
           where: { isActive: true },
           required: false,
@@ -598,7 +598,7 @@ const createProduct = async (req, res, next) => {
     });
 
     res.status(201).json({
-      status: 'success',
+      status: "success",
       data: createdProduct,
     });
   } catch (error) {
@@ -635,63 +635,63 @@ const updateProduct = async (req, res, next) => {
     } = req.body;
 
     // Debug request body
-    console.log('UpdateProduct request body:', {
+    console.log("UpdateProduct request body:", {
       compareAtPrice,
-      hasCompareAtPrice: req.body.hasOwnProperty('compareAtPrice'),
+      hasCompareAtPrice: req.body.hasOwnProperty("compareAtPrice"),
       // Note: comparePrice is not a valid field in the Product model
     });
 
     // Find product
     const product = await Product.findByPk(id);
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Update product - chỉ cập nhật các trường có trong request
     const updateData = {};
 
     // Chỉ cập nhật các trường có trong request body
-    if (req.body.hasOwnProperty('name')) updateData.name = name;
-    if (req.body.hasOwnProperty('description'))
+    if (req.body.hasOwnProperty("name")) updateData.name = name;
+    if (req.body.hasOwnProperty("description"))
       updateData.description = description;
-    if (req.body.hasOwnProperty('shortDescription'))
+    if (req.body.hasOwnProperty("shortDescription"))
       updateData.shortDescription = shortDescription;
-    if (req.body.hasOwnProperty('price')) updateData.price = price;
-    if (req.body.hasOwnProperty('compareAtPrice'))
+    if (req.body.hasOwnProperty("price")) updateData.price = price;
+    if (req.body.hasOwnProperty("compareAtPrice"))
       updateData.compareAtPrice = compareAtPrice;
     // Removed comparePrice update as it's not in the Product model
-    if (req.body.hasOwnProperty('images')) updateData.images = images;
-    if (req.body.hasOwnProperty('thumbnail')) updateData.thumbnail = thumbnail;
-    if (req.body.hasOwnProperty('inStock')) updateData.inStock = inStock;
-    if (req.body.hasOwnProperty('stockQuantity'))
+    if (req.body.hasOwnProperty("images")) updateData.images = images;
+    if (req.body.hasOwnProperty("thumbnail")) updateData.thumbnail = thumbnail;
+    if (req.body.hasOwnProperty("inStock")) updateData.inStock = inStock;
+    if (req.body.hasOwnProperty("stockQuantity"))
       updateData.stockQuantity = stockQuantity;
-    if (req.body.hasOwnProperty('featured')) updateData.featured = featured;
-    if (req.body.hasOwnProperty('searchKeywords'))
+    if (req.body.hasOwnProperty("featured")) updateData.featured = featured;
+    if (req.body.hasOwnProperty("searchKeywords"))
       updateData.searchKeywords = searchKeywords;
-    if (req.body.hasOwnProperty('seoTitle')) updateData.seoTitle = seoTitle;
-    if (req.body.hasOwnProperty('seoDescription'))
+    if (req.body.hasOwnProperty("seoTitle")) updateData.seoTitle = seoTitle;
+    if (req.body.hasOwnProperty("seoDescription"))
       updateData.seoDescription = seoDescription;
-    if (req.body.hasOwnProperty('seoKeywords'))
+    if (req.body.hasOwnProperty("seoKeywords"))
       updateData.seoKeywords = seoKeywords;
 
     // Cập nhật sản phẩm với dữ liệu mới
     await product.update(updateData, { transaction });
 
     // Update categories - chỉ khi categoryIds được gửi trong request
-    if (req.body.hasOwnProperty('categoryIds') && categoryIds) {
+    if (req.body.hasOwnProperty("categoryIds") && categoryIds) {
       const categories = await Category.findAll({
         where: { id: { [Op.in]: categoryIds } },
       });
 
       if (categories.length !== categoryIds.length) {
-        throw new AppError('Một hoặc nhiều danh mục không tồn tại', 400);
+        throw new AppError("Một hoặc nhiều danh mục không tồn tại", 400);
       }
 
       await product.setCategories(categories, { transaction });
     }
 
     // Update attributes - chỉ khi attributes được gửi trong request
-    if (req.body.hasOwnProperty('attributes')) {
+    if (req.body.hasOwnProperty("attributes")) {
       // Delete existing attributes
       await ProductAttribute.destroy({
         where: { productId: id },
@@ -710,7 +710,7 @@ const updateProduct = async (req, res, next) => {
     }
 
     // Update variants - chỉ khi variants được gửi trong request
-    if (req.body.hasOwnProperty('variants')) {
+    if (req.body.hasOwnProperty("variants")) {
       // Delete existing variants
       await ProductVariant.destroy({
         where: { productId: id },
@@ -729,42 +729,42 @@ const updateProduct = async (req, res, next) => {
     }
 
     // Update warranty packages - chỉ khi warrantyPackageIds được gửi trong request
-    if (req.body.hasOwnProperty('warrantyPackageIds')) {
-      console.log('🛡️ Processing warranty packages:', warrantyPackageIds);
+    if (req.body.hasOwnProperty("warrantyPackageIds")) {
+      console.log("🛡️ Processing warranty packages:", warrantyPackageIds);
 
       if (warrantyPackageIds && warrantyPackageIds.length > 0) {
         // Verify warranty packages exist
-        const { WarrantyPackage } = require('../models');
+        const { WarrantyPackage } = require("../models");
         const warranties = await WarrantyPackage.findAll({
           where: { id: { [Op.in]: warrantyPackageIds } },
         });
 
         console.log(
-          '✅ Found warranties:',
+          "✅ Found warranties:",
           warranties.map((w) => ({ id: w.id, name: w.name }))
         );
         console.log(
-          '📊 Expected:',
+          "📊 Expected:",
           warrantyPackageIds.length,
-          'Found:',
+          "Found:",
           warranties.length
         );
 
         if (warranties.length !== warrantyPackageIds.length) {
-          console.log('❌ Warranty package count mismatch!');
-          throw new AppError('Một hoặc nhiều gói bảo hành không tồn tại', 400);
+          console.log("❌ Warranty package count mismatch!");
+          throw new AppError("Một hoặc nhiều gói bảo hành không tồn tại", 400);
         }
 
         await product.setWarrantyPackages(warranties, { transaction });
-        console.log('💾 Warranty packages updated successfully');
+        console.log("💾 Warranty packages updated successfully");
       } else {
         // Remove all warranty packages if empty array is sent
-        console.log('🗑️ Removing all warranty packages');
+        console.log("🗑️ Removing all warranty packages");
         await product.setWarrantyPackages([], { transaction });
       }
     } else {
       console.log(
-        '⏭️ No warrantyPackageIds in request, skipping warranty update'
+        "⏭️ No warrantyPackageIds in request, skipping warranty update"
       );
     }
 
@@ -774,20 +774,20 @@ const updateProduct = async (req, res, next) => {
     const updatedProduct = await Product.findByPk(id, {
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'attributes',
+          association: "attributes",
         },
         {
-          association: 'variants',
+          association: "variants",
         },
         {
-          association: 'warrantyPackages',
+          association: "warrantyPackages",
           through: {
-            attributes: ['isDefault'],
-            as: 'productWarranty',
+            attributes: ["isDefault"],
+            as: "productWarranty",
           },
           where: { isActive: true },
           required: false,
@@ -796,7 +796,7 @@ const updateProduct = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: updatedProduct,
     });
   } catch (error) {
@@ -813,15 +813,15 @@ const deleteProduct = async (req, res, next) => {
     // Find product
     const product = await Product.findByPk(id);
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Delete product
     await product.destroy();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Xóa sản phẩm thành công',
+      status: "success",
+      message: "Xóa sản phẩm thành công",
     });
   } catch (error) {
     next(error);
@@ -837,20 +837,20 @@ const getFeaturedProducts = async (req, res, next) => {
       where: { featured: true },
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'reviews',
-          attributes: ['rating'],
+          association: "reviews",
+          attributes: ["rating"],
         },
         {
-          association: 'variants',
-          attributes: ['id', 'name', 'price', 'stockQuantity', 'sku'],
+          association: "variants",
+          attributes: ["id", "name", "price", "stockQuantity", "sku"],
         },
       ],
       limit: parseInt(limit),
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     // Process products to add ratings
@@ -898,7 +898,7 @@ const getFeaturedProducts = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: products,
     });
   } catch (error) {
@@ -916,14 +916,14 @@ const getRelatedProducts = async (req, res, next) => {
     const product = await Product.findByPk(id, {
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
       ],
     });
 
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Get category IDs
@@ -936,20 +936,20 @@ const getRelatedProducts = async (req, res, next) => {
       relatedProductsRaw = await Product.findAll({
         include: [
           {
-            association: 'categories',
+            association: "categories",
             where: { id: { [Op.in]: categoryIds } },
             through: { attributes: [] },
           },
           {
-            association: 'reviews',
-            attributes: ['rating'],
+            association: "reviews",
+            attributes: ["rating"],
           },
         ],
         where: {
           id: { [Op.ne]: id }, // Exclude current product
         },
         limit: parseInt(limit),
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
       });
     }
 
@@ -963,18 +963,18 @@ const getRelatedProducts = async (req, res, next) => {
       relatedProductsRaw = await Product.findAll({
         include: [
           {
-            association: 'reviews',
-            attributes: ['rating'],
+            association: "reviews",
+            attributes: ["rating"],
           },
         ],
         where: {
           id: { [Op.ne]: id }, // Exclude current product
-          status: 'active', // Chỉ lấy sản phẩm đang hoạt động
+          status: "active", // Chỉ lấy sản phẩm đang hoạt động
         },
         limit: parseInt(limit),
         order: [
-          ['featured', 'DESC'], // Ưu tiên sản phẩm nổi bật
-          ['createdAt', 'DESC'], // Sau đó là sản phẩm mới nhất
+          ["featured", "DESC"], // Ưu tiên sản phẩm nổi bật
+          ["createdAt", "DESC"], // Sau đó là sản phẩm mới nhất
         ],
       });
     }
@@ -1010,7 +1010,7 @@ const getRelatedProducts = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: relatedProducts,
     });
   } catch (error) {
@@ -1024,8 +1024,14 @@ const searchProducts = async (req, res, next) => {
     const { q, page = 1, limit = 10 } = req.query;
 
     if (!q) {
-      throw new AppError('Từ khóa tìm kiếm là bắt buộc', 400);
+      throw new AppError("Từ khóa tìm kiếm là bắt buộc", 400);
     }
+
+    // Build search condition for array field
+    const searchCondition = sequelize.where(
+      sequelize.cast(sequelize.col("search_keywords"), "TEXT"),
+      { [Op.iLike]: `%${q}%` }
+    );
 
     const { count, rows: products } = await Product.findAndCountAll({
       where: {
@@ -1033,22 +1039,22 @@ const searchProducts = async (req, res, next) => {
           { name: { [Op.iLike]: `%${q}%` } },
           { description: { [Op.iLike]: `%${q}%` } },
           { shortDescription: { [Op.iLike]: `%${q}%` } },
-          { searchKeywords: { [Op.contains]: [q] } },
+          searchCondition,
         ],
       },
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
       ],
       limit: parseInt(limit),
       offset: (parseInt(page) - 1) * parseInt(limit),
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total: count,
         pages: Math.ceil(count / limit),
@@ -1069,16 +1075,16 @@ const getNewArrivals = async (req, res, next) => {
     const productsRaw = await Product.findAll({
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'reviews',
-          attributes: ['rating'],
+          association: "reviews",
+          attributes: ["rating"],
         },
       ],
       limit: parseInt(limit),
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     // Process products to add ratings
@@ -1112,7 +1118,7 @@ const getNewArrivals = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: products,
     });
   } catch (error) {
@@ -1123,20 +1129,20 @@ const getNewArrivals = async (req, res, next) => {
 // Get best sellers
 const getBestSellers = async (req, res, next) => {
   try {
-    const { limit = 10, period = 'month' } = req.query;
+    const { limit = 10, period = "month" } = req.query;
 
     // Calculate date range based on period
     const now = new Date();
     let startDate;
 
     switch (period) {
-      case 'week':
+      case "week":
         startDate = new Date(now.setDate(now.getDate() - 7));
         break;
-      case 'month':
+      case "month":
         startDate = new Date(now.setMonth(now.getMonth() - 1));
         break;
-      case 'year':
+      case "year":
         startDate = new Date(now.setFullYear(now.getFullYear() - 1));
         break;
       default:
@@ -1186,7 +1192,7 @@ const getBestSellers = async (req, res, next) => {
       where: { id: { [Op.in]: productIds } },
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
       ],
@@ -1195,14 +1201,14 @@ const getBestSellers = async (req, res, next) => {
           sequelize.literal(
             `CASE ${productIds
               .map((id, index) => `WHEN id = ${id} THEN ${index}`)
-              .join(' ')} END`
+              .join(" ")} END`
           ),
         ],
       ],
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: products,
     });
   } catch (error) {
@@ -1213,7 +1219,7 @@ const getBestSellers = async (req, res, next) => {
 // Get deals (products with discounts)
 const getDeals = async (req, res, next) => {
   try {
-    const { minDiscount = 5, limit = 12, sort = 'discount_desc' } = req.query;
+    const { minDiscount = 5, limit = 12, sort = "discount_desc" } = req.query;
 
     // Get all products with a compareAtPrice
     const allProducts = await Product.findAll({
@@ -1222,12 +1228,12 @@ const getDeals = async (req, res, next) => {
       },
       include: [
         {
-          association: 'categories',
+          association: "categories",
           through: { attributes: [] },
         },
         {
-          association: 'reviews',
-          attributes: ['rating'],
+          association: "reviews",
+          attributes: ["rating"],
         },
       ],
     });
@@ -1270,13 +1276,13 @@ const getDeals = async (req, res, next) => {
     // Sort products
     let sortedProducts;
     switch (sort) {
-      case 'price_asc':
+      case "price_asc":
         sortedProducts = discountedProducts.sort((a, b) => a.price - b.price);
         break;
-      case 'price_desc':
+      case "price_desc":
         sortedProducts = discountedProducts.sort((a, b) => b.price - a.price);
         break;
-      case 'discount_desc':
+      case "discount_desc":
       default:
         sortedProducts = discountedProducts.sort(
           (a, b) => b.discountPercentage - a.discountPercentage
@@ -1287,7 +1293,7 @@ const getDeals = async (req, res, next) => {
     const limitedProducts = sortedProducts.slice(0, parseInt(limit));
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: limitedProducts,
     });
   } catch (error) {
@@ -1303,7 +1309,7 @@ const getProductVariants = async (req, res, next) => {
     // Find product
     const product = await Product.findByPk(id);
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Get variants
@@ -1312,7 +1318,7 @@ const getProductVariants = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         variants,
       },
@@ -1330,13 +1336,13 @@ const getProductReviewsSummary = async (req, res, next) => {
     // Find product
     const product = await Product.findByPk(id);
     if (!product) {
-      throw new AppError('Không tìm thấy sản phẩm', 404);
+      throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
     // Get reviews
     const reviews = await Review.findAll({
       where: { productId: id },
-      attributes: ['rating'],
+      attributes: ["rating"],
     });
 
     // Calculate summary
@@ -1360,7 +1366,7 @@ const getProductReviewsSummary = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         average,
         count,
@@ -1377,7 +1383,7 @@ const getProductFilters = async (req, res, next) => {
   try {
     const { categoryId } = req.query;
 
-    console.log('Getting product filters with categoryId:', categoryId);
+    console.log("Getting product filters with categoryId:", categoryId);
 
     // Build where condition
     const whereCondition = {};
@@ -1392,7 +1398,7 @@ const getProductFilters = async (req, res, next) => {
 
       if (isValidUUID) {
         includeCondition.push({
-          association: 'categories',
+          association: "categories",
           where: { id: categoryId },
           through: { attributes: [] },
           required: false, // Đặt required: false để tránh lỗi khi không tìm thấy danh mục
@@ -1404,7 +1410,7 @@ const getProductFilters = async (req, res, next) => {
         });
         if (category) {
           includeCondition.push({
-            association: 'categories',
+            association: "categories",
             where: { id: category.id },
             through: { attributes: [] },
             required: false,
@@ -1416,8 +1422,8 @@ const getProductFilters = async (req, res, next) => {
     // Get price range
     const priceRange = await Product.findAll({
       attributes: [
-        [sequelize.fn('MIN', sequelize.col('price')), 'min'],
-        [sequelize.fn('MAX', sequelize.col('price')), 'max'],
+        [sequelize.fn("MIN", sequelize.col("price")), "min"],
+        [sequelize.fn("MAX", sequelize.col("price")), "max"],
       ],
       where: whereCondition,
       include: includeCondition,
@@ -1457,9 +1463,9 @@ const getProductFilters = async (req, res, next) => {
 
     // Get brands
     const brands = await ProductAttribute.findAll({
-      attributes: ['values'],
+      attributes: ["values"],
       where: {
-        name: 'brand',
+        name: "brand",
         ...(actualCategoryId ? productFilter : {}),
       },
       raw: true,
@@ -1467,9 +1473,9 @@ const getProductFilters = async (req, res, next) => {
 
     // Get colors
     const colors = await ProductAttribute.findAll({
-      attributes: ['values'],
+      attributes: ["values"],
       where: {
-        name: 'color',
+        name: "color",
         ...(actualCategoryId ? productFilter : {}),
       },
       raw: true,
@@ -1477,9 +1483,9 @@ const getProductFilters = async (req, res, next) => {
 
     // Get sizes
     const sizes = await ProductAttribute.findAll({
-      attributes: ['values'],
+      attributes: ["values"],
       where: {
-        name: 'size',
+        name: "size",
         ...(actualCategoryId ? productFilter : {}),
       },
       raw: true,
@@ -1487,12 +1493,12 @@ const getProductFilters = async (req, res, next) => {
 
     // Get other attributes
     const otherAttributes = await ProductAttribute.findAll({
-      attributes: ['name', 'values'],
+      attributes: ["name", "values"],
       where: {
-        name: { [Op.notIn]: ['brand', 'color', 'size'] },
+        name: { [Op.notIn]: ["brand", "color", "size"] },
         ...(actualCategoryId ? productFilter : {}),
       },
-      group: ['name', 'values'],
+      group: ["name", "values"],
       raw: true,
     });
 
@@ -1519,7 +1525,7 @@ const getProductFilters = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         priceRange: {
           min: parseFloat(priceRange[0]?.min || 0),
