@@ -1,4 +1,4 @@
-const { Wishlist, Product, User } = require("../models");
+const { Wishlist, Product } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 
 // Get user wishlist
