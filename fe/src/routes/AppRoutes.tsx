@@ -1,61 +1,62 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
-import AdminLayout from '@/components/admin/AdminLayout';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import PublicOnlyRoute from '@/components/auth/PublicOnlyRoute';
-import AdminRoute from './AdminRoute';
+import { lazy, Suspense } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "@/components/layout/MainLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import PublicOnlyRoute from "@/components/auth/PublicOnlyRoute";
+import AdminRoute from "./AdminRoute";
+import SideBarPerson from "@/pages/SideBarPerson";
 
 // Lazy-loaded pages
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const ShopPage = lazy(() => import('@/pages/ShopPage'));
-const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
-const CartPage = lazy(() => import('@/pages/CartPage'));
-const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
-const LoginPage = lazy(() => import('@/pages/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
-const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
-const VerifyEmailPage = lazy(() => import('@/pages/VerifyEmailPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const OrdersPage = lazy(() => import('@/pages/OrdersPage'));
+const HomePage = lazy(() => import("@/pages/HomePage"));
+const ShopPage = lazy(() => import("@/pages/ShopPage"));
+const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
+const CartPage = lazy(() => import("@/pages/CartPage"));
+const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
+const VerifyEmailPage = lazy(() => import("@/pages/VerifyEmailPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const OrdersPage = lazy(() => import("@/pages/OrdersPage"));
 // Wishlist feature removed
-const CategoriesPage = lazy(() => import('@/pages/CategoriesPage'));
-const CategoryPage = lazy(() => import('@/pages/CategoryPage'));
-const DealsPage = lazy(() => import('@/pages/DealsPage'));
-const NewArrivalsPage = lazy(() => import('@/pages/NewArrivalsPage'));
-const BestSellersPage = lazy(() => import('@/pages/BestSellersPage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
-const FAQsPage = lazy(() => import('@/pages/FAQsPage'));
-const ShippingReturnsPage = lazy(() => import('@/pages/ShippingReturnsPage'));
-const TrackOrderPage = lazy(() => import('@/pages/TrackOrderPage'));
-const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage'));
-const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const CategoriesPage = lazy(() => import("@/pages/CategoriesPage"));
+const CategoryPage = lazy(() => import("@/pages/CategoryPage"));
+const DealsPage = lazy(() => import("@/pages/DealsPage"));
+const NewArrivalsPage = lazy(() => import("@/pages/NewArrivalsPage"));
+const BestSellersPage = lazy(() => import("@/pages/BestSellersPage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
+const ContactPage = lazy(() => import("@/pages/ContactPage"));
+const FAQsPage = lazy(() => import("@/pages/FAQsPage"));
+const ShippingReturnsPage = lazy(() => import("@/pages/ShippingReturnsPage"));
+const TrackOrderPage = lazy(() => import("@/pages/TrackOrderPage"));
+const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
+const TermsPage = lazy(() => import("@/pages/TermsPage"));
 
 // Admin pages
-const AdminDashboardPage = lazy(() => import('@/pages/admin/DashboardPage'));
-const AdminProductsPage = lazy(() => import('@/pages/admin/ProductsPage'));
-const CreateProductPage = lazy(() => import('@/pages/admin/CreateProductPage'));
-const EditProductPage = lazy(() => import('@/pages/admin/EditProductPage'));
-const AdminOrdersPage = lazy(() => import('@/pages/admin/OrdersPage'));
-const AdminUsersPage = lazy(() => import('@/pages/admin/UsersPage'));
-const AdminCategoriesPage = lazy(() => import('@/pages/admin/CategoriesPage'));
+const AdminDashboardPage = lazy(() => import("@/pages/admin/DashboardPage"));
+const AdminProductsPage = lazy(() => import("@/pages/admin/ProductsPage"));
+const CreateProductPage = lazy(() => import("@/pages/admin/CreateProductPage"));
+const EditProductPage = lazy(() => import("@/pages/admin/EditProductPage"));
+const AdminOrdersPage = lazy(() => import("@/pages/admin/OrdersPage"));
+const AdminUsersPage = lazy(() => import("@/pages/admin/UsersPage"));
+const AdminCategoriesPage = lazy(() => import("@/pages/admin/CategoriesPage"));
 const AdminWarrantyPackagesPage = lazy(
-  () => import('@/pages/admin/WarrantyPackagesPage')
+  () => import("@/pages/admin/WarrantyPackagesPage")
 );
 const SimpleNamingTestPage = lazy(
-  () => import('@/pages/admin/SimpleNamingTestPage')
+  () => import("@/pages/admin/SimpleNamingTestPage")
 );
 
 // Test components
-const TestComponents = lazy(() => import('@/test-components'));
-const TestBasicForm = lazy(() => import('@/test-basic-form'));
+const TestComponents = lazy(() => import("@/test-components"));
+const TestBasicForm = lazy(() => import("@/test-basic-form"));
 
 // Error pages
-const UnauthorizedPage = lazy(() => import('@/pages/UnauthorizedPage'));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const UnauthorizedPage = lazy(() => import("@/pages/UnauthorizedPage"));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 const AppRoutes: React.FC = () => {
   return (
@@ -147,11 +148,19 @@ const AppRoutes: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="profile"
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          /> */}
+          <Route
+            path="user"
+            element={
+              <ProtectedRoute>
+                <SideBarPerson />
               </ProtectedRoute>
             }
           />
