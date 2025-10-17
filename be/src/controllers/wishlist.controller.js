@@ -1,34 +1,34 @@
-const { Wishlist, Product } = require('../models');
-const { AppError } = require('../middlewares/errorHandler');
+const { Wishlist, Product, User } = require("../models");
+const { AppError } = require("../middlewares/errorHandler");
 
 // Get user wishlist
 const getWishlist = async (req, res, next) => {
   try {
     const userId = req.user.id;
-
     const wishlistItems = await Wishlist.findAll({
       where: { userId },
       include: [
         {
           model: Product,
+          as: "products",
           attributes: [
-            'id',
-            'name',
-            'slug',
-            'price',
-            'compareAtPrice',
-            'thumbnail',
-            'inStock',
-            'stockQuantity',
+            "id",
+            "name",
+            "slug",
+            "price",
+            "compareAtPrice",
+            "thumbnail",
+            "inStock",
+            "stockQuantity",
           ],
         },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
-      status: 'success',
-      data: wishlistItems.map((item) => item.Product),
+      status: "success",
+      data: wishlistItems.map((item) => item.products),
     });
   } catch (error) {
     next(error);
@@ -44,7 +44,7 @@ const addToWishlist = async (req, res, next) => {
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      throw new AppError('Sản phẩm không tồn tại', 404);
+      throw new AppError("Sản phẩm không tồn tại", 404);
     }
 
     // Check if product is already in wishlist
@@ -54,8 +54,8 @@ const addToWishlist = async (req, res, next) => {
 
     if (existingItem) {
       return res.status(200).json({
-        status: 'success',
-        message: 'Sản phẩm đã có trong danh sách yêu thích',
+        status: "success",
+        message: "Sản phẩm đã có trong danh sách yêu thích",
       });
     }
 
@@ -66,8 +66,8 @@ const addToWishlist = async (req, res, next) => {
     });
 
     res.status(201).json({
-      status: 'success',
-      message: 'Đã thêm sản phẩm vào danh sách yêu thích',
+      status: "success",
+      message: "Đã thêm sản phẩm vào danh sách yêu thích",
     });
   } catch (error) {
     next(error);
@@ -86,15 +86,15 @@ const removeFromWishlist = async (req, res, next) => {
     });
 
     if (!wishlistItem) {
-      throw new AppError('Sản phẩm không có trong danh sách yêu thích', 404);
+      throw new AppError("Sản phẩm không có trong danh sách yêu thích", 404);
     }
 
     // Remove from wishlist
     await wishlistItem.destroy();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Đã xóa sản phẩm khỏi danh sách yêu thích',
+      status: "success",
+      message: "Đã xóa sản phẩm khỏi danh sách yêu thích",
     });
   } catch (error) {
     next(error);
@@ -113,7 +113,7 @@ const checkWishlist = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         inWishlist: !!wishlistItem,
       },
@@ -134,8 +134,8 @@ const clearWishlist = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
-      message: 'Đã xóa tất cả sản phẩm trong danh sách yêu thích',
+      status: "success",
+      message: "Đã xóa tất cả sản phẩm trong danh sách yêu thích",
     });
   } catch (error) {
     next(error);
