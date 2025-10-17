@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import ThemeToggle from '@/components/common/ThemeToggle';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher';
-import SearchBar from '@/components/features/SearchBar';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { toggleMobileMenu, toggleSearch } from '@/features/ui/uiSlice';
-import { useAuth } from '@/hooks/useAuth';
-import { useGetCartCountQuery } from '@/services/cartApi';
-import { initializeCart } from '@/features/cart/cartSlice';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import SearchBar from "@/components/features/SearchBar";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { toggleMobileMenu, toggleSearch } from "@/features/ui/uiSlice";
+import { useAuth } from "@/hooks/useAuth";
+import { useGetCartCountQuery } from "@/services/cartApi";
+import { initializeCart } from "@/features/cart/cartSlice";
 import {
   NAVIGATION_ICONS,
   NavigationIconKey,
@@ -19,7 +19,7 @@ import {
   AdminIcon,
   MenuIcon,
   CloseIcon,
-} from '@/components/icons';
+} from "@/components/icons";
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
   } = useAuth();
 
   // Debug logging for admin panel visibility
-  console.log('🔍 Header render:', {
+  console.log("🔍 Header render:", {
     isAuthenticated,
     user,
     userRole: user?.role,
@@ -72,7 +72,7 @@ const Header: React.FC = () => {
     : localCartCount;
 
   // Debug logging for cart count
-  console.log('🛒 Cart count debug:', {
+  console.log("🛒 Cart count debug:", {
     isAuthenticated,
     serverCartCount,
     localCartCount,
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
   // Xóa localStorage khi server trả về count = 0 và cập nhật state Redux (chỉ cho authenticated users)
   useEffect(() => {
     if (isAuthenticated && serverCartCount === 0) {
-      localStorage.removeItem('cartItems');
+      localStorage.removeItem("cartItems");
       // Cập nhật state Redux để đồng bộ với localStorage
       dispatch(initializeCart());
     }
@@ -94,8 +94,8 @@ const Header: React.FC = () => {
       setIsScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Handle click outside dropdown
@@ -109,8 +109,8 @@ const Header: React.FC = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Handle user profile click
@@ -118,27 +118,27 @@ const Header: React.FC = () => {
     if (isAuthenticated) {
       setShowUserDropdown(!showUserDropdown);
     } else {
-      navigate('/login');
+      navigate("/login");
     }
   };
 
   // Handle logout with navigation
   const handleLogoutClick = async () => {
     await handleLogout();
-    navigate('/', { replace: true });
+    navigate("/", { replace: true });
   };
 
   // Handle cart click
   const handleCartClick = () => {
-    navigate('/cart');
+    navigate("/cart");
   };
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled || isSearchOpen
-          ? 'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md shadow-lg border-b border-neutral-200/20 dark:border-neutral-700/20 py-2'
-          : 'bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm py-3'
+          ? "bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md shadow-lg border-b border-neutral-200/20 dark:border-neutral-700/20 py-2"
+          : "bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm py-3"
       }`}
     >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex items-center justify-between">
@@ -152,7 +152,7 @@ const Header: React.FC = () => {
           </div>
           <div className="ml-2 sm:ml-3">
             <span className="font-heading font-bold text-base sm:text-lg bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-              {t('header.brand')}
+              {t("header.brand")}
             </span>
             <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium hidden sm:block">
               E-Commerce
@@ -163,11 +163,11 @@ const Header: React.FC = () => {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-1">
           {[
-            { key: 'home' as NavigationIconKey, path: '/' },
-            { key: 'shop' as NavigationIconKey, path: '/shop' },
-            { key: 'categories' as NavigationIconKey, path: '/categories' },
-            { key: 'deals' as NavigationIconKey, path: '/deals' },
-            { key: 'about' as NavigationIconKey, path: '/about' },
+            { key: "home" as NavigationIconKey, path: "/" },
+            { key: "shop" as NavigationIconKey, path: "/shop" },
+            { key: "categories" as NavigationIconKey, path: "/categories" },
+            { key: "deals" as NavigationIconKey, path: "/deals" },
+            { key: "about" as NavigationIconKey, path: "/about" },
           ].map((item) => {
             const IconComponent = NAVIGATION_ICONS[item.key];
             return (
@@ -225,10 +225,10 @@ const Header: React.FC = () => {
               onClick={handleUserClick}
               className={`group relative p-1.5 sm:p-2 rounded-xl transition-all duration-300 ${
                 isAuthenticated
-                  ? 'bg-gradient-to-r from-primary-100 to-primary-50 dark:from-primary-900/20 dark:to-primary-800/10 text-primary-600 dark:text-primary-400 hover:from-primary-200 hover:to-primary-100 dark:hover:from-primary-900/30 dark:hover:to-primary-800/20 border border-primary-200/50 dark:border-primary-700/30'
-                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700'
+                  ? "bg-gradient-to-r from-primary-100 to-primary-50 dark:from-primary-900/20 dark:to-primary-800/10 text-primary-600 dark:text-primary-400 hover:from-primary-200 hover:to-primary-100 dark:hover:from-primary-900/30 dark:hover:to-primary-800/20 border border-primary-200/50 dark:border-primary-700/30"
+                  : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
               }`}
-              aria-label={t('header.actions.userAccount')}
+              aria-label={t("header.actions.userAccount")}
             >
               <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300" />
               {isAuthenticated && (
@@ -253,11 +253,11 @@ const Header: React.FC = () => {
                   </div>
 
                   <Link
-                    to="/profile"
+                    to="/user"
                     className="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     onClick={() => setShowUserDropdown(false)}
                   >
-                    {t('header.dropdown.profile')}
+                    {t("header.dropdown.profile")}
                   </Link>
 
                   <Link
@@ -265,7 +265,7 @@ const Header: React.FC = () => {
                     className="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     onClick={() => setShowUserDropdown(false)}
                   >
-                    {t('header.dropdown.orders')}
+                    {t("header.dropdown.orders")}
                   </Link>
 
                   {/* Wishlist link removed */}
@@ -294,7 +294,7 @@ const Header: React.FC = () => {
                               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                             />
                           </svg>
-                          <span>{t('header.dropdown.adminPanel')}</span>
+                          <span>{t("header.dropdown.adminPanel")}</span>
                         </div>
                       </Link>
                     </>
@@ -308,7 +308,7 @@ const Header: React.FC = () => {
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                     >
-                      {t('header.dropdown.logout')}
+                      {t("header.dropdown.logout")}
                     </button>
                   </div>
                 </div>
@@ -321,16 +321,16 @@ const Header: React.FC = () => {
             onClick={handleCartClick}
             className={`group relative p-1.5 sm:p-2 rounded-xl transition-all duration-300 ${
               cartItemsCount > 0
-                ? 'bg-gradient-to-r from-secondary-100 to-secondary-50 dark:from-secondary-900/20 dark:to-secondary-800/10 text-secondary-600 dark:text-secondary-400 hover:from-secondary-200 hover:to-secondary-100 dark:hover:from-secondary-900/30 dark:hover:to-secondary-800/20 border border-secondary-200/50 dark:border-secondary-700/30'
-                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700'
+                ? "bg-gradient-to-r from-secondary-100 to-secondary-50 dark:from-secondary-900/20 dark:to-secondary-800/10 text-secondary-600 dark:text-secondary-400 hover:from-secondary-200 hover:to-secondary-100 dark:hover:from-secondary-900/30 dark:hover:to-secondary-800/20 border border-secondary-200/50 dark:border-secondary-700/30"
+                : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700"
             }`}
-            aria-label={t('header.actions.shoppingCart')}
+            aria-label={t("header.actions.shoppingCart")}
           >
             <CartIcon className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-110 transition-transform duration-300" />
             {cartItemsCount > 0 && (
               <>
                 <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-gradient-to-r from-secondary-500 to-warning-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg animate-bounce">
-                  {cartItemsCount > 99 ? '99+' : cartItemsCount}
+                  {cartItemsCount > 99 ? "99+" : cartItemsCount}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-secondary-500/10 to-secondary-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </>
@@ -343,8 +343,8 @@ const Header: React.FC = () => {
             onClick={() => dispatch(toggleMobileMenu())}
             aria-label={
               isMobileMenuOpen
-                ? t('header.actions.closeMenu')
-                : t('header.actions.openMenu')
+                ? t("header.actions.closeMenu")
+                : t("header.actions.openMenu")
             }
           >
             {isMobileMenuOpen ? (
@@ -360,11 +360,11 @@ const Header: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white dark:bg-neutral-900 shadow-lg py-4 px-4 sm:px-6 space-y-4 animate-slideInTop border-b border-neutral-200 dark:border-neutral-700">
           {[
-            { key: 'home', path: '/' },
-            { key: 'shop', path: '/shop' },
-            { key: 'categories', path: '/categories' },
-            { key: 'deals', path: '/deals' },
-            { key: 'about', path: '/about' },
+            { key: "home", path: "/" },
+            { key: "shop", path: "/shop" },
+            { key: "categories", path: "/categories" },
+            { key: "deals", path: "/deals" },
+            { key: "about", path: "/about" },
           ].map((item) => (
             <Link
               key={item.key}
@@ -409,13 +409,13 @@ const Header: React.FC = () => {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  const input = e.currentTarget.querySelector('input');
+                  const input = e.currentTarget.querySelector("input");
                   const searchTerm = input?.value?.trim();
                   if (searchTerm) {
                     // Save to localStorage
                     try {
                       const recentSearches =
-                        localStorage.getItem('recentSearches');
+                        localStorage.getItem("recentSearches");
                       const searches = recentSearches
                         ? JSON.parse(recentSearches)
                         : [];
@@ -424,15 +424,15 @@ const Header: React.FC = () => {
                         ...searches.filter((s: string) => s !== searchTerm),
                       ].slice(0, 5);
                       localStorage.setItem(
-                        'recentSearches',
+                        "recentSearches",
                         JSON.stringify(updatedSearches)
                       );
                       console.log(
-                        'Mobile search - saved searches:',
+                        "Mobile search - saved searches:",
                         updatedSearches
                       );
                     } catch (error) {
-                      console.error('Error saving search term:', error);
+                      console.error("Error saving search term:", error);
                     }
 
                     // Navigate to search results
@@ -443,7 +443,7 @@ const Header: React.FC = () => {
               >
                 <input
                   type="text"
-                  placeholder={t('header.actions.searchPlaceholder')}
+                  placeholder={t("header.actions.searchPlaceholder")}
                   className="w-full py-2.5 pl-10 pr-4 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   onFocus={() => {
                     dispatch(toggleMobileMenu());
@@ -493,7 +493,7 @@ const Header: React.FC = () => {
           <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                {t('header.actions.changeLanguage')}
+                {t("header.actions.changeLanguage")}
               </span>
               <LanguageSwitcher />
             </div>
