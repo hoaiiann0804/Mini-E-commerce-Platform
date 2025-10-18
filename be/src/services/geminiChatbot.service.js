@@ -126,6 +126,7 @@ KHẢ NĂNG CỦA BẠN:
 5. Xử lý khiếu nại và phản hồi
 6. Trò chuyện thân thiện, tự nhiên
 7. Trả lời câu hỏi kiến thức chung một cách thông minh và hài hước
+8. THÊM SẢN PHẨM VÀO GIỎ HÀNG khi khách hàng yêu cầu
 
 DANH SÁCH SẢN PHẨM CÓ SẴN:
 ${productList}
@@ -149,13 +150,20 @@ HƯỚNG DẪN TRẢ LỜI:
 - Nếu KHIẾU NẠI: Thể hiện sự quan tâm, hướng dẫn giải quyết
 - Nếu HỎI CHUNG: Trò chuyện thân thiện, hướng về sản phẩm
 - Nếu HỎI NGOÀI LĨNH VỰC: Trả lời thông minh, hài hước và thân thiện. Có thể trả lời các câu hỏi kiến thức chung, nhưng sau đó nhẹ nhàng chuyển hướng về shop.
+- Nếu YÊU CẦU THÊM VÀO GIỎ HÀNG: Xác nhận sản phẩm và thông báo đã thêm vào giỏ hàng thành công
 
 Hãy trả lời theo format JSON sau:
 {
   "response": "Câu trả lời chi tiết, thân thiện và hữu ích",
   "matchedProducts": ["tên sản phẩm 1", "tên sản phẩm 2", ...],
   "suggestions": ["gợi ý 1", "gợi ý 2", "gợi ý 3", "gợi ý 4"],
-  "intent": "product_search|pricing|policy|support|complaint|general|off_topic"
+  "intent": "product_search|pricing|policy|support|complaint|general|off_topic|add_to_cart",
+  "cartAction": {
+    "action": "add_to_cart",
+    "productId": "id-sản-phẩm",
+    "quantity": 1,
+    "message": "Đã thêm sản phẩm vào giỏ hàng thành công!"
+  }
 }
 
 LƯU Ý QUAN TRỌNG:
@@ -165,6 +173,13 @@ LƯU Ý QUAN TRỌNG:
 - Với câu hỏi ngoài lề, hãy trả lời thông minh, hài hước và thân thiện trước, sau đó mới chuyển hướng về shop
 - Thể hiện sự quan tâm và sẵn sàng hỗ trợ
 - Đừng từ chối trả lời các câu hỏi kiến thức chung, hãy trả lời một cách thông minh và hài hước
+
+CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
+- Khi khách hàng nói: "thêm vào giỏ", "mua", "add to cart", "cho tôi", "tôi lấy"
+- Xác định sản phẩm cụ thể từ cuộc trò chuyện trước đó hoặc từ matchedProducts
+- Trả về intent: "add_to_cart" và cartAction với productId chính xác
+- Thông báo thành công: "✅ Đã thêm [tên sản phẩm] vào giỏ hàng của bạn!"
+- Gợi ý tiếp theo: "Xem giỏ hàng", "Tiếp tục mua sắm", "Thanh toán"
 `;
   }
 
@@ -212,6 +227,7 @@ LƯU Ý QUAN TRỌNG:
             'Liên hệ tư vấn',
           ],
           intent: parsed.intent || 'general',
+          cartAction: parsed.cartAction || null, // Thêm cartAction từ AI response
         };
       }
     } catch (error) {
@@ -247,6 +263,7 @@ LƯU Ý QUAN TRỌNG:
       giày: ['giày', 'shoes', 'shoe', 'sneaker'],
       áo: ['áo', 'shirt', 'tshirt', 't-shirt'],
       quần: ['quần', 'pants', 'jeans', 'trousers'],
+      điện : ['laptop', 'điện thoại', 'ipad', 'tai nghe'],
     };
 
     // Expand search terms with mappings

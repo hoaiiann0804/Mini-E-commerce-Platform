@@ -46,6 +46,27 @@ class ChatbotController {
         ...context,
       });
 
+      // Xử lý cartAction nếu có
+      if (response.cartAction && response.cartAction.action === 'add_to_cart') {
+        try {
+          // Thêm sản phẩm vào giỏ hàng
+          const cartResult = await this.addToCartDirectly({
+            productId: response.cartAction.productId,
+            quantity: response.cartAction.quantity || 1,
+            userId,
+            sessionId,
+          });
+
+          // Cập nhật response với thông báo thành công
+          response.response = response.cartAction.message || '✅ Đã thêm sản phẩm vào giỏ hàng thành công!';
+          response.cartAction.result = cartResult;
+        } catch (cartError) {
+          console.error('Failed to add to cart:', cartError);
+          response.response = '❌ Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.';
+          response.cartAction = null;
+        }
+      }
+
       res.json({
         status: 'success',
         data: response,
@@ -93,10 +114,10 @@ class ChatbotController {
         rating: product.rating || 4.5,
         discount: product.compareAtPrice
           ? Math.round(
-              ((product.compareAtPrice - product.price) /
-                product.compareAtPrice) *
-                100
-            )
+            ((product.compareAtPrice - product.price) /
+              product.compareAtPrice) *
+            100
+          )
           : 0,
       }));
 
@@ -112,12 +133,12 @@ class ChatbotController {
         actions:
           products.length > 0
             ? [
-                {
-                  type: 'view_products',
-                  label: `Xem tất cả ${products.length} sản phẩm`,
-                  url: `/products?search=${encodeURIComponent(message)}`,
-                },
-              ]
+              {
+                type: 'view_products',
+                label: `Xem tất cả ${products.length} sản phẩm`,
+                url: `/products?search=${encodeURIComponent(message)}`,
+              },
+            ]
             : [],
       };
     } catch (error) {
@@ -385,6 +406,165 @@ class ChatbotController {
         status: 'error',
         message: 'Failed to track analytics',
       });
+    }
+  }
+
+  /**
+   * Add product to cart directly (internal method)
+   * @param {string|Object} productInfo - Can be productId (UUID), product name, or product object
+   * @param {string} [variantId] - Optional variant ID
+   * @param {number} [quantity=1] - Quantity to add
+   * @param {string} [userId] - User ID if logged in
+   * @param {string} [sessionId] - Session ID for guest users
+   */
+  async addToCartDirectly({ productId: productIdentifier, variantId, quantity = 1, userId, sessionId }) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      let product;
+
+      // If productIdentifier is an object (already looked up product)
+      if (typeof productIdentifier === 'object' && productIdentifier !== null) {
+        product = productIdentifier;
+      }
+      // If it's a valid UUID
+      else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(productIdentifier)) {
+        product = await Product.findByPk(productIdentifier, { transaction });
+      }
+      // If it's a product name or other identifier
+      else {
+        // Try to find product by name or slug
+        product = await Product.findOne({
+          where: {
+            [Op.or]: [
+              { name: productIdentifier },
+              { slug: productIdentifier.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') }
+            ]
+          },
+          transaction
+        });
+      }
+
+      if (!product) {
+        throw new Error(`Không tìm thấy sản phẩm: ${productIdentifier}`);
+      }
+
+      if (!product.inStock) {
+        throw new Error('Sản phẩm đã hết hàng');
+      }
+
+      // Get or create cart
+      let cart;
+      if (userId) {
+        // For logged-in users
+        [cart] = await Cart.findOrCreate({
+          where: { userId, status: 'active' },
+          defaults: { userId },
+          transaction
+        });
+      } else if (sessionId) {
+        // For guest users
+        [cart] = await Cart.findOrCreate({
+          where: { sessionId, status: 'active' },
+          defaults: { sessionId },
+          transaction
+        });
+      } else {
+        throw new Error('Thiếu thông tin người dùng hoặc phiên');
+      }
+
+      // Check if item already exists in cart
+      const whereCondition = {
+        cartId: cart.id,
+        productId: product.id,  // Use the found product's ID
+        variantId: variantId || null
+      };
+
+      let cartItem = await CartItem.findOne({ where: whereCondition, transaction });
+
+      if (cartItem) {
+        // Update quantity if item exists
+        cartItem.quantity += quantity;
+        await cartItem.save({ transaction });
+      } else {
+        // Add new item to cart
+        cartItem = await CartItem.create({
+          cartId: cart.id,
+          productId: product.id,  // Use the found product's ID
+          variantId: variantId || null,
+          quantity,
+          price: product.price // Store the price at time of adding
+        }, { transaction });
+      }
+
+      // Track analytics
+      await chatbotService.trackAnalytics({
+        event: 'product_added_to_cart',
+        userId: userId || `guest_${sessionId}`,
+        sessionId,
+        productId: product.id,  // Use the found product's ID
+        metadata: {
+          quantity,
+          variantId,
+          source: 'chatbot_auto',
+          productName: product.name,
+          originalInput: productIdentifier  // Keep track of what the user originally entered
+        },
+        timestamp: new Date(),
+      });
+
+      // Get the updated cart with all items
+      const updatedCart = await Cart.findOne({
+        where: { id: cart.id },
+        include: [
+          {
+            model: CartItem,
+            as: 'items',
+            include: [
+              {
+                model: Product,
+                attributes: ['id', 'name', 'price', 'thumbnail', 'inStock', 'stockQuantity']
+              }
+            ]
+          }
+        ],
+        transaction
+      });
+
+      await transaction.commit();
+
+      // Calculate cart totals
+      const cartItems = updatedCart.CartItems || [];
+      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = cartItems.reduce((sum, item) => {
+        return sum + (item.price || item.Product?.price || 0) * item.quantity;
+      }, 0);
+
+      // Return success response with full cart data
+      return {
+        success: true,
+        message: 'Đã thêm sản phẩm vào giỏ hàng thành công!',
+        cart: {
+          id: updatedCart.id,
+          items: cartItems.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            name: item.Product?.name || 'Unknown Product',
+            price: item.price || item.Product?.price || 0,
+            quantity: item.quantity,
+            image: item.Product?.thumbnail,
+            inStock: item.Product?.inStock,
+            stockQuantity: item.Product?.stockQuantity,
+            variantId: item.variantId || null
+          })),
+          totalItems,
+          subtotal
+        }
+      };
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Add to cart error:', error);
+      throw error;
     }
   }
 
