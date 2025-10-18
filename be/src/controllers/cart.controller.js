@@ -108,9 +108,9 @@ const getCart = async (req, res, next) => {
       // Calculate warranty price
       const warrantyPrice = item.warrantyPackages
         ? item.warrantyPackages.reduce(
-            (warrantySum, warranty) => warrantySum + parseFloat(warranty.price),
-            0
-          )
+          (warrantySum, warranty) => warrantySum + parseFloat(warranty.price),
+          0
+        )
         : 0;
 
       return sum + price * item.quantity + warrantyPrice * item.quantity;

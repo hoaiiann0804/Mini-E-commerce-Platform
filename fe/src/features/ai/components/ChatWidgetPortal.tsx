@@ -2,9 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { RootState } from '../../../app/store';
+import type { RootState } from '@/store';
 import { Message } from '../types/Message';
 import { useSendChatbotMessageMutation } from '../services/chatbotApi';
+import { useGetCartQuery } from '@/services/cartApi';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '@/store';
+import { setServerCart } from '@/features/cart/cartSlice';
+import type { BackendCart, BackendCartItem } from '@/services/cartApi';
+import type { ServerCart } from '@/features/cart/cartSlice';
 import { geminiService } from '../services/geminiService';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -28,8 +34,12 @@ const ChatWidgetPortal: React.FC = () => {
     (state: RootState) => state.auth
   );
 
-  // API mutation hook
+  // Hooks
+  const dispatch = useDispatch<AppDispatch>();
   const [sendChatbotMessage, { isLoading }] = useSendChatbotMessageMutation();
+  const { refetch: refetchCart } = useGetCartQuery(undefined, {
+    skip: !isAuthenticated, // Only fetch cart if user is authenticated
+  });
 
   // Tạo session ID cho chat
   const [sessionId] = useState<string>(
@@ -42,9 +52,9 @@ const ChatWidgetPortal: React.FC = () => {
       const greetingText =
         isAuthenticated && user
           ? t('chat.greetingWithName', { name: user.name }) ||
-            `Chào ${user.name}! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?`
+          `Chào ${user.name}! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?`
           : t('chat.greeting') ||
-            'Chào bạn! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?';
+          'Chào bạn! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?';
 
       const greeting = {
         id: Date.now().toString(),
@@ -139,7 +149,61 @@ const ChatWidgetPortal: React.FC = () => {
       console.log('Received AI response:', response);
 
       // Xóa tin nhắn "đang nhập" và thêm phản hồi từ API
-      if (response.status === 'success' && response.data) {
+      const responseData = response as {
+        status: string;
+        data: {
+          response?: string;
+          cart?: BackendCart;
+          suggestions?: string[];
+          products?: any[];
+          actions?: any[];
+        };
+      };
+
+      if (responseData.status === 'success' && responseData.data) {
+        // Nếu có dữ liệu giỏ hàng mới (khi thêm sản phẩm thành công)
+        if (responseData.data.cart) {
+          const { items, totalItems, subtotal } = responseData.data.cart;
+
+          // Tạo cấu trúc dữ liệu giỏ hàng phù hợp với Redux store
+          const serverCart: ServerCart = {
+            id: responseData.data.cart.id || 'guest-cart',
+            items: items.map((item: BackendCartItem) => ({
+              id: item.id,
+              cartId: responseData.data.cart?.id || 'guest-cart',
+              productId: item.productId,
+              variantId: item.variantId || null,
+              quantity: item.quantity,
+              price: item.ProductVariant?.price || item.Product?.price || 0,
+              Product: {
+                id: item.productId,
+                name: item.Product?.name || 'Unknown Product',
+                slug: item.Product?.slug || '',
+                price: item.Product?.price || 0,
+                thumbnail: item.Product?.thumbnail || '',
+                inStock: item.Product?.inStock || false,
+                stockQuantity: item.Product?.stockQuantity || 0,
+              },
+              ProductVariant: item.ProductVariant ? {
+                id: item.ProductVariant.id,
+                name: item.ProductVariant.name,
+                price: item.ProductVariant.price,
+                stockQuantity: item.ProductVariant.stockQuantity,
+              } : undefined,
+            })),
+            totalItems,
+            subtotal,
+          };
+
+          // Cập nhật Redux store
+          dispatch(setServerCart(serverCart));
+
+          // Đồng bộ với server nếu cần
+          if (isAuthenticated) {
+            await refetchCart();
+          }
+        }
+
         setMessages((prev) => {
           const filtered = prev.filter((msg) => msg.id !== loadingId);
           return [
@@ -245,18 +309,16 @@ const ChatWidgetPortal: React.FC = () => {
 
         {/* AI Status indicator - Thiết kế đẹp hơn */}
         <div
-          className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-lg ${
-            geminiService.isReady()
+          className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-lg ${geminiService.isReady()
               ? 'bg-gradient-to-r from-green-400 to-green-500'
               : 'bg-gradient-to-r from-yellow-400 to-orange-500'
-          }`}
+            }`}
         >
           <div
-            className={`absolute inset-0.5 rounded-full ${
-              geminiService.isReady()
+            className={`absolute inset-0.5 rounded-full ${geminiService.isReady()
                 ? 'bg-green-300 animate-pulse'
                 : 'bg-yellow-300 animate-pulse'
-            }`}
+              }`}
             style={{ animationDuration: '1.5s' }}
           ></div>
         </div>
