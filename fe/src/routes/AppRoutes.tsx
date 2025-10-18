@@ -1,12 +1,14 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
+import UserLayout from "@/components/layout/UserLayout";
 import AdminLayout from "@/components/admin/AdminLayout";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicOnlyRoute from "@/components/auth/PublicOnlyRoute";
 import AdminRoute from "./AdminRoute";
 import SideBarPerson from "@/pages/SideBarPerson";
+// import SideBarPerson from "@/pages/SideBarPerson";
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import("@/pages/HomePage"));
@@ -156,14 +158,22 @@ const AppRoutes: React.FC = () => {
               </ProtectedRoute>
             }
           /> */}
+          {/* User routes with nested layout */}
           <Route
             path="user"
             element={
               <ProtectedRoute>
-                <SideBarPerson />
+                <UserLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/user/profile" replace />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="wishlist" element={<div>Wishlist Coming Soon</div>} />
+            <Route path="address" element={<div>Address Management Coming Soon</div>} />
+            <Route path="notifications" element={<div>Notifications Coming Soon</div>} />
+            <Route path="setting" element={<div>Settings Coming Soon</div>} />
+          </Route>
           <Route
             path="orders"
             element={
