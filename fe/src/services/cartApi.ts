@@ -1,5 +1,5 @@
-import { api } from './api';
-import { RootState } from '@/store';
+import { api } from "./api";
+import { RootState } from "@/store";
 
 // Backend Cart Types
 export interface BackendCartItem {
@@ -72,25 +72,25 @@ export interface CartCountResponse {
 export const cartApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<BackendCart, void>({
-      query: () => '/cart',
+      query: () => "/cart",
       transformResponse: (response: CartResponse) => response.data,
-      providesTags: ['Cart'],
+      providesTags: ["Cart"],
     }),
 
     getCartCount: builder.query<number, void>({
-      query: () => '/cart/count',
+      query: () => "/cart/count",
       transformResponse: (response: CartCountResponse) => response.data.count,
-      providesTags: ['CartCount'],
+      providesTags: ["CartCount"],
     }),
 
     addToCart: builder.mutation<BackendCart, AddToCartRequest>({
       query: (data) => ({
-        url: '/cart',
-        method: 'POST',
+        url: "/cart",
+        method: "POST",
         body: data,
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
 
     updateCartItem: builder.mutation<
@@ -99,48 +99,48 @@ export const cartApi = api.injectEndpoints({
     >({
       query: ({ id, data }) => ({
         url: `/cart/items/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
 
     removeCartItem: builder.mutation<BackendCart, string>({
       query: (id) => ({
         url: `/cart/items/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
 
     clearCart: builder.mutation<BackendCart, void>({
       query: () => ({
-        url: '/cart',
-        method: 'DELETE',
+        url: "/cart",
+        method: "DELETE",
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
 
     syncCart: builder.mutation<BackendCart, SyncCartRequest>({
       query: (data) => ({
-        url: '/cart/sync',
-        method: 'POST',
+        url: "/cart/sync",
+        method: "POST",
         body: data,
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
 
     mergeCart: builder.mutation<BackendCart, void>({
       query: () => ({
-        url: '/cart/merge',
-        method: 'POST',
+        url: "/cart/merge",
+        method: "POST",
       }),
       transformResponse: (response: CartResponse) => response.data,
-      invalidatesTags: ['Cart', 'CartCount'],
+      invalidatesTags: ["Cart", "CartCount"],
     }),
   }),
 });

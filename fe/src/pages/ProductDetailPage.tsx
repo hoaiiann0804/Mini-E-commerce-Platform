@@ -1,33 +1,34 @@
-import { PremiumButton } from '@/components/common';
-import Badge from '@/components/common/Badge';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Rating } from '@/components/common/Rating';
-import ProductCard from '@/components/features/ProductCard';
-import ProductReviews from '@/components/features/ProductReviews';
-import WarrantySelection from '@/components/product/WarrantySelection';
-import ProductVariantSelector from '@/components/product/ProductVariantSelector';
-import DynamicProductTitle from '@/components/product/DynamicProductTitle';
-import SimpleDynamicTitle from '@/components/product/SimpleDynamicTitle';
-import ProductDetailsSection from '@/components/product/ProductDetailsSection';
-import { productApi } from '@/services/productApi';
-import { useGetWarrantyPackagesQuery } from '@/services/warrantyApi';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { PremiumButton } from "@/components/common";
+import Badge from "@/components/common/Badge";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { Rating } from "@/components/common/Rating";
+import ProductCard from "@/components/features/ProductCard";
+import ProductReviews from "@/components/features/ProductReviews";
+import WarrantySelection from "@/components/product/WarrantySelection";
+import ProductVariantSelector from "@/components/product/ProductVariantSelector";
+import DynamicProductTitle from "@/components/product/DynamicProductTitle";
+import SimpleDynamicTitle from "@/components/product/SimpleDynamicTitle";
+import ProductDetailsSection from "@/components/product/ProductDetailsSection";
+import { productApi } from "@/services/productApi";
+import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import { Heart } from "lucide-react";
 import {
   Link,
   useNavigate,
   useParams,
   useSearchParams,
-} from 'react-router-dom';
-import { RootState } from '@/store';
-import { v4 as uuidv4 } from 'uuid';
-import { LeftOutlined, RightOutlined, EyeOutlined } from '@ant-design/icons';
-import { Image } from 'antd';
+} from "react-router-dom";
+import { RootState } from "@/store";
+import { v4 as uuidv4 } from "uuid";
+import { LeftOutlined, RightOutlined, EyeOutlined } from "@ant-design/icons";
+import { Image } from "antd";
 
-import { addItem, setServerCart } from '@/features/cart/cartSlice';
-import { addNotification } from '@/features/ui/uiSlice';
-import { useAddToCartMutation } from '@/services/cartApi';
+import { addItem, setServerCart } from "@/features/cart/cartSlice";
+import { addNotification } from "@/features/ui/uiSlice";
+import { useAddToCartMutation } from "@/services/cartApi";
 import {
   getVariantStock,
   findVariantByAttributes,
@@ -37,7 +38,7 @@ import {
   formatStockText,
   getStockStatusColor,
   hasVariants,
-} from '@/utils/productHelpers';
+} from "@/utils/productHelpers";
 
 const ProductDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ const ProductDetailPage: React.FC = () => {
   );
 
   // Get skuId from URL params
-  const skuId = searchParams.get('skuId') || undefined;
+  const skuId = searchParams.get("skuId") || undefined;
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -60,7 +61,7 @@ const ProductDetailPage: React.FC = () => {
     Record<string, string>
   >({});
   const [selectedWarranties, setSelectedWarranties] = useState<string[]>([]);
-  const [dynamicProductName, setDynamicProductName] = useState<string>('');
+  const [dynamicProductName, setDynamicProductName] = useState<string>("");
   const [mappedAttributes, setMappedAttributes] = useState<
     Record<string, string>
   >({});
@@ -72,7 +73,7 @@ const ProductDetailPage: React.FC = () => {
     error,
     refetch,
   } = productApi.useGetProductByIdQuery(
-    { id: productId || '', skuId },
+    { id: productId || "", skuId },
     {
       skip: !productId,
     }
@@ -81,7 +82,7 @@ const ProductDetailPage: React.FC = () => {
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
 
   const { data: relatedProductsData } = productApi.useGetRelatedProductsQuery(
-    productData?.data?.id || '',
+    productData?.data?.id || "",
     {
       skip: !productData?.data?.id,
     }
@@ -93,7 +94,7 @@ const ProductDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      navigate('/404');
+      navigate("/404");
     }
   }, [error, navigate]);
 
@@ -179,7 +180,7 @@ const ProductDetailPage: React.FC = () => {
   const handleVariantChange = (variantId: string) => {
     // Update URL with new skuId
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('skuId', variantId);
+    newSearchParams.set("skuId", variantId);
     setSearchParams(newSearchParams);
 
     // Reset quantity and image selection
@@ -216,8 +217,8 @@ const ProductDetailPage: React.FC = () => {
 
           dispatch(
             addNotification({
-              type: 'error',
-              message: `Vui lòng chọn: ${missingAttributes.join(', ')}`,
+              type: "error",
+              message: `Vui lòng chọn: ${missingAttributes.join(", ")}`,
             })
           );
           return;
@@ -240,8 +241,8 @@ const ProductDetailPage: React.FC = () => {
     if (availableStock === 0) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: 'Sản phẩm này đã hết hàng',
+          type: "error",
+          message: "Sản phẩm này đã hết hàng",
         })
       );
       return;
@@ -250,19 +251,19 @@ const ProductDetailPage: React.FC = () => {
     if (quantity > availableStock) {
       dispatch(
         addNotification({
-          type: 'error',
+          type: "error",
           message: `Chỉ còn ${availableStock} sản phẩm trong kho`,
         })
       );
       return;
     }
 
-    console.log('🔐 isAuthenticated trong handleAddToCart:', isAuthenticated);
+    console.log("🔐 isAuthenticated trong handleAddToCart:", isAuthenticated);
 
     if (isAuthenticated) {
       // Nếu đã đăng nhập, sử dụng API
       try {
-        console.log('🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:', {
+        console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
           productId: product.id,
           variantId,
           quantity,
@@ -275,7 +276,7 @@ const ProductDetailPage: React.FC = () => {
           warrantyPackageIds: selectedWarranties,
         }).unwrap();
 
-        console.log('✅ API success, server cart:', serverCart);
+        console.log("✅ API success, server cart:", serverCart);
 
         // Update Redux store with server response
         dispatch(setServerCart(serverCart));
@@ -283,12 +284,12 @@ const ProductDetailPage: React.FC = () => {
         dispatch(
           addNotification({
             message: `${product.name} đã được thêm vào giỏ hàng`,
-            type: 'success',
+            type: "success",
             duration: 3000,
           })
         );
       } catch (error: any) {
-        console.error('❌ API thất bại:', error);
+        console.error("❌ API thất bại:", error);
 
         // Fallback to localStorage if API fails
         const newItem = {
@@ -313,14 +314,14 @@ const ProductDetailPage: React.FC = () => {
             message:
               error?.data?.message ||
               `${product.name} đã được thêm vào giỏ hàng (offline)`,
-            type: error?.data?.message ? 'error' : 'success',
+            type: error?.data?.message ? "error" : "success",
             duration: 3000,
           })
         );
       }
     } else {
       // Nếu chưa đăng nhập, KHÔNG gọi API, chỉ lưu vào localStorage
-      console.log('🔐 Chưa đăng nhập, chỉ lưu vào localStorage');
+      console.log("🔐 Chưa đăng nhập, chỉ lưu vào localStorage");
 
       const newItem = {
         id: uuidv4(),
@@ -342,14 +343,14 @@ const ProductDetailPage: React.FC = () => {
 
       // Debug: Check if localStorage was updated
       console.log(
-        '🔍 localStorage after add:',
-        localStorage.getItem('cartItems')
+        "🔍 localStorage after add:",
+        localStorage.getItem("cartItems")
       );
 
       dispatch(
         addNotification({
           message: `${product.name} đã được thêm vào giỏ hàng`,
-          type: 'success',
+          type: "success",
           duration: 3000,
         })
       );
@@ -405,7 +406,7 @@ const ProductDetailPage: React.FC = () => {
       dispatch(
         addNotification({
           message: `${product.name} đã được thêm vào giỏ hàng`,
-          type: 'success',
+          type: "success",
           duration: 3000,
         })
       );
@@ -426,13 +427,13 @@ const ProductDetailPage: React.FC = () => {
       };
 
       // Lưu thông tin sản phẩm vào sessionStorage
-      sessionStorage.setItem('buyNowItem', JSON.stringify(buyNowItem));
-      sessionStorage.setItem('buyNowAction', 'true');
+      sessionStorage.setItem("buyNowItem", JSON.stringify(buyNowItem));
+      sessionStorage.setItem("buyNowAction", "true");
 
       // Đảm bảo localStorage được cập nhật ngay lập tức nếu không đăng nhập
       if (!isAuthenticated) {
         // Lưu giỏ hàng vào localStorage ngay lập tức
-        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
 
         // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
         const existingItemIndex = cartItems.findIndex(
@@ -451,18 +452,18 @@ const ProductDetailPage: React.FC = () => {
         }
 
         // Lưu giỏ hàng vào localStorage
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        localStorage.setItem("cartItems", JSON.stringify(cartItems));
       }
 
       // Chuyển hướng ngay lập tức, không cần setTimeout
-      navigate('/checkout?buyNow=true');
+      navigate("/checkout?buyNow=true");
     } catch (error: any) {
-      console.error('Error buying now:', error);
+      console.error("Error buying now:", error);
       dispatch(
         addNotification({
           message:
-            error?.data?.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng',
-          type: 'error',
+            error?.data?.message || "Có lỗi xảy ra khi thêm vào giỏ hàng",
+          type: "error",
           duration: 3000,
         })
       );
@@ -490,7 +491,7 @@ const ProductDetailPage: React.FC = () => {
           variant="primary"
           size="large"
           iconType="arrow-right"
-          onClick={() => navigate('/shop')}
+          onClick={() => navigate("/shop")}
         >
           Continue Shopping
         </PremiumButton>
@@ -614,8 +615,8 @@ const ProductDetailPage: React.FC = () => {
                   key={index}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
                     selectedImage === index
-                      ? 'border-primary-500 shadow-lg ring-2 ring-primary-200'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-primary-500 shadow-lg ring-2 ring-primary-200"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                   onClick={() => setSelectedImage(index)}
                 >
@@ -667,7 +668,7 @@ const ProductDetailPage: React.FC = () => {
                   <>
                     <span className="text-2xl font-bold text-neutral-900 dark:text-white">
                       {parseFloat(currentPrice.toString()).toLocaleString(
-                        'vi-VN'
+                        "vi-VN"
                       )}
                       đ
                     </span>
@@ -675,7 +676,7 @@ const ProductDetailPage: React.FC = () => {
                     {comparePrice && comparePrice > currentPrice && (
                       <span className="ml-3 text-lg text-neutral-500 dark:text-neutral-400 line-through">
                         {parseFloat(comparePrice.toString()).toLocaleString(
-                          'vi-VN'
+                          "vi-VN"
                         )}
                         đ
                       </span>
@@ -728,8 +729,8 @@ const ProductDetailPage: React.FC = () => {
 
                 return (
                   <div className="flex items-center gap-2">
-                    <Badge variant={availableStock > 0 ? 'success' : 'error'}>
-                      {availableStock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                    <Badge variant={availableStock > 0 ? "success" : "error"}>
+                      {availableStock > 0 ? "Còn hàng" : "Hết hàng"}
                     </Badge>
                     <span className={`text-sm font-medium ${stockColor}`}>
                       {stockText}
@@ -747,7 +748,7 @@ const ProductDetailPage: React.FC = () => {
             {/* Short description */}
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">
               {product.shortDescription ||
-                product.description.substring(0, 150) + '...'}
+                product.description.substring(0, 150) + "..."}
             </p>
           </div>
 
@@ -795,10 +796,10 @@ const ProductDetailPage: React.FC = () => {
                                 px-4 py-2 text-sm border rounded-lg transition-all duration-200 font-medium
                                 ${
                                   isSelected
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
                                     : available
-                                      ? 'bg-white border-gray-300 text-gray-800 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm'
-                                      : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                                      ? "bg-white border-gray-300 text-gray-800 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm"
+                                      : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
                                 }
                               `}
                             >
@@ -874,6 +875,11 @@ const ProductDetailPage: React.FC = () => {
                       />
                     </svg>
                   </button>
+                  <div className="flex  justify-between ml-10">
+                    <button className="px-4 py-2 rounded-lg border border-r">
+                      <Heart size={20} className="text-gray-400 hover:text-red-500 transition-colors"/>
+                    </button>
+                  </div>
                 </div>
               );
             })()}
@@ -898,7 +904,7 @@ const ProductDetailPage: React.FC = () => {
               disabled={product.stock <= 0}
               className="w-full h-14"
             >
-              {t('product.addToCart')}
+              {t("product.addToCart")}
             </PremiumButton>
             <PremiumButton
               variant="secondary"
@@ -908,7 +914,7 @@ const ProductDetailPage: React.FC = () => {
               disabled={product.stock <= 0}
               className="w-full h-14"
             >
-              {t('product.buyNow')}
+              {t("product.buyNow")}
             </PremiumButton>
           </div>
 
