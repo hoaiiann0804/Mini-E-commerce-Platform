@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks/useAuth';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { setTheme } from '@/features/ui/uiSlice';
-import { ConfigProvider, theme as antdTheme, Button, Drawer } from 'antd';
-import { MenuOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { setTheme } from "@/features/ui/uiSlice";
+import { ConfigProvider, theme as antdTheme, Button, Drawer } from "antd";
+import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
@@ -26,19 +26,19 @@ const AdminLayout: React.FC = () => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleTheme = () => {
-    dispatch(setTheme(theme === 'light' ? 'dark' : 'light'));
+    dispatch(setTheme(theme === "light" ? "dark" : "light"));
   };
 
   const adminNavItems = [
     {
-      key: 'dashboard',
-      path: '/admin/dashboard',
-      label: 'Dashboard',
+      key: "dashboard",
+      path: "/admin/dashboard",
+      label: "Dashboard",
       icon: (
         <svg
           className="w-5 h-5"
@@ -56,9 +56,9 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      key: 'products',
-      path: '/admin/products',
-      label: 'Products',
+      key: "products",
+      path: "/admin/products",
+      label: "Products",
       icon: (
         <svg
           className="w-5 h-5"
@@ -76,9 +76,9 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      key: 'categories',
-      path: '/admin/categories',
-      label: 'Categories',
+      key: "categories",
+      path: "/admin/categories",
+      label: "Categories",
       icon: (
         <svg
           className="w-5 h-5"
@@ -96,9 +96,9 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      key: 'orders',
-      path: '/admin/orders',
-      label: 'Orders',
+      key: "orders",
+      path: "/admin/orders",
+      label: "Orders",
       icon: (
         <svg
           className="w-5 h-5"
@@ -116,9 +116,9 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      key: 'users',
-      path: '/admin/users',
-      label: 'Users',
+      key: "users",
+      path: "/admin/users",
+      label: "Users",
       icon: (
         <svg
           className="w-5 h-5"
@@ -136,9 +136,9 @@ const AdminLayout: React.FC = () => {
       ),
     },
     {
-      key: 'warranty-packages',
-      path: '/admin/warranty-packages',
-      label: 'Warranty Packages',
+      key: "warranty-packages",
+      path: "/admin/warranty-packages",
+      label: "Warranty Packages",
       icon: (
         <svg
           className="w-5 h-5"
@@ -161,11 +161,11 @@ const AdminLayout: React.FC = () => {
     <ConfigProvider
       theme={{
         algorithm:
-          theme === 'dark'
+          theme === "dark"
             ? antdTheme.darkAlgorithm
             : antdTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#1890ff',
+          colorPrimary: "#1890ff",
           borderRadius: 6,
         },
       }}
@@ -203,7 +203,7 @@ const AdminLayout: React.FC = () => {
                   onClick={toggleTheme}
                   className="flex items-center justify-center text-neutral-700 dark:text-neutral-300"
                 >
-                  {theme === 'light' ? (
+                  {theme === "light" ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -249,9 +249,9 @@ const AdminLayout: React.FC = () => {
             width={280}
             bodyStyle={{ padding: 0 }}
             headerStyle={{
-              borderBottom: `1px solid ${theme === 'dark' ? '#424242' : '#f0f0f0'}`,
-              background: theme === 'dark' ? '#141414' : '#fff',
-              color: theme === 'dark' ? '#fff' : '#000',
+              borderBottom: `1px solid ${theme === "dark" ? "#424242" : "#f0f0f0"}`,
+              background: theme === "dark" ? "#141414" : "#fff",
+              color: theme === "dark" ? "#fff" : "#000",
             }}
           >
             <nav className="px-4 py-4">
@@ -261,19 +261,19 @@ const AdminLayout: React.FC = () => {
                   return (
                     <li key={item.key}>
                       <Link
-                        to={item.path}
+                        to={"item.path"}
                         className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                           isActive
-                            ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-                            : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white'
+                            ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium"
+                            : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white"
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <span
                           className={
                             isActive
-                              ? 'text-primary-600 dark:text-primary-400'
-                              : ''
+                              ? "text-primary-600 dark:text-primary-400"
+                              : ""
                           }
                         >
                           {item.icon}
@@ -299,15 +299,15 @@ const AdminLayout: React.FC = () => {
                         to={item.path}
                         className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                           isActive
-                            ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
-                            : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white'
+                            ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium"
+                            : "text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white"
                         }`}
                       >
                         <span
                           className={
                             isActive
-                              ? 'text-primary-600 dark:text-primary-400'
-                              : ''
+                              ? "text-primary-600 dark:text-primary-400"
+                              : ""
                           }
                         >
                           {item.icon}
