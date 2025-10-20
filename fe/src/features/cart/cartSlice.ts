@@ -7,8 +7,11 @@ import {
 } from '@/types/cart.types';
 
 const initialState: CartState = {
+  // Lấy danh sách sản phẩm trong giỏ hàng từ localStorage
+// Nếu chưa có dữ liệu ('cartItems' là null) thì dùng mảng rỗng '[]' thay thế
+// Sau đó chuyển chuỗi JSON thành mảng thật bằng JSON.parse
   items: JSON.parse(localStorage.getItem('cartItems') || '[]'),
-  isOpen: false,
+  isOpen: false, 
   isLoading: false,
   totalItems: 0,
   subtotal: 0,
