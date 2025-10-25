@@ -9,6 +9,7 @@ import ProductVariantSelector from "@/components/product/ProductVariantSelector"
 import DynamicProductTitle from "@/components/product/DynamicProductTitle";
 import SimpleDynamicTitle from "@/components/product/SimpleDynamicTitle";
 import ProductDetailsSection from "@/components/product/ProductDetailsSection";
+import { useAddToWishlistMutation } from "@/services/wishlistApi";
 import { productApi } from "@/services/productApi";
 import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
 import { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ import {
 import { RootState } from "@/store";
 import { v4 as uuidv4 } from "uuid";
 import { LeftOutlined, RightOutlined, EyeOutlined } from "@ant-design/icons";
-import { Image } from "antd";
+import { Image, message } from "antd";
 
 import { addItem, setServerCart } from "@/features/cart/cartSlice";
 import { addNotification } from "@/features/ui/uiSlice";
@@ -39,6 +40,10 @@ import {
   getStockStatusColor,
   hasVariants,
 } from "@/utils/productHelpers";
+import {
+  setServerWishList,
+  addItemWishlist,
+} from "@/features/wishlist/wishlistSlice";
 
 const ProductDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -51,6 +56,7 @@ const ProductDetailPage: React.FC = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+  // Lấy danh sách sách wishlist từ redux store
 
   // Get skuId from URL params
   const skuId = searchParams.get("skuId") || undefined;
@@ -80,7 +86,8 @@ const ProductDetailPage: React.FC = () => {
   );
 
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
-
+  const [addtoWishList, { isLoading: isAddingtoWishList }] =
+    useAddToWishlistMutation();
   const { data: relatedProductsData } = productApi.useGetRelatedProductsQuery(
     productData?.data?.id || "",
     {
@@ -91,7 +98,8 @@ const ProductDetailPage: React.FC = () => {
   const product = productData?.data;
   const relatedProducts = relatedProductsData?.data || [];
   const warrantyPackages = product?.warrantyPackages || [];
-
+  const wishlit = useSelector((state: RootState) => state.wishlist.items);
+  const isWishlisted = wishlit.some((items) => items.productId === product.id);
   useEffect(() => {
     if (error) {
       navigate("/404");
@@ -100,6 +108,8 @@ const ProductDetailPage: React.FC = () => {
 
   // Auto-select first variant when product loads
   useEffect(() => {
+    // console.log("Product: ", product);
+    // console.log("Selected", selectedAttributes);
     if (product && product.attributes && product.attributes.length > 0) {
       const firstAttribute = product.attributes[0];
       if (firstAttribute.values && firstAttribute.values.length > 0) {
@@ -110,6 +120,7 @@ const ProductDetailPage: React.FC = () => {
           const initialAttributes = { [firstAttribute.name]: firstValue };
           setSelectedAttributes(initialAttributes);
           setMappedAttributes(initialAttributes);
+          // console.log("MappedAttributes", initialAttributes);
         }
       }
     }
@@ -124,6 +135,7 @@ const ProductDetailPage: React.FC = () => {
   // Handle quantity change
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock || 99)) {
+      // console.log("Qantity", newQuantity);
       setQuantity(newQuantity);
     }
   };
@@ -137,14 +149,20 @@ const ProductDetailPage: React.FC = () => {
   };
 
   const handleNextImage = () => {
+    // if the product doesn't exist or has no images, stop and don't do anything
     if (!product?.images.length) return;
+    // is the  product has images, move to the next image
     setSelectedImage((prev) =>
+      //if it's the last image, start again from the first one
       prev === product.images.length - 1 ? 0 : prev + 1
     );
   };
 
   // Handle attribute selection with toggle functionality
   const handleAttributeChange = (name: string, value: string) => {
+    // console.log("handleAttributeChange, name:", name, "value:", value); // name: CPU value: AMD Ryzen 5 PRO 6650U
+    // console.log("mappedAttributes trước:", mappedAttributes); // {CPU: 'AMD Ryzen 5 PRO 6650U'}
+    //
     setSelectedAttributes((prev) => {
       const newAttributes = { ...prev };
 
@@ -165,6 +183,7 @@ const ProductDetailPage: React.FC = () => {
 
     // Reset quantity to 1 when changing attributes
     setQuantity(1);
+    // console.log(quantity);
   };
 
   const handleDynamicNameUpdate = (newName: string, details: any) => {
@@ -263,11 +282,11 @@ const ProductDetailPage: React.FC = () => {
     if (isAuthenticated) {
       // Nếu đã đăng nhập, sử dụng API
       try {
-        console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
-          productId: product.id,
-          variantId,
-          quantity,
-        });
+        // console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
+        //   productId: product.id,
+        //   variantId,
+        //   quantity,
+        // });
 
         const serverCart = await addToCart({
           productId: product.id,
@@ -350,6 +369,64 @@ const ProductDetailPage: React.FC = () => {
       dispatch(
         addNotification({
           message: `${product.name} đã được thêm vào giỏ hàng`,
+          type: "success",
+          duration: 3000,
+        })
+      );
+    }
+  };
+  const handletoWishList = async () => {
+    if (!product) return;
+    if (isWishlisted) {
+      dispatch(
+        addNotification({
+          message: `${product.name} đã có trong danh sách yêu thích `,
+          type: "info",
+          duration: 3000,
+        })
+      );
+      return;
+    }
+    const newItem = {
+      id: uuidv4(),
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      thumbnail: product.thumbnail,
+      slug: product.slug,
+      dateAdded: new Date().toISOString(),
+    };
+    if (isAuthenticated) {
+      try {
+        const serverWishlist = await addtoWishList({
+          productId: product.id,
+        });
+        // console.log("✅ API success, server", serverWishlist);
+        dispatch(setServerWishList(serverWishlist));
+        //Update Redic store with server response
+        dispatch(
+          addNotification({
+            message: `${product.name} đã được thêm vào yêu thích`,
+            type: "success",
+            duration: 3000,
+          })
+        );
+      } catch (err: any) {
+        console.error("❌ API thất bại", err);
+        dispatch(addItemWishlist(newItem));
+        dispatch(
+          addNotification({
+            message: "Không thể thêm vào danh sách yêu thích, đã lưu cục bộ",
+            type: "error",
+            duration: 3000,
+          })
+        );
+      }
+    } else {
+      dispatch(addItemWishlist(newItem));
+      dispatch(
+        addNotification({
+          message: `${product.name} đã được thêm vào yêu thích (offline)`,
           type: "success",
           duration: 3000,
         })
@@ -875,10 +952,14 @@ const ProductDetailPage: React.FC = () => {
                       />
                     </svg>
                   </button>
-                  <div className="flex  justify-between ml-10">
-                    <button className="px-4 py-2 rounded-lg border border-r">
-                      <Heart size={20} className="text-gray-400 hover:text-red-500 transition-colors"/>
-                    </button>
+                  <div className="flex justify-between ml-10">
+                    <PremiumButton
+                      className="flex items-center w-12 h-12"
+                      variant="outline"
+                      // isProcessing={isAddingtoWishList}
+                      onClick={handletoWishList}
+                      iconType="heart"
+                    ></PremiumButton>
                   </div>
                 </div>
               );
@@ -1019,5 +1100,4 @@ const ProductDetailPage: React.FC = () => {
     </div>
   );
 };
-
 export default ProductDetailPage;

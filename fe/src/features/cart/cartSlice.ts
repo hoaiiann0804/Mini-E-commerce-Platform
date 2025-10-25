@@ -1,17 +1,17 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   CartItem,
   CartState,
   ServerCart,
   UpdateCartItemPayload,
-} from '@/types/cart.types';
+} from "@/types/cart.types";
 
 const initialState: CartState = {
   // Lấy danh sách sản phẩm trong giỏ hàng từ localStorage
-// Nếu chưa có dữ liệu ('cartItems' là null) thì dùng mảng rỗng '[]' thay thế
-// Sau đó chuyển chuỗi JSON thành mảng thật bằng JSON.parse
-  items: JSON.parse(localStorage.getItem('cartItems') || '[]'),
-  isOpen: false, 
+  // Nếu chưa có dữ liệu ('cartItems' là null) thì dùng mảng rỗng '[]' thay thế
+  // Sau đó chuyển chuỗi JSON thành mảng thật bằng JSON.parse
+  items: JSON.parse(localStorage.getItem("cartItems") || "[]"),
+  isOpen: false,
   isLoading: false,
   totalItems: 0,
   subtotal: 0,
@@ -38,7 +38,7 @@ const convertServerCartItem = (serverItem: any): CartItem => ({
 });
 
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     // Set cart from server data
@@ -48,7 +48,7 @@ const cartSlice = createSlice({
       state.totalItems = action.payload.totalItems;
       state.subtotal = action.payload.subtotal;
       // Also save to localStorage for offline access
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
 
     // Local cart operations (for guests or offline)
@@ -79,7 +79,7 @@ const cartSlice = createSlice({
       );
 
       // Save to localStorage
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
 
     removeItem: (state, action: PayloadAction<string>) => {
@@ -95,7 +95,7 @@ const cartSlice = createSlice({
         0
       );
 
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
 
     updateQuantity: (state, action: PayloadAction<UpdateCartItemPayload>) => {
@@ -113,7 +113,7 @@ const cartSlice = createSlice({
           0
         );
       }
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
 
     clearCart: (state) => {
@@ -121,7 +121,7 @@ const cartSlice = createSlice({
       state.totalItems = 0;
       state.subtotal = 0;
       state.serverCart = null;
-      localStorage.removeItem('cartItems');
+      localStorage.removeItem("cartItems");
     },
 
     toggleCart: (state) => {
@@ -142,11 +142,11 @@ const cartSlice = createSlice({
 
     // Initialize totals from localStorage
     initializeCart: (state) => {
-      const items = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
 
       // Nếu giỏ hàng trống hoặc không hợp lệ, xóa localStorage
       if (!items || !Array.isArray(items) || items.length === 0) {
-        localStorage.removeItem('cartItems');
+        localStorage.removeItem("cartItems");
         state.items = [];
         state.totalItems = 0;
         state.subtotal = 0;
@@ -198,15 +198,15 @@ const cartSlice = createSlice({
         ...serverCart,
         items: mergedItems.map((item) => ({
           id: item.id,
-          cartId: item.cartId || serverCart.id || '',
+          cartId: item.cartId || serverCart.id || "",
           productId: item.productId,
           variantId: item.variantId,
           quantity: item.quantity,
           price: item.price,
-          Product: {
+          Product: {   
             id: item.productId,
             name: item.name,
-            slug: '',
+            slug: "",
             price: item.price,
             thumbnail: item.image,
             inStock: item.inStock || true,
@@ -215,7 +215,7 @@ const cartSlice = createSlice({
           ProductVariant: item.variantId
             ? {
                 id: item.variantId,
-                name: item.attributes?.variant || '',
+                name: item.attributes?.variant || "",
                 price: item.price,
                 stockQuantity: item.stockQuantity || 0,
               }
@@ -234,7 +234,7 @@ const cartSlice = createSlice({
       );
 
       // Update localStorage
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      localStorage.setItem("cartItems", JSON.stringify(state.items));
     },
   },
 });
