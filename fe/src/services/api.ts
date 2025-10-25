@@ -1,21 +1,21 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getValidToken } from '@/utils/tokenManager';
-import { handleUnauthorizedError } from '@/utils/authUtils';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getValidToken } from "@/utils/tokenManager";
+import { handleUnauthorizedError } from "@/utils/authUtils";
 import type {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
-} from '@reduxjs/toolkit/query';
+} from "@reduxjs/toolkit/query";
 
 /**
  * API Configuration
  */
 const API_CONFIG = {
-  DEFAULT_URL: 'http://localhost:8888/api',
+  DEFAULT_URL: "http://localhost:8888/api",
   TIMEOUT: 10000,
   HEADERS: {
-    ACCEPT: 'application/json',
-    CONTENT_TYPE: 'application/json',
+    ACCEPT: "application/json",
+    CONTENT_TYPE: "application/json",
   },
 } as const;
 
@@ -24,7 +24,7 @@ const API_CONFIG = {
  */
 const getBaseUrl = (): string => {
   const apiBaseUrl = import.meta.env.VITE_API_URL || API_CONFIG.DEFAULT_URL;
-  return apiBaseUrl.endsWith('/api') ? apiBaseUrl : `${apiBaseUrl}/api`;
+  return apiBaseUrl.endsWith("/api") ? apiBaseUrl : `${apiBaseUrl}/api`;
 };
 
 /**
@@ -32,13 +32,13 @@ const getBaseUrl = (): string => {
  */
 const logApiConfig = (): void => {
   if (import.meta.env.DEV) {
-    console.group('🔧 API Configuration');
-    console.log('Base URL:', getBaseUrl());
+    console.group("🔧 API Configuration");
+    console.log("Base URL:", getBaseUrl());
     console.log(
-      'Environment:',
-      import.meta.env.DEV ? 'Development' : 'Production'
+      "Environment:",
+      import.meta.env.DEV ? "Development" : "Production"
     );
-    console.log('VITE_API_URL:', import.meta.env.VITE_API_URL || 'Not set');
+    console.log("VITE_API_URL:", import.meta.env.VITE_API_URL || "Not set");
     console.groupEnd();
   }
 };
@@ -55,18 +55,18 @@ const prepareHeaders = async (headers: Headers): Promise<Headers> => {
 
   // Add authorization header if token exists
   if (token) {
-    headers.set('authorization', `Bearer ${token}`);
+    headers.set("authorization", `Bearer ${token}`);
   } else {
     // Fallback to localStorage token
-    const localToken = localStorage.getItem('token');
+    const localToken = localStorage.getItem("token");
     if (localToken) {
-      headers.set('authorization', `Bearer ${localToken}`);
+      headers.set("authorization", `Bearer ${localToken}`);
     }
   }
 
   // Add standard headers
-  headers.set('Accept', API_CONFIG.HEADERS.ACCEPT);
-  headers.set('Content-Type', API_CONFIG.HEADERS.CONTENT_TYPE);
+  headers.set("Accept", API_CONFIG.HEADERS.ACCEPT);
+  headers.set("Content-Type", API_CONFIG.HEADERS.CONTENT_TYPE);
 
   return headers;
 };
@@ -92,10 +92,10 @@ const isUnauthorizedError = (error: any): boolean => {
  */
 const logApiError = (args: string | FetchArgs, error: any): void => {
   if (import.meta.env.DEV) {
-    console.group('🚨 API Error');
-    console.log('Endpoint:', typeof args === 'string' ? args : args.url);
-    console.log('Status:', error.status);
-    console.log('Data:', error.data);
+    console.group("🚨 API Error");
+    console.log("Endpoint:", typeof args === "string" ? args : args.url);
+    console.log("Status:", error.status);
+    console.log("Data:", error.data);
     console.groupEnd();
   }
 };
@@ -126,10 +126,10 @@ const baseQueryWithAutoLogout: BaseQueryFn<
 
     return result;
   } catch (error) {
-    console.error('💥 Unexpected API error:', error);
+    console.error("💥 Unexpected API error:", error);
     return {
       error: {
-        status: 'FETCH_ERROR',
+        status: "FETCH_ERROR",
         error: String(error),
       },
     };
@@ -138,39 +138,40 @@ const baseQueryWithAutoLogout: BaseQueryFn<
 
 // Create the API service
 export const api = createApi({
-  reducerPath: 'api',
+  reducerPath: "api",
   baseQuery: baseQueryWithAutoLogout,
   tagTypes: [
-    'Product',
-    'Category',
-    'User',
-    'CurrentUser',
-    'Addresses',
-    'Cart',
-    'CartCount',
-    'Order',
-    'Review',
-    'PaymentMethod',
-    'AdminDashboard',
-    'AdminStats',
-    'AdminOrder',
-    'AdminProduct',
-    'AdminUser',
-    'Upload',
-    'WarrantyPackages',
-    'Images',
+    "Product",
+    "Category",
+    "User",
+    "CurrentUser",
+    "Addresses",
+    "Cart",
+    "CartCount",
+    "Order",
+    "Review",
+    "PaymentMethod",
+    "AdminDashboard",
+    "AdminStats",
+    "AdminOrder",
+    "AdminProduct",
+    "AdminUser",
+    "Upload",
+    "WarrantyPackages",
+    "Images",
+    "Wishlist",
   ],
   endpoints: () => ({}),
 });
 
 // Factory function để tạo baseQuery với prefix URL tùy chỉnh
 export const createPrefixedBaseQuery = (
-  prefix: string = ''
+  prefix: string = ""
 ): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> => {
   return async (args, api, extraOptions) => {
     // Thêm prefix vào URL
     const adjustedArgs =
-      typeof args === 'string'
+      typeof args === "string"
         ? `${prefix}${args}`
         : { ...args, url: `${prefix}${args.url}` };
 

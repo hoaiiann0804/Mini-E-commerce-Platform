@@ -49,13 +49,34 @@ const addToWishlist = async (req, res, next) => {
 
     // Check if product is already in wishlist
     const existingItem = await Wishlist.findOne({
-      where: { userId, productId },
+      where: { userId },
     });
 
     if (existingItem) {
+      const wishlistItems = await Wishlist.findAll({
+        where: { userId },
+        include: [
+          {
+            model: Product,
+            as: "products",
+            attributes: [
+              "id",
+              "name",
+              "slug",
+              "price",
+              "compareAtPrice",
+              "thumbnail",
+              "inStock",
+              "stockQuantity",
+            ],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
       return res.status(200).json({
         status: "success",
         message: "Sản phẩm đã có trong danh sách yêu thích",
+        data: wishlistItems.map((item) => item.products),
       });
     }
 
@@ -64,10 +85,31 @@ const addToWishlist = async (req, res, next) => {
       userId,
       productId,
     });
+    const wishlistItem = await Wishlist.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Product,
+          as: "products",
+          attributes: [
+            "id",
+            "name",
+            "slug",
+            "price",
+            "compareAtPrice",
+            "thumbnail",
+            "inStock",
+            "stockQuantity",
+          ],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(201).json({
       status: "success",
       message: "Đã thêm sản phẩm vào danh sách yêu thích",
+      data: wishlistItem.map((item) => item.products),
     });
   } catch (error) {
     next(error);
