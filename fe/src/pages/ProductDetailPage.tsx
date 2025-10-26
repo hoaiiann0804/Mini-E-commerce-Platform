@@ -956,10 +956,13 @@ const ProductDetailPage: React.FC = () => {
                     <PremiumButton
                       className="flex items-center w-12 h-12"
                       variant="outline"
-                      // isProcessing={isAddingtoWishList}
+                      isProcessing={isAddingtoWishList}
+                      processingText="Đang thêm..."
                       onClick={handletoWishList}
-                      iconType="heart"
-                    ></PremiumButton>
+                      // iconType="heart"
+                    >
+                      <Heart size={20} />
+                    </PremiumButton>
                   </div>
                 </div>
               );
