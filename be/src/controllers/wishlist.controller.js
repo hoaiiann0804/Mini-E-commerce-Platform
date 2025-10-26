@@ -49,7 +49,7 @@ const addToWishlist = async (req, res, next) => {
 
     // Check if product is already in wishlist
     const existingItem = await Wishlist.findOne({
-      where: { userId },
+      where: { userId, productId },
     });
 
     if (existingItem) {
@@ -147,7 +147,17 @@ const removeFromWishlist = async (req, res, next) => {
 const checkWishlist = async (req, res, next) => {
   try {
     const { productId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id; // Optional auth
+
+    // If no user (guest), product is not in wishlist
+    // if (!userId) {
+    //   return res.status(200).json({
+    //     status: "success",
+    //     data: {
+    //       inWishlist: false,
+    //     },
+    //   });
+    // }
 
     // Check if product is in wishlist
     const wishlistItem = await Wishlist.findOne({
