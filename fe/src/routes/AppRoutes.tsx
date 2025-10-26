@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicOnlyRoute from "@/components/auth/PublicOnlyRoute";
 import AdminRoute from "./AdminRoute";
 import SideBarPerson from "@/pages/SideBarPerson";
+import WishListPage from "@/pages/WishListPage";
 // import SideBarPerson from "@/pages/SideBarPerson";
 
 // Lazy-loaded pages
@@ -169,7 +170,7 @@ const AppRoutes: React.FC = () => {
           >
             <Route index element={<Navigate to="/user/profile" replace />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="wishlist" element={<div>Wishlist Coming Soon</div>} />
+            <Route path="wishlist" element={<WishListPage/>} />
             <Route path="address" element={<div>Address Management Coming Soon</div>} />
             <Route path="notifications" element={<div>Notifications Coming Soon</div>} />
             <Route path="setting" element={<div>Settings Coming Soon</div>} />
