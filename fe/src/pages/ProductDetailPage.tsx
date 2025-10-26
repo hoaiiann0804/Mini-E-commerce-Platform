@@ -16,6 +16,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { Heart } from "lucide-react";
+
+import { useMemo } from "react";
 import {
   Link,
   useNavigate,
@@ -43,6 +45,7 @@ import {
 import {
   setServerWishList,
   addItemWishlist,
+  removeItemWishlist,
 } from "@/features/wishlist/wishlistSlice";
 
 const ProductDetailPage: React.FC = () => {
@@ -98,8 +101,11 @@ const ProductDetailPage: React.FC = () => {
   const product = productData?.data;
   const relatedProducts = relatedProductsData?.data || [];
   const warrantyPackages = product?.warrantyPackages || [];
-  const wishlit = useSelector((state: RootState) => state.wishlist.items);
-  const isWishlisted = wishlit.some((items) => items.productId === product.id);
+  const wishlist = useSelector((state: RootState) => state.wishlist.items);
+  const isWishlisted = useMemo(
+    () => wishlist.some((items) => items.productId === product?.id),
+    [wishlist, product]
+  );
   useEffect(() => {
     if (error) {
       navigate("/404");
@@ -212,7 +218,7 @@ const ProductDetailPage: React.FC = () => {
 
   // Add to cart
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product) return <LoadingSpinner />;
 
     // For variant products, use current variant
     let variantId: string | undefined;
@@ -377,37 +383,72 @@ const ProductDetailPage: React.FC = () => {
   };
   const handletoWishList = async () => {
     if (!product) return;
+
     if (isWishlisted) {
-      dispatch(
-        addNotification({
-          message: `${product.name} đã có trong danh sách yêu thích `,
-          type: "info",
-          duration: 3000,
-        })
-      );
+      // dispatch(
+      //   addNotification({
+      //     message: `${product.name} đã có trong danh sách yêu thích `,
+      //     type: "info",
+      //     duration: 3000,
+      //   })
+      // );
+      // Remove from wishlist
+      if (isAuthenticated) {
+        try {
+          // For now, we'll just remove from local state since the API doesn't have a remove endpoint
+          // In a full implementation, you'd call a remove API endpoint
+          dispatch(removeItemWishlist({ productId: product.id } as any));
+          dispatch(
+            addNotification({
+              message: `${product.name} đã được xóa khỏi danh sách yêu thích`,
+              type: "success",
+              duration: 3000,
+            })
+          );
+        } catch (err: any) {
+          console.error("❌ API thất bại", err);
+          dispatch(removeItemWishlist({ productId: product.id } as any));
+        }
+      } else {
+        dispatch(removeItemWishlist({ productId: product.id } as any));
+        dispatch(
+          addNotification({
+            message: `${product.name} đã được xóa khỏi yêu thích`,
+            type: "success",
+            duration: 3000,
+          })
+        );
+      }
       return;
     }
+
+    // Add to wishlist
     const newItem = {
       id: uuidv4(),
       productId: product.id,
       name: product.name,
       price: product.price,
+      compareAtPrice: product.compareAtPrice,
       thumbnail: product.thumbnail,
       slug: product.slug,
-      dateAdded: new Date().toISOString(),
+      //dateAdded: new Date().toISOString(),
     };
+
     if (isAuthenticated) {
       try {
-        const serverWishlist = await addtoWishList({
+        const response = await addtoWishList({
           productId: product.id,
-        });
+        }).unwrap();
         // console.log("✅ API success, server", serverWishlist);
-        dispatch(setServerWishList(serverWishlist));
-        //Update Redic store with server response
+        dispatch(setServerWishList(response));
+        //Update Redux store with server response
         dispatch(
           addNotification({
-            message: `${product.name} đã được thêm vào yêu thích`,
-            type: "success",
+            type: response.message?.includes("đã có trong danh sách yêu thích")
+              ? "info"
+              : "success",
+            message:
+              response.message || `${product.name} đã được thêm vào yêu thích`,
             duration: 3000,
           })
         );
@@ -959,9 +1000,14 @@ const ProductDetailPage: React.FC = () => {
                       isProcessing={isAddingtoWishList}
                       processingText="Đang thêm..."
                       onClick={handletoWishList}
-                      // iconType="heart"
+                      iconType={isWishlisted ? "heart-filled" : "heart"}
+                      title={
+                        isWishlisted
+                          ? "Xóa khỏi yêu thích"
+                          : "Thêm vào yêu thích"
+                      }
                     >
-                      <Heart size={20} />
+                      {/* <Heart size={20} /> */}
                     </PremiumButton>
                   </div>
                 </div>

@@ -7,14 +7,16 @@ export interface BackendWishlistItem {
   productId: string;
   name: string;
   price: number;
+  compareAtPrice: number;
   thumbnail: string;
   slug: string;
-  dateAdded: string;
+  //dateAdded: string;
 }
 
 export interface BackendWishlist {
   id: string | null;
   items: BackendWishlistItem[];
+  message?: string;
 }
 
 export interface AddToWishlist {
@@ -34,6 +36,7 @@ export const WishlsitApi = api.injectEndpoints({
         return {
           id: null,
           items: response.data || [],
+          message: response.message,
         };
       },
       providesTags: ["Wishlist"],
@@ -49,7 +52,8 @@ export const WishlsitApi = api.injectEndpoints({
         console.log("Raw API response:", response);
         return {
           id: null,
-          items: response.data || [],
+          items: response.data,
+          message: response.message,
         };
       },
       invalidatesTags: ["Wishlist"],

@@ -1,35 +1,37 @@
-import React from 'react';
-import { Button, ButtonProps } from 'antd';
+import React from "react";
+import { Button, ButtonProps } from "antd";
 import {
   CheckCircleOutlined,
   ArrowRightOutlined,
   ShoppingCartOutlined,
   HeartOutlined,
+  HeartFilled,
   UserOutlined,
   SettingOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
 export type PremiumButtonVariant =
-  | 'primary' // Teal gradient - main CTA
-  | 'secondary' // Orange gradient - secondary actions
-  | 'success' // Green gradient - success actions
-  | 'info' // Blue gradient - info actions
-  | 'warning' // Yellow gradient - warning actions
-  | 'danger' // Red gradient - danger actions
-  | 'ghost' // Transparent with border
-  | 'outline'; // Outline style
+  | "primary" // Teal gradient - main CTA
+  | "secondary" // Orange gradient - secondary actions
+  | "success" // Green gradient - success actions
+  | "info" // Blue gradient - info actions
+  | "warning" // Yellow gradient - warning actions
+  | "danger" // Red gradient - danger actions
+  | "ghost" // Transparent with border
+  | "outline"; // Outline style
 
 export type PremiumButtonIcon =
-  | 'check'
-  | 'arrow-right'
-  | 'cart'
-  | 'heart'
-  | 'user'
-  | 'settings'
-  | 'none';
+  | "check"
+  | "arrow-right"
+  | "cart"
+  | "heart"
+  | "heart-filled"
+  | "user"
+  | "settings"
+  | "none";
 
 interface PremiumButtonProps
-  extends Omit<ButtonProps, 'type' | 'icon' | 'variant'> {
+  extends Omit<ButtonProps, "type" | "icon" | "variant"> {
   variant?: PremiumButtonVariant;
   iconType?: PremiumButtonIcon;
   isProcessing?: boolean;
@@ -39,17 +41,19 @@ interface PremiumButtonProps
 
 const getIcon = (iconType: PremiumButtonIcon) => {
   switch (iconType) {
-    case 'check':
+    case "check":
       return <CheckCircleOutlined />;
-    case 'arrow-right':
+    case "arrow-right":
       return <ArrowRightOutlined />;
-    case 'cart':
+    case "cart":
       return <ShoppingCartOutlined />;
-    case 'heart':
+    case "heart":
       return <HeartOutlined />;
-    case 'user':
+    case "heart-filled":
+      return <HeartFilled />;
+    case "user":
       return <UserOutlined />;
-    case 'settings':
+    case "settings":
       return <SettingOutlined />;
     default:
       return null;
@@ -62,52 +66,52 @@ const getGradientStyle = (
 ) => {
   const gradients = {
     primary: {
-      normal: 'linear-gradient(135deg, #2AACA7, #229A96)',
-      processing: 'linear-gradient(135deg, #4BBCB8, #2AACA7)',
-      shadow: 'rgba(42, 172, 167, 0.3)',
-      shadowHover: 'rgba(42, 172, 167, 0.4)',
+      normal: "linear-gradient(135deg, #2AACA7, #229A96)",
+      processing: "linear-gradient(135deg, #4BBCB8, #2AACA7)",
+      shadow: "rgba(42, 172, 167, 0.3)",
+      shadowHover: "rgba(42, 172, 167, 0.4)",
     },
     secondary: {
-      normal: 'linear-gradient(135deg, #FF755E, #E56954)',
-      processing: 'linear-gradient(135deg, #FF8F7B, #FF755E)',
-      shadow: 'rgba(255, 117, 94, 0.3)',
-      shadowHover: 'rgba(255, 117, 94, 0.4)',
+      normal: "linear-gradient(135deg, #FF755E, #E56954)",
+      processing: "linear-gradient(135deg, #FF8F7B, #FF755E)",
+      shadow: "rgba(255, 117, 94, 0.3)",
+      shadowHover: "rgba(255, 117, 94, 0.4)",
     },
     success: {
-      normal: 'linear-gradient(135deg, #10B981, #059669)',
-      processing: 'linear-gradient(135deg, #34D399, #10B981)',
-      shadow: 'rgba(16, 185, 129, 0.3)',
-      shadowHover: 'rgba(16, 185, 129, 0.4)',
+      normal: "linear-gradient(135deg, #10B981, #059669)",
+      processing: "linear-gradient(135deg, #34D399, #10B981)",
+      shadow: "rgba(16, 185, 129, 0.3)",
+      shadowHover: "rgba(16, 185, 129, 0.4)",
     },
     info: {
-      normal: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-      processing: 'linear-gradient(135deg, #60A5FA, #3B82F6)',
-      shadow: 'rgba(59, 130, 246, 0.3)',
-      shadowHover: 'rgba(59, 130, 246, 0.4)',
+      normal: "linear-gradient(135deg, #3B82F6, #2563EB)",
+      processing: "linear-gradient(135deg, #60A5FA, #3B82F6)",
+      shadow: "rgba(59, 130, 246, 0.3)",
+      shadowHover: "rgba(59, 130, 246, 0.4)",
     },
     warning: {
-      normal: 'linear-gradient(135deg, #F59E0B, #D97706)',
-      processing: 'linear-gradient(135deg, #FBBF24, #F59E0B)',
-      shadow: 'rgba(245, 158, 11, 0.3)',
-      shadowHover: 'rgba(245, 158, 11, 0.4)',
+      normal: "linear-gradient(135deg, #F59E0B, #D97706)",
+      processing: "linear-gradient(135deg, #FBBF24, #F59E0B)",
+      shadow: "rgba(245, 158, 11, 0.3)",
+      shadowHover: "rgba(245, 158, 11, 0.4)",
     },
     danger: {
-      normal: 'linear-gradient(135deg, #EF4444, #DC2626)',
-      processing: 'linear-gradient(135deg, #F87171, #EF4444)',
-      shadow: 'rgba(239, 68, 68, 0.3)',
-      shadowHover: 'rgba(239, 68, 68, 0.4)',
+      normal: "linear-gradient(135deg, #EF4444, #DC2626)",
+      processing: "linear-gradient(135deg, #F87171, #EF4444)",
+      shadow: "rgba(239, 68, 68, 0.3)",
+      shadowHover: "rgba(239, 68, 68, 0.4)",
     },
     ghost: {
-      normal: 'transparent',
-      processing: 'rgba(42, 172, 167, 0.1)',
-      shadow: 'rgba(42, 172, 167, 0.1)',
-      shadowHover: 'rgba(42, 172, 167, 0.2)',
+      normal: "transparent",
+      processing: "rgba(42, 172, 167, 0.1)",
+      shadow: "rgba(42, 172, 167, 0.1)",
+      shadowHover: "rgba(42, 172, 167, 0.2)",
     },
     outline: {
-      normal: 'transparent',
-      processing: 'rgba(42, 172, 167, 0.05)',
-      shadow: 'rgba(42, 172, 167, 0.1)',
-      shadowHover: 'rgba(42, 172, 167, 0.15)',
+      normal: "transparent",
+      processing: "rgba(42, 172, 167, 0.05)",
+      shadow: "rgba(42, 172, 167, 0.1)",
+      shadowHover: "rgba(42, 172, 167, 0.15)",
     },
   };
 
@@ -120,13 +124,13 @@ const getGradientStyle = (
 };
 
 const PremiumButton: React.FC<PremiumButtonProps> = ({
-  variant = 'primary',
-  iconType = 'none',
+  variant = "primary",
+  iconType = "none",
   isProcessing = false,
-  processingText = 'Processing...',
+  processingText = "Processing...",
   gradientHover = true,
   children,
-  className = '',
+  className = "",
   style = {},
   onMouseEnter,
   onMouseLeave,
@@ -134,22 +138,22 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
   ...props
 }) => {
   const gradientStyle = getGradientStyle(variant, isProcessing);
-  const icon = !isProcessing && iconType !== 'none' ? getIcon(iconType) : null;
+  const icon = !isProcessing && iconType !== "none" ? getIcon(iconType) : null;
 
-  const isGhost = variant === 'ghost';
-  const isOutline = variant === 'outline';
+  const isGhost = variant === "ghost";
+  const isOutline = variant === "outline";
 
   const buttonStyle = {
     ...gradientStyle,
-    borderColor: isOutline ? '#2AACA7' : 'transparent',
-    color: isGhost || isOutline ? '#2AACA7' : 'white',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    borderColor: isOutline ? "#2AACA7" : "transparent",
+    color: isGhost || isOutline ? "#2AACA7" : "white",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
     ...style,
   };
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
     if (!isProcessing && !disabled && gradientHover) {
-      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.transform = "translateY(-2px)";
       e.currentTarget.style.boxShadow = gradientStyle.shadowHover;
     }
     onMouseEnter?.(e);
@@ -157,60 +161,60 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
     if (!isProcessing && !disabled) {
-      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.transform = "translateY(0)";
       e.currentTarget.style.boxShadow = gradientStyle.boxShadow;
     }
     onMouseLeave?.(e);
   };
 
   const getButtonType = () => {
-    if (isGhost || isOutline) return 'default';
-    return 'primary';
+    if (isGhost || isOutline) return "default";
+    return "primary";
   };
 
   const getButtonClasses = () => {
     const baseClasses = [
-      'premium-button',
+      "premium-button",
       `premium-button-${variant}`,
-      'css-dev-only-do-not-override-mc1tut',
+      "css-dev-only-do-not-override-mc1tut",
     ];
 
     // Add Ant Design specific classes for different variants
-    if (variant === 'primary') {
+    if (variant === "primary") {
       baseClasses.push(
-        'ant-btn-primary',
-        'ant-btn-color-primary',
-        'ant-btn-variant-solid'
+        "ant-btn-primary",
+        "ant-btn-color-primary",
+        "ant-btn-variant-solid"
       );
-    } else if (variant === 'secondary') {
+    } else if (variant === "secondary") {
       baseClasses.push(
-        'ant-btn-default',
-        'ant-btn-color-default',
-        'ant-btn-variant-solid'
+        "ant-btn-default",
+        "ant-btn-color-default",
+        "ant-btn-variant-solid"
       );
-    } else if (variant === 'success') {
+    } else if (variant === "success") {
       baseClasses.push(
-        'ant-btn-primary',
-        'ant-btn-color-primary',
-        'ant-btn-variant-solid'
+        "ant-btn-primary",
+        "ant-btn-color-primary",
+        "ant-btn-variant-solid"
       );
-    } else if (variant === 'danger') {
+    } else if (variant === "danger") {
       baseClasses.push(
-        'ant-btn-dangerous',
-        'ant-btn-color-danger',
-        'ant-btn-variant-solid'
+        "ant-btn-dangerous",
+        "ant-btn-color-danger",
+        "ant-btn-variant-solid"
       );
-    } else if (variant === 'outline') {
+    } else if (variant === "outline") {
       baseClasses.push(
-        'ant-btn-default',
-        'ant-btn-color-default',
-        'ant-btn-variant-outlined'
+        "ant-btn-default",
+        "ant-btn-color-default",
+        "ant-btn-variant-outlined"
       );
-    } else if (variant === 'ghost') {
+    } else if (variant === "ghost") {
       baseClasses.push(
-        'ant-btn-text',
-        'ant-btn-color-default',
-        'ant-btn-variant-text'
+        "ant-btn-text",
+        "ant-btn-color-default",
+        "ant-btn-variant-text"
       );
     }
 
@@ -218,7 +222,7 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
       baseClasses.push(className);
     }
 
-    return baseClasses.join(' ');
+    return baseClasses.join(" ");
   };
 
   return (
