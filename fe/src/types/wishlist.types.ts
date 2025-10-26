@@ -3,9 +3,10 @@ export interface WishlistItem {
   productId: string;
   name: string;
   price: number;
+  compareAtPrice: number;
   thumbnail: string;
   slug: string;
-  dateAdded: string;
+  //dateAdded: string;
 }
 
 export interface WishlistState {

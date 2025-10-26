@@ -15,13 +15,14 @@ const initialState: WishlistState = {
 
 //Helper function to covert server wishlist item to local wishlist item
 const convertServerWishlist = (serverItem: any): WishlistItem => ({
-  id: serverItem.id,
-  productId: serverItem.productId,
+  id: serverItem.id, // This is the wishlist item ID from backend
+  productId: serverItem.id, // serverItem is the product object, so id is productId
   name: serverItem.name,
   price: serverItem.price,
+  compareAtPrice: serverItem.compareAtPrice,
   thumbnail: serverItem.thumbnail,
   slug: serverItem.slug,
-  dateAdded: serverItem.dateAdded,
+  //dateAdded: serverItem.//dateAdded,
 });
 
 const wishlistSlice = createSlice({
@@ -110,16 +111,17 @@ const wishlistSlice = createSlice({
           productId: item.productId,
           name: item.name,
           price: item.price,
+          compareAtPrice: item.compareAtPrice,
           thumbnail: item.thumbnail,
           slug: item.slug,
-          dateAdded: item.dateAdded,
+          //dateAdded: item.//dateAdded,
         })),
       };
 
       // cập nhật state vào danh sách hợp nhấtnhất
       state.items = mergedItems;
       //luư danh sách hợp nhất vào localStorage
-      localStorage.setItem("wishliistItems", JSON.stringify(state.items));
+      localStorage.setItem("wishlistItems", JSON.stringify(state.items));
     },
   },
 });
