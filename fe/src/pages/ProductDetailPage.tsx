@@ -982,7 +982,7 @@ const ProductDetailPage: React.FC = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-4 w-4"
                       fill="none"
-                      viewBox="0 0 24 24"
+                      viewBox="0 0 24 24" 
                       stroke="currentColor"
                     >
                       <path
@@ -995,8 +995,8 @@ const ProductDetailPage: React.FC = () => {
                   </button>
                   <div className="flex justify-between ml-10">
                     <PremiumButton
-                      className="flex items-center w-12 h-12"
-                      variant="outline"
+                      // variant="outline"
+                      variant="success"
                       isProcessing={isAddingtoWishList}
                       processingText="Đang thêm..."
                       onClick={handletoWishList}

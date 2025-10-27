@@ -177,6 +177,7 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
       "premium-button",
       `premium-button-${variant}`,
       "css-dev-only-do-not-override-mc1tut",
+      "premium-button-icon-fix",
     ];
 
     // Add Ant Design specific classes for different variants
@@ -230,7 +231,7 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
       type={getButtonType()}
       loading={isProcessing}
       disabled={disabled || isProcessing}
-      icon={icon}
+      // icon={icon}
       className={getButtonClasses()}
       style={buttonStyle}
       onMouseEnter={handleMouseEnter}
@@ -242,7 +243,14 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
           {processingText}
         </span>
       ) : (
-        <span className="flex items-center justify-center">{children}</span>
+        <span className="flex items-center justify-center gap-1">
+          {icon && (
+            <span className="flex items-center" style={{ fontSize: "20px" }}>
+              {icon}
+            </span>
+          )}
+          {children && <span>{children}</span>}
+        </span>
       )}
     </Button>
   );
