@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useCreateProductMutation } from '@/services/adminProductApi';
-import { useGetCategoriesQuery } from '@/services/categoryApi';
+import React, { useState } from "react";
+import { useCreateProductMutation } from "@/services/adminProductApi";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
 
 // Kiểm tra xem một chuỗi có phải là URL hình ảnh hay không
 const isImageUrl = (url: string): boolean => {
@@ -22,14 +22,14 @@ import {
   message,
   Divider,
   Typography,
-} from 'antd';
+} from "antd";
 import {
   PlusOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
   BulbOutlined,
-} from '@ant-design/icons';
-import { generateSearchKeywords } from '@/utils/textUtils';
+} from "@ant-design/icons";
+import { generateSearchKeywords } from "@/utils/textUtils";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -40,9 +40,9 @@ interface CreateProductWizardContentProps {
 }
 
 const statusOptions = [
-  { value: 'active', label: 'Đang bán' },
-  { value: 'inactive', label: 'Tạm dừng' },
-  { value: 'draft', label: 'Bản nháp' },
+  { value: "active", label: "Đang bán" },
+  { value: "inactive", label: "Tạm dừng" },
+  { value: "draft", label: "Bản nháp" },
 ];
 
 interface Attribute {
@@ -72,28 +72,28 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
   // State để lưu trữ dữ liệu form giữa các bước
   const [formState, setFormState] = useState<Record<string, any>>({
-    name: '',
-    sku: '',
-    shortDescription: '',
-    description: '',
+    name: "",
+    sku: "",
+    shortDescription: "",
+    description: "",
     price: 0,
     comparePrice: undefined,
     stock: 0,
     categoryIds: [],
-    status: 'active',
+    status: "active",
     featured: false,
-    images: '',
-    thumbnail: '',
-    searchKeywords: '',
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
+    images: "",
+    thumbnail: "",
+    searchKeywords: "",
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
   });
 
   // Effect để cập nhật form khi chuyển bước
   React.useEffect(() => {
-    console.log('Current step changed to:', currentStep);
-    console.log('Current formState:', formState);
+    console.log("Current step changed to:", currentStep);
+    console.log("Current formState:", formState);
 
     // Cập nhật form với dữ liệu đã lưu trong formState
     form.setFieldsValue(formState);
@@ -111,28 +111,28 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
   const steps = [
     {
-      title: 'Thông tin cơ bản',
-      description: 'Nhập thông tin cơ bản về sản phẩm',
+      title: "Thông tin cơ bản",
+      description: "Nhập thông tin cơ bản về sản phẩm",
     },
     {
-      title: 'Giá & Kho hàng',
-      description: 'Thiết lập giá bán và số lượng tồn kho',
+      title: "Giá & Kho hàng",
+      description: "Thiết lập giá bán và số lượng tồn kho",
     },
     {
-      title: 'Phân loại',
-      description: 'Chọn danh mục và trạng thái sản phẩm',
+      title: "Phân loại",
+      description: "Chọn danh mục và trạng thái sản phẩm",
     },
     {
-      title: 'Hình ảnh',
-      description: 'Thêm hình ảnh sản phẩm',
+      title: "Hình ảnh",
+      description: "Thêm hình ảnh sản phẩm",
     },
     {
-      title: 'Thuộc tính & Biến thể',
-      description: 'Thêm thuộc tính và biến thể sản phẩm (tùy chọn)',
+      title: "Thuộc tính & Biến thể",
+      description: "Thêm thuộc tính và biến thể sản phẩm (tùy chọn)",
     },
     {
-      title: 'SEO & Hoàn tất',
-      description: 'Tối ưu SEO và hoàn tất tạo sản phẩm',
+      title: "SEO & Hoàn tất",
+      description: "Tối ưu SEO và hoàn tất tạo sản phẩm",
     },
   ];
 
@@ -142,7 +142,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     const currentValues = form.getFieldsValue();
 
     if (name && !currentValues.seoTitle) {
-      form.setFieldValue('seoTitle', name);
+      form.setFieldValue("seoTitle", name);
     }
   };
 
@@ -153,10 +153,10 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     const currentValues = form.getFieldsValue();
 
     if (description && !currentValues.seoDescription) {
-      form.setFieldValue('seoDescription', description.substring(0, 160));
+      form.setFieldValue("seoDescription", description.substring(0, 160));
     }
     if (description && !currentValues.shortDescription) {
-      form.setFieldValue('shortDescription', description.substring(0, 200));
+      form.setFieldValue("shortDescription", description.substring(0, 200));
     }
   };
 
@@ -164,7 +164,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
   const addAttribute = () => {
     setAttributes([
       ...attributes,
-      { id: Date.now().toString(), name: '', value: '' },
+      { id: Date.now().toString(), name: "", value: "" },
     ]);
   };
 
@@ -184,7 +184,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
   const addVariant = () => {
     setVariants([
       ...variants,
-      { id: Date.now().toString(), name: '', price: 0, stock: 0 },
+      { id: Date.now().toString(), name: "", price: 0, stock: 0 },
     ]);
   };
 
@@ -204,7 +204,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     try {
       // Lưu giá trị hiện tại của form trước khi chuyển bước
       const currentFormValues = form.getFieldsValue();
-      console.log('Current form values before validation:', currentFormValues);
+      console.log("Current form values before validation:", currentFormValues);
 
       // Cập nhật formState với dữ liệu hiện tại
       setFormState((prevState) => ({
@@ -224,35 +224,35 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           if (currentStep === 0) {
             // Thông tin cơ bản
             if (!currentValues.name || !currentValues.name.trim()) {
-              message.error('Tên sản phẩm không được để trống');
+              message.error("Tên sản phẩm không được để trống");
               return;
             }
             if (!currentValues.sku || !currentValues.sku.trim()) {
-              message.error('Mã SKU không được để trống');
+              message.error("Mã SKU không được để trống");
               return;
             }
             if (
               !currentValues.shortDescription ||
               !currentValues.shortDescription.trim()
             ) {
-              message.error('Mô tả ngắn không được để trống');
+              message.error("Mô tả ngắn không được để trống");
               return;
             }
             if (
               !currentValues.description ||
               !currentValues.description.trim()
             ) {
-              message.error('Mô tả chi tiết không được để trống');
+              message.error("Mô tả chi tiết không được để trống");
               return;
             }
           } else if (currentStep === 1) {
             // Giá & Kho hàng
             if (!currentValues.price || currentValues.price <= 0) {
-              message.error('Giá sản phẩm phải lớn hơn 0');
+              message.error("Giá sản phẩm phải lớn hơn 0");
               return;
             }
             if (currentValues.stock === undefined || currentValues.stock < 0) {
-              message.error('Số lượng tồn kho không hợp lệ');
+              message.error("Số lượng tồn kho không hợp lệ");
               return;
             }
           } else if (currentStep === 2) {
@@ -261,7 +261,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
               !currentValues.categoryIds ||
               currentValues.categoryIds.length === 0
             ) {
-              message.error('Vui lòng chọn ít nhất một danh mục');
+              message.error("Vui lòng chọn ít nhất một danh mục");
               return;
             }
           }
@@ -271,14 +271,14 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
           // Lưu lại giá trị của form hiện tại
           const currentFormData = form.getFieldsValue();
-          console.log('Form data after validation:', currentFormData);
+          console.log("Form data after validation:", currentFormData);
 
           // Cập nhật formState với dữ liệu mới
           setFormState((prevState) => ({
             ...prevState,
             ...currentFormData,
           }));
-          console.log('Updated form state:', {
+          console.log("Updated form state:", {
             ...formState,
             ...currentFormData,
           });
@@ -286,9 +286,9 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           // Nếu validation thành công, chuyển sang bước tiếp theo
           setCurrentStep(currentStep + 1);
         } catch (validationError) {
-          console.log('Field validation failed:', validationError);
+          console.log("Field validation failed:", validationError);
           message.error(
-            'Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục'
+            "Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục"
           );
           return;
         }
@@ -304,9 +304,9 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         setCurrentStep(currentStep + 1);
       }
     } catch (error) {
-      console.log('Validation failed:', error);
+      console.log("Validation failed:", error);
       message.error(
-        'Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục'
+        "Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục"
       );
     }
   };
@@ -314,11 +314,11 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
   const getFieldsForStep = (step: number): string[] => {
     switch (step) {
       case 0: // Basic Info
-        return ['name', 'sku', 'shortDescription', 'description'];
+        return ["name", "sku", "shortDescription", "description"];
       case 1: // Pricing
-        return ['price', 'stock'];
+        return ["price", "stock"];
       case 2: // Categories
-        return ['categoryIds'];
+        return ["categoryIds"];
       case 3: // Images
         return []; // No required fields
       case 4: // Attributes & Variants
@@ -333,7 +333,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
   const handlePrev = () => {
     // Lưu giá trị hiện tại của form trước khi quay lại bước trước
     const currentFormValues = form.getFieldsValue();
-    console.log('Current form values before going back:', currentFormValues);
+    console.log("Current form values before going back:", currentFormValues);
 
     // Cập nhật formState với dữ liệu hiện tại
     setFormState((prevState) => ({
@@ -350,14 +350,14 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     const allValues = { ...formState, ...currentValues };
 
     const keywords = generateSearchKeywords(
-      allValues.name || '',
-      allValues.description || '',
-      allValues.shortDescription || '',
+      allValues.name || "",
+      allValues.description || "",
+      allValues.shortDescription || "",
       15
     );
 
-    const keywordsString = keywords.join(', ');
-    form.setFieldValue('searchKeywords', keywordsString);
+    const keywordsString = keywords.join(", ");
+    form.setFieldValue("searchKeywords", keywordsString);
 
     message.success(`Đã tạo ${keywords.length} từ khóa tự động!`);
   };
@@ -377,9 +377,9 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Sử dụng formState đã được cập nhật
-      console.log('Form values before validation:', formState);
-      console.log('Current form values:', currentFormValues);
-      console.log('Combined form values:', {
+      console.log("Form values before validation:", formState);
+      console.log("Current form values:", currentFormValues);
+      console.log("Combined form values:", {
         ...formState,
         ...currentFormValues,
       });
@@ -392,13 +392,13 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
       // Kiểm tra các trường bắt buộc
       if (!combinedValues.name || !combinedValues.name.trim()) {
-        message.error('Tên sản phẩm không được để trống');
+        message.error("Tên sản phẩm không được để trống");
         setCurrentStep(0);
         return;
       }
 
       if (!combinedValues.sku || !combinedValues.sku.trim()) {
-        message.error('Mã SKU không được để trống');
+        message.error("Mã SKU không được để trống");
         setCurrentStep(0);
         return;
       }
@@ -407,25 +407,25 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         !combinedValues.shortDescription ||
         !combinedValues.shortDescription.trim()
       ) {
-        message.error('Mô tả ngắn không được để trống');
+        message.error("Mô tả ngắn không được để trống");
         setCurrentStep(0);
         return;
       }
 
       if (!combinedValues.description || !combinedValues.description.trim()) {
-        message.error('Mô tả chi tiết không được để trống');
+        message.error("Mô tả chi tiết không được để trống");
         setCurrentStep(0);
         return;
       }
 
       if (!combinedValues.price || combinedValues.price <= 0) {
-        message.error('Giá sản phẩm phải lớn hơn 0');
+        message.error("Giá sản phẩm phải lớn hơn 0");
         setCurrentStep(1);
         return;
       }
 
       if (combinedValues.stock === undefined || combinedValues.stock < 0) {
-        message.error('Số lượng tồn kho không hợp lệ');
+        message.error("Số lượng tồn kho không hợp lệ");
         setCurrentStep(1);
         return;
       }
@@ -434,7 +434,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         !combinedValues.categoryIds ||
         combinedValues.categoryIds.length === 0
       ) {
-        message.error('Vui lòng chọn ít nhất một danh mục');
+        message.error("Vui lòng chọn ít nhất một danh mục");
         setCurrentStep(2);
         return;
       }
@@ -442,30 +442,30 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       // Lấy tất cả giá trị form sau khi validate
       const allValues = combinedValues;
 
-      console.log('All validations passed!');
+      console.log("All validations passed!");
 
       // Chuẩn bị dữ liệu sản phẩm để gửi đi
-      console.log('Preparing product data with name:', allValues.name);
-      console.log('All values to be used:', allValues);
+      console.log("Preparing product data with name:", allValues.name);
+      console.log("All values to be used:", allValues);
 
       // Đảm bảo name là string trước khi gọi trim()
       const productName =
-        typeof allValues.name === 'string'
+        typeof allValues.name === "string"
           ? allValues.name.trim()
           : String(allValues.name);
-      console.log('Product name after processing:', productName);
+      console.log("Product name after processing:", productName);
 
       // Trước khi tạo productData, log ra giá trị của images và thumbnail
-      console.log('Raw images value:', allValues.images);
-      console.log('Raw thumbnail value:', allValues.thumbnail);
+      console.log("Raw images value:", allValues.images);
+      console.log("Raw thumbnail value:", allValues.thumbnail);
 
       // Xử lý images
       let processedImages = [];
-      if (allValues.images && typeof allValues.images === 'string') {
-        if (allValues.images.includes(',')) {
+      if (allValues.images && typeof allValues.images === "string") {
+        if (allValues.images.includes(",")) {
           // Nhiều URL
           processedImages = allValues.images
-            .split(',')
+            .split(",")
             .map((img: string) => img.trim())
             .filter((img: string) => img);
         } else {
@@ -478,53 +478,53 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       }
 
       // Xử lý thumbnail
-      let processedThumbnail = '';
-      if (allValues.thumbnail && typeof allValues.thumbnail === 'string') {
+      let processedThumbnail = "";
+      if (allValues.thumbnail && typeof allValues.thumbnail === "string") {
         processedThumbnail = allValues.thumbnail.trim();
       } else if (processedImages.length > 0) {
         processedThumbnail = processedImages[0];
       }
 
-      console.log('Processed images:', processedImages);
-      console.log('Processed thumbnail:', processedThumbnail);
+      console.log("Processed images:", processedImages);
+      console.log("Processed thumbnail:", processedThumbnail);
 
       const productData = {
         name: productName,
         description:
-          typeof allValues.description === 'string'
+          typeof allValues.description === "string"
             ? allValues.description.trim()
             : String(allValues.description),
         shortDescription:
-          (typeof allValues.shortDescription === 'string'
+          (typeof allValues.shortDescription === "string"
             ? allValues.shortDescription.trim()
             : String(allValues.shortDescription)) ||
-          (typeof allValues.description === 'string'
+          (typeof allValues.description === "string"
             ? allValues.description.substring(0, 200)
-            : ''),
+            : ""),
         price: Number(allValues.price),
         comparePrice: allValues.comparePrice
           ? Number(allValues.comparePrice)
           : undefined,
         stock: Number(allValues.stock),
         sku:
-          typeof allValues.sku === 'string'
+          typeof allValues.sku === "string"
             ? allValues.sku.trim()
             : String(allValues.sku),
-        status: allValues.status || 'active',
+        status: allValues.status || "active",
         categoryIds: allValues.categoryIds || [],
         images: processedImages,
         thumbnail: processedThumbnail,
         featured: Boolean(allValues.featured),
         searchKeywords:
           allValues.searchKeywords &&
-          typeof allValues.searchKeywords === 'string'
+          typeof allValues.searchKeywords === "string"
             ? allValues.searchKeywords
-                .split(',')
+                .split(",")
                 .map((kw: string) => kw.trim())
                 .filter((kw) => kw)
             : [],
         seoTitle:
-          allValues.seoTitle || (allValues.name ? allValues.name.trim() : ''),
+          allValues.seoTitle || (allValues.name ? allValues.name.trim() : ""),
         seoDescription: (() => {
           // Nếu seoDescription không phải là URL hình ảnh, sử dụng nó
           if (
@@ -543,12 +543,12 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             return allValues.description.substring(0, 160);
           }
 
-          return '';
+          return "";
         })(),
         seoKeywords:
-          allValues.seoKeywords && typeof allValues.seoKeywords === 'string'
+          allValues.seoKeywords && typeof allValues.seoKeywords === "string"
             ? allValues.seoKeywords
-                .split(',')
+                .split(",")
                 .map((kw: string) => kw.trim())
                 .filter((kw) => kw)
             : [],
@@ -567,9 +567,9 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           })),
       };
 
-      console.log('Product data to be sent:', productData); // Debug log
+      console.log("Product data to be sent:", productData); // Debug log
       await createProduct(productData).unwrap();
-      message.success('Tạo sản phẩm thành công!');
+      message.success("Tạo sản phẩm thành công!");
 
       // Reset form
       form.resetFields();
@@ -579,32 +579,32 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
       onSuccess?.();
     } catch (error: any) {
-      console.error('Failed to create product:', error);
+      console.error("Failed to create product:", error);
 
       // Log chi tiết lỗi để debug
       if (error.errorFields) {
-        console.log('Validation error fields:', error.errorFields);
+        console.log("Validation error fields:", error.errorFields);
         // Hiển thị lỗi cụ thể từ trường đầu tiên bị lỗi
         if (error.errorFields.length > 0) {
           const firstError = error.errorFields[0];
           message.error(
-            `Lỗi ở trường ${firstError.name.join('.')}: ${firstError.errors.join(', ')}`
+            `Lỗi ở trường ${firstError.name.join(".")}: ${firstError.errors.join(", ")}`
           );
 
           // Chuyển về bước tương ứng với trường lỗi
           if (
-            firstError.name.includes('name') ||
-            firstError.name.includes('sku') ||
-            firstError.name.includes('description') ||
-            firstError.name.includes('shortDescription')
+            firstError.name.includes("name") ||
+            firstError.name.includes("sku") ||
+            firstError.name.includes("description") ||
+            firstError.name.includes("shortDescription")
           ) {
             setCurrentStep(0);
           } else if (
-            firstError.name.includes('price') ||
-            firstError.name.includes('stock')
+            firstError.name.includes("price") ||
+            firstError.name.includes("stock")
           ) {
             setCurrentStep(1);
-          } else if (firstError.name.includes('categoryIds')) {
+          } else if (firstError.name.includes("categoryIds")) {
             setCurrentStep(2);
           }
           return;
@@ -612,7 +612,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       }
 
       // Nếu không phải lỗi validation, hiển thị thông báo chung
-      message.error('Tạo sản phẩm thất bại. Vui lòng thử lại.');
+      message.error("Tạo sản phẩm thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -623,17 +623,17 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           <div>
             <Card
               size="small"
-              style={{ marginBottom: 16, backgroundColor: '#f0f9ff' }}
+              style={{ marginBottom: 16, backgroundColor: "#f0f9ff" }}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div style={{ display: "flex", alignItems: "flex-start" }}>
                 <InfoCircleOutlined
-                  style={{ color: '#3b82f6', marginRight: 8, marginTop: 4 }}
+                  style={{ color: "#3b82f6", marginRight: 8, marginTop: 4 }}
                 />
                 <div>
-                  <Text strong style={{ color: '#1e40af' }}>
+                  <Text strong style={{ color: "#1e40af" }}>
                     Mẹo nhỏ
                   </Text>
-                  <div style={{ color: '#3730a3', fontSize: '14px' }}>
+                  <div style={{ color: "#3730a3", fontSize: "14px" }}>
                     Hãy đặt tên sản phẩm ngắn gọn, dễ nhớ và chứa từ khóa quan
                     trọng. Mô tả ngắn nên nêu bật lợi ích chính của sản phẩm.
                   </div>
@@ -647,7 +647,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                   name="name"
                   label="Tên sản phẩm"
                   rules={[
-                    { required: true, message: 'Vui lòng nhập tên sản phẩm' },
+                    { required: true, message: "Vui lòng nhập tên sản phẩm" },
                   ]}
                 >
                   <Input
@@ -660,7 +660,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                 <Form.Item
                   name="sku"
                   label="Mã SKU"
-                  rules={[{ required: true, message: 'Vui lòng nhập mã SKU' }]}
+                  rules={[{ required: true, message: "Vui lòng nhập mã SKU" }]}
                 >
                   <Input placeholder="Nhập mã SKU" />
                 </Form.Item>
@@ -679,7 +679,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                   name="shortDescription"
                   label="Mô tả ngắn"
                   rules={[
-                    { required: true, message: 'Vui lòng nhập mô tả ngắn' },
+                    { required: true, message: "Vui lòng nhập mô tả ngắn" },
                   ]}
                 >
                   <TextArea
@@ -693,7 +693,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                   name="description"
                   label="Mô tả chi tiết"
                   rules={[
-                    { required: true, message: 'Vui lòng nhập mô tả chi tiết' },
+                    { required: true, message: "Vui lòng nhập mô tả chi tiết" },
                   ]}
                 >
                   <TextArea
@@ -715,17 +715,17 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                 name="price"
                 label="Giá bán"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập giá bán' },
-                  { type: 'number', min: 0, message: 'Giá phải lớn hơn 0' },
+                  { required: true, message: "Vui lòng nhập giá bán" },
+                  { type: "number", min: 0, message: "Giá phải lớn hơn 0" },
                 ]}
               >
                 <InputNumber
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   placeholder="0"
                   formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
                   addonAfter="VND"
                 />
               </Form.Item>
@@ -733,12 +733,12 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             <Col span={12}>
               <Form.Item name="comparePrice" label="Giá so sánh">
                 <InputNumber
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   placeholder="0"
                   formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
                   addonAfter="VND"
                 />
               </Form.Item>
@@ -748,12 +748,12 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                 name="stock"
                 label="Số lượng tồn kho"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập số lượng tồn kho' },
-                  { type: 'number', min: 0, message: 'Số lượng không được âm' },
+                  { required: true, message: "Vui lòng nhập số lượng tồn kho" },
+                  { type: "number", min: 0, message: "Số lượng không được âm" },
                 ]}
               >
                 <InputNumber
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   placeholder="0"
                   min={0}
                 />
@@ -772,7 +772,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                 rules={[
                   {
                     required: true,
-                    message: 'Vui lòng chọn ít nhất một danh mục',
+                    message: "Vui lòng chọn ít nhất một danh mục",
                   },
                 ]}
               >
@@ -823,7 +823,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             <Title level={5}>Thuộc tính sản phẩm</Title>
             <Space
               direction="vertical"
-              style={{ width: '100%', marginBottom: 24 }}
+              style={{ width: "100%", marginBottom: 24 }}
             >
               {attributes.map((attr) => (
                 <Row key={attr.id} gutter={8} align="middle">
@@ -832,7 +832,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                       placeholder="Tên thuộc tính"
                       value={attr.name}
                       onChange={(e) =>
-                        updateAttribute(attr.id, 'name', e.target.value)
+                        updateAttribute(attr.id, "name", e.target.value)
                       }
                     />
                   </Col>
@@ -841,7 +841,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                       placeholder="Giá trị"
                       value={attr.value}
                       onChange={(e) =>
-                        updateAttribute(attr.id, 'value', e.target.value)
+                        updateAttribute(attr.id, "value", e.target.value)
                       }
                     />
                   </Col>
@@ -867,7 +867,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             <Divider />
 
             <Title level={5}>Biến thể sản phẩm</Title>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction="vertical" style={{ width: "100%" }}>
               {variants.map((variant) => (
                 <Row key={variant.id} gutter={8} align="middle">
                   <Col span={8}>
@@ -875,27 +875,27 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
                       placeholder="Tên biến thể"
                       value={variant.name}
                       onChange={(e) =>
-                        updateVariant(variant.id, 'name', e.target.value)
+                        updateVariant(variant.id, "name", e.target.value)
                       }
                     />
                   </Col>
                   <Col span={6}>
                     <InputNumber
-                      style={{ width: '100%' }}
+                      style={{ width: "100%" }}
                       placeholder="Giá"
                       value={variant.price}
                       onChange={(value) =>
-                        updateVariant(variant.id, 'price', value || 0)
+                        updateVariant(variant.id, "price", value || 0)
                       }
                     />
                   </Col>
                   <Col span={6}>
                     <InputNumber
-                      style={{ width: '100%' }}
+                      style={{ width: "100%" }}
                       placeholder="Kho"
                       value={variant.stock}
                       onChange={(value) =>
-                        updateVariant(variant.id, 'stock', value || 0)
+                        updateVariant(variant.id, "stock", value || 0)
                       }
                     />
                   </Col>
@@ -985,18 +985,18 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         layout="vertical"
         style={{ minHeight: 400 }}
         initialValues={{
-          status: 'active',
+          status: "active",
           featured: false,
-          searchKeywords: '',
-          seoKeywords: '',
-          images: '',
-          thumbnail: '',
+          searchKeywords: "",
+          seoKeywords: "",
+          images: "",
+          thumbnail: "",
           stock: 0,
           price: 0,
         }}
         onValuesChange={(changedValues, allValues) => {
-          console.log('Form values changed:', changedValues);
-          console.log('All form values:', allValues);
+          console.log("Form values changed:", changedValues);
+          console.log("All form values:", allValues);
 
           // Cập nhật formState khi giá trị form thay đổi
           setFormState((prevState) => ({
@@ -1009,7 +1009,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         {renderStepContent()}
       </Form>
 
-      <div style={{ marginTop: 24, textAlign: 'right' }}>
+      <div style={{ marginTop: 24, textAlign: "right" }}>
         <Space>
           {currentStep > 0 && <Button onClick={handlePrev}>Quay lại</Button>}
           {currentStep < steps.length - 1 && (
