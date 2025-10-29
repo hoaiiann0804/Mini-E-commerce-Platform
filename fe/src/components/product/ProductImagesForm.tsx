@@ -1,22 +1,28 @@
-import React from 'react';
-import { Form, Input, Row, Col, Alert } from 'antd';
+import React from "react";
+import { Form, Input, Row, Col, Alert } from "antd";
+import type { FormInstance } from "antd/es/form";
+import ImageUploader from "../upload/ImageUploader";
+type Props = { form?: FormInstance };
 
-const { TextArea } = Input;
-
-const ProductImagesForm: React.FC = () => {
+const ProductImagesForm: React.FC<Props> = ({ form }) => {
   return (
     <Row gutter={[24, 16]}>
       <Col span={24}>
-        <Form.Item name="images" label="Hình ảnh sản phẩm">
-          <TextArea
-            rows={6}
-            placeholder={`Nhập URL hình ảnh, mỗi URL trên một dòng. Ví dụ:
-https://example.com/image1.jpg
-https://example.com/image2.jpg
-http://localhost:8888/uploads/images/product/2025/07/sample.jpeg`}
-            showCount
-            maxLength={3000}
+        <Form.Item label="Tải ảnh" tooltip="Tối đa 10 ảnh, 10MB mỗi ảnh">
+          <ImageUploader
+            productId={form?.getFieldValue("id")}
+            onUrlsChange={(urls) => {
+              if (!form) return;
+              const current: string = form.getFieldValue("images") || "";
+              const merged = Array.from(
+                new Set([...(current ? current.split("\n") : []), ...urls])
+              );
+              form.setFieldsValue({ images: merged.join("\n") });
+            }}
           />
+        </Form.Item>
+        <Form.Item name="images" label="Hoặc dán URL (mỗi dòng một URL)">
+          <Input.TextArea rows={6} />
         </Form.Item>
       </Col>
 

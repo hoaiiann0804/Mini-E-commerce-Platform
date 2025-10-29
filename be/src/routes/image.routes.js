@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const imageController = require('../controllers/imageController');
-const { authenticate } = require('../middlewares/authenticate');
-const { adminAuthenticate } = require('../middlewares/adminAuth');
+const imageController = require("../controllers/imageController");
+const { authenticate } = require("../middlewares/authenticate");
+const { adminAuthenticate } = require("../middlewares/adminAuth");
 
 /**
  * @swagger
@@ -165,12 +165,12 @@ const { adminAuthenticate } = require('../middlewares/adminAuth');
  *                       type: string
  *                       example: "1.0.0"
  */
-router.get('/health', imageController.healthCheck);
+router.get("/health", imageController.healthCheck);
 
-router.post('/upload', authenticate, imageController.uploadSingle);
+router.post("/upload", authenticate, imageController.uploadSingle);
 
 // Test endpoint without auth (for development only)
-router.post('/test-upload', imageController.uploadSingle);
+router.post("/test-upload", imageController.uploadSingle);
 
 /**
  * @swagger
@@ -254,7 +254,7 @@ router.post('/test-upload', imageController.uploadSingle);
  *       401:
  *         description: Not authenticated
  */
-router.post('/upload-multiple', authenticate, imageController.uploadMultiple);
+router.post("/upload-multiple", authenticate, imageController.uploadMultiple);
 
 /**
  * @swagger
@@ -286,7 +286,7 @@ router.post('/upload-multiple', authenticate, imageController.uploadMultiple);
  *       404:
  *         description: Image not found
  */
-router.get('/:id', imageController.getImageById);
+router.get("/:id", imageController.getImageById);
 
 /**
  * @swagger
@@ -325,7 +325,7 @@ router.get('/:id', imageController.getImageById);
  *       404:
  *         description: Product not found
  */
-router.get('/product/:productId', imageController.getImagesByProductId);
+router.get("/product/:productId", imageController.getImagesByProductId);
 
 /**
  * @swagger
@@ -362,7 +362,7 @@ router.get('/product/:productId', imageController.getImagesByProductId);
  *       401:
  *         description: Not authenticated
  */
-router.delete('/:id', authenticate, imageController.deleteImage);
+router.delete("/:id", authenticate, imageController.deleteImage);
 
 /**
  * @swagger
@@ -415,7 +415,7 @@ router.delete('/:id', authenticate, imageController.deleteImage);
  *       401:
  *         description: Not authenticated
  */
-router.post('/convert/base64', authenticate, imageController.convertBase64);
+router.post("/convert/base64", authenticate, imageController.convertBase64);
 
 /**
  * @swagger
@@ -456,7 +456,7 @@ router.post('/convert/base64', authenticate, imageController.convertBase64);
  *         description: Not authorized (Admin only)
  */
 router.post(
-  '/admin/cleanup',
+  "/admin/cleanup",
   authenticate,
   adminAuthenticate,
   imageController.cleanupOrphanedFiles

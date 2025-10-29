@@ -88,6 +88,8 @@ export const imageApi = api.injectEndpoints({
           url: '/images/upload',
           method: 'POST',
           body: formData,
+          // Flag as FormData so global prepareHeaders won't set Content-Type
+          headers: { 'X-Is-FormData': 'true' },
         };
       },
       invalidatesTags: ['Images'],
@@ -118,6 +120,7 @@ export const imageApi = api.injectEndpoints({
           url: '/images/upload-multiple',
           method: 'POST',
           body: formData,
+          headers: { 'X-Is-FormData': 'true' },
         };
       },
       invalidatesTags: ['Images'],
