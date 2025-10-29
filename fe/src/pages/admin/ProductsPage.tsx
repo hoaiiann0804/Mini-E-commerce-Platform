@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useGetAdminProductsQuery,
   useDeleteProductMutation,
-} from '@/services/adminProductApi';
-import { useGetAllCategoriesQuery } from '@/services/categoryApi';
-import { calculatePriceRange } from '@/utils/priceUtils';
+} from "@/services/adminProductApi";
+import { useGetAllCategoriesQuery } from "@/services/categoryApi";
+import { calculatePriceRange } from "@/utils/priceUtils";
 import {
   Table,
   Button,
@@ -24,35 +24,35 @@ import {
   message,
   Spin,
   Alert,
-} from 'antd';
+} from "antd";
 import {
   PlusOutlined,
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
 const { Title } = Typography;
 
 // Status options
 const statusOptions = [
-  { value: 'all', label: 'Tất cả trạng thái' },
-  { value: 'active', label: 'Hoạt động' },
-  { value: 'inactive', label: 'Không hoạt động' },
-  { value: 'draft', label: 'Bản nháp' },
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "active", label: "Hoạt động" },
+  { value: "inactive", label: "Không hoạt động" },
+  { value: "draft", label: "Bản nháp" },
 ];
 
 const ProductsPage: React.FC = () => {
   const navigate = useNavigate();
 
   // State for filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
 
   // State for modals
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -72,8 +72,8 @@ const ProductsPage: React.FC = () => {
     page: currentPage,
     limit: 10,
     search: searchTerm || undefined,
-    category: categoryFilter !== 'all' ? categoryFilter : undefined,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
+    category: categoryFilter !== "all" ? categoryFilter : undefined,
+    status: statusFilter !== "all" ? statusFilter : undefined,
     sortBy,
     sortOrder,
   });
@@ -89,7 +89,7 @@ const ProductsPage: React.FC = () => {
 
   // Tạo options cho dropdown danh mục
   const categoryOptions = [
-    { value: 'all', label: 'Tất cả danh mục' },
+    { value: "all", label: "Tất cả danh mục" },
     ...(Array.isArray(apiCategories)
       ? apiCategories.map((cat: any) => ({
           value: cat.id,
@@ -101,18 +101,18 @@ const ProductsPage: React.FC = () => {
   // Log dữ liệu sản phẩm để debug
   useEffect(() => {
     if (products.length > 0) {
-      console.log('Products data:', products);
+      console.log("Products data:", products);
       // Kiểm tra xem sản phẩm có biến thể không
       const hasVariants = products.some(
         (product) => product.variants && product.variants.length > 0
       );
-      console.log('Products have variants:', hasVariants);
+      console.log("Products have variants:", hasVariants);
       if (hasVariants) {
         // Log sản phẩm đầu tiên có biến thể
         const productWithVariants = products.find(
           (product) => product.variants && product.variants.length > 0
         );
-        console.log('Example product with variants:', productWithVariants);
+        console.log("Example product with variants:", productWithVariants);
       }
     }
   }, [products]);
@@ -120,7 +120,7 @@ const ProductsPage: React.FC = () => {
   // Log dữ liệu danh mục để debug
   useEffect(() => {
     if (apiCategories.length > 0) {
-      console.log('Categories data:', apiCategories);
+      console.log("Categories data:", apiCategories);
     }
   }, [apiCategories]);
 
@@ -128,11 +128,11 @@ const ProductsPage: React.FC = () => {
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId).unwrap();
-      message.success('Xóa sản phẩm thành công');
+      message.success("Xóa sản phẩm thành công");
       refetch();
     } catch (error) {
-      message.error('Xóa sản phẩm thất bại');
-      console.error('Failed to delete product:', error);
+      message.error("Xóa sản phẩm thất bại");
+      console.error("Failed to delete product:", error);
     }
   };
 
@@ -153,9 +153,9 @@ const ProductsPage: React.FC = () => {
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
@@ -179,39 +179,39 @@ const ProductsPage: React.FC = () => {
   // Get status tag color
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'green';
-      case 'inactive':
-        return 'orange';
-      case 'draft':
-        return 'red';
+      case "active":
+        return "green";
+      case "inactive":
+        return "orange";
+      case "draft":
+        return "red";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   // Table columns
   const columns = [
     {
-      title: 'Hình ảnh',
-      dataIndex: 'images',
-      key: 'images',
+      title: "Hình ảnh",
+      dataIndex: "images",
+      key: "images",
       width: 80,
       render: (images: string[]) => (
         <Image
           width={50}
           height={50}
-          src={images?.[0] || '/placeholder-image.jpg'}
+          src={images?.[0] || "/placeholder-image.jpg"}
           alt="Product"
-          style={{ objectFit: 'cover', borderRadius: 4 }}
+          style={{ objectFit: "cover", borderRadius: 4 }}
           fallback="/placeholder-image.jpg"
         />
       ),
     },
     {
-      title: 'Tên sản phẩm',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      key: "name",
       sorter: true,
       render: (text: string) => (
         <div style={{ maxWidth: 200 }}>
@@ -220,9 +220,9 @@ const ProductsPage: React.FC = () => {
       ),
     },
     {
-      title: 'Danh mục',
-      dataIndex: 'categories',
-      key: 'categories',
+      title: "Danh mục",
+      dataIndex: "categories",
+      key: "categories",
       render: (categories: any[]) => (
         <>
           {categories && categories.length > 0 ? (
@@ -238,36 +238,36 @@ const ProductsPage: React.FC = () => {
       ),
     },
     {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá",
+      dataIndex: "price",
+      key: "price",
       sorter: true,
       render: (price: number, record: any) => (
-        <span style={{ fontWeight: 500, color: '#52c41a' }}>
+        <span style={{ fontWeight: 500, color: "#52c41a" }}>
           {calculateDisplayPrice(record)}
         </span>
       ),
     },
     {
-      title: 'Kho',
-      dataIndex: 'stockQuantity',
-      key: 'stock',
+      title: "Kho",
+      dataIndex: "stockQuantity",
+      key: "stock",
       sorter: true,
       render: (stockQuantity: number, record: any) => {
         // Sử dụng stockQuantity từ API hoặc fallback về stock nếu có
         const stock =
           stockQuantity !== undefined ? stockQuantity : record.stock;
         return (
-          <span style={{ color: stock > 0 ? '#52c41a' : '#ff4d4f' }}>
+          <span style={{ color: stock > 0 ? "#52c41a" : "#ff4d4f" }}>
             {stock}
           </span>
         );
       },
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
           {statusOptions.find((s) => s.value === status)?.label || status}
@@ -275,8 +275,8 @@ const ProductsPage: React.FC = () => {
       ),
     },
     {
-      title: 'Hành động',
-      key: 'actions',
+      title: "Hành động",
+      key: "actions",
       width: 150,
       render: (_: any, record: any) => (
         <Space>
@@ -291,7 +291,7 @@ const ProductsPage: React.FC = () => {
             type="link"
             icon={<EditOutlined />}
             onClick={() => {
-              console.log('Edit button clicked, record.id:', record.id);
+              console.log("Edit button clicked, record.id:", record.id);
               navigate(`/admin/products/edit/${record.id}`);
             }}
             title="Chỉnh sửa"
@@ -326,7 +326,7 @@ const ProductsPage: React.FC = () => {
   ) => {
     if (sorter.field) {
       setSortBy(sorter.field);
-      setSortOrder(sorter.order === 'ascend' ? 'ASC' : 'DESC');
+      setSortOrder(sorter.order === "ascend" ? "ASC" : "DESC");
     }
   };
 
@@ -364,14 +364,14 @@ const ProductsPage: React.FC = () => {
             <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
               {pagination?.totalItems
                 ? `${pagination.totalItems} sản phẩm • ${pagination.totalPages} trang`
-                : 'Quản lý danh sách sản phẩm của bạn'}
+                : "Quản lý danh sách sản phẩm của bạn"}
             </p>
           </Col>
           <Col xs={24} sm={12} className="flex justify-start sm:justify-end">
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate('/admin/products/create')}
+              onClick={() => navigate("/admin/products/create")}
               size="large"
             >
               Thêm sản phẩm
@@ -389,12 +389,12 @@ const ProductsPage: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               allowClear
-              suffix={<SearchOutlined style={{ color: 'rgba(0,0,0,.45)' }} />}
+              suffix={<SearchOutlined style={{ color: "rgba(0,0,0,.45)" }} />}
             />
           </Col>
           <Col xs={12} md={7} lg={4}>
             <Select
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               placeholder="Danh mục"
               value={categoryFilter}
               onChange={setCategoryFilter}
@@ -404,7 +404,7 @@ const ProductsPage: React.FC = () => {
           </Col>
           <Col xs={12} md={7} lg={4}>
             <Select
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               placeholder="Trạng thái"
               value={statusFilter}
               onChange={setStatusFilter}
@@ -477,7 +477,7 @@ const ProductsPage: React.FC = () => {
               <Col span={8}>
                 <Image
                   width="100%"
-                  src={selectedProduct.images?.[0] || '/placeholder-image.jpg'}
+                  src={selectedProduct.images?.[0] || "/placeholder-image.jpg"}
                   alt={selectedProduct.name}
                   fallback="/placeholder-image.jpg"
                 />
@@ -486,13 +486,13 @@ const ProductsPage: React.FC = () => {
                 <Space
                   direction="vertical"
                   size="middle"
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 >
                   <div>
                     <strong>Tên sản phẩm:</strong> {selectedProduct.name}
                   </div>
                   <div>
-                    <strong>Danh mục:</strong>{' '}
+                    <strong>Danh mục:</strong>{" "}
                     {selectedProduct.categories &&
                     selectedProduct.categories.length > 0 ? (
                       selectedProduct.categories.map(
@@ -507,8 +507,8 @@ const ProductsPage: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <strong>Giá:</strong>{' '}
-                    <span style={{ fontWeight: 500, color: '#52c41a' }}>
+                    <strong>Giá:</strong>{" "}
+                    <span style={{ fontWeight: 500, color: "#52c41a" }}>
                       {
                         calculatePriceRange(
                           selectedProduct.price,
@@ -518,14 +518,14 @@ const ProductsPage: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <strong>Kho:</strong>{' '}
+                    <strong>Kho:</strong>{" "}
                     <span
                       style={{
                         color:
                           (selectedProduct.stockQuantity ||
                             selectedProduct.stock) > 0
-                            ? '#52c41a'
-                            : '#ff4d4f',
+                            ? "#52c41a"
+                            : "#ff4d4f",
                       }}
                     >
                       {selectedProduct.stockQuantity !== undefined
@@ -534,7 +534,7 @@ const ProductsPage: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <strong>Trạng thái:</strong>{' '}
+                    <strong>Trạng thái:</strong>{" "}
                     <Tag color={getStatusColor(selectedProduct.status)}>
                       {statusOptions.find(
                         (s) => s.value === selectedProduct.status

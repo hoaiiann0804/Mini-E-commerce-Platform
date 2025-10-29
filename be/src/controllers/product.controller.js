@@ -164,11 +164,17 @@ const getAllProducts = async (req, res, next) => {
         displayPrice = parseFloat(sortedVariants[0].price) || displayPrice;
       }
 
+      // Replace backslashes with forward slashes in images for URL compatibility
+      const processedImages = productJson.images
+        ? productJson.images.map((img) => img.replace(/\\/g, "/"))
+        : [];
+
       // Add ratings and remove reviews from response
       delete productJson.reviews;
 
       return {
         ...productJson,
+        images: processedImages,
         price: displayPrice,
         compareAtPrice,
         ratings,
@@ -227,6 +233,22 @@ const getProductById = async (req, res, next) => {
           where: { isActive: true },
           required: false,
         },
+        {
+          association: "productImages",
+          where: { isActive: true },
+          required: false,
+          attributes: [
+            "id",
+            "originalName",
+            "fileName",
+            "filePath",
+            "fileSize",
+            "mimeType",
+            "width",
+            "height",
+            "category",
+          ],
+        },
       ],
     });
 
@@ -234,7 +256,7 @@ const getProductById = async (req, res, next) => {
       throw new AppError("Không tìm thấy sản phẩm", 404);
     }
 
-    // Process product to add ratings calculation
+    // Process product to add ratings calculation and construct image URLs
     const productJson = product.toJSON();
 
     // Calculate average rating
@@ -254,10 +276,24 @@ const getProductById = async (req, res, next) => {
       ratings.count = productJson.reviews.length;
     }
 
-    // Add ratings to product data
+    // Construct image URLs for productImages
+    const productImagesWithUrls = productJson.productImages
+      ? productJson.productImages.map((image) => ({
+          ...image,
+          url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
+        }))
+      : [];
+
+    // Also fix images array in product data
+    const processedImages = productJson.images
+      ? productJson.images.map((img) => img.replace(/\\/g, "/"))
+      : [];
+
+    // Add ratings and processed images to product data
     const productWithRatings = {
       ...productJson,
       ratings,
+      productImages: productImagesWithUrls,
     };
 
     res.status(200).json({

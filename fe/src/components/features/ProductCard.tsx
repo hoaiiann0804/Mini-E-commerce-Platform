@@ -1,10 +1,10 @@
-import { addNotification } from '@/features/ui/uiSlice';
-import { Product } from '@/types/product.types';
-import { calculatePriceRange } from '@/utils/priceUtils';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { addNotification } from "@/features/ui/uiSlice";
+import { Product } from "@/types/product.types";
+import { calculatePriceRange } from "@/utils/priceUtils";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
 // Mở rộng interface Product để hỗ trợ discountPercentage từ API
 interface ProductCardProps extends Product {
@@ -131,16 +131,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </span>
               {compareAtPrice && compareAtPrice > priceInfo.basePrice && (
                 <span className="text-base text-neutral-400 dark:text-neutral-500 line-through font-medium">
-                  {compareAtPrice.toLocaleString('vi-VN')}đ
+                  {compareAtPrice.toLocaleString("vi-VN")}đ
                 </span>
               )}
             </div>
             {compareAtPrice && compareAtPrice > priceInfo.basePrice && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
-                  Tiết kiệm{' '}
+                  Tiết kiệm{" "}
                   {(compareAtPrice - priceInfo.basePrice).toLocaleString(
-                    'vi-VN'
+                    "vi-VN"
                   )}
                   đ
                 </span>
