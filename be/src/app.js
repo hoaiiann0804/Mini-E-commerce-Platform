@@ -62,7 +62,14 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Body parser, reading data from body into req.body
-app.use(express.json({ limit: "50mb" }));
+// Skip JSON parsing for multipart/form-data requests to avoid conflicts with multer
+//app.use(express.json({ limit: "50mb" }));
+app.use(
+  express.json({
+    limit: "50mb",
+    type: (req) => !req.headers["content-type"]?.startsWith("multipart/"),
+  })
+);
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Cookie parser
@@ -75,6 +82,7 @@ app.use(xss());
 app.use(compression());
 
 // Serve uploaded files statically
+//Kiểm tra xem folder /uploads có được public chưa:
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // API routes

@@ -66,7 +66,15 @@ const prepareHeaders = async (headers: Headers): Promise<Headers> => {
 
   // Add standard headers
   headers.set("Accept", API_CONFIG.HEADERS.ACCEPT);
-  headers.set("Content-Type", API_CONFIG.HEADERS.CONTENT_TYPE);
+
+  // If endpoint flagged this request as FormData, DO NOT set Content-Type.
+  // Let the browser set the proper multipart boundary.
+  const isFormDataRequest = headers.get("X-Is-FormData") === "true";
+  if (isFormDataRequest) {
+    headers.delete("X-Is-FormData");
+  } else if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", API_CONFIG.HEADERS.CONTENT_TYPE);
+  }
 
   return headers;
 };
