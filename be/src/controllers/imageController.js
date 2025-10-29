@@ -158,7 +158,7 @@ class ImageController {
         status: "success",
         data: {
           ...image.toJSON(),
-          url: `/uploads/${image.filePath}`,
+          url: `${process.env.BASE_URL || "http://localhost:8888"}/uploads/${image.filePath}`,
         },
       });
     } catch (error) {
@@ -174,7 +174,7 @@ class ImageController {
 
       const imagesWithUrls = images.map((image) => ({
         ...image.toJSON(),
-        url: `/uploads/${image.filePath.replace(/\\/g, '/')}`,
+        url: `${process.env.BASE_URL || "http://localhost:8888"}/uploads/${image.filePath.replace(/\\/g, "/")}`,
       }));
 
       res.status(200).json({

@@ -5,6 +5,9 @@ const { v4: uuidv4 } = require('uuid');
 const Image = require('../models/image');
 const { AppError } = require('../middlewares/errorHandler');
 
+// Base URL for generating full image URLs
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
+
 class ImageService {
   constructor() {
     this.uploadDir = path.join(__dirname, '../../uploads');
@@ -213,7 +216,7 @@ class ImageService {
         id: imageRecord.id,
         fileName: fileName,
         filePath: filePath,
-        url: `/uploads/${filePath}`,
+        url: `${BASE_URL}/uploads/${filePath}`,
         originalName: file.originalname,
         size: file.size,
         dimensions,
@@ -368,7 +371,7 @@ class ImageService {
         id: imageRecord.id,
         fileName: fileName,
         filePath: filePath,
-        url: `/uploads/${filePath}`,
+        url: `${BASE_URL}/uploads/${filePath}`,
         originalName: `converted_${fileName}`,
         size: buffer.length,
         dimensions,
