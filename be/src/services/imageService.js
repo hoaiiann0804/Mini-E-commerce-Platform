@@ -36,7 +36,8 @@ class ImageService {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
 
-    return path.join('images', category, year.toString(), month, fileName);
+    // Use forward slashes for URL compatibility
+    return path.join('images', category, year.toString(), month, fileName).replace(/\\/g, '/');
   }
 
   // Generate unique filename with UUID
