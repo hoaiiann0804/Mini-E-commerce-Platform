@@ -9,14 +9,14 @@ const initialState: WishlistState = {
   //Lấy danh sách sản phẩm yêu thích từ localStorage (bộ nhớ trình duyệt)
   // Nếu không có dữ liệu, trả về mảng rỗng []
 
-  items: JSON.parse(localStorage.getItem("wishlistItem") || "[]"),
+  items: JSON.parse(localStorage.getItem("wishlistItems") || "[]"),
   serverWishlist: null,
 };
 
 //Helper function to covert server wishlist item to local wishlist item
 const convertServerWishlist = (serverItem: any): WishlistItem => ({
   id: serverItem.id, // This is the wishlist item ID from backend
-  productId: serverItem.id, // serverItem is the product object, so id is productId
+  productId: serverItem.productId, // product ID
   name: serverItem.name,
   price: serverItem.price,
   compareAtPrice: serverItem.compareAtPrice,
@@ -50,13 +50,20 @@ const wishlistSlice = createSlice({
     },
     removeItemWishlist: (state, action: PayloadAction<WishlistItem>) => {
       state.items = state.items.filter(
-        (item) => item.productId !== action.payload.productId
+        (item) => item.id !== action.payload.id
       );
       localStorage.setItem("wishlistItems", JSON.stringify(state.items));
     },
     clearWishlist: (state) => {
       state.items = [];
-      localStorage.removeItem("wishlistItem");
+      state.serverWishlist = null;
+      localStorage.removeItem("wishlistItems");
+    },
+    // Async clear wishlist (for backend sync)
+    clearWishlistAsync: (state) => {
+      state.items = [];
+      state.serverWishlist = null;
+      localStorage.removeItem("wishlistItems");
     },
     //Làm mới danh sách từ localStorange
     initiaLizeWishlist: (state) => {
@@ -130,6 +137,7 @@ export const {
   addItemWishlist,
   removeItemWishlist,
   clearWishlist,
+  clearWishlistAsync,
   setServerWishList,
   mergeWithLocalWishlist,
   initiaLizeWishlist,
