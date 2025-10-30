@@ -384,64 +384,16 @@ const ProductDetailPage: React.FC = () => {
   const handletoWishList = async () => {
     if (!product) return;
 
-    if (isWishlisted) {
-      // dispatch(
-      //   addNotification({
-      //     message: `${product.name} đã có trong danh sách yêu thích `,
-      //     type: "info",
-      //     duration: 3000,
-      //   })
-      // );
-      // Remove from wishlist
-      if (isAuthenticated) {
-        try {
-          // For now, we'll just remove from local state since the API doesn't have a remove endpoint
-          // In a full implementation, you'd call a remove API endpoint
-          dispatch(removeItemWishlist({ productId: product.id } as any));
-          dispatch(
-            addNotification({
-              message: `${product.name} đã được xóa khỏi danh sách yêu thích`,
-              type: "success",
-              duration: 3000,
-            })
-          );
-        } catch (err: any) {
-          console.error("❌ API thất bại", err);
-          dispatch(removeItemWishlist({ productId: product.id } as any));
-        }
-      } else {
-        dispatch(removeItemWishlist({ productId: product.id } as any));
-        dispatch(
-          addNotification({
-            message: `${product.name} đã được xóa khỏi yêu thích`,
-            type: "success",
-            duration: 3000,
-          })
-        );
-      }
-      return;
-    }
-
-    // Add to wishlist
-    const newItem = {
-      id: uuidv4(),
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      compareAtPrice: product.compareAtPrice,
-      thumbnail: product.thumbnail,
-      slug: product.slug,
-      //dateAdded: new Date().toISOString(),
-    };
-
     if (isAuthenticated) {
+      // For authenticated users, always call the API since it acts as a toggle
       try {
         const response = await addtoWishList({
           productId: product.id,
         }).unwrap();
-        // console.log("✅ API success, server", serverWishlist);
+        console.log("✅ API success, server wishlist:", response);
+        // Update Redux store with server response
         dispatch(setServerWishList(response));
-        //Update Redux store with server response
+        // Show notification based on API response message
         dispatch(
           addNotification({
             type: response.message?.includes("đã có trong danh sách yêu thích")
@@ -454,6 +406,16 @@ const ProductDetailPage: React.FC = () => {
         );
       } catch (err: any) {
         console.error("❌ API thất bại", err);
+        // Fallback to local state management
+        const newItem = {
+          id: uuidv4(),
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          thumbnail: product.thumbnail,
+          slug: product.slug,
+        };
         dispatch(addItemWishlist(newItem));
         dispatch(
           addNotification({
@@ -464,14 +426,35 @@ const ProductDetailPage: React.FC = () => {
         );
       }
     } else {
-      dispatch(addItemWishlist(newItem));
-      dispatch(
-        addNotification({
-          message: `${product.name} đã được thêm vào yêu thích (offline)`,
-          type: "success",
-          duration: 3000,
-        })
-      );
+      // For unauthenticated users, use local state management
+      if (isWishlisted) {
+        dispatch(removeItemWishlist({ productId: product.id } as any));
+        dispatch(
+          addNotification({
+            message: `${product.name} đã được xóa khỏi yêu thích`,
+            type: "success",
+            duration: 3000,
+          })
+        );
+      } else {
+        const newItem = {
+          id: uuidv4(),
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          thumbnail: product.thumbnail,
+          slug: product.slug,
+        };
+        dispatch(addItemWishlist(newItem));
+        dispatch(
+          addNotification({
+            message: `${product.name} đã được thêm vào yêu thích (offline)`,
+            type: "success",
+            duration: 3000,
+          })
+        );
+      }
     }
   };
 
