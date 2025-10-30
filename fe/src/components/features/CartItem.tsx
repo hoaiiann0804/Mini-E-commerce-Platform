@@ -78,6 +78,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, isCheckout = false }) => {
     <div className="flex py-4 border-b border-neutral-200 dark:border-neutral-700 last:border-b-0">
       {/* Product image */}
       <div className="w-20 h-20 flex-shrink-0">
+        
         <Link to={`/products/${item.productId}`}>
           <img
             src={item.image}

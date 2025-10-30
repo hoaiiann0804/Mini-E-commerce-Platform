@@ -52,19 +52,23 @@ export const WishlsitApi = api.injectEndpoints({
         console.log("Raw API response:", response);
         return {
           id: null,
-          items: response.data,
+          items: response.data || [],
           message: response.message,
         };
       },
       invalidatesTags: ["Wishlist"],
     }),
 
-    removeWishlistItem: builder.mutation<BackendWishlist, void>({
+    removeWishlistItem: builder.mutation<BackendWishlist, string>({
       query: (id) => ({
         url: `wishlist/${id}`,
         method: "DELETE",
       }),
-      transformResponse: (response: WishListResponse) => response.data,
+      transformResponse: (response: WishListResponse) => ({
+        id: null,
+        items: response.data || [],
+        message: response.message,
+      }),
       invalidatesTags: ["Wishlist"],
     }),
     clearWishlist: builder.mutation<BackendWishlist, void>({
@@ -72,7 +76,11 @@ export const WishlsitApi = api.injectEndpoints({
         url: "/wishlist",
         method: "DELETE",
       }),
-      transformResponse: (response: WishListResponse) => response.data,
+      transformResponse: (response: WishListResponse) => ({
+        id: null,
+        items: response.data || [],
+        message: response.message,
+      }),
       invalidatesTags: ["Wishlist"],
     }),
   }),
