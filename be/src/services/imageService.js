@@ -1,27 +1,27 @@
-const sharp = require('sharp');
-const path = require('path');
-const fs = require('fs').promises;
-const { v4: uuidv4 } = require('uuid');
-const Image = require('../models/image');
-const { AppError } = require('../middlewares/errorHandler');
+const sharp = require("sharp");
+const path = require("path");
+const fs = require("fs").promises;
+const { v4: uuidv4 } = require("uuid");
+const Image = require("../models/image");
+const { AppError } = require("../middlewares/errorHandler");
 
 // Base URL for generating full image URLs
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8888';
+const BASE_URL = process.env.BASE_URL || "http://localhost:8888";
 
 class ImageService {
   constructor() {
-    this.uploadDir = path.join(__dirname, '../../uploads');
+    this.uploadDir = path.join(__dirname, "../../uploads");
     this.initializeDirectories();
   }
 
   // Initialize upload directories
   async initializeDirectories() {
     const dirs = [
-      path.join(this.uploadDir, 'images/products'),
-      path.join(this.uploadDir, 'images/thumbnails'),
-      path.join(this.uploadDir, 'images/users'),
-      path.join(this.uploadDir, 'images/reviews'),
-      path.join(this.uploadDir, 'images/temp'),
+      path.join(this.uploadDir, "images/products"),
+      path.join(this.uploadDir, "images/thumbnails"),
+      path.join(this.uploadDir, "images/users"),
+      path.join(this.uploadDir, "images/reviews"),
+      path.join(this.uploadDir, "images/temp"),
     ];
 
     for (const dir of dirs) {
@@ -37,10 +37,12 @@ class ImageService {
   generateFilePath(category, fileName) {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, "0");
 
     // Use forward slashes for URL compatibility
-    return path.join('images', category, year.toString(), month, fileName).replace(/\\/g, '/');
+    return path
+      .join("images", category, year.toString(), month, fileName)
+      .replace(/\\/g, "/");
   }
 
   // Generate unique filename with UUID
@@ -59,7 +61,7 @@ class ImageService {
         height: metadata.height,
       };
     } catch (error) {
-      console.error('Error getting image dimensions:', error);
+      console.error("Error getting image dimensions:", error);
       return { width: null, height: null };
     }
   }
@@ -74,18 +76,18 @@ class ImageService {
         sharpInstance = sharpInstance.resize({
           width: options.width,
           height: options.height,
-          fit: options.fit || 'inside',
+          fit: options.fit || "inside",
           withoutEnlargement: true,
         });
       }
 
       // Apply quality settings
       if (options.quality) {
-        if (outputPath.endsWith('.jpg') || outputPath.endsWith('.jpeg')) {
+        if (outputPath.endsWith(".jpg") || outputPath.endsWith(".jpeg")) {
           sharpInstance = sharpInstance.jpeg({ quality: options.quality });
-        } else if (outputPath.endsWith('.png')) {
+        } else if (outputPath.endsWith(".png")) {
           sharpInstance = sharpInstance.png({ quality: options.quality });
-        } else if (outputPath.endsWith('.webp')) {
+        } else if (outputPath.endsWith(".webp")) {
           sharpInstance = sharpInstance.webp({ quality: options.quality });
         }
       }
@@ -101,8 +103,8 @@ class ImageService {
 
       return outputPath;
     } catch (error) {
-      console.error('Error processing image:', error);
-      throw new AppError('Failed to process image', 500);
+      console.error("Error processing image:", error);
+      throw new AppError("Failed to process image", 500);
     }
   }
 
@@ -110,22 +112,22 @@ class ImageService {
   async generateThumbnails(originalPath, fileName, category) {
     const thumbnails = [];
     const thumbSizes = [
-      { name: 'small', width: 150, height: 150 },
-      { name: 'medium', width: 300, height: 300 },
-      { name: 'large', width: 600, height: 600 },
+      { name: "small", width: 150, height: 150 },
+      { name: "medium", width: 300, height: 300 },
+      { name: "large", width: 600, height: 600 },
     ];
 
     for (const size of thumbSizes) {
       try {
         const thumbFileName = `${path.parse(fileName).name}_${size.name}${path.extname(fileName)}`;
-        const thumbPath = this.generateFilePath('thumbnails', thumbFileName);
+        const thumbPath = this.generateFilePath("thumbnails", thumbFileName);
         const fullThumbPath = path.join(this.uploadDir, thumbPath);
 
         await this.processImage(originalPath, fullThumbPath, {
           width: size.width,
           height: size.height,
           quality: 85,
-          fit: 'cover',
+          fit: "cover",
         });
 
         thumbnails.push({
@@ -144,7 +146,7 @@ class ImageService {
   // Upload and process single image
   async uploadImage(file, options = {}) {
     try {
-      console.log('📤 Starting image upload:', {
+      console.log("📤 Starting image upload:", {
         originalname: file.originalname,
         mimetype: file.mimetype,
         size: file.size,
@@ -153,7 +155,7 @@ class ImageService {
       });
 
       const {
-        category = 'product',
+        category = "product",
         productId = null,
         userId = null,
         generateThumbs = true,
@@ -197,7 +199,7 @@ class ImageService {
 
       // Generate thumbnails if requested
       let thumbnails = [];
-      if (generateThumbs && category === 'product') {
+      if (generateThumbs && category === "product") {
         thumbnails = await this.generateThumbnails(
           fullPath,
           fileName,
@@ -209,7 +211,7 @@ class ImageService {
       try {
         await fs.unlink(file.path);
       } catch (error) {
-        console.error('Error cleaning up temp file:', error);
+        console.error("Error cleaning up temp file:", error);
       }
 
       return {
@@ -224,8 +226,8 @@ class ImageService {
         category,
       };
     } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new AppError('Failed to upload image', 500);
+      console.error("Error uploading image:", error);
+      throw new AppError("Failed to upload image", 500);
     }
   }
 
@@ -262,7 +264,7 @@ class ImageService {
     try {
       const image = await Image.findByPk(id);
       if (!image) {
-        throw new AppError('Image not found', 404);
+        throw new AppError("Image not found", 404);
       }
       return image;
     } catch (error) {
@@ -280,18 +282,18 @@ class ImageService {
       try {
         await fs.unlink(fullPath);
       } catch (error) {
-        console.error('Error deleting file:', error);
+        console.error("Error deleting file:", error);
       }
 
       // Delete thumbnails if they exist
-      if (image.category === 'product') {
-        const thumbSizes = ['small', 'medium', 'large'];
+      if (image.category === "product") {
+        const thumbSizes = ["small", "medium", "large"];
         for (const size of thumbSizes) {
           try {
             const thumbFileName = `${path.parse(image.fileName).name}_${size}${path.extname(image.fileName)}`;
             const thumbPath = path.join(
               this.uploadDir,
-              'images/thumbnails',
+              "images/thumbnails",
               thumbFileName
             );
             await fs.unlink(thumbPath);
@@ -315,7 +317,7 @@ class ImageService {
     try {
       const images = await Image.findAll({
         where: { productId, isActive: true },
-        order: [['createdAt', 'ASC']],
+        order: [["createdAt", "ASC"]],
       });
       return images;
     } catch (error) {
@@ -326,19 +328,19 @@ class ImageService {
   // Convert base64 to file
   async convertBase64ToFile(base64Data, options = {}) {
     try {
-      const { category = 'product', productId = null, userId = null } = options;
+      const { category = "product", productId = null, userId = null } = options;
 
       // Extract mime type and base64 data
       const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (!matches || matches.length !== 3) {
-        throw new AppError('Invalid base64 data', 400);
+        throw new AppError("Invalid base64 data", 400);
       }
 
       const mimeType = matches[1];
       const base64 = matches[2];
 
       // Determine file extension
-      const ext = mimeType.split('/')[1];
+      const ext = mimeType.split("/")[1];
       const fileName = `${uuidv4()}.${ext}`;
       const filePath = this.generateFilePath(category, fileName);
       const fullPath = path.join(this.uploadDir, filePath);
@@ -347,7 +349,7 @@ class ImageService {
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
 
       // Convert and save
-      const buffer = Buffer.from(base64, 'base64');
+      const buffer = Buffer.from(base64, "base64");
       await fs.writeFile(fullPath, buffer);
 
       // Get image dimensions
@@ -378,8 +380,8 @@ class ImageService {
         category,
       };
     } catch (error) {
-      console.error('Error converting base64 to file:', error);
-      throw new AppError('Failed to convert base64 to file', 500);
+      console.error("Error converting base64 to file:", error);
+      throw new AppError("Failed to convert base64 to file", 500);
     }
   }
 
@@ -392,7 +394,7 @@ class ImageService {
       // Get all active images from database
       const activeImages = await Image.findAll({
         where: { isActive: true },
-        attributes: ['filePath'],
+        attributes: ["filePath"],
       });
 
       const activeFilePaths = new Set(activeImages.map((img) => img.filePath));
@@ -420,8 +422,8 @@ class ImageService {
         deletedFiles: orphanedFiles.length,
       };
     } catch (error) {
-      console.error('Error cleaning up orphaned files:', error);
-      throw new AppError('Failed to cleanup orphaned files', 500);
+      console.error("Error cleaning up orphaned files:", error);
+      throw new AppError("Failed to cleanup orphaned files", 500);
     }
   }
 
