@@ -116,7 +116,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </Link>
 
         {/* Enhanced description */}
-        {shortDescription && (  
+        {shortDescription && (
           <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed line-clamp-2 group-hover:text-neutral-700 dark:group-hover:text-neutral-300 transition-colors duration-200">
             {shortDescription}
           </p>
