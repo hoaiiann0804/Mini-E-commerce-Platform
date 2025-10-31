@@ -11,6 +11,27 @@ import {
 } from '@/utils/priceUtils';
 import { v4 as uuidv4 } from 'uuid';
 import { RootState } from '@/store';
+import ProductDetailPopup from '../popup/ProductDetailPopup';
+
+interface Variant {
+  attributes: Record<string, string>;
+  stock: number;
+  stockQuantity?: number;
+  sku: string;
+  id?: string;
+}
+
+interface PopupProduct {
+  id: string | number;
+  name: string;
+  images?: string[];
+  description?: string;
+  rating?: number;
+  price: number;
+  compareAtPrice?: number | null;
+  variants?: Variant[];
+  thumbnail?: string;
+}
 
 interface ProductListCardProps extends Product {
   enableVariantPricing?: boolean; // Option để bật/tắt việc load variants
@@ -30,15 +51,17 @@ const ProductListCard: React.FC<ProductListCardProps> = ({
   enableVariantPricing = false, // Mặc định tắt để tránh quá nhiều API calls
 }) => {
   const dispatch = useDispatch();
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<PopupProduct | null>(
+    null
+  )
 
   // Lấy thông tin đăng nhập từ Redux store
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
 
-  // Chỉ khởi tạo API mutation khi đã đăng nhập
-  const [addToCart] = useAddToCartMutation();
+
+
 
   // Debug: Log authentication status
   console.log('🔐 isAuthenticated:', isAuthenticated);
@@ -52,96 +75,10 @@ const ProductListCard: React.FC<ProductListCardProps> = ({
     ? calculateDiscountPercentage(compareAtPrice, priceInfo.basePrice)
     : 0;
 
-  // Handle add to cart
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
 
-    if (isAddingToCart) return;
-
-    setIsAddingToCart(true);
-
-    console.log('🔐 isAuthenticated trong handleAddToCart:', isAuthenticated);
-
-    if (isAuthenticated) {
-      // Nếu đã đăng nhập, sử dụng API
-      try {
-        console.log('🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng');
-        const serverCart = await addToCart({
-          productId: id,
-          quantity: 1,
-        }).unwrap();
-
-        // Update Redux store with server response
-        dispatch(setServerCart(serverCart));
-
-        dispatch(
-          addNotification({
-            message: `${name} đã được thêm vào giỏ hàng`,
-            type: 'success',
-            duration: 3000,
-          })
-        );
-      } catch (error: any) {
-        console.error('❌ API thất bại:', error);
-
-        // Fallback to localStorage if API fails
-        const newItem = {
-          id: uuidv4(),
-          productId: id,
-          name,
-          price,
-          quantity: 1,
-          image: thumbnail,
-        };
-
-        dispatch(addItem(newItem));
-
-        dispatch(
-          addNotification({
-            message:
-              error?.data?.message ||
-              `${name} đã được thêm vào giỏ hàng (offline)`,
-            type: error?.data?.message ? 'error' : 'success',
-            duration: 3000,
-          })
-        );
-      }
-    } else {
-      // Nếu chưa đăng nhập, KHÔNG gọi API, chỉ lưu vào localStorage
-      console.log('� Chưa đăng nhập, chỉ lưu vào localStorage');
-
-      const newItem = {
-        id: uuidv4(),
-        productId: id,
-        name,
-        price,
-        quantity: 1,
-        image: thumbnail,
-      };
-
-      // Chỉ thêm vào Redux store, cartSlice sẽ tự động cập nhật localStorage
-      dispatch(addItem(newItem));
-
-      // Debug: Check if localStorage was updated
-      console.log(
-        '🔍 localStorage after add:',
-        localStorage.getItem('cartItems')
-      );
-
-      dispatch(
-        addNotification({
-          message: `${name} đã được thêm vào giỏ hàng`,
-          type: 'success',
-          duration: 3000,
-        })
-      );
-    }
-
-    setIsAddingToCart(false);
-  };
 
   return (
+    <>
     <div className="group relative bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden transition-all duration-500 ease-out hover:shadow-2xl hover:-translate-y-1 border border-neutral-100/50 dark:border-neutral-800/50 hover:border-primary-200/30 dark:hover:border-primary-800/30 backdrop-blur-sm">
       <div className="flex flex-col lg:flex-row gap-6 p-8">
         {/* Enhanced Image Section */}
@@ -242,17 +179,27 @@ const ProductListCard: React.FC<ProductListCardProps> = ({
 
             {/* Enhanced action buttons */}
             <div className="flex items-center gap-4">
-              {/* Add to cart button */}
+              {/* Quick view button */}
               <button
-                onClick={handleAddToCart}
-                disabled={isAddingToCart}
-                className="flex-1 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-700 hover:via-emerald-800 hover:to-emerald-900 disabled:from-gray-400 disabled:via-gray-500 disabled:to-gray-600 text-white rounded-xl px-6 py-4 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 font-semibold text-base group/cart"
-              >
+              onClick={() => setSelectedProduct({
+                id,
+                name,
+                thumbnail,
+                price,
+                compareAtPrice: compareAtPrice || undefined,
+                description: shortDescription,
+                rating: ratings?.average,
+                variants: variants?.map(v => ({
+                  attributes: v.attributes,
+                  stock: v.stockQuantity,
+                  stockQuantity: v.stockQuantity,
+                  sku: v.sku,
+                  id: v.id,
+                })),
+              })}
+                className="flex-1 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-700 hover:via-emerald-800 hover:to-emerald-900 disabled:from-gray-400 disabled:via-gray-500 disabled:to-gray-600 text-white rounded-xl px-6 py-4 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 font-semibold text-base group/cart">
                 <div className="flex items-center justify-center gap-3">
-                  {isAddingToCart ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  ) : (
-                    <svg
+                <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 transition-transform duration-200 group-hover/cart:scale-110"
                       fill="none"
@@ -263,14 +210,19 @@ const ProductListCard: React.FC<ProductListCardProps> = ({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h8a2 2 0 002-2v-6"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
-                  )}
-                  <span className="font-medium">
-                    {isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ'}
+                    <span className="font-medium">
+                    Xem nhanh
                   </span>
-                </div>
+                  </div>
               </button>
 
               {/* Quick view button */}
@@ -310,6 +262,13 @@ const ProductListCard: React.FC<ProductListCardProps> = ({
       {/* Premium glow effect */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary-600/0 via-primary-600/0 to-primary-600/0 group-hover:from-primary-600/5 group-hover:via-primary-600/10 group-hover:to-primary-600/5 transition-all duration-500 pointer-events-none"></div>
     </div>
+    {selectedProduct && (
+        <ProductDetailPopup
+          product={selectedProduct as any}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+    </>
   );
 };
 
