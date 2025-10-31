@@ -94,6 +94,34 @@ const WishListPage = () => {
 - Fixed `removeItemWishlist` reducer to filter by `item.id` instead of `item.productId`
 - Fixed `convertServerWishlist` helper to use `serverItem.productId` for the productId field
 
+### 6. Fixed Price Display for Products Without Discounts
+
+**File:** `fe/src/components/features/WishListCard.tsx`
+
+**Problem:** Products without discounts were showing "0.00 đ" instead of the correct price.
+
+**Solution:** Updated the price display logic to handle cases where `item.price` is 0 or invalid:
+
+```typescript
+// Before
+{item.price.toLocaleString("vi-VN")}đ
+
+// After
+{(item.price > 0 ? item.price : item.compareAtPrice || 0).toLocaleString("vi-VN")}đ
+```
+
+Also updated the strikethrough price condition to only show when there's a valid discount:
+
+```typescript
+// Before
+{item.compareAtPrice && item.compareAtPrice > item.price && (
+
+// After
+{item.compareAtPrice && item.price > 0 && item.compareAtPrice > item.price && (
+```
+
+**Result:** Products now display correct prices whether they have discounts or not, and the strikethrough price only appears for valid discounted items.
+
 ## Files Modified
 
 - `fe/src/features/wishlist/wishlistSlice.ts`
@@ -107,7 +135,8 @@ const WishListPage = () => {
 - Reload the page
 - Verify items persist and display correctly
 - Remove individual items and verify only that item is removed (not all items)
+- Check price display for products with and without discounts
 
 ## Status
 
-✅ Fixed - Wishlist items now persist across page reloads and remove functionality works correctly
+✅ Fixed - Wishlist items now persist across page reloads, remove functionality works correctly, and price display is accurate for all product types

@@ -101,10 +101,11 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
             </div>
             <div className="pt-6">
               <div className="mb-4 flex items-center justify-between gap-4">
-                <span className="me-2 rounded bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900 dark:text-primary-300">
-                  {" "}
-                  {item.compareAtPrice - item.price}
-                </span>
+                {item.compareAtPrice && item.compareAtPrice > item.price && (
+                  <span className="me-2 rounded bg-primary-100 px-2.5 py-0.5 text-xs font-medium text-primary-800 dark:bg-primary-900 dark:text-primary-300">
+                    Tiết kiệm {(item.compareAtPrice - item.price).toLocaleString("vi-VN")}đ
+                  </span>
+                )}
                 <div className="flex items-center justify-end gap-1">
                   <Link to={`/products/${item.id}`}>
                     <button
@@ -311,11 +312,11 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
               </ul>
               <div className="mt-4 flex items-center justify-between gap-4 mb-1">
                 <p className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">
-                  ${item.price.toLocaleString("vi-VN")}đ
+                  {(item.price > 0 ? item.price : item.compareAtPrice || 0).toLocaleString("vi-VN")}đ
                 </p>
               </div>
               <div className=" flex items-center justify-between">
-                {item.compareAtPrice && item.compareAtPrice > item.price && (
+                {item.compareAtPrice && item.price > 0 && item.compareAtPrice > item.price && (
                   <span className="text-base text-neutral-400 dark:text-neutral-500 line-through font-medium">
                     {item.compareAtPrice.toLocaleString("vi-VN")}đ
                   </span>
