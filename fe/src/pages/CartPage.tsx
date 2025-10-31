@@ -212,6 +212,7 @@ const CartPage: React.FC = () => {
                   </span>
                 </div>
 
+                
                 <div className="flex justify-between">
                   <span className="text-neutral-600 dark:text-neutral-400">
                     {t('cart.shipping')}
