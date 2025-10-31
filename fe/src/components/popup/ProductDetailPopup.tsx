@@ -1,56 +1,148 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Minus, Plus } from 'lucide-react'
-import { Rating } from '../common/Rating'
-import { formatPrice } from '@/utils/format'
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Minus, Plus } from "lucide-react";
+import { Rating } from "../common/Rating";
+import { formatPrice } from "@/utils/format";
+import { useAddToCartMutation } from "@/services/cartApi";
+import { useDispatch, useSelector } from "react-redux";
+import { productApi } from "@/services/productApi";
+
+interface Variant {
+  attributes: Record<string, string>;
+  stock: number;
+  stockQuantity?: number;
+  sku: string;
+  id?: string;
+}
 
 interface Product {
-  id: string | number
-  name: string
-  images?: string[]
-  description?: string
-  rating?: number
-  price: number
-  compareAtPrice?: number
-  variants?: { attributes: Record<string, string> }[]
-  thumbnail?: string
+  id: string | number;
+  name: string;
+  images?: string[];
+  shortDescription?: string;
+  rating?: number;
+  price: number;
+  compareAtPrice?: number;
+  variants?: Variant[];
+  thumbnail?: string;
 }
 
 interface ProductDetailPopupProps {
-  product: Product
-  onClose: () => void
+  product: Product;
+  onClose: () => void;
 }
 
-const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({ product, onClose }) => {
-  const [selectAttrs, setSelectAttrs] = useState<Record<string, string>>({})
-  const [qty, setQty] = useState<number>(1)
-  const [error, setError] = useState<string | null>(null)
+const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({
+  product: initialProduct,
+  onClose,
+}) => {
+  const [selectAttrs, setSelectAttrs] = useState<Record<string, string>>({});
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const originalPrice  = product.compareAtPrice
+  const { productId } = useParams<{ productId: string }>();
+
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const skuId = searchParams.get("skuId") || undefined;
+
+  const [mappedAttributes, setMappedAttributes] = useState<
+    Record<string, string>
+  >({});
+  const [qty, setQty] = useState<number>(1);
+
+
+
+  // lay thong tin dang nhap tu reudx store
+  const isAuthenticated = useSelector(
+    (state: any) => state.auth.isAuthenticated
+  );
+
+  //API hooks - fetch full product data if we have an ID
+  const {
+    data: productData,
+    isLoading,
+    refetch,
+  } = productApi.useGetProductByIdQuery(
+    { id: (productId || initialProduct.id || "").toString(), skuId },
+    {
+      skip: !productId && !initialProduct.id,
+    }
+  );
+
+  const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
+
+  const product = productData?.data || initialProduct;
+  const originalPrice = product.compareAtPrice;
+
+  // Auto-select first variant when product loads
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0) {
+      const firstVariant = product.variants[0];
+      setSelectedVariant(firstVariant);
+      setSelectAttrs(firstVariant.attributes);
+      setQty(1);
+    }
+  }, [product]);
 
   const handleSelectAttrs = (attrname: string, value: string) => {
-    setSelectAttrs(prev => ({ ...prev, [attrname]: value }))
-    setError(null)
-  }
+    const newAttrs = { ...selectAttrs, [attrname]: value };
+    setSelectAttrs(newAttrs);
+    setError(null);
+
+    // Find variant that matches all selected attributes
+    const matchingVariant = product?.variants?.find((variant: Variant) =>
+      Object.keys(newAttrs).every(
+        (key) => variant.attributes[key] === newAttrs[key]
+      )
+    );
+
+    if (matchingVariant) {
+      setSelectedVariant(matchingVariant);
+      setQty(1); // reset qty when variant changes
+    } else {
+      setSelectedVariant(null);
+      setError("No matching variant found for selected attributes");
+    }
+  };
 
   const handleDecrease = () => {
     if (qty > 1) {
-      setQty(qty - 1)
-      setError(null)
+      setQty(qty - 1);
+      setError(null);
     } else {
-      setError('Quantity cannot be less than 1')
+      setError("Quantity cannot be less than 1");
     }
-  }
+  };
 
   const handleIncrease = () => {
-    setQty(qty + 1)
-    setError(null)
-  }
+    const maxStock = selectedVariant?.stockQuantity || selectedVariant?.stock || 0;
+    if (selectedVariant && qty < maxStock) {
+      setQty(qty + 1);
+      setError(null);
+    } else {
+      setError("Cannot increase quantity beyond available stock");
+    }
+  };
 
   const handleAddToCart = () => {
-    // Stub: Integrate with cart logic later
-    console.log('Adding to cart:', { productId: product.id, attributes: selectAttrs, quantity: qty })
-  }
+    if (!selectedVariant) {
+      setError("Please select a variant");
+      return;
+    }
+    const maxStock = selectedVariant.stockQuantity || selectedVariant.stock;
+    if (qty > maxStock) {
+      setError("Quantity exceeds available stock");
+      return;
+    }
+    // Integrate with cart logic
+    addToCart({
+      productId: product.id,
+      variantId: selectedVariant.id || selectedVariant.sku,
+      quantity: qty,
+    });
+  };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -68,60 +160,100 @@ const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({ product, onClos
 
         {/* Body */}
         <div className="p-4 overflow-y-auto max-h-96">
-          <img src={product.thumbnail} alt={product.name} className="w-60 h-60 object-cover mb-4 rounded" />
-          <p className="text-gray-700 mb-2">{product.description}</p>
-          <div>
-            <Rating value={product.rating || 0} />
-          </div>
+          <img
+            src={product.thumbnail}
+            alt={product.name}
+            className="w-60 h-60 object-cover mb-4 rounded"
+          />
+          <p className="text-gray-700 mb-2">{product.shortDescription}</p>
+          {product.ratings && (
+              <div className="flex items-center mb-4">
+                <Rating
+                  value={product.ratings.average}
+                  showCount={true}
+                  count={product.ratings.count}
+                />
+                <Link
+                  to="#reviews"
+                  className="ml-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                >
+                  Xem đánh giá
+                </Link>
+              </div>
+            )}
           {product.price && product.price > 0 ? (
             <>
-                <div className="mt-4 flex items-center justify-between gap-4 mb-1">
-                  <p className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">
-                    {formatPrice(product.price > 0 ? product.price : product.compareAtPrice || 0)}
-                  </p>
-                </div>
-                <div className=" flex items-center justify-between">
-                  {product.compareAtPrice && product.price > 0 && product.compareAtPrice > product.price && (
+              <div className="mt-4 flex items-center justify-between gap-4 mb-1">
+                <p className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">
+                  {formatPrice(
+                    product.price > 0
+                      ? product.price
+                      : product.compareAtPrice || 0
+                  )}
+                </p>
+              </div>
+              <div className=" flex items-center justify-between">
+                {product.compareAtPrice &&
+                  product.price > 0 &&
+                  product.compareAtPrice > product.price && (
                     <span className="text-base text-neutral-400 dark:text-neutral-500 line-through font-medium">
-                     {formatPrice(product.compareAtPrice)}
+                      {formatPrice(product.compareAtPrice)}
                     </span>
                   )}
-                </div>
-              {(() => {
-                const variants = product.variants;
-                if (!variants || variants.length === 0 || !variants[0]?.attributes) return null;
-                return Object.keys(variants[0].attributes).map((attrname) => {
-                  const value = [...new Set(variants.map((v) => v.attributes?.[attrname]).filter(Boolean))]
-                  return (
-                    <div key={attrname}>
-                      <p className="text-foreground font-medium mb-6">
-                        {attrname} :
-                      </p>
-                      <div className="flex space-x-2 mb-6">
-                        {value.map((item) => (
-                          <button
-                            key={item}
-                            onClick={() => handleSelectAttrs(attrname, item)}
-                            className={`px-4 py-2 border border-md transition-colors mb-5
-                              ${selectAttrs[attrname] === item ? "bg-blue-500 text-white border-blue-500" : "bg-background text-foreground border-border"}
-                              hover:border-gray-500 `}
-                          >
-                            {item}
-                          </button>
-                        ))}
-                      </div>
-                      {error && <p className="text-red-500">{error}</p>}
-                    </div>
-                  )
-                })
-              })()}
+              </div>
             </>
           ) : (
             <>
-              <p className="text-lg font-bold">
-                {formatPrice(originalPrice)}
-              </p>
+              <p className="text-lg font-bold">{formatPrice(originalPrice)}</p>
             </>
+          )}
+          {(() => {
+            const variants = product.variants;
+            if (
+              !variants ||
+              variants.length === 0 ||
+              !variants[0]?.attributes
+            )
+              return null;
+            return Object.keys(variants[0].attributes).map(
+              (attrname: string) => {
+                const value = [
+                  ...new Set(
+                    variants
+                      .map((v: Variant) => v.attributes?.[attrname])
+                      .filter(Boolean)
+                  ),
+                ] as string[];
+                return (
+                  <div key={attrname}>
+                    <p className="text-foreground font-medium mb-6">
+                      {attrname} :
+                    </p>
+                    <div className="flex space-x-2 mb-6">
+                      {value.map((item) => (
+                        <button
+                          key={item}
+                          onClick={() => handleSelectAttrs(attrname, item)}
+                          className={`px-4 py-2 border border-md transition-colors mb-5
+                          ${selectAttrs[attrname] === item ? "bg-blue-500 text-white border-blue-500" : "bg-background text-foreground border-border"}
+                          hover:border-gray-500 `}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                    {error && <p className="text-red-500">{error}</p>}
+                  </div>
+                );
+              }
+            );
+          })()}
+          {selectedVariant && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">
+                Available Stock: {selectedVariant.stock}
+              </p>
+            </div>
           )}
           <div>
             <div className="flex items-center space-x-4 mt-1">
@@ -129,16 +261,18 @@ const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({ product, onClos
                 <button
                   className="p-2 hover:bg-muted transition-colors"
                   onClick={handleDecrease}
+                  disabled={qty <= 1}
                 >
                   <Minus className="h-4 w-4" />
                 </button>
 
-                <button className="px-4 py-2 border border-border rounded-md transition-colors text-foreground">
-                  {qty}
-                </button>
+                <span className="px-4 py-2 border border-border rounded-md transition-colors text-foreground">
+                  {qty} / {(selectedVariant?.stockQuantity || selectedVariant?.stock) || 0}
+                </span>
                 <button
                   className="p-2 hover:bg-muted transition-colors"
                   onClick={handleIncrease}
+                  disabled={!selectedVariant || qty >= (selectedVariant.stockQuantity || selectedVariant.stock)}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -163,7 +297,7 @@ const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({ product, onClos
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetailPopup
+export default ProductDetailPopup;
