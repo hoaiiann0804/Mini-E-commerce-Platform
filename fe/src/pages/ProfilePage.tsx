@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import Button from '@/components/common/Button';
-import { PremiumButton } from '@/components/common';
-import Input from '@/components/common/Input';
-import { RootState } from '@/store';
-import { updateUser } from '@/features/auth/authSlice';
-import { addNotification } from '@/features/ui/uiSlice';
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import Button from "@/components/common/Button";
+import { PremiumButton } from "@/components/common";
+import Input from "@/components/common/Input";
+import { RootState } from "@/store";
+import { updateUser } from "@/features/auth/authSlice";
+import { addNotification } from "@/features/ui/uiSlice";
 import {
   useUpdateProfileMutation,
   useChangePasswordMutation,
-} from '@/services/userApi';
-import { useGetCurrentUserQuery } from '@/services/authApi';
+} from "@/services/userApi";
+import { useGetCurrentUserQuery } from "@/services/authApi";
 
 const ProfilePage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -24,13 +24,13 @@ const ProfilePage: React.FC = () => {
     useChangePasswordMutation();
 
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   // Update form data when user data is loaded
@@ -38,10 +38,10 @@ const ProfilePage: React.FC = () => {
     if (currentUser) {
       setFormData((prevData) => ({
         ...prevData,
-        firstName: currentUser.firstName || '',
-        lastName: currentUser.lastName || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
+        firstName: currentUser.firstName || "",
+        lastName: currentUser.lastName || "",
+        email: currentUser.email || "",
+        phone: currentUser.phone || "",
       }));
     }
   }, [currentUser]);
@@ -55,7 +55,7 @@ const ProfilePage: React.FC = () => {
 
     // Clear error when field is edited
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -63,17 +63,17 @@ const ProfilePage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.firstName) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = "Last name is required";
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     // Only validate password fields if any of them are filled
@@ -84,19 +84,19 @@ const ProfilePage: React.FC = () => {
     ) {
       if (!formData.currentPassword) {
         newErrors.currentPassword =
-          'Current password is required to change password';
+          "Current password is required to change password";
       }
 
       if (!formData.newPassword) {
-        newErrors.newPassword = 'New password is required';
+        newErrors.newPassword = "New password is required";
       } else if (formData.newPassword.length < 6) {
-        newErrors.newPassword = 'Password must be at least 6 characters';
+        newErrors.newPassword = "Password must be at least 6 characters";
       }
 
       if (!formData.confirmPassword) {
-        newErrors.confirmPassword = 'Please confirm your new password';
+        newErrors.confirmPassword = "Please confirm your new password";
       } else if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+        newErrors.confirmPassword = "Passwords do not match";
       }
     }
 
@@ -119,14 +119,14 @@ const ProfilePage: React.FC = () => {
         phone: formData.phone,
       };
 
-      console.log('Submitting profile data:', profileData);
+      console.log("Submitting profile data:", profileData);
 
       // Check if we have a token
-      const token = localStorage.getItem('token');
-      console.log('Current token:', token ? 'exists' : 'missing');
+      const token = localStorage.getItem("token");
+      console.log("Current token:", token ? "exists" : "missing");
 
       const updatedUser = await updateProfile(profileData).unwrap();
-      console.log('Profile update response:', updatedUser);
+      console.log("Profile update response:", updatedUser);
 
       // Update user in Redux store
       dispatch(
@@ -148,8 +148,8 @@ const ProfilePage: React.FC = () => {
 
         dispatch(
           addNotification({
-            type: 'success',
-            message: 'Password changed successfully',
+            type: "success",
+            message: "Password changed successfully",
             duration: 3000,
           })
         );
@@ -157,8 +157,8 @@ const ProfilePage: React.FC = () => {
 
       dispatch(
         addNotification({
-          type: 'success',
-          message: 'Profile updated successfully',
+          type: "success",
+          message: "Profile updated successfully",
           duration: 3000,
         })
       );
@@ -168,17 +168,17 @@ const ProfilePage: React.FC = () => {
       // Clear password fields
       setFormData((prev) => ({
         ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       }));
     } catch (error: any) {
-      console.error('Failed to update profile:', error);
+      console.error("Failed to update profile:", error);
 
       dispatch(
         addNotification({
-          type: 'error',
-          message: error.data?.message || 'Failed to update profile',
+          type: "error",
+          message: error.data?.message || "Failed to update profile",
           duration: 5000,
         })
       );
@@ -307,14 +307,14 @@ const ProfilePage: React.FC = () => {
                           setIsEditing(false);
                           setFormData({
                             firstName:
-                              currentUser?.firstName || user?.firstName || '',
+                              currentUser?.firstName || user?.firstName || "",
                             lastName:
-                              currentUser?.lastName || user?.lastName || '',
-                            email: currentUser?.email || user?.email || '',
-                            phone: currentUser?.phone || user?.phone || '',
-                            currentPassword: '',
-                            newPassword: '',
-                            confirmPassword: '',
+                              currentUser?.lastName || user?.lastName || "",
+                            email: currentUser?.email || user?.email || "",
+                            phone: currentUser?.phone || user?.phone || "",
+                            currentPassword: "",
+                            newPassword: "",
+                            confirmPassword: "",
                           });
                           setErrors({});
                         }}
