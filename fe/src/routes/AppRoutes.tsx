@@ -11,6 +11,7 @@ import SideBarPerson from "@/pages/SideBarPerson";
 import WishListPage from "@/pages/WishListPage";
 import ProductReviews from "@/components/features/ProductReviews";
 import ReviewSection from "@/components/features/ReviewSection";
+import AddressPage from "@/pages/AddressPage";
 // import SideBarPerson from "@/pages/SideBarPerson";
 
 // Lazy-loaded pages
@@ -92,7 +93,6 @@ const AppRoutes: React.FC = () => {
           <Route path="track-order" element={<TrackOrderPage />} />
           <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="terms" element={<TermsPage />} />
- 
 
           {/* Public-only routes (redirect to home if authenticated) */}
           <Route
@@ -174,10 +174,8 @@ const AppRoutes: React.FC = () => {
             <Route index element={<Navigate to="/user/profile" replace />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="wishlist" element={<WishListPage />} />
-            <Route
-              path="address"
-              element={<div>Address Management Coming Soon</div>}
-            />
+            <Route path="address" element={<AddressPage />} />
+
             <Route
               path="notifications"
               element={<div>Notifications Coming Soon</div>}
