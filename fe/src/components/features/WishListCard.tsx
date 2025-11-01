@@ -3,14 +3,19 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  clearWishlist,
   removeItemWishlist,
   setServerWishList,
 } from "@/features/wishlist/wishlistSlice";
-import { useRemoveWishlistItemMutation } from "@/services/wishlistApi";
+import {
+  useClearWishlistMutation,
+  useRemoveWishlistItemMutation,
+} from "@/services/wishlistApi";
 import { addNotification } from "@/features/ui/uiSlice";
 import { RootState } from "@/store";
 import ProductDetailPopup from "../popup/ProductDetailPopup";
 import { formatPrice } from "@/utils/format";
+import { Trash2 } from "lucide-react";
 interface WishListCardProps {
   items: WishlistItem[];
 }
@@ -23,6 +28,7 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
   );
   const [removeWishlistItem, { isLoading: isRemoving }] =
     useRemoveWishlistItemMutation();
+  const [ClearWishlistItem] = useClearWishlistMutation();
   const [selectedProduct, setSelectedProduct] = useState<WishlistItem | null>(
     null
   );
@@ -68,6 +74,42 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
     }
   };
 
+  // handle clear wishlist
+  const handleClearWishlist = async () => {
+    if (isAuthenticated) {
+      try {
+        await ClearWishlistItem().unwrap();
+        dispatch(clearWishlist());
+        dispatch(
+          addNotification({
+            message: "Đã xóa tất cả danh sách yêu thích",
+            type: "success",
+            duration: 3000,
+          })
+        );
+      } catch (error: any) {
+        dispatch(clearWishlist());
+        dispatch(
+          addNotification({
+            message: "Không thể xóa danh sách yêu thích",
+            type: "error",
+            duration: 3000,
+          })
+        );
+      }
+    } else {
+      // For unauthenticated users, clear local wishlist
+      dispatch(clearWishlist());
+      dispatch(
+        addNotification({
+          message: "Đã xóa tất cả danh sách yêu thích",
+          type: "success",
+          duration: 3000,
+        })
+      );
+    }
+  };
+
   // Force re-render when items prop changes
   React.useEffect(() => {
     // This effect ensures the component re-renders when items prop changes
@@ -84,6 +126,15 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
 
   return (
     <>
+      <div className="flex items-center justify-end  ">
+        <button
+          className=" bg-primary-600 rounded-lg px-6 py-2 flex justify-between"
+          onClick={handleClearWishlist}
+        >
+          <span className="text-white font-bold">Clear </span>
+          <Trash2 className="text-white" size={20} />
+        </button>
+      </div>
       <div className="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => (
           <div
