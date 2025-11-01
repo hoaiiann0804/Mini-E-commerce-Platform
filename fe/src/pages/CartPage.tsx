@@ -76,9 +76,9 @@ const CartPage: React.FC = () => {
   const total = subtotal + shipping + tax;
 
   // Handle checkout
-  const handleCheckout = () => {
-    navigate('/checkout');
-  };
+    const handleCheckout = () => {
+      navigate('/checkout');
+    };
 
   // Handle clear cart
   const handleClearCart = async () => {
