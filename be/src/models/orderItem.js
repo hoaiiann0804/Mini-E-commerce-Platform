@@ -1,57 +1,57 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/sequelize');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/sequelize");
 
 const OrderItem = sequelize.define(
-  'OrderItem',
+  "OrderItem",
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+      primaryKey: true,
     },
     orderId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     productId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     variantId: {
       type: DataTypes.UUID,
-      allowNull: true
+      allowNull: true,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     sku: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     price: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
     },
     quantity: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     subtotal: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
     },
     image: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     attributes: {
       type: DataTypes.JSONB,
-      defaultValue: {}
+      defaultValue: {},
     },
   },
   {
-    tableName: 'order_items',
+    tableName: "order_items",
     timestamps: true,
   }
 );
