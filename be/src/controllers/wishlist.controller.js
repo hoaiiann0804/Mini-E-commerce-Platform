@@ -1,11 +1,37 @@
 const { Wishlist, Product } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
+const { Op } = require("sequelize");
 
 // Get user wishlist
 const getWishlist = async (req, res, next) => {
   try {
+    const {
+      page = 1,
+      limit = 10,
+      minPrice,
+      maxPrice,
+      sort = "createdAt",
+      order = "DESC",
+    } = req.query;
+
+    //build filter conditions
+    const whereConditions = {};
+
+    if (minPrice) {
+      whereConditions.price = {
+        ...whereConditions.price,
+        [Op.gte]: parseFloat(minPrice),
+      };
+    }
+
+    if (maxPrice) {
+      whereConditions.price = {
+        ...whereConditions.price,
+        [Op.lte]: parseFloat(minPrice),
+      };
+    }
     const userId = req.user.id;
-    const wishlistItems = await Wishlist.findAll({
+    const { count, rows: wishlistItems } = await Wishlist.findAndCountAll({
       where: { userId },
       include: [
         {
@@ -23,12 +49,22 @@ const getWishlist = async (req, res, next) => {
           ],
         },
       ],
-      order: [["createdAt", "DESC"]],
+      limit: parseInt(limit),
+      offset: (parseInt(page) - 1) * parseInt(limit),
+      order: [[sort, order]],
     });
+    //process product wishlist
+    const products = wishlistItems.map((item) => item.products);
 
     res.status(200).json({
       status: "success",
-      data: wishlistItems.map((item) => item.products),
+
+      data: {
+        total: count,
+        pages: Math.ceil(count / limit),
+        currentPage: parseInt(page),
+        products,
+      },
     });
   } catch (error) {
     next(error);
