@@ -279,9 +279,9 @@ const getProductById = async (req, res, next) => {
     // Construct image URLs for productImages
     const productImagesWithUrls = productJson.productImages
       ? productJson.productImages.map((image) => ({
-          ...image,
-          url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
-        }))
+        ...image,
+        url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
+      }))
       : [];
 
     // Also fix images array in product data
@@ -1236,7 +1236,7 @@ const getBestSellers = async (req, res, next) => {
         [
           sequelize.literal(
             `CASE ${productIds
-              .map((id, index) => `WHEN id = ${id} THEN ${index}`)
+              .map((id, index) => `WHEN "Product"."id" = '${id}' THEN ${index}`)
               .join(" ")} END`
           ),
         ],

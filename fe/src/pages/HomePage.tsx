@@ -1,4 +1,23 @@
 import { PremiumButton } from '@/components/common';
+import { Product } from '@/types/product.types';
+
+// Define the product item type from the API response
+interface ProductItem {
+  id: string;
+  name: string;
+  price: number;
+  thumbnail: string;
+  slug: string;
+  images?: string[];
+  description?: string;
+  categoryId?: string;
+  categoryName?: string;
+  rating?: number;
+  reviewCount?: number;
+  stock?: number;
+  [key: string]: any; // For any additional properties
+}
+
 import ProductCard from '@/components/features/ProductCard';
 import { HeroSection } from '@/components/sections';
 import {
@@ -10,7 +29,11 @@ import { ErrorState, EmptyState } from '@/components/common/ErrorState';
 import { ProductGrid, CategoryGrid } from '@/components/layout/Grid';
 import { PageLayout, PageSection } from '@/components/layout/PageLayout';
 import { useGetCategoriesQuery } from '@/services/categoryApi';
-import { useGetFeaturedProductsQuery } from '@/services/productApi';
+import {
+  useGetFeaturedProductsQuery,
+  useGetBestSellersQuery,
+  useGetNewArrivalsQuery
+} from '@/services/productApi';
 import { useApiState } from '@/hooks/useApiState';
 import {
   getCategoryImage,
@@ -27,13 +50,28 @@ const HomePage: React.FC = () => {
 
   // API queries with enhanced state management
   const featuredProductsQuery = useGetFeaturedProductsQuery({ limit: 4 });
+  const bestSellersQuery = useGetBestSellersQuery({ limit: 4 });
+  const newArrivalsQuery = useGetNewArrivalsQuery({ limit: 4 });
   const categoriesQuery = useGetCategoriesQuery();
 
-  const featuredProducts = useApiState({
+  const featuredProducts = useApiState<{ data: ProductItem[] }>({
     data: featuredProductsQuery.data,
     isLoading: featuredProductsQuery.isLoading,
-    error: featuredProductsQuery.error,
-    refetch: featuredProductsQuery.refetch,
+    error: featuredProductsQuery.error as Error | undefined,
+    isArray: true,
+  });
+
+  const bestSellers = useApiState<{ data: ProductItem[] }>({
+    data: bestSellersQuery.data,
+    isLoading: bestSellersQuery.isLoading,
+    error: bestSellersQuery.error as Error | undefined,
+    isArray: true,
+  });
+
+  const newArrivals = useApiState<{ data: ProductItem[] }>({
+    data: newArrivalsQuery.data,
+    isLoading: newArrivalsQuery.isLoading,
+    error: newArrivalsQuery.error as Error | undefined,
     isArray: true,
   });
 
@@ -71,7 +109,7 @@ const HomePage: React.FC = () => {
         className="py-16 bg-neutral-50 dark:bg-neutral-900"
         headerActions={
           <Link
-            to="/shop"
+            to="/shop?sort=featured"
             className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center"
           >
             {t('homepage.featuredProducts.viewAll')}
@@ -98,21 +136,171 @@ const HomePage: React.FC = () => {
           </ProductGrid>
         ) : featuredProducts.isError ? (
           <ErrorState
-            error={featuredProducts.error}
-            onRetry={featuredProducts.retry}
+            error={featuredProducts.error?.message || 'Lỗi tải sản phẩm nổi bật'}
+            onRetry={() => featuredProductsQuery.refetch()}
             retryText="Thử lại"
           />
-        ) : featuredProducts.isEmpty ? (
-          <EmptyState
-            title="Không có sản phẩm nổi bật"
-            description="Hiện tại chưa có sản phẩm nổi bật nào để hiển thị."
-          />
-        ) : (
+        ) : featuredProducts.data?.data && featuredProducts.data.data.length > 0 ? (
           <ProductGrid>
-            {featuredProducts.data?.data?.map((product) => (
-              <ProductCard key={product.id} {...product} />
+            {featuredProducts.data?.data?.map((product: ProductItem) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                thumbnail={product.thumbnail}
+                slug={product.slug}
+                images={product.images || [product.thumbnail]}
+                description={product.description || ''}
+                categoryId={product.categoryId || ''}
+                categoryName={product.categoryName || ''}
+                rating={product.rating || 0}
+                reviewCount={product.reviewCount || 0}
+                stock={product.stock || 0}
+              />
             ))}
           </ProductGrid>
+        ) : (
+          <EmptyState
+            title="Không có sản phẩm nổi bật"
+            description="Hiện tại chưa có sản phẩm nổi bật nào."
+            actionLabel="Tải lại"
+            onAction={() => featuredProductsQuery.refetch()}
+          />
+        )}
+      </PageSection>
+
+      {/* Bestsellers Section */}
+      <PageSection
+        title="Sản phẩm bán chạy"
+        className="py-16 bg-white dark:bg-neutral-800"
+        headerActions={
+          <Link
+            to="/shop?sort=bestselling"
+            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center"
+          >
+            Xem tất cả
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 ml-1"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        }
+      >
+        {bestSellers.isLoading ? (
+          <ProductGrid>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </ProductGrid>
+        ) : bestSellers.isError ? (
+          <ErrorState
+            error={bestSellers.error?.message || 'Lỗi tải sản phẩm bán chạy'}
+            onRetry={() => bestSellersQuery.refetch()}
+            retryText="Thử lại"
+          />
+        ) : bestSellers.data?.data && bestSellers.data.data.length > 0 ? (
+          <ProductGrid>
+            {bestSellers.data?.data?.map((product: ProductItem) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                thumbnail={product.thumbnail}
+                slug={product.slug}
+                images={product.images || [product.thumbnail]}
+                description={product.description || ''}
+                categoryId={product.categoryId || ''}
+                categoryName={product.categoryName || ''}
+                rating={product.rating || 0}
+                reviewCount={product.reviewCount || 0}
+                stock={product.stock || 0}
+              />
+            ))}
+          </ProductGrid>
+        ) : (
+          <EmptyState
+            title="Không có sản phẩm bán chạy"
+            description="Hiện tại chưa có thông tin sản phẩm bán chạy."
+            actionLabel="Tải lại"
+            onAction={() => bestSellersQuery.refetch()}
+          />
+        )}
+      </PageSection>
+
+      {/* New Arrivals Section */}
+      <PageSection
+        title="Sản phẩm mới về"
+        className="py-16 bg-neutral-50 dark:bg-neutral-900"
+        headerActions={
+          <Link
+            to="/shop?sort=newest"
+            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center"
+          >
+            Xem tất cả
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 ml-1"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        }
+      >
+        {newArrivals.isLoading ? (
+          <ProductGrid>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </ProductGrid>
+        ) : newArrivals.isError ? (
+          <ErrorState
+            error={newArrivals.error?.message || 'Lỗi tải sản phẩm mới về'}
+            onRetry={() => newArrivalsQuery.refetch()}
+            retryText="Thử lại"
+          />
+        ) : newArrivals.data?.data && newArrivals.data.data.length > 0 ? (
+          <ProductGrid>
+            {newArrivals.data?.data?.map((product: ProductItem) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                thumbnail={product.thumbnail}
+                slug={product.slug}
+                images={product.images || [product.thumbnail]}
+                description={product.description || ''}
+                categoryId={product.categoryId || ''}
+                categoryName={product.categoryName || ''}
+                rating={product.rating || 0}
+                reviewCount={product.reviewCount || 0}
+                stock={product.stock || 0}
+              />
+            ))}
+          </ProductGrid>
+        ) : (
+          <EmptyState
+            title="Không có sản phẩm mới"
+            description="Hiện tại chưa có sản phẩm mới nào."
+            actionLabel="Tải lại"
+            onAction={() => newArrivalsQuery.refetch()}
+          />
         )}
       </PageSection>
 
