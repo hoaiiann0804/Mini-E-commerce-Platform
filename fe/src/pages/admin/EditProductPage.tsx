@@ -156,22 +156,48 @@ const EditProductPage: React.FC = () => {
           if (key === "description") {
             return;
           } else if (key === "price" && formValues[key] !== undefined) {
-            productData[key] = parseFloat(formValues[key].toString()) || 0;
+            // For price, ensure it's a number and not a string with formatting
+            let priceValue = formValues[key];
+
+            // If it's already a number, use it directly
+            if (typeof priceValue === 'number') {
+              productData[key] = priceValue;
+            }
+            // If it's a string, clean it up and convert to number
+            else if (typeof priceValue === 'string') {
+              // Remove all non-numeric characters except decimal point and minus
+              const cleanedValue = priceValue.replace(/[^\d.-]/g, '');
+              const numericValue = parseFloat(cleanedValue);
+              if (!isNaN(numericValue)) {
+                productData[key] = numericValue;
+              }
+            }
           } else if (
             key === "compareAtPrice" &&
-            formValues[key] !== undefined
+            formValues[key] !== undefined &&
+            formValues[key] !== ''
           ) {
-            const compareAtPrice = parseFloat(formValues[key].toString());
-            productData["comparePrice"] =
-              compareAtPrice > 0 ? compareAtPrice : undefined;
+            // For compareAtPrice, ensure it's a number or null/undefined
+            const value = formValues[key];
+            if (typeof value === 'number') {
+              productData["comparePrice"] = value > 0 ? value : null;
+            } else if (typeof value === 'string' && value.trim() !== '') {
+              const cleanedValue = value.replace(/[^\d.]/g, '');
+              const numericValue = parseFloat(cleanedValue);
+              if (!isNaN(numericValue) && numericValue > 0) {
+                productData["comparePrice"] = numericValue;
+              } else {
+                productData["comparePrice"] = null;
+              }
+            }
           } else if (key === "stockQuantity" && formValues[key] !== undefined) {
             productData["stock"] = parseInt(formValues[key].toString()) || 0;
           } else if (key === "images" && formValues[key] !== undefined) {
             const processedImages =
               typeof formValues[key] === "string"
                 ? formValues[key]
-                    .split("\n")
-                    .filter((img: string) => img.trim())
+                  .split("\n")
+                  .filter((img: string) => img.trim())
                 : Array.isArray(formValues[key])
                   ? formValues[key]
                   : [];
@@ -184,9 +210,9 @@ const EditProductPage: React.FC = () => {
             productData[key] =
               typeof formValues[key] === "string"
                 ? formValues[key]
-                    .split(",")
-                    .map((kw: string) => kw.trim())
-                    .filter((kw) => kw.length > 0)
+                  .split(",")
+                  .map((kw: string) => kw.trim())
+                  .filter((kw) => kw.length > 0)
                 : Array.isArray(formValues[key])
                   ? formValues[key]
                   : [];
