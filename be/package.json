@@ -26,6 +26,7 @@
   "description": "Backend API for E-commerce website",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@mui/icons-material": "^7.3.4",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.7.4",

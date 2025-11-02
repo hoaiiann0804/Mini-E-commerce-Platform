@@ -60,15 +60,13 @@ const Select: React.FC<SelectProps> = ({
   };
 
   const baseClasses = 'relative w-full';
-  const selectClasses = `block w-full px-4 py-3 rounded-lg border ${
-    error
+  const selectClasses = `block w-full px-4 py-3 rounded-lg border ${error
       ? 'border-error focus:ring-error-100 focus:border-error'
       : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
-  } ${
-    disabled
+    } ${disabled
       ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
       : 'bg-white text-neutral-800 cursor-pointer'
-  } dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 appearance-none transition-colors duration-200`;
+    } dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 appearance-none transition-colors duration-200`;
 
   return (
     <div className={`${baseClasses} ${className}`} ref={selectRef}>
@@ -114,11 +112,10 @@ const Select: React.FC<SelectProps> = ({
                 <li
                   key={option.value}
                   role="option"
-                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 ${
-                    option.value === value
+                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 ${option.value === value
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
                       : 'text-neutral-700 dark:text-neutral-300'
-                  }`}
+                    }`}
                   onClick={() => handleSelect(option)}
                   aria-selected={option.value === value}
                 >
