@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { Button } from "antd";
 import {
   ArrowRightOutlined,
   CheckCircleOutlined,
   LoadingOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
-import CustomButton from '@/components/common/Button';
-import PremiumButton from '@/components/common/PremiumButton';
-import Input from '@/components/common/Input';
-import Select from '@/components/common/Select';
-import CartItem from '@/components/features/CartItem';
-import StripePaymentForm from '@/components/payment/StripePaymentForm';
-import BankTransferQR from '@/components/payment/BankTransferQR';
-import { RootState } from '@/store';
-import { clearCart, initializeCart, addItem } from '@/features/cart/cartSlice';
-import { addNotification } from '@/features/ui/uiSlice';
-import { formatPrice } from '@/utils/format';
-import { useCreateOrderMutation } from '@/services/orderApi';
-import { cartApi, useGetCartCountQuery } from '@/services/cartApi';
+import CustomButton from "@/components/common/Button";
+import PremiumButton from "@/components/common/PremiumButton";
+import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
+import CartItem from "@/components/features/CartItem";
+import StripePaymentForm from "@/components/payment/StripePaymentForm";
+import BankTransferQR from "@/components/payment/BankTransferQR";
+import { RootState } from "@/store";
+import { clearCart, initializeCart, addItem } from "@/features/cart/cartSlice";
+import { addNotification } from "@/features/ui/uiSlice";
+import { formatPrice } from "@/utils/format";
+import { useCreateOrderMutation } from "@/services/orderApi";
+import { cartApi, useGetCartCountQuery } from "@/services/cartApi";
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -34,16 +34,16 @@ const CheckoutPage: React.FC = () => {
   useEffect(() => {
     // Kiểm tra xem URL có chứa tham số
     const searchParams = new URLSearchParams(window.location.search);
-    const isBuyNow = searchParams.get('buyNow') === 'true';
+    const isBuyNow = searchParams.get("buyNow") === "true";
 
     // Kiểm tra cả hai loại URL (cũ và mới)
     const repayOrderId =
-      searchParams.get('repayOrder') || searchParams.get('orderId');
-    const repayAmount = searchParams.get('amount');
+      searchParams.get("repayOrder") || searchParams.get("orderId");
+    const repayAmount = searchParams.get("amount");
 
     // Kiểm tra xem URL có phải là URL cũ không (/checkout/payment)
     const isOldPaymentUrl =
-      window.location.pathname.includes('/checkout/payment');
+      window.location.pathname.includes("/checkout/payment");
 
     // Nếu là URL cũ, chuyển hướng đến URL mới
     if (isOldPaymentUrl && repayOrderId && repayAmount) {
@@ -55,7 +55,7 @@ const CheckoutPage: React.FC = () => {
 
     // Kiểm tra xem người dùng đang thanh toán lại đơn hàng hay không
     if (repayOrderId && repayAmount) {
-      console.log('Repaying order:', repayOrderId, 'amount:', repayAmount);
+      console.log("Repaying order:", repayOrderId, "amount:", repayAmount);
 
       // Đặt thông tin đơn hàng hiện tại để thanh toán
       setCurrentOrder({
@@ -67,34 +67,34 @@ const CheckoutPage: React.FC = () => {
       // Đặt phương thức thanh toán mặc định
       setFormData((prev) => ({
         ...prev,
-        paymentMethod: 'stripe',
+        paymentMethod: "stripe",
       }));
 
       return;
     }
 
     // Kiểm tra xem người dùng vừa thực hiện hành động "Mua ngay" hay không
-    const isBuyNowAction = sessionStorage.getItem('buyNowAction') === 'true';
+    const isBuyNowAction = sessionStorage.getItem("buyNowAction") === "true";
 
     // Nếu người dùng vừa thực hiện hành động "Mua ngay", không chuyển hướng
     if (isBuyNow || isBuyNowAction) {
       // Xóa cờ sau khi đã sử dụng
-      sessionStorage.removeItem('buyNowAction');
+      sessionStorage.removeItem("buyNowAction");
 
       // Đảm bảo giỏ hàng được khởi tạo
       dispatch(initializeCart());
 
       // Nếu có thông tin sản phẩm mua ngay trong sessionStorage, thêm vào giỏ hàng
-      const buyNowItemStr = sessionStorage.getItem('buyNowItem');
+      const buyNowItemStr = sessionStorage.getItem("buyNowItem");
       if (buyNowItemStr) {
         try {
           const buyNowItem = JSON.parse(buyNowItemStr);
           // Thêm sản phẩm vào giỏ hàng nếu chưa có
           dispatch(addItem(buyNowItem));
           // Xóa thông tin sản phẩm sau khi đã sử dụng
-          sessionStorage.removeItem('buyNowItem');
+          sessionStorage.removeItem("buyNowItem");
         } catch (error) {
-          console.error('Error parsing buyNowItem:', error);
+          console.error("Error parsing buyNowItem:", error);
         }
       }
 
@@ -106,13 +106,13 @@ const CheckoutPage: React.FC = () => {
 
     // Kiểm tra localStorage trực tiếp để đảm bảo không có dữ liệu giỏ hàng cũ
     // Chỉ chuyển hướng nếu không phải đang thanh toán lại đơn hàng
-    const cartItems = localStorage.getItem('cartItems');
-    if ((!cartItems || cartItems === '[]') && !repayOrderId) {
-      navigate('/shop');
+    const cartItems = localStorage.getItem("cartItems");
+    if ((!cartItems || cartItems === "[]") && !repayOrderId) {
+      navigate("/shop");
       dispatch(
         addNotification({
-          type: 'info',
-          message: t('checkout.emptyCart.redirectMessage'),
+          type: "info",
+          message: t("checkout.emptyCart.redirectMessage"),
         })
       );
     }
@@ -125,52 +125,52 @@ const CheckoutPage: React.FC = () => {
 
   // Payment methods with i18n
   const paymentMethods = [
-    { value: 'stripe', label: t('checkout.paymentMethod.creditCard') },
-    { value: 'bank_transfer', label: t('checkout.paymentMethod.bankTransfer') },
+    { value: "stripe", label: t("checkout.paymentMethod.creditCard") },
+    { value: "bank_transfer", label: t("checkout.paymentMethod.bankTransfer") },
   ];
 
   // Shipping methods with i18n
   const shippingMethods = [
     {
-      value: 'standard',
-      label: t('checkout.shippingMethod.standard'),
+      value: "standard",
+      label: t("checkout.shippingMethod.standard"),
       price: 30000,
     },
     {
-      value: 'express',
-      label: t('checkout.shippingMethod.express'),
+      value: "express",
+      label: t("checkout.shippingMethod.express"),
       price: 50000,
     },
     {
-      value: 'free',
-      label: t('checkout.shippingMethod.free'),
+      value: "free",
+      label: t("checkout.shippingMethod.free"),
       price: 0,
     },
   ];
 
   // Form state
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '', // Sử dụng số điện thoại của người dùng nếu có
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'VN',
-    shippingMethod: 'standard',
-    paymentMethod: 'stripe',
-    notes: '',
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "", // Sử dụng số điện thoại của người dùng nếu có
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "VN",
+    shippingMethod: "standard",
+    paymentMethod: "stripe",
+    notes: "",
     // Billing address (same as shipping by default)
-    billingFirstName: user?.firstName || '',
-    billingLastName: user?.lastName || '',
-    billingAddress: '',
-    billingCity: '',
-    billingState: '',
-    billingZipCode: '',
-    billingCountry: 'VN',
-    billingPhone: user?.phone || '', // Sử dụng số điện thoại của người dùng nếu có
+    billingFirstName: user?.firstName || "",
+    billingLastName: user?.lastName || "",
+    billingAddress: "",
+    billingCity: "",
+    billingState: "",
+    billingZipCode: "",
+    billingCountry: "VN",
+    billingPhone: user?.phone || "", // Sử dụng số điện thoại của người dùng nếu có
     sameAsShipping: true,
   });
 
@@ -179,18 +179,18 @@ const CheckoutPage: React.FC = () => {
   const [currentOrder, setCurrentOrder] = useState<any>(null);
 
   // Debug log
-  console.log('CheckoutPage render - currentOrder:', currentOrder);
-  console.log('CheckoutPage render - paymentMethod:', formData.paymentMethod);
+  console.log("CheckoutPage render - currentOrder:", currentOrder);
+  console.log("CheckoutPage render - paymentMethod:", formData.paymentMethod);
 
   // Countries list
   const countries = [
-    { value: 'VN', label: t('checkout.countries.VN') },
-    { value: 'US', label: t('checkout.countries.US') },
-    { value: 'CA', label: t('checkout.countries.CA') },
-    { value: 'UK', label: t('checkout.countries.UK') },
-    { value: 'AU', label: t('checkout.countries.AU') },
-    { value: 'DE', label: t('checkout.countries.DE') },
-    { value: 'FR', label: t('checkout.countries.FR') },
+    { value: "VN", label: t("checkout.countries.VN") },
+    { value: "US", label: t("checkout.countries.US") },
+    { value: "CA", label: t("checkout.countries.CA") },
+    { value: "UK", label: t("checkout.countries.UK") },
+    { value: "AU", label: t("checkout.countries.AU") },
+    { value: "DE", label: t("checkout.countries.DE") },
+    { value: "FR", label: t("checkout.countries.FR") },
   ];
 
   // Calculate totals
@@ -216,13 +216,13 @@ const CheckoutPage: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
-        [name]: '',
+        [name]: "",
       }));
     }
 
     // Auto-fill billing address if same as shipping
-    if (formData.sameAsShipping && name.startsWith('shipping')) {
-      const billingField = name.replace('shipping', 'billing');
+    if (formData.sameAsShipping && name.startsWith("shipping")) {
+      const billingField = name.replace("shipping", "billing");
       setFormData((prev) => ({
         ...prev,
         [billingField]: value,
@@ -254,48 +254,48 @@ const CheckoutPage: React.FC = () => {
 
     // Required fields
     const requiredFields = [
-      'firstName',
-      'lastName',
-      'email',
-      'phone',
-      'address',
-      'city',
-      'state',
-      'zipCode',
-      'country',
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "city",
+      "state",
+      "zipCode",
+      "country",
     ];
 
     requiredFields.forEach((field) => {
       if (!formData[field as keyof typeof formData]) {
-        newErrors[field] = t('checkout.validation.required');
+        newErrors[field] = t("checkout.validation.required");
       }
     });
 
     // Email validation
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('checkout.validation.emailInvalid');
+      newErrors.email = t("checkout.validation.emailInvalid");
     }
 
     // Phone validation
-    if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = t('checkout.validation.phoneInvalid');
+    if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\D/g, ""))) {
+      newErrors.phone = t("checkout.validation.phoneInvalid");
     }
 
     // Billing address validation if not same as shipping
     if (!formData.sameAsShipping) {
       const billingFields = [
-        'billingFirstName',
-        'billingLastName',
-        'billingAddress',
-        'billingCity',
-        'billingState',
-        'billingZipCode',
-        'billingCountry',
+        "billingFirstName",
+        "billingLastName",
+        "billingAddress",
+        "billingCity",
+        "billingState",
+        "billingZipCode",
+        "billingCountry",
       ];
 
       billingFields.forEach((field) => {
         if (!formData[field as keyof typeof formData]) {
-          newErrors[field] = t('checkout.validation.required');
+          newErrors[field] = t("checkout.validation.required");
         }
       });
     }
@@ -309,7 +309,7 @@ const CheckoutPage: React.FC = () => {
     if (!validateForm()) {
       const firstError = document.querySelector('[aria-invalid="true"]');
       if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return null;
     }
@@ -355,11 +355,11 @@ const CheckoutPage: React.FC = () => {
       const response = await createOrder(orderData).unwrap();
       return response.data.order;
     } catch (error) {
-      console.error('Failed to create order:', error);
+      console.error("Failed to create order:", error);
       dispatch(
         addNotification({
-          type: 'error',
-          message: t('checkout.errors.orderCreationFailed'),
+          type: "error",
+          message: t("checkout.errors.orderCreationFailed"),
           duration: 5000,
         })
       );
@@ -371,8 +371,8 @@ const CheckoutPage: React.FC = () => {
   const handlePaymentSuccess = async (paymentIntent: any) => {
     dispatch(
       addNotification({
-        type: 'success',
-        message: t('checkout.success.message'),
+        type: "success",
+        message: t("checkout.success.message"),
         duration: 5000,
       })
     );
@@ -381,17 +381,17 @@ const CheckoutPage: React.FC = () => {
     dispatch(clearCart());
 
     // Refetch cart count to update header badge
-    dispatch(cartApi.util.invalidateTags(['CartCount']));
+    dispatch(cartApi.util.invalidateTags(["CartCount"]));
 
     // Redirect to orders page
-    navigate('/orders');
+    navigate("/orders");
   };
 
   // Handle payment error
   const handlePaymentError = (error: string) => {
     dispatch(
       addNotification({
-        type: 'error',
+        type: "error",
         message: error,
         duration: 5000,
       })
@@ -405,12 +405,12 @@ const CheckoutPage: React.FC = () => {
 
   // Handle creating order for Stripe payment
   const handleStripeOrderCreation = async () => {
-    console.log('Creating order for Stripe payment...');
+    console.log("Creating order for Stripe payment...");
     const order = await handleCreateOrder();
-    console.log('Order created:', order);
+    console.log("Order created:", order);
     if (order) {
       setCurrentOrder(order);
-      console.log('Current order set:', order);
+      console.log("Current order set:", order);
     }
   };
 
@@ -418,7 +418,7 @@ const CheckoutPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.paymentMethod === 'stripe') {
+    if (formData.paymentMethod === "stripe") {
       // For Stripe, create order first
       await handleStripeOrderCreation();
       return;
@@ -429,17 +429,17 @@ const CheckoutPage: React.FC = () => {
     if (order) {
       dispatch(
         addNotification({
-          type: 'success',
-          message: t('checkout.success.message'),
+          type: "success",
+          message: t("checkout.success.message"),
           duration: 5000,
         })
       );
       dispatch(clearCart());
 
       // Refetch cart count to update header badge
-      dispatch(cartApi.util.invalidateTags(['CartCount']));
+      dispatch(cartApi.util.invalidateTags(["CartCount"]));
 
-      navigate('/orders');
+      navigate("/orders");
     }
   };
 
@@ -450,12 +450,12 @@ const CheckoutPage: React.FC = () => {
   useEffect(() => {
     // Kiểm tra xem URL có chứa tham số
     const searchParams = new URLSearchParams(window.location.search);
-    const isBuyNow = searchParams.get('buyNow') === 'true';
+    const isBuyNow = searchParams.get("buyNow") === "true";
     const repayOrderId =
-      searchParams.get('repayOrder') || searchParams.get('orderId');
+      searchParams.get("repayOrder") || searchParams.get("orderId");
 
     // Kiểm tra xem người dùng vừa thực hiện hành động "Mua ngay" hay không
-    const isBuyNowAction = sessionStorage.getItem('buyNowAction') === 'true';
+    const isBuyNowAction = sessionStorage.getItem("buyNowAction") === "true";
 
     // Đặt một timeout dài hơn để đảm bảo giỏ hàng đã được khởi tạo và API đã cập nhật
     const timer = setTimeout(() => {
@@ -464,19 +464,19 @@ const CheckoutPage: React.FC = () => {
       // Nếu người dùng vừa thực hiện hành động "Mua ngay" hoặc đang thanh toán lại đơn hàng, không chuyển hướng
       if (isBuyNow || isBuyNowAction || repayOrderId) {
         // Xóa cờ sau khi đã sử dụng
-        sessionStorage.removeItem('buyNowAction');
+        sessionStorage.removeItem("buyNowAction");
 
         // Nếu có thông tin sản phẩm mua ngay trong sessionStorage, thêm vào giỏ hàng
-        const buyNowItemStr = sessionStorage.getItem('buyNowItem');
+        const buyNowItemStr = sessionStorage.getItem("buyNowItem");
         if (buyNowItemStr) {
           try {
             const buyNowItem = JSON.parse(buyNowItemStr);
             // Thêm sản phẩm vào giỏ hàng nếu chưa có
             dispatch(addItem(buyNowItem));
             // Xóa thông tin sản phẩm sau khi đã sử dụng
-            sessionStorage.removeItem('buyNowItem');
+            sessionStorage.removeItem("buyNowItem");
           } catch (error) {
-            console.error('Error parsing buyNowItem:', error);
+            console.error("Error parsing buyNowItem:", error);
           }
         }
 
@@ -491,17 +491,17 @@ const CheckoutPage: React.FC = () => {
         !repayOrderId
       ) {
         // Xóa dữ liệu giỏ hàng trong localStorage để đảm bảo không có dữ liệu cũ
-        localStorage.removeItem('cartItems');
+        localStorage.removeItem("cartItems");
 
         // Cập nhật state Redux
         dispatch(initializeCart());
 
         // Chuyển hướng về trang shop
-        navigate('/shop');
+        navigate("/shop");
         dispatch(
           addNotification({
-            type: 'info',
-            message: t('checkout.emptyCart.redirectMessage'),
+            type: "info",
+            message: t("checkout.emptyCart.redirectMessage"),
           })
         );
       }
@@ -516,7 +516,7 @@ const CheckoutPage: React.FC = () => {
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
         <p className="text-neutral-600 dark:text-neutral-400">
-          {t('common.loading')}
+          {t("common.loading")}
         </p>
       </div>
     );
@@ -530,7 +530,7 @@ const CheckoutPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-8">
-        {isRepayingOrder ? t('checkout.repayTitle') : t('checkout.title')}
+        {isRepayingOrder ? t("checkout.repayTitle") : t("checkout.title")}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -540,79 +540,79 @@ const CheckoutPage: React.FC = () => {
           {!isRepayingOrder && (
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
-                {t('checkout.shippingInfo.title')}
+                {t("checkout.shippingInfo.title")}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label={t('checkout.shippingInfo.firstName')}
+                  label={t("checkout.shippingInfo.firstName")}
                   value={formData.firstName}
                   onChange={(e) =>
-                    handleInputChange('firstName', e.target.value)
+                    handleInputChange("firstName", e.target.value)
                   }
                   error={errors.firstName}
                   required
                 />
                 <Input
-                  label={t('checkout.shippingInfo.lastName')}
+                  label={t("checkout.shippingInfo.lastName")}
                   value={formData.lastName}
                   onChange={(e) =>
-                    handleInputChange('lastName', e.target.value)
+                    handleInputChange("lastName", e.target.value)
                   }
                   error={errors.lastName}
                   required
                 />
                 <Input
-                  label={t('checkout.shippingInfo.email')}
+                  label={t("checkout.shippingInfo.email")}
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   error={errors.email}
                   required
                 />
                 <Input
-                  label={t('checkout.shippingInfo.phone')}
+                  label={t("checkout.shippingInfo.phone")}
                   value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
                   error={errors.phone}
                   required
                 />
                 <div className="md:col-span-2">
                   <Input
-                    label={t('checkout.shippingInfo.address')}
+                    label={t("checkout.shippingInfo.address")}
                     value={formData.address}
                     onChange={(e) =>
-                      handleInputChange('address', e.target.value)
+                      handleInputChange("address", e.target.value)
                     }
                     error={errors.address}
                     required
                   />
                 </div>
                 <Input
-                  label={t('checkout.shippingInfo.city')}
+                  label={t("checkout.shippingInfo.city")}
                   value={formData.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
                   error={errors.city}
                   required
                 />
                 <Input
-                  label={t('checkout.shippingInfo.state')}
+                  label={t("checkout.shippingInfo.state")}
                   value={formData.state}
-                  onChange={(e) => handleInputChange('state', e.target.value)}
+                  onChange={(e) => handleInputChange("state", e.target.value)}
                   error={errors.state}
                   required
                 />
                 <Input
-                  label={t('checkout.shippingInfo.zipCode')}
+                  label={t("checkout.shippingInfo.zipCode")}
                   value={formData.zipCode}
-                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                  onChange={(e) => handleInputChange("zipCode", e.target.value)}
                   error={errors.zipCode}
                   required
                 />
                 <Select
-                  label={t('checkout.shippingInfo.country')}
+                  label={t("checkout.shippingInfo.country")}
                   value={formData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
+                  onChange={(e) => handleInputChange("country", e.target.value)}
                   options={countries}
                   error={errors.country}
                   required
@@ -625,7 +625,7 @@ const CheckoutPage: React.FC = () => {
           {!isRepayingOrder && (
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
-                {t('checkout.shippingMethod.title')}
+                {t("checkout.shippingMethod.title")}
               </h2>
 
               <div className="space-y-3">
@@ -640,7 +640,7 @@ const CheckoutPage: React.FC = () => {
                       value={method.value}
                       checked={formData.shippingMethod === method.value}
                       onChange={(e) =>
-                        handleInputChange('shippingMethod', e.target.value)
+                        handleInputChange("shippingMethod", e.target.value)
                       }
                       className="mr-3"
                     />
@@ -651,7 +651,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
                     <div className="font-semibold text-neutral-800 dark:text-neutral-100">
                       {method.price === 0
-                        ? t('checkout.shippingMethod.freeLabel')
+                        ? t("checkout.shippingMethod.freeLabel")
                         : formatPrice(method.price)}
                     </div>
                   </label>
@@ -664,8 +664,8 @@ const CheckoutPage: React.FC = () => {
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
               {isRepayingOrder
-                ? t('checkout.repaymentMethod.title')
-                : t('checkout.paymentMethod.title')}
+                ? t("checkout.repaymentMethod.title")
+                : t("checkout.paymentMethod.title")}
             </h2>
 
             <div className="space-y-3 mb-6">
@@ -680,7 +680,7 @@ const CheckoutPage: React.FC = () => {
                     value={method.value}
                     checked={formData.paymentMethod === method.value}
                     onChange={(e) =>
-                      handleInputChange('paymentMethod', e.target.value)
+                      handleInputChange("paymentMethod", e.target.value)
                     }
                     className="mr-3"
                   />
@@ -694,12 +694,12 @@ const CheckoutPage: React.FC = () => {
             {/* Other payment methods info */}
             {/* PayPal section removed */}
 
-            {formData.paymentMethod === 'bank_transfer' && (
+            {formData.paymentMethod === "bank_transfer" && (
               <div className="p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
                 {!currentOrder ? (
                   <>
                     <h4 className="font-semibold text-neutral-800 dark:text-neutral-100 mb-2">
-                      {t('checkout.bankTransfer.instructions')}
+                      {t("checkout.bankTransfer.instructions")}
                     </h4>
                     <div className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
                       <p className="text-blue-700 dark:text-blue-300 font-medium">
@@ -728,7 +728,7 @@ const CheckoutPage: React.FC = () => {
             </h2>
             <textarea
               value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
               placeholder="Any special instructions for your order..."
               className="w-full p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100"
               rows={3}
@@ -741,7 +741,7 @@ const CheckoutPage: React.FC = () => {
           {/* Order Summary */}
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 sticky top-4">
             <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
-              {t('checkout.orderSummary.title')}
+              {t("checkout.orderSummary.title")}
             </h2>
 
             {/* Cart Items or Repay Order */}
@@ -750,13 +750,13 @@ const CheckoutPage: React.FC = () => {
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <div className="text-blue-800 dark:text-blue-200">
                     <div className="font-semibold mb-2">
-                      {t('checkout.repayOrder.title')}
+                      {t("checkout.repayOrder.title")}
                     </div>
                     <div className="text-sm mb-1">
-                      {t('checkout.repayOrder.id')}: {currentOrder.id}
+                      {t("checkout.repayOrder.id")}: {currentOrder.id}
                     </div>
                     <div className="text-lg font-semibold">
-                      {t('checkout.repayOrder.amount')}:{' '}
+                      {t("checkout.repayOrder.amount")}:{" "}
                       {formatPrice(currentOrder.total)}
                     </div>
                   </div>
@@ -766,7 +766,7 @@ const CheckoutPage: React.FC = () => {
               <div className="space-y-4 mb-6">
                 {items.map((item) => (
                   <CartItem
-                    key={`${item.id}-${item.variantId || 'default'}`}
+                    key={`${item.id}-${item.variantId || "default"}`}
                     item={item}
                     readonly
                   />
@@ -779,36 +779,36 @@ const CheckoutPage: React.FC = () => {
               {!isRepayingOrder ? (
                 <>
                   <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                    <span>{t('checkout.orderSummary.subtotal')}</span>
+                    <span>{t("checkout.orderSummary.subtotal")}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                    <span>{t('checkout.orderSummary.shipping')}</span>
+                    <span>{t("checkout.orderSummary.shipping")}</span>
                     <span>
                       {shippingCost === 0
-                        ? t('checkout.orderSummary.freeShipping')
+                        ? t("checkout.orderSummary.freeShipping")
                         : formatPrice(shippingCost)}
                     </span>
                   </div>
                   <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                    <span>{t('checkout.orderSummary.tax')}</span>
+                    <span>{t("checkout.orderSummary.tax")}</span>
                     <span>{formatPrice(tax)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                    <span>{t('checkout.orderSummary.total')}</span>
+                    <span>{t("checkout.orderSummary.total")}</span>
                     <span>{formatPrice(total)}</span>
                   </div>
                 </>
               ) : (
                 <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                  <span>{t('checkout.orderSummary.total')}</span>
+                  <span>{t("checkout.orderSummary.total")}</span>
                   <span>{formatPrice(currentOrder.total)}</span>
                 </div>
               )}
             </div>
 
             {/* Complete Order Button (for bank transfer after QR is shown) */}
-            {formData.paymentMethod === 'bank_transfer' && currentOrder && (
+            {formData.paymentMethod === "bank_transfer" && currentOrder && (
               <PremiumButton
                 variant="success"
                 size="large"
@@ -823,7 +823,7 @@ const CheckoutPage: React.FC = () => {
             )}
 
             {/* Create Order Button for Bank Transfer */}
-            {formData.paymentMethod === 'bank_transfer' && !currentOrder && (
+            {formData.paymentMethod === "bank_transfer" && !currentOrder && (
               <PremiumButton
                 variant="primary"
                 size="large"
@@ -833,12 +833,12 @@ const CheckoutPage: React.FC = () => {
                 onClick={handleStripeOrderCreation} // Reuse the same function for creating order
                 className="w-full mt-6 h-14 text-lg font-semibold"
               >
-                {t('checkout.createOrder') || 'Tạo đơn hàng và nhận mã QR'}
+                {t("checkout.createOrder") || "Tạo đơn hàng và nhận mã QR"}
               </PremiumButton>
             )}
 
             {/* Create Order Button (for Stripe) */}
-            {formData.paymentMethod === 'stripe' && !currentOrder && (
+            {formData.paymentMethod === "stripe" && !currentOrder && (
               <PremiumButton
                 variant="primary"
                 size="large"
@@ -853,14 +853,14 @@ const CheckoutPage: React.FC = () => {
             )}
 
             {/* Stripe Payment Form */}
-            {formData.paymentMethod === 'stripe' && currentOrder && (
+            {formData.paymentMethod === "stripe" && currentOrder && (
               <div className="mt-6">
                 <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <div className="text-blue-800 dark:text-blue-200">
                     <div className="font-semibold">
                       {currentOrder.isRepay
-                        ? 'Thanh toán lại đơn hàng'
-                        : 'Order Created Successfully!'}
+                        ? "Thanh toán lại đơn hàng"
+                        : "Order Created Successfully!"}
                     </div>
                     {currentOrder.number && (
                       <div className="text-sm">
@@ -901,10 +901,10 @@ const CheckoutPage: React.FC = () => {
                 </svg>
                 <div>
                   <div className="font-semibold">
-                    {t('checkout.securityNotice.title')}
+                    {t("checkout.securityNotice.title")}
                   </div>
                   <div className="text-sm">
-                    {t('checkout.securityNotice.message')}
+                    {t("checkout.securityNotice.message")}
                   </div>
                 </div>
               </div>
