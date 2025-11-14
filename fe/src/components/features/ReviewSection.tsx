@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import ReviewForm from './ReviewForm';
-import ReviewList from './ReviewList';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import ReviewForm from "./ReviewForm";
+import ReviewList from "./ReviewList";
+import { useNavigate } from "react-router-dom";
 
 interface ReviewSectionProps {
   productId: string;
@@ -73,7 +73,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <button
                   onClick={() => {
-                    navigate('/login');
+                    navigate("/login");
                   }}
                   className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm"
                 >
@@ -81,7 +81,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId }) => {
                 </button>
                 <button
                   onClick={() => {
-                    navigate('/register');
+                    navigate("/register");
                   }}
                   className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors text-sm"
                 >
