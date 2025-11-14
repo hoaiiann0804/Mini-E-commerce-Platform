@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { toast } from '@/utils/toast';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { useCreateReviewMutation } from '@/services/reviewApi';
+import { useState } from "react";
+import { toast } from "@/utils/toast";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { useCreateReviewMutation } from "@/services/reviewApi";
 
 interface ReviewFormProps {
   productId: string;
@@ -22,8 +22,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
   const [formData, setFormData] = useState({
     rating: 0,
-    title: '',
-    comment: '',
+    title: "",
+    comment: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -32,19 +32,19 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     const newErrors: { [key: string]: string } = {};
 
     if (formData.rating === 0) {
-      newErrors.rating = 'Vui lòng chọn số sao đánh giá';
+      newErrors.rating = "Vui lòng chọn số sao đánh giá";
     }
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Vui lòng nhập tiêu đề đánh giá';
+      newErrors.title = "Vui lòng nhập tiêu đề đánh giá";
     } else if (formData.title.length < 5 || formData.title.length > 100) {
-      newErrors.title = 'Tiêu đề phải từ 5-100 ký tự';
+      newErrors.title = "Tiêu đề phải từ 5-100 ký tự";
     }
 
     if (!formData.comment.trim()) {
-      newErrors.comment = 'Vui lòng nhập nội dung đánh giá';
+      newErrors.comment = "Vui lòng nhập nội dung đánh giá";
     } else if (formData.comment.length < 10 || formData.comment.length > 1000) {
-      newErrors.comment = 'Nội dung phải từ 10-1000 ký tự';
+      newErrors.comment = "Nội dung phải từ 10-1000 ký tự";
     }
 
     setErrors(newErrors);
@@ -67,13 +67,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         comment: formData.comment,
       }).unwrap();
 
-      toast.success('Đánh giá của bạn đã được gửi thành công!');
+      toast.success("Đánh giá của bạn đã được gửi thành công!");
 
       // Reset form
       setFormData({
         rating: 0,
-        title: '',
-        comment: '',
+        title: "",
+        comment: "",
       });
       setErrors({});
 
@@ -81,7 +81,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         onSubmitSuccess();
       }
     } catch (error: any) {
-      console.error('Error creating review:', error);
+      console.error("Error creating review:", error);
 
       // Handle specific error messages
       if (error?.data?.message) {
@@ -89,7 +89,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       } else if (error?.message) {
         toast.error(error.message);
       } else {
-        toast.error('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+        toast.error("Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.");
       }
     }
   };
@@ -123,7 +123,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             <button
               onClick={() => {
                 // Navigate to login page
-                window.location.href = '/login';
+                window.location.href = "/login";
               }}
               className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
             >
@@ -132,7 +132,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             <button
               onClick={() => {
                 // Navigate to register page
-                window.location.href = '/register';
+                window.location.href = "/register";
               }}
               className="px-6 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors font-medium"
             >
@@ -168,8 +168,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 }}
                 className={`w-8 h-8 ${
                   star <= formData.rating
-                    ? 'text-yellow-400'
-                    : 'text-neutral-300 dark:text-neutral-600'
+                    ? "text-yellow-400"
+                    : "text-neutral-300 dark:text-neutral-600"
                 } hover:text-yellow-400 transition-colors`}
               >
                 <svg
@@ -186,11 +186,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               {formData.rating > 0 && (
                 <>
                   {formData.rating} sao
-                  {formData.rating === 1 && ' - Rất tệ'}
-                  {formData.rating === 2 && ' - Tệ'}
-                  {formData.rating === 3 && ' - Trung bình'}
-                  {formData.rating === 4 && ' - Tốt'}
-                  {formData.rating === 5 && ' - Tuyệt vời'}
+                  {formData.rating === 1 && " - Rất tệ"}
+                  {formData.rating === 2 && " - Tệ"}
+                  {formData.rating === 3 && " - Trung bình"}
+                  {formData.rating === 4 && " - Tốt"}
+                  {formData.rating === 5 && " - Tuyệt vời"}
                 </>
               )}
             </span>
@@ -294,7 +294,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 Đang gửi...
               </span>
             ) : (
-              'Gửi đánh giá'
+              "Gửi đánh giá"
             )}
           </button>
           {onCancel && (
