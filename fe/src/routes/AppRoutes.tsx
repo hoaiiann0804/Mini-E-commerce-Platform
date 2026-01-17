@@ -2,20 +2,18 @@ import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import UserLayout from "@/components/layout/UserLayout";
-import AdminLayout from "@/components/admin/AdminLayout";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicOnlyRoute from "@/components/auth/PublicOnlyRoute";
 import AdminRoute from "./AdminRoute";
-import SideBarPerson from "@/pages/SideBarPerson";
-import WishListPage from "@/pages/WishListPage";
-import ProductReviews from "@/components/features/ProductReviews";
-import ReviewSection from "@/components/features/ReviewSection";
-import AddressPage from "@/pages/AddressPage";
+
 // import SideBarPerson from "@/pages/SideBarPerson";
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import("@/pages/HomePage"));
+const WishListPage = lazy(() => import("@/pages/WishListPage"));
+const AddressPage = lazy(() => import("@/pages/AddressPage"));
+const AdminLayout = lazy(() => import("@/components/admin/AdminLayout"));
 const ShopPage = lazy(() => import("@/pages/ShopPage"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
 const CartPage = lazy(() => import("@/pages/CartPage"));
@@ -204,7 +202,9 @@ const AppRoutes: React.FC = () => {
           path="admin"
           element={
             <AdminRoute>
-              <AdminLayout />
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminLayout />
+              </Suspense>
             </AdminRoute>
           }
         >
