@@ -31,8 +31,6 @@ import {
   useCreateWarrantyPackageMutation,
   useUpdateWarrantyPackageMutation,
   useDeleteWarrantyPackageMutation,
-  CreateWarrantyPackageRequest,
-  UpdateWarrantyPackageRequest,
 } from '@/services/warrantyApi';
 import { WarrantyPackage } from '@/types/product.types';
 
@@ -206,7 +204,7 @@ const WarrantyPackagesPage: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'actions',
-      render: (_, record: WarrantyPackage) => (
+      render: (_:any, record: WarrantyPackage) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
             <Button
