@@ -28,6 +28,8 @@
     "clsx": "^2.1.1",
     "country-state-city": "^3.2.1",
     "dayjs": "^1.11.10",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "formik": "^2.4.5",
     "framer-motion": "^11.0.8",
     "i18next": "^23.10.0",
