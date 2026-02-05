@@ -42,7 +42,7 @@ import AttributeModal from "@/components/modals/AttributeModal";
 import VariantModal from "@/components/modals/VariantModal";
 
 // Types
-import { ProductFormData, ProductAttribute, ProductVariant } from "@/types";
+import { ProductFormData, ProductAttribute, ProductVariant, Category } from "@/types";
 
 // Utils
 import {
@@ -338,12 +338,16 @@ const EditProductPage: React.FC = () => {
         Array.isArray(product.images)
       ) {
         const imageElements = product.images
-          .filter((img) => img.includes("data:image"))
-          .map(
-            (img) =>
-              `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
-          )
-          .join("<br/>");
+  .filter(
+    (img): img is string =>
+      typeof img === "string" && img.startsWith("data:image")
+  )
+  .map(
+    (img) =>
+      `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
+  )
+  .join("<br/>");
+
 
         if (imageElements) {
           processedDescription = imageElements;
@@ -507,7 +511,7 @@ const EditProductPage: React.FC = () => {
     return "Cập nhật sản phẩm thất bại. Vui lòng thử lại.";
   };
 
-  const categories = categoriesResponse?.data || [];
+  const categories: Category[] = Array.isArray(categoriesResponse?.data)?categoriesResponse.data : categoriesResponse?.data ?[categoriesResponse.data]: [];
 
   // Handle loading and error states
   if (isLoadingProduct) {

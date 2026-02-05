@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef } from "react";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -18,17 +18,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       leftIcon,
       rightIcon,
       fullWidth = true,
-      className = '',
+      className = "",
       disabled,
       ...props
     },
     ref
   ) => {
-    const inputClasses = `input ${error ? 'input-error' : ''} ${
-      disabled ? 'input-disabled' : ''
-    } ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${className}`;
+    const inputClasses = `input ${error ? "input-error" : ""} ${
+      disabled ? "input-disabled" : ""
+    } ${leftIcon ? "pl-10" : ""} ${rightIcon ? "pr-10" : ""} ${className}`;
 
-    const containerClasses = `${fullWidth ? 'w-full' : 'w-auto'} mb-4`;
+    const containerClasses = `${fullWidth ? "w-full" : "w-auto"} mb-4`;
 
     return (
       <div className={containerClasses}>
@@ -73,6 +73,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export default Input;

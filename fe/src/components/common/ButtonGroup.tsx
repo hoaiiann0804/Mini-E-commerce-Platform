@@ -22,7 +22,6 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({
   const groupClasses =
     `${baseClasses} ${directionClasses} ${widthClasses} ${className}`.trim();
 
-  // Clone children and add appropriate classes for grouping
   const processedChildren = React.Children.map(children, (child, index) => {
     if (!React.isValidElement(child)) return child;
 

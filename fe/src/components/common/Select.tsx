@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
 export interface SelectOption {
   value: string;
@@ -8,7 +8,8 @@ export interface SelectOption {
 interface SelectProps {
   options: SelectOption[];
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onValueChange?: (value: string) => void;
   placeholder?: string;
   label?: string;
   error?: string;
@@ -20,11 +21,12 @@ const Select: React.FC<SelectProps> = ({
   options,
   value,
   onChange,
-  placeholder = 'Select an option',
+  onValueChange,
+  placeholder = "Select an option",
   label,
   error,
   disabled = false,
-  className = '',
+  className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
@@ -42,14 +44,18 @@ const Select: React.FC<SelectProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleSelect = (option: SelectOption) => {
-    onChange(option.value);
+    if (onValueChange) {
+      onValueChange(option.value);
+    } else if (onChange) {
+      onChange(option.value);
+    }
     setIsOpen(false);
   };
 
@@ -59,14 +65,16 @@ const Select: React.FC<SelectProps> = ({
     }
   };
 
-  const baseClasses = 'relative w-full';
-  const selectClasses = `block w-full px-4 py-3 rounded-lg border ${error
-      ? 'border-error focus:ring-error-100 focus:border-error'
-      : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
-    } ${disabled
-      ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-      : 'bg-white text-neutral-800 cursor-pointer'
-    } dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 appearance-none transition-colors duration-200`;
+  const baseClasses = "relative w-full";
+  const selectClasses = `block w-full px-4 py-3 rounded-lg border ${
+    error
+      ? "border-error focus:ring-error-100 focus:border-error"
+      : "border-neutral-300 focus:ring-primary-500 focus:border-primary-500"
+  } ${
+    disabled
+      ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+      : "bg-white text-neutral-800 cursor-pointer"
+  } dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 appearance-none transition-colors duration-200`;
 
   return (
     <div className={`${baseClasses} ${className}`} ref={selectRef}>
@@ -90,7 +98,7 @@ const Select: React.FC<SelectProps> = ({
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg
-              className={`w-5 h-5 text-neutral-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
+              className={`w-5 h-5 text-neutral-400 transition-transform duration-200 ${isOpen ? "transform rotate-180" : ""}`}
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -112,10 +120,11 @@ const Select: React.FC<SelectProps> = ({
                 <li
                   key={option.value}
                   role="option"
-                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 ${option.value === value
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                      : 'text-neutral-700 dark:text-neutral-300'
-                    }`}
+                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 ${
+                    option.value === value
+                      ? "bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
+                      : "text-neutral-700 dark:text-neutral-300"
+                  }`}
                   onClick={() => handleSelect(option)}
                   aria-selected={option.value === value}
                 >

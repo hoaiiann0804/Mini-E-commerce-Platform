@@ -13,7 +13,6 @@ import {
 } from 'antd';
 import {
   ThunderboltOutlined,
-  BulbOutlined,
   PlayCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
@@ -74,7 +73,11 @@ const SimpleNamingTestPage: React.FC = () => {
 
   const runTestScenario = (scenario: (typeof testScenarios)[0]) => {
     setBaseName(scenario.baseName);
-    setSelectedAttributes(scenario.attributes);
+    setSelectedAttributes(
+      Object.fromEntries(
+        Object.entries(scenario.attributes).filter(([_, value]) => value !== undefined)
+      )
+    );
   };
 
   return (

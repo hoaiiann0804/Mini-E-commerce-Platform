@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { useGetCurrentUserQuery } from '@/services/authApi';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { useGetCurrentUserQuery } from "@/services/authApi";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface AdminRouteProps {
   children: ReactNode;
@@ -35,7 +35,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
         <div className="text-center">
-          <LoadingSpinner size="large" />
+          <LoadingSpinner size="lg" />
           <p className="mt-4 text-neutral-600 dark:text-neutral-400">
             Đang xác thực quyền truy cập...
           </p>
@@ -57,7 +57,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   // Check if user is an admin or manager
-  if (userToCheck?.role !== 'admin' && userToCheck?.role !== 'manager') {
+  if (userToCheck?.role !== "admin" && userToCheck?.role !== "manager") {
     return <Navigate to="/unauthorized" replace />;
   }
 

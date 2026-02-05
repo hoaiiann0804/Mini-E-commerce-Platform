@@ -221,7 +221,7 @@ const CategoriesPage: React.FC = () => {
       title: 'Hành động',
       key: 'actions',
       width: 120,
-      render: (_, record: Category) => (
+      render: (_:any, record: Category) => (
         <Space>
           <Button
             type="link"

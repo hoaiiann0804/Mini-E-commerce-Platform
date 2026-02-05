@@ -1,15 +1,14 @@
-import { useState, useMemo } from 'react';
-import { useGetDealsQuery } from '@/services/productApi';
-import ProductCard from '@/components/features/ProductCard';
-import ProductListCard from '@/components/features/ProductListCard';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Select from '@/components/common/Select';
-import Pagination from '@/components/common/Pagination';
-import { Product } from '@/types/product.types';
+import { useState, useMemo } from "react";
+import { useGetDealsQuery } from "@/services/productApi";
+import ProductCard from "@/components/features/ProductCard";
+import ProductListCard from "@/components/features/ProductListCard";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Select from "@/components/common/Select";
+import { Product } from "@/types/product.types";
 
 const DealsPage: React.FC = () => {
-  const [sortOption, setSortOption] = useState('discount_desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortOption, setSortOption] = useState("discount_desc");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const limit = 12;
 
@@ -25,25 +24,24 @@ const DealsPage: React.FC = () => {
   });
 
   // Chuyển đổi dữ liệu từ API thành định dạng phù hợp với component ProductCard
-  const formattedProducts = useMemo(() => {
+  const formattedProducts = useMemo<Product[]>(() => {
     if (!dealsData?.data) return [];
 
-    return dealsData.data.map((item) => {
+    return dealsData.data.map((item: any) => {
       // Chuyển đổi chuỗi giá thành số
       const price =
-        typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+        typeof item.price === "string" ? parseFloat(item.price) : item.price;
       const compareAtPrice =
-        typeof item.compareAtPrice === 'string'
+        typeof item.compareAtPrice === "string"
           ? parseFloat(item.compareAtPrice)
           : item.compareAtPrice;
 
-      // Tạo đối tượng ratings nếu không có
+
       const ratings = {
-        average: 4.5, // Giá trị mặc định
+        average: 4.5, 
         count: 10,
       };
 
-      // Trả về đối tượng phù hợp với interface Product
       return {
         ...item,
         price,
@@ -53,17 +51,17 @@ const DealsPage: React.FC = () => {
           item.createdAt &&
           new Date(item.createdAt) >
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Sản phẩm mới nếu được tạo trong 7 ngày qua
-        categoryName: item.categories?.[0]?.name || 'Uncategorized',
+        categoryName: item.categories?.[0]?.name || "Uncategorized",
         stock: item.stockQuantity || 0,
       } as Product;
     });
   }, [dealsData]);
 
   const sortOptions = [
-    { value: 'discount_desc', label: 'Giảm giá cao nhất' },
-    { value: 'price_asc', label: 'Giá: Thấp đến cao' },
-    { value: 'price_desc', label: 'Giá: Cao đến thấp' },
-    { value: 'newest', label: 'Mới nhất' },
+    { value: "discount_desc", label: "Giảm giá cao nhất" },
+    { value: "price_asc", label: "Giá: Thấp đến cao" },
+    { value: "price_desc", label: "Giá: Cao đến thấp" },
+    { value: "newest", label: "Mới nhất" },
   ];
 
   const handleSortChange = (value: string) => {
@@ -114,7 +112,7 @@ const DealsPage: React.FC = () => {
           <p className="text-neutral-600 dark:text-neutral-400 text-lg">
             {formattedProducts.length > 0
               ? `Hiển thị ${formattedProducts.length} sản phẩm giảm giá trên 50%`
-              : 'Khám phá các sản phẩm giảm giá sốc'}
+              : "Khám phá các sản phẩm giảm giá sốc"}
           </p>
         </div>
 
@@ -124,11 +122,11 @@ const DealsPage: React.FC = () => {
             {/* View Mode Toggle */}
             <div className="flex items-center bg-white dark:bg-neutral-800 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                  viewMode === "grid"
+                    ? "bg-primary-500 text-white"
+                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                 }`}
                 aria-label="Grid view"
               >
@@ -147,11 +145,11 @@ const DealsPage: React.FC = () => {
                 </svg>
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                  viewMode === "list"
+                    ? "bg-primary-500 text-white"
+                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                 }`}
                 aria-label="List view"
               >
@@ -210,13 +208,13 @@ const DealsPage: React.FC = () => {
           <>
             <div
               className={
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr'
-                  : 'space-y-8'
+                viewMode === "grid"
+                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr"
+                  : "space-y-8"
               }
             >
               {formattedProducts.map((product) =>
-                viewMode === 'grid' ? (
+                viewMode === "grid" ? (
                   <ProductCard
                     key={product.id}
                     {...product}

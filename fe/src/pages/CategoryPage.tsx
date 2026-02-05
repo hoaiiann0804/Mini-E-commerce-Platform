@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useGetCategoryBySlugQuery } from '@/services/categoryApi';
-import { mockProducts } from '@/data/mockProducts';
-import { Product } from '@/types/product.types';
-import ProductCard from '@/components/features/ProductCard';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { getCategoryBySlug } from '@/data/mockCategories';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { mockProducts } from "@/data/mockProducts";
+import { Product } from "@/types/product.types";
+import ProductCard from "@/components/features/ProductCard";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { getCategoryBySlug } from "@/data/mockCategories";
 
 const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -13,15 +12,9 @@ const CategoryPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const {
-    data: category,
-    isLoading: categoryLoading,
-    error: categoryError,
-  } = useGetCategoryBySlugQuery(slug || '');
-
   useEffect(() => {
     if (!slug) {
-      navigate('/not-found');
+      navigate("/not-found");
       return;
     }
 
@@ -30,7 +23,7 @@ const CategoryPage: React.FC = () => {
 
     if (!directCategory) {
       console.error(`Category with slug "${slug}" not found`);
-      navigate('/not-found');
+      navigate("/not-found");
       return;
     }
 
@@ -57,7 +50,7 @@ const CategoryPage: React.FC = () => {
   }
 
   // Lấy thông tin danh mục trực tiếp từ dữ liệu mock
-  const categoryInfo = getCategoryBySlug(slug || '');
+  const categoryInfo = getCategoryBySlug(slug || "");
 
   if (!categoryInfo) {
     return null; // Sẽ được xử lý trong useEffect

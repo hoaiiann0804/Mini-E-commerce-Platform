@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Table,
   Button,
@@ -17,7 +17,7 @@ import {
   Row,
   Col,
   Statistic,
-} from 'antd';
+} from "antd";
 import {
   UserOutlined,
   EditOutlined,
@@ -28,14 +28,14 @@ import {
   PhoneOutlined,
   CrownOutlined,
   TeamOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 import {
   useGetAllUsersQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
   type User,
   type UserFilters,
-} from '@/services/adminUserApi';
+} from "@/services/adminUserApi";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -44,7 +44,7 @@ interface UserFormData {
   firstName: string;
   lastName: string;
   phone?: string;
-  role: 'customer' | 'admin' | 'manager';
+  role: "customer" | "admin" | "manager";
   isEmailVerified: boolean;
   isActive: boolean;
 }
@@ -56,10 +56,10 @@ const UsersPage: React.FC = () => {
   const [filters, setFilters] = useState<UserFilters>({
     page: 1,
     limit: 10,
-    search: '',
-    role: '',
-    sortBy: 'createdAt',
-    sortOrder: 'DESC',
+    search: "",
+    role: "",
+    sortBy: "createdAt",
+    sortOrder: "DESC",
   });
 
   // API hooks
@@ -81,12 +81,12 @@ const UsersPage: React.FC = () => {
         ...values,
       }).unwrap();
 
-      message.success('Cập nhật người dùng thành công!');
+      message.success("Cập nhật người dùng thành công!");
       setIsModalVisible(false);
       setEditingUser(null);
       form.resetFields();
     } catch (error: any) {
-      message.error(error?.data?.message || 'Có lỗi xảy ra!');
+      message.error(error?.data?.message || "Có lỗi xảy ra!");
     }
   };
 
@@ -94,9 +94,9 @@ const UsersPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteUser(id).unwrap();
-      message.success('Xóa người dùng thành công!');
+      message.success("Xóa người dùng thành công!");
     } catch (error: any) {
-      message.error(error?.data?.message || 'Không thể xóa người dùng!');
+      message.error(error?.data?.message || "Không thể xóa người dùng!");
     }
   };
 
@@ -132,25 +132,25 @@ const UsersPage: React.FC = () => {
   // Get role color
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin':
-        return 'red';
-      case 'manager':
-        return 'orange';
-      case 'customer':
-        return 'blue';
+      case "admin":
+        return "red";
+      case "manager":
+        return "orange";
+      case "customer":
+        return "blue";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   // Get role icon
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin':
+      case "admin":
         return <CrownOutlined />;
-      case 'manager':
+      case "manager":
         return <TeamOutlined />;
-      case 'customer':
+      case "customer":
         return <UserOutlined />;
       default:
         return <UserOutlined />;
@@ -160,9 +160,9 @@ const UsersPage: React.FC = () => {
   // Table columns
   const columns = [
     {
-      title: 'Người dùng',
-      key: 'user',
-      render: (_, record: User) => (
+      title: "Người dùng",
+      key: "user",
+      render: (_: unknown, record: User) => (
         <div className="flex items-center gap-3">
           <Avatar src={record.avatar} icon={<UserOutlined />} size={48} />
           <div>
@@ -184,51 +184,51 @@ const UsersPage: React.FC = () => {
       ),
     },
     {
-      title: 'Vai trò',
-      dataIndex: 'role',
-      key: 'role',
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
       width: 120,
       render: (role: string) => (
         <Tag color={getRoleColor(role)} icon={getRoleIcon(role)}>
-          {role === 'admin'
-            ? 'Quản trị viên'
-            : role === 'manager'
-              ? 'Quản lý'
-              : 'Khách hàng'}
+          {role === "admin"
+            ? "Quản trị viên"
+            : role === "manager"
+              ? "Quản lý"
+              : "Khách hàng"}
         </Tag>
       ),
     },
     {
-      title: 'Trạng thái',
-      key: 'status',
+      title: "Trạng thái",
+      key: "status",
       width: 150,
-      render: (_, record: User) => (
+      render: (_: unknown, record: User) => (
         <div className="space-y-1">
           <div>
-            <Tag color={record.isActive ? 'success' : 'error'}>
-              {record.isActive ? 'Hoạt động' : 'Bị khóa'}
+            <Tag color={record.isActive ? "success" : "error"}>
+              {record.isActive ? "Hoạt động" : "Bị khóa"}
             </Tag>
           </div>
           <div>
-            <Tag color={record.isEmailVerified ? 'processing' : 'warning'}>
-              {record.isEmailVerified ? 'Email đã xác minh' : 'Chưa xác minh'}
+            <Tag color={record.isEmailVerified ? "processing" : "warning"}>
+              {record.isEmailVerified ? "Email đã xác minh" : "Chưa xác minh"}
             </Tag>
           </div>
         </div>
       ),
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
       width: 120,
-      render: (date: string) => new Date(date).toLocaleDateString('vi-VN'),
+      render: (date: string) => new Date(date).toLocaleDateString("vi-VN"),
     },
     {
-      title: 'Hành động',
-      key: 'actions',
+      title: "Hành động",
+      key: "actions",
       width: 120,
-      render: (_, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space>
           <Button
             type="link"
@@ -253,8 +253,8 @@ const UsersPage: React.FC = () => {
 
   // Calculate statistics
   const totalUsers = pagination?.totalItems || 0;
-  const adminCount = users.filter((u) => u.role === 'admin').length;
-  const customerCount = users.filter((u) => u.role === 'customer').length;
+  const adminCount = users.filter((u) => u.role === "admin").length;
+  const customerCount = users.filter((u) => u.role === "customer").length;
   const verifiedCount = users.filter((u) => u.isEmailVerified).length;
 
   return (
@@ -282,7 +282,7 @@ const UsersPage: React.FC = () => {
                 }
                 value={totalUsers}
                 prefix={<UserOutlined />}
-                valueStyle={{ color: '#1890ff' }}
+                valueStyle={{ color: "#1890ff" }}
               />
             </Card>
           </Col>
@@ -294,7 +294,7 @@ const UsersPage: React.FC = () => {
                 }
                 value={adminCount}
                 prefix={<CrownOutlined />}
-                valueStyle={{ color: '#f5222d' }}
+                valueStyle={{ color: "#f5222d" }}
               />
             </Card>
           </Col>
@@ -306,7 +306,7 @@ const UsersPage: React.FC = () => {
                 }
                 value={customerCount}
                 prefix={<TeamOutlined />}
-                valueStyle={{ color: '#52c41a' }}
+                valueStyle={{ color: "#52c41a" }}
               />
             </Card>
           </Col>
@@ -320,7 +320,7 @@ const UsersPage: React.FC = () => {
                 }
                 value={verifiedCount}
                 prefix={<MailOutlined />}
-                valueStyle={{ color: '#722ed1' }}
+                valueStyle={{ color: "#722ed1" }}
               />
             </Card>
           </Col>
@@ -334,7 +334,7 @@ const UsersPage: React.FC = () => {
                 placeholder="Tìm kiếm theo tên, email, số điện thoại..."
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
-                suffix={<SearchOutlined style={{ color: 'rgba(0,0,0,.45)' }} />}
+                suffix={<SearchOutlined style={{ color: "rgba(0,0,0,.45)" }} />}
                 allowClear
               />
             </Col>
@@ -342,8 +342,8 @@ const UsersPage: React.FC = () => {
               <Select
                 placeholder="Vai trò"
                 value={filters.role}
-                onChange={(value) => handleFilterChange('role', value)}
-                style={{ width: '100%' }}
+                onChange={(value) => handleFilterChange("role", value)}
+                style={{ width: "100%" }}
                 allowClear
               >
                 <Option value="">Tất cả</Option>
@@ -356,8 +356,8 @@ const UsersPage: React.FC = () => {
               <Select
                 placeholder="Sắp xếp theo"
                 value={filters.sortBy}
-                onChange={(value) => handleFilterChange('sortBy', value)}
-                style={{ width: '100%' }}
+                onChange={(value) => handleFilterChange("sortBy", value)}
+                style={{ width: "100%" }}
               >
                 <Option value="createdAt">Ngày tạo</Option>
                 <Option value="firstName">Tên</Option>
@@ -368,8 +368,8 @@ const UsersPage: React.FC = () => {
               <Select
                 placeholder="Thứ tự"
                 value={filters.sortOrder}
-                onChange={(value) => handleFilterChange('sortOrder', value)}
-                style={{ width: '100%' }}
+                onChange={(value) => handleFilterChange("sortOrder", value)}
+                style={{ width: "100%" }}
               >
                 <Option value="DESC">Giảm dần</Option>
                 <Option value="ASC">Tăng dần</Option>
@@ -380,7 +380,7 @@ const UsersPage: React.FC = () => {
                 icon={<ReloadOutlined />}
                 onClick={() => refetch()}
                 loading={isLoading}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
                 className="dark:text-neutral-300"
               >
                 Làm mới
@@ -429,7 +429,7 @@ const UsersPage: React.FC = () => {
                 <Form.Item
                   name="firstName"
                   label="Tên"
-                  rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
+                  rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
                 >
                   <Input placeholder="Nhập tên" />
                 </Form.Item>
@@ -438,7 +438,7 @@ const UsersPage: React.FC = () => {
                 <Form.Item
                   name="lastName"
                   label="Họ"
-                  rules={[{ required: true, message: 'Vui lòng nhập họ!' }]}
+                  rules={[{ required: true, message: "Vui lòng nhập họ!" }]}
                 >
                   <Input placeholder="Nhập họ" />
                 </Form.Item>
@@ -452,7 +452,7 @@ const UsersPage: React.FC = () => {
             <Form.Item
               name="role"
               label="Vai trò"
-              rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+              rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
             >
               <Select placeholder="Chọn vai trò">
                 <Option value="customer">Khách hàng</Option>

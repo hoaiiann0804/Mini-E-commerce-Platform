@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Button, Radio, Space, Divider } from "antd";
+import { Button, Radio, Space } from "antd";
 import {
-  ArrowRightOutlined,
-  CheckCircleOutlined,
   LoadingOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
@@ -14,7 +12,6 @@ import {
 import { useGetAddressesQuery } from "@/services/userApi";
 import type { Address } from "@/types/user.types";
 
-import CustomButton from "@/components/common/Button";
 import PremiumButton from "@/components/common/PremiumButton";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
@@ -295,23 +292,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  // Handle same as shipping checkbox
-  const handleSameAsShipping = (checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      sameAsShipping: checked,
-      ...(checked && {
-        billingFirstName: prev.firstName,
-        billingLastName: prev.lastName,
-        billingAddress: prev.address,
-        billingCity: prev.city,
-        billingState: prev.state,
-        billingZipCode: prev.zipCode,
-        billingCountry: prev.country,
-        billingPhone: prev.phone,
-      }),
-    }));
-  };
+
 
   // Validate form
   const validateForm = () => {
@@ -479,34 +460,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  // Handle form submission for non-Stripe payments
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
-    if (formData.paymentMethod === "stripe") {
-      // For Stripe, create order first
-      await handleStripeOrderCreation();
-      return;
-    }
-
-    // For other payment methods, handle differently
-    const order = await handleCreateOrder();
-    if (order) {
-      dispatch(
-        addNotification({
-          type: "success",
-          message: t("checkout.success.message"),
-          duration: 5000,
-        })
-      );
-      dispatch(clearCart());
-
-      // Refetch cart count to update header badge
-      dispatch(cartApi.util.invalidateTags(["CartCount"]));
-
-      navigate("/orders");
-    }
-  };
 
   // Trạng thái loading cho giỏ hàng
   const [isCartLoading, setIsCartLoading] = useState(true);
@@ -667,7 +621,7 @@ const CheckoutPage: React.FC = () => {
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
-                      onClick={() => navigate('/account/addresses')}
+                      onClick={() => navigate('/user/address')}
                       className="p-0 text-sm"
                     >
                       {t('checkout.manageAddresses')}
@@ -756,7 +710,6 @@ const CheckoutPage: React.FC = () => {
                     options={countries}
                     error={errors.country}
                     disabled={!isUsingCustomAddress && selectedAddressId !== null}
-                    required
                   />
                 </div>
               </div>
@@ -905,7 +858,7 @@ const CheckoutPage: React.FC = () => {
                 <CartItem
                   key={`${item.id}-${item.variantId || "default"}`}
                   item={item}
-                  readonly
+                  isCheckout
                 />
               ))}
             </div>

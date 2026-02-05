@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useGetCategoriesQuery } from '@/services/categoryApi';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Category } from '@/types/category.types';
-import { mockCategories } from '@/data/mockCategories';
 
 const CategoriesPage: React.FC = () => {
   const { data: categories, isLoading, error } = useGetCategoriesQuery();

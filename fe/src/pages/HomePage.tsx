@@ -1,5 +1,5 @@
-import { PremiumButton } from '@/components/common';
-import { Product } from '@/types/product.types';
+import { PremiumButton } from "@/components/common";
+import { Product } from "@/types/product.types";
 
 // Define the product item type from the API response
 interface ProductItem {
@@ -15,32 +15,34 @@ interface ProductItem {
   rating?: number;
   reviewCount?: number;
   stock?: number;
-  [key: string]: any; // For any additional properties
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: any;
 }
 
-import ProductCard from '@/components/features/ProductCard';
-import { HeroSection } from '@/components/sections';
+import ProductCard from "@/components/features/ProductCard";
+import { HeroSection } from "@/components/sections";
 import {
   SectionLoading,
   ProductCardSkeleton,
   CategoryCardSkeleton,
-} from '@/components/common/LoadingState';
-import { ErrorState, EmptyState } from '@/components/common/ErrorState';
-import { ProductGrid, CategoryGrid } from '@/components/layout/Grid';
-import { PageLayout, PageSection } from '@/components/layout/PageLayout';
-import { useGetCategoriesQuery } from '@/services/categoryApi';
+} from "@/components/common/LoadingState";
+import { ErrorState, EmptyState } from "@/components/common/ErrorState";
+import { ProductGrid, CategoryGrid } from "@/components/layout/Grid";
+import { PageLayout, PageSection } from "@/components/layout/PageLayout";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
 import {
   useGetFeaturedProductsQuery,
   useGetBestSellersQuery,
-  useGetNewArrivalsQuery
-} from '@/services/productApi';
-import { useApiState } from '@/hooks/useApiState';
+  useGetNewArrivalsQuery,
+} from "@/services/productApi";
+import { useApiState } from "@/hooks/useApiState";
 import {
   getCategoryImage,
   createCategoryImageErrorHandler,
-} from '@/utils/imageUtils';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+} from "@/utils/imageUtils";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 /**
  * HomePage component - Main landing page with hero, featured products, and categories
@@ -102,17 +104,26 @@ const HomePage: React.FC = () => {
     >
       {/* Hero Section */}
       <HeroSection />
+      {/* <div className="pt-3">
+      <div className="bg-white">
+      <h2 className="text-center text-xl font-semibold mb-4">
+        Trusted by companies worldwide
+      </h2>
+      <BrandCarousel />
+    </div>
+      </div>
+       */}
 
       {/* Featured Products */}
       <PageSection
-        title={t('homepage.featuredProducts.title')}
+        title={t("homepage.featuredProducts.title")}
         className="py-16 bg-neutral-50 dark:bg-neutral-900"
         headerActions={
           <Link
             to="/shop?sort=featured"
             className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center"
           >
-            {t('homepage.featuredProducts.viewAll')}
+            {t("homepage.featuredProducts.viewAll")}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 ml-1"
@@ -136,26 +147,31 @@ const HomePage: React.FC = () => {
           </ProductGrid>
         ) : featuredProducts.isError ? (
           <ErrorState
-            error={featuredProducts.error?.message || 'Lỗi tải sản phẩm nổi bật'}
+            error={
+              featuredProducts.error?.message || "Lỗi tải sản phẩm nổi bật"
+            }
             onRetry={() => featuredProductsQuery.refetch()}
             retryText="Thử lại"
           />
-        ) : featuredProducts.data?.data && featuredProducts.data.data.length > 0 ? (
+        ) : featuredProducts.data?.data &&
+          featuredProducts.data.data.length > 0 ? (
           <ProductGrid>
             {featuredProducts.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                thumbnail={product.thumbnail}
-                slug={product.slug}
-                images={product.images || [product.thumbnail]}
-                description={product.description || ''}
-                categoryId={product.categoryId || ''}
-                categoryName={product.categoryName || ''}
-                rating={product.rating || 0}
-                reviewCount={product.reviewCount || 0}
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
                 stock={product.stock || 0}
               />
             ))}
@@ -203,7 +219,7 @@ const HomePage: React.FC = () => {
           </ProductGrid>
         ) : bestSellers.isError ? (
           <ErrorState
-            error={bestSellers.error?.message || 'Lỗi tải sản phẩm bán chạy'}
+            error={bestSellers.error?.message || "Lỗi tải sản phẩm bán chạy"}
             onRetry={() => bestSellersQuery.refetch()}
             retryText="Thử lại"
           />
@@ -212,17 +228,19 @@ const HomePage: React.FC = () => {
             {bestSellers.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                thumbnail={product.thumbnail}
-                slug={product.slug}
-                images={product.images || [product.thumbnail]}
-                description={product.description || ''}
-                categoryId={product.categoryId || ''}
-                categoryName={product.categoryName || ''}
-                rating={product.rating || 0}
-                reviewCount={product.reviewCount || 0}
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
                 stock={product.stock || 0}
               />
             ))}
@@ -270,7 +288,7 @@ const HomePage: React.FC = () => {
           </ProductGrid>
         ) : newArrivals.isError ? (
           <ErrorState
-            error={newArrivals.error?.message || 'Lỗi tải sản phẩm mới về'}
+            error={newArrivals.error?.message || "Lỗi tải sản phẩm mới về"}
             onRetry={() => newArrivalsQuery.refetch()}
             retryText="Thử lại"
           />
@@ -279,17 +297,19 @@ const HomePage: React.FC = () => {
             {newArrivals.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                thumbnail={product.thumbnail}
-                slug={product.slug}
-                images={product.images || [product.thumbnail]}
-                description={product.description || ''}
-                categoryId={product.categoryId || ''}
-                categoryName={product.categoryName || ''}
-                rating={product.rating || 0}
-                reviewCount={product.reviewCount || 0}
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
                 stock={product.stock || 0}
               />
             ))}
@@ -306,7 +326,7 @@ const HomePage: React.FC = () => {
 
       {/* Categories */}
       <PageSection
-        title={t('homepage.categories.title')}
+        title={t("homepage.categories.title")}
         className="py-16 bg-white dark:bg-neutral-800"
       >
         {categories.isLoading ? (
@@ -348,7 +368,7 @@ const HomePage: React.FC = () => {
                     {category.name}
                   </h3>
                   <p className="text-white text-sm drop-shadow-md">
-                    {category.count} {t('homepage.categories.productsCount')}
+                    {category.count} {t("homepage.categories.productsCount")}
                   </p>
                 </div>
               </Link>
@@ -364,21 +384,21 @@ const HomePage: React.FC = () => {
             <div className="md:w-1/2">
               <img
                 src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2215&q=80"
-                alt={t('homepage.promotion.imageAlt')}
+                alt={t("homepage.promotion.imageAlt")}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
               <span className="text-secondary-500 font-semibold text-sm uppercase tracking-wider mb-2">
-                {t('homepage.promotion.badge')}
+                {t("homepage.promotion.badge")}
               </span>
               <h2 className="text-2xl md:text-4xl font-bold text-neutral-800 dark:text-neutral-100 mb-4">
-                {t('homepage.promotion.title')}
+                {t("homepage.promotion.title")}
               </h2>
               <p className="text-neutral-600 dark:text-neutral-300 mb-8">
-                {t('homepage.promotion.description')}{' '}
-                <strong>{t('homepage.promotion.promoCode')}</strong>{' '}
-                {t('homepage.promotion.atCheckout')}
+                {t("homepage.promotion.description")}{" "}
+                <strong>{t("homepage.promotion.promoCode")}</strong>{" "}
+                {t("homepage.promotion.atCheckout")}
               </p>
               <div>
                 <Link
@@ -393,7 +413,7 @@ const HomePage: React.FC = () => {
                   >
                     <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
                   </svg>
-                  {t('homepage.promotion.shopNewArrivals')}
+                  {t("homepage.promotion.shopNewArrivals")}
                 </Link>
               </div>
             </div>
@@ -409,21 +429,21 @@ const HomePage: React.FC = () => {
         <div className="absolute inset-0 opacity-10">
           <img
             src="https://images.unsplash.com/photo-1607082349566-187342175e2f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-            alt={t('homepage.newsletter.backgroundAlt')}
+            alt={t("homepage.newsletter.backgroundAlt")}
             className="w-full h-full object-cover"
           />
         </div>
         <div className="container mx-auto px-4 max-w-3xl text-center relative z-10">
           <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-3">
-            {t('homepage.newsletter.title')}
+            {t("homepage.newsletter.title")}
           </h2>
           <p className="text-neutral-600 dark:text-neutral-300 mb-8">
-            {t('homepage.newsletter.description')}
+            {t("homepage.newsletter.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="email"
-              placeholder={t('homepage.newsletter.emailPlaceholder')}
+              placeholder={t("homepage.newsletter.emailPlaceholder")}
               className="flex-grow px-4 py-3 rounded-lg sm:rounded-r-none border border-neutral-300 dark:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-neutral-700 dark:text-neutral-100"
             />
             <PremiumButton
@@ -432,7 +452,7 @@ const HomePage: React.FC = () => {
               iconType="arrow-right"
               className="px-6 py-3 sm:rounded-l-none"
             >
-              {t('homepage.newsletter.subscribe')}
+              {t("homepage.newsletter.subscribe")}
             </PremiumButton>
           </div>
         </div>

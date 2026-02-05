@@ -1,17 +1,17 @@
-import React from 'react';
-import { Form, Select, Input, Row, Col, Alert } from 'antd';
-import { Category } from '@/types/product';
+import React from "react";
+import { Form, Select, Input, Row, Col, Alert } from "antd";
+import { Category } from "@/types/product";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
 interface ProductCategoryFormProps {
-  categories: Category[];
+  categories?: Category[];
   isLoading: boolean;
 }
 
 const ProductCategoryForm: React.FC<ProductCategoryFormProps> = ({
-  categories,
+  categories = [],
   isLoading,
 }) => {
   return (
@@ -23,7 +23,7 @@ const ProductCategoryForm: React.FC<ProductCategoryFormProps> = ({
           rules={[
             {
               required: true,
-              message: 'Vui lòng chọn ít nhất một danh mục!',
+              message: "Vui lòng chọn ít nhất một danh mục!",
             },
           ]}
         >

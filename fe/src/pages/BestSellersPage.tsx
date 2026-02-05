@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { useGetProductsQuery } from '@/services/productApi';
-import ProductCard from '@/components/features/ProductCard';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Select from '@/components/common/Select';
-import Pagination from '@/components/common/Pagination';
+import { useState } from "react";
+import { useGetProductsQuery } from "@/services/productApi";
+import ProductCard from "@/components/features/ProductCard";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Select from "@/components/common/Select";
+import Pagination from "@/components/common/Pagination";
+import type { Product } from "@/types";
 
 const BestSellersPage: React.FC = () => {
-  const [sortOption, setSortOption] = useState('popular');
+  type SortOption = "popular" | "price_asc" | "price_desc" | "newest";
+  const [sortOption, setSortOption] = useState<SortOption>("popular");
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 12;
 
-  // Get best selling products
   const {
     data: productsData,
     isLoading,
@@ -19,17 +20,17 @@ const BestSellersPage: React.FC = () => {
     sort: sortOption,
     page: currentPage,
     limit,
-    bestSellers: true, // This would be a parameter in a real API to filter for best sellers
+    bestSellers: true,
   });
 
-  const sortOptions = [
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'price_asc', label: 'Price: Low to High' },
-    { value: 'price_desc', label: 'Price: High to Low' },
-    { value: 'newest', label: 'Newest' },
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: "popular", label: "Most Popular" },
+    { value: "price_asc", label: "Price: Low to High" },
+    { value: "price_desc", label: "Price: High to Low" },
+    { value: "newest", label: "Newest" },
   ];
 
-  const handleSortChange = (value: string) => {
+  const handleSortChange = (value: SortOption) => {
     setSortOption(value);
     setCurrentPage(1);
   };
@@ -37,7 +38,7 @@ const BestSellersPage: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Scroll to top when changing page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
@@ -80,13 +81,13 @@ const BestSellersPage: React.FC = () => {
         <p className="text-neutral-600 dark:text-neutral-400 mb-4 md:mb-0">
           {productsData?.total
             ? `Showing ${productsData.products.length} of ${productsData.total} products`
-            : 'Browse our best selling products'}
+            : "Browse our best selling products"}
         </p>
         <div className="w-full md:w-48">
           <Select
             options={sortOptions}
             value={sortOption}
-            onChange={handleSortChange}
+            onValueChange={handleSortChange}
             placeholder="Sort By"
           />
         </div>
@@ -119,7 +120,7 @@ const BestSellersPage: React.FC = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {productsData?.products.map((product) => (
+            {productsData?.products.map((product: Product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

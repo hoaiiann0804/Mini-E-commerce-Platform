@@ -71,14 +71,14 @@ const CreateProductPage: React.FC = () => {
   );
 
   // State cho hierarchical attributes và variants
-  const [attributeGroups, setAttributeGroups] = useState<AttributeGroup[]>([]);
-  const [hierarchicalVariants, setHierarchicalVariants] = useState<any[]>([]);
-  const [specifications, setSpecifications] = useState<any[]>([]);
+  // const [attributeGroups, setAttributeGroups] = useState<AttributeGroup[]>([]);
+  // const [hierarchicalVariants, setHierarchicalVariants] = useState<any[]>([]);
+  // const [specifications, setSpecifications] = useState<any[]>([]);
 
   // API hooks
   const { data: categoriesResponse, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery();
-  const { data: warrantyData, isLoading: isWarrantyLoading } =
+  const { isLoading: isWarrantyLoading } =
     useGetWarrantyPackagesQuery({ isActive: true });
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [convertBase64ToImage] = useConvertBase64ToImageMutation();
@@ -182,7 +182,7 @@ const CreateProductPage: React.FC = () => {
             uploadImageFn: async ({ base64Data, options }) => {
               return await convertBase64ToImage({
                 base64Data,
-                options,
+                options: options as { category?: 'product' | 'user' | 'review'; productId?: string },
               }).unwrap();
             },
           });
@@ -252,7 +252,7 @@ const CreateProductPage: React.FC = () => {
               ) || 0,
           sku: hasVariants
             ? undefined
-            : allFormValues.sku || values.sku || `PROD-${Date.now()}`,
+            : allFormValues.sku || `PROD-${Date.now()}`,
           status: allFormValues.status || values.status || 'active',
           featured: allFormValues.featured || values.featured || false,
           categoryIds: allFormValues.categoryIds || values.categoryIds || [],
@@ -447,7 +447,11 @@ const CreateProductPage: React.FC = () => {
     return 'Tạo sản phẩm thất bại. Vui lòng thử lại.';
   };
 
-  const categories = categoriesResponse?.data || [];
+  const categories = Array.isArray(categoriesResponse?.data)
+    ? categoriesResponse.data
+    : categoriesResponse?.data
+      ? [categoriesResponse.data]
+      : [];
 
   // Tab order constant
   const TAB_ORDER = [
@@ -759,7 +763,7 @@ const CreateProductPage: React.FC = () => {
             tabOrder={TAB_ORDER}
             completedSteps={completedSteps}
             isLastTab={true}
-            onSubmit={handleSubmit}
+            onSubmit={() => handleSubmit(form.getFieldsValue())}
             isSubmitting={isCreating}
             submitText="Tạo sản phẩm"
             loadingText="Đang tạo..."

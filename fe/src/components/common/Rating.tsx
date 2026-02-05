@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
 interface RatingProps {
   value: number;
   onChange?: (value: number) => void;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   interactive?: boolean;
   className?: string;
   showCount?: boolean;
@@ -13,9 +13,9 @@ interface RatingProps {
 export const Rating: React.FC<RatingProps> = ({
   value,
   onChange,
-  size = 'medium',
+  size = "medium",
   interactive = false,
-  className = '',
+  className = "",
   showCount = false,
   count,
 }) => {
@@ -23,16 +23,16 @@ export const Rating: React.FC<RatingProps> = ({
 
   // Determine star size based on the size prop
   const starSizeClass = {
-    small: 'w-4 h-4',
-    medium: 'w-5 h-5',
-    large: 'w-6 h-6',
+    small: "w-4 h-4",
+    medium: "w-5 h-5",
+    large: "w-6 h-6",
   }[size];
 
   // Determine container size based on the size prop
   const containerSizeClass = {
-    small: 'gap-1',
-    medium: 'gap-1.5',
-    large: 'gap-2',
+    small: "gap-1",
+    medium: "gap-1.5",
+    large: "gap-2",
   }[size];
 
   // Handle mouse enter on a star
@@ -105,12 +105,12 @@ const Star: React.FC<StarProps> = ({
     <svg
       xmlns="http://www.w3.org/2000/svg"
       className={`${size} ${
-        filled ? 'text-yellow-400' : 'text-neutral-300 dark:text-neutral-600'
-      } ${interactive ? 'cursor-pointer' : ''}`}
-      fill={filled ? 'currentColor' : 'none'}
+        filled ? "text-yellow-400" : "text-neutral-300 dark:text-neutral-600"
+      } ${interactive ? "cursor-pointer" : ""}`}
+      fill={filled ? "currentColor" : "none"}
       viewBox="0 0 24 24"
       stroke="currentColor"
-      strokeWidth={filled ? '0' : '1.5'}
+      strokeWidth={filled ? "0" : "1.5"}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
     >

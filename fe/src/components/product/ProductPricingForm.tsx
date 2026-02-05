@@ -55,13 +55,13 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
           }
           initialValue={hasVariants ? 0 : undefined}
         >
-          <InputNumber
+          <InputNumber<number>
             placeholder="Nhập giá bán"
             style={{ width: "100%" }}
             formatter={(value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
-            parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+            parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, ""))}
             addonAfter="đ"
             min={0}
             disabled={hasVariants}
@@ -75,13 +75,13 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
           label="Giá so sánh"
           tooltip="Giá gốc trước khi giảm giá (nếu có)"
         >
-          <InputNumber
+          <InputNumber<number>
             placeholder="0"
             style={{ width: "100%" }}
             formatter={(value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
-            parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+            parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, ""))}
             addonAfter="đ"
             min={0}
           />

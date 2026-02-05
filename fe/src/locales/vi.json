@@ -322,6 +322,9 @@
       "zipCode": "Mã Bưu Điện",
       "country": "Quốc Gia"
     },
+    "useCustomAddress": "Địa chỉ khách hàng đã chọn",
+    "selectAddress": "Chọn địa chỉ",
+    "manageAddresses":"Quản lý địa chỉ",
     "countries": {
       "US": "Hoa Kỳ",
       "CA": "Canada",

@@ -33,7 +33,6 @@ const ProfilePage: React.FC = () => {
     confirmPassword: "",
   });
 
-  // Update form data when user data is loaded
   useEffect(() => {
     if (currentUser) {
       setFormData((prevData) => ({
