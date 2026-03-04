@@ -12,6 +12,286 @@
 | The codebase is split into `fe/` (React + TypeScript + Vite) and `be/` (Node.js + Express + Sequelize + PostgreSQL). | Mã nguồn được tách thành `fe/` (React + TypeScript + Vite) và `be/` (Node.js + Express + Sequelize + PostgreSQL). |
 | Development now supports Docker Compose with dedicated scripts at root and backend levels. | Luồng phát triển hiện hỗ trợ Docker Compose với các script ở cả root và backend. |
 
+### 1.1 Workflow Diagrams | Sơ đồ luồng hoạt động
+
+#### Architecture Overview | Tổng quan kiến trúc
+
+```mermaid
+graph TB
+    subgraph "Frontend (React + TypeScript)"
+        A[User Interface] --> B[React Components]
+        B --> C[State Management - Zustand]
+        C --> D[API Services]
+        D --> E[HTTP Client - Axios]
+    end
+
+    subgraph "Backend (Node.js + Express)"
+        F[Express Server] --> G[Authentication Middleware]
+        G --> H[Route Controllers]
+        H --> I[Business Logic Services]
+        I --> J[Database Models]
+        J --> K[PostgreSQL Database]
+    end
+
+    subgraph "External Services"
+        L[Stripe Payment]
+        M[Gemini AI Chatbot]
+        N[File Storage]
+    end
+
+    E --> F
+    I --> L
+    I --> M
+    I --> N
+```
+
+#### Main Flows | Luồng hoạt động chính
+
+##### 1) User Authentication | Xác thực người dùng
+
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
+
+    U->>FE: Đăng nhập/Đăng ký
+    FE->>BE: POST /api/auth/login
+    BE->>DB: Kiểm tra thông tin
+    DB-->>BE: Trả về user data
+    BE-->>FE: JWT Token + User Info
+    FE-->>U: Chuyển hướng Dashboard
+```
+
+</details>
+
+##### 2) Product Management | Quản lý sản phẩm
+
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
+
+```mermaid
+sequenceDiagram
+    participant A as Admin
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
+    participant FS as File Storage
+
+    A->>FE: Tạo/Sửa sản phẩm
+    FE->>BE: POST /api/products (với hình ảnh)
+    BE->>FS: Upload hình ảnh
+    FS-->>BE: URL hình ảnh
+    BE->>DB: Lưu thông tin sản phẩm
+    DB-->>BE: Xác nhận
+    BE-->>FE: Sản phẩm đã tạo
+    FE-->>A: Hiển thị thông báo thành công
+```
+
+</details>
+
+##### 3) Purchase Flow | Quy trình mua hàng
+
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
+    participant ST as Stripe
+
+    C->>FE: Thêm sản phẩm vào giỏ
+    FE->>FE: Cập nhật Local State
+    C->>FE: Tiến hành thanh toán
+    FE->>BE: POST /api/orders/create
+    BE->>DB: Tạo đơn hàng tạm
+    BE->>ST: Tạo Payment Intent
+    ST-->>BE: Client Secret
+    BE-->>FE: Payment Intent
+    FE->>ST: Xử lý thanh toán
+    ST-->>FE: Kết quả thanh toán
+    FE->>BE: Xác nhận thanh toán
+    BE->>DB: Cập nhật trạng thái đơn hàng
+    DB-->>BE: Xác nhận
+    BE-->>FE: Đơn hàng hoàn tất
+    FE-->>C: Hiển thị thành công
+```
+
+</details>
+
+##### 4) Chatbot Support | Chatbot hỗ trợ
+
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant AI as Gemini AI
+    participant DB as Database
+
+    U->>FE: Gửi tin nhắn chat
+    FE->>BE: POST /api/chat/message
+    BE->>DB: Lấy context sản phẩm
+    DB-->>BE: Thông tin sản phẩm
+    BE->>AI: Gửi prompt + context
+    AI-->>BE: Phản hồi AI
+    BE->>DB: Lưu lịch sử chat
+    BE-->>FE: Tin nhắn phản hồi
+    FE-->>U: Hiển thị phản hồi
+```
+
+</details>
+
+#### Detailed Architecture | Kiến trúc chi tiết
+
+```text
+Frontend (fe/src/)
+├── components/          # UI components tái sử dụng
+├── pages/               # Các trang chính
+├── store/               # State management
+├── services/            # API calls
+├── hooks/               # Custom hooks
+├── utils/               # Helper functions
+└── types/               # Type definitions
+
+Backend (be/src/)
+├── controllers/         # Route handlers
+├── middlewares/         # Express middlewares
+├── models/              # Database models
+├── services/            # Business logic
+├── routes/              # API routes
+└── utils/               # Helper functions
+```
+
+#### Security & Authentication | Bảo mật & xác thực
+
+```mermaid
+graph LR
+    A[Request] --> B{JWT Token?}
+    B -->|Yes| C[Verify Token]
+    B -->|No| D[Return 401]
+    C --> E{Valid?}
+    E -->|Yes| F[Extract User Info]
+    E -->|No| D
+    F --> G[Proceed to Controller]
+    G --> H[Check Permissions]
+    H --> I{Authorized?}
+    I -->|Yes| J[Execute Action]
+    I -->|No| K[Return 403]
+```
+
+#### Responsive Design Flow | Luồng responsive
+
+```mermaid
+graph TD
+    A[User Access] --> B{Device Type?}
+    B -->|Desktop| C[Full Layout]
+    B -->|Tablet| D[Adapted Layout]
+    B -->|Mobile| E[Mobile Layout]
+
+    C --> F[Sidebar Navigation]
+    D --> G[Collapsible Sidebar]
+    E --> H[Bottom Navigation]
+
+    F --> I[Grid Layout]
+    G --> I
+    H --> J[Stack Layout]
+```
+
+#### i18n Flow | Luồng đa ngôn ngữ
+
+```mermaid
+graph LR
+    A[User Selects Language] --> B[Update i18n Context]
+    B --> C[Reload Text Resources]
+    C --> D[Re-render Components]
+    D --> E[Update Local Storage]
+    E --> F[Persist Language Choice]
+```
+
+#### State Management Flow | Luồng quản lý trạng thái
+
+```mermaid
+graph TB
+    subgraph "State Store"
+        A[Auth Store] --> B[User Info, Token]
+        C[Cart Store] --> D[Items, Total, Quantity]
+        E[Product Store] --> F[Products, Categories, Filters]
+        G[UI Store] --> H[Loading, Modals, Notifications]
+    end
+
+    subgraph "React Components"
+        I[Login Component] --> A
+        J[Cart Component] --> C
+        K[Product List] --> E
+        L[Loading Spinner] --> G
+    end
+```
+
+#### Deployment Flow | Luồng triển khai
+
+```mermaid
+graph LR
+    A[Source Code] --> B[Build Process]
+    B --> C{Environment}
+    C -->|Development| D[Local Server]
+    C -->|Production| E[Production Server]
+
+    D --> F[npm run dev]
+    E --> G[npm run build]
+    G --> H[Static Files]
+    H --> I[Web Server]
+```
+
+#### Performance Optimization | Tối ưu hiệu năng
+
+```mermaid
+graph TD
+    A[Performance Strategy] --> B[Frontend Optimization]
+    A --> C[Backend Optimization]
+
+    B --> D[Code Splitting]
+    B --> E[Lazy Loading]
+    B --> F[Image Optimization]
+    B --> G[Caching]
+
+    C --> H[Database Indexing]
+    C --> I[API Response Caching]
+    C --> J[File Compression]
+    C --> K[Connection Pooling]
+```
+
+#### Data Flow Summary | Tóm tắt luồng dữ liệu
+
+1. **User Interaction** → Frontend captures user actions  
+   **Tương tác người dùng** → Frontend ghi nhận thao tác người dùng
+2. **State Management** → Store manages application state  
+   **Quản lý trạng thái** → Store quản lý trạng thái ứng dụng
+3. **API Calls** → Frontend communicates with backend via REST API  
+   **Gọi API** → Frontend giao tiếp với backend qua REST API
+4. **Authentication** → JWT tokens secure all requests  
+   **Xác thực** → JWT bảo mật tất cả request
+5. **Business Logic** → Backend processes requests and applies business rules  
+   **Nghiệp vụ** → Backend xử lý request và áp dụng business rules
+6. **Database Operations** → PostgreSQL stores and retrieves data  
+   **Dữ liệu** → PostgreSQL lưu trữ và truy xuất dữ liệu
+7. **External Services** → Integration with Stripe and Gemini AI  
+   **Dịch vụ ngoài** → Tích hợp Stripe và Gemini AI
+8. **Response** → Data flows back to frontend and updates UI  
+   **Phản hồi** → Dữ liệu trả về frontend và cập nhật UI
+
+---
+
 ## 2. Core Features | Tính năng chính
 
 | English | Tiếng Việt |
@@ -45,7 +325,7 @@
 ## 5. Project Structure | Cấu trúc thư mục
 
 ```text
-E-commrce Mini/
+E-commerce Mini/
 ├─ fe/                     # Frontend (Vite + React + TS)
 ├─ be/                     # Backend API (Express + Sequelize)
 ├─ docs/                   # Supporting documentation
@@ -252,7 +532,7 @@ Auth: `adminAuthenticate` middleware required for all routes.
 
 | Field | Type | English | Tiếng Việt |
 |---|---|---|---|
-| categoryId | string | Filter by category | Lọc theo danh mục |
+| categoryId | UUID / String | Filter by category | Lọc theo danh mục |
 | search | string | Search keyword | Từ khóa tìm kiếm |
 | minPrice / maxPrice | number | Price range filter | Lọc theo khoảng giá |
 | sort | 'price_asc' \| 'price_desc' \| 'newest' \| 'popular' | Sorting mode | Chế độ sắp xếp |
