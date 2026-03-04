@@ -1,0 +1,15 @@
+{
+  "name": "e-commrce-mini",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose -f docker-compose.dev.yml up -d",
+    "docker:up:build": "docker compose -f docker-compose.dev.yml up --build -d",
+    "docker:down": "docker compose -f docker-compose.dev.yml down",
+    "docker:down:v": "docker compose -f docker-compose.dev.yml down -v",
+    "docker:restart": "docker compose -f docker-compose.dev.yml restart",
+    "docker:logs": "docker compose -f docker-compose.dev.yml logs -f",
+    "docker:logs:api": "docker compose -f docker-compose.dev.yml logs -f api",
+    "docker:ps": "docker compose -f docker-compose.dev.yml ps",
+    "docker:build:api": "docker compose -f docker-compose.dev.yml build api"
+  }
+}

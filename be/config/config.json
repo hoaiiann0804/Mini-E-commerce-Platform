@@ -5,7 +5,7 @@
     "password": "123456",
     "database": "websitebanhangmini",
     "host": "localhost",
-    "port": 5432,
+    "port": 5438,
     "dialect": "postgres",
     "logging": false  
   },
@@ -14,7 +14,7 @@
     "password": "123456",
     "database": "websitebanhangmini_test",
     "host": "localhost",
-    "port": 5432,
+    "port": 5438,
     "dialect": "postgres"
   },
   "production": {
@@ -22,7 +22,7 @@
     "password": "123456",
     "database": "websitebanhangmini_production",
     "host": "localhost",
-    "port": 5432,
+    "port": 5438,
     "dialect": "postgres"
   }
 }
