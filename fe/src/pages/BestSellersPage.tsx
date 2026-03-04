@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useGetProductsQuery } from '@/services/productApi';
-import ProductCard from '@/components/features/ProductCard';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Select from '@/components/common/Select';
-import Pagination from '@/components/common/Pagination';
+import { useState } from "react";
+import { useGetProductsQuery } from "@/services/productApi";
+import ProductCard from "@/components/features/ProductCard";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Select from "@/components/common/Select";
+import Pagination from "@/components/common/Pagination";
 
 const BestSellersPage: React.FC = () => {
-  const [sortOption, setSortOption] = useState('popular');
+  const [sortOption, setSortOption] = useState("popular");
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 12;
 
@@ -23,10 +23,10 @@ const BestSellersPage: React.FC = () => {
   });
 
   const sortOptions = [
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'price_asc', label: 'Price: Low to High' },
-    { value: 'price_desc', label: 'Price: High to Low' },
-    { value: 'newest', label: 'Newest' },
+    { value: "popular", label: "Most Popular" },
+    { value: "price_asc", label: "Price: Low to High" },
+    { value: "price_desc", label: "Price: High to Low" },
+    { value: "newest", label: "Newest" },
   ];
 
   const handleSortChange = (value: string) => {
@@ -37,7 +37,7 @@ const BestSellersPage: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Scroll to top when changing page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
@@ -80,7 +80,7 @@ const BestSellersPage: React.FC = () => {
         <p className="text-neutral-600 dark:text-neutral-400 mb-4 md:mb-0">
           {productsData?.total
             ? `Showing ${productsData.products.length} of ${productsData.total} products`
-            : 'Browse our best selling products'}
+            : "Browse our best selling products"}
         </p>
         <div className="w-full md:w-48">
           <Select
