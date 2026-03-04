@@ -1,4 +1,6 @@
-﻿# E-Commerce Mini | Bilingual README (English / Tiếng Việt)
+
+ 🛍️ **E-Commerce Mini**
+ # E-Commerce Mini | Bilingual README (English / Tiếng Việt)
 
 > Last synchronized with source code on **March 4, 2026**
 
