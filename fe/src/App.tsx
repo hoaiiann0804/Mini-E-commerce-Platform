@@ -12,20 +12,19 @@ import AuthProvider from '@/components/auth/AuthProvider';
 import StripeProvider from '@/contexts/StripeContext';
 import { useAntdToast } from '@/hooks/useAntdToast';
 import { setNavigateFunction } from '@/utils/authUtils';
-// Import i18n configuration
+
+
 import '@/config/i18n';
 import '@/styles/index.scss';
 
-// Inner component that has access to useNavigate
 const AppContent: React.FC = () => {
   const theme = useSelector((state: RootState) => state.ui.theme);
   const { contextHolder } = useAntdToast();
   const navigate = useNavigate();
 
-  // Initialize token refresh logic
   useTokenRefresh();
 
-  // Setup navigation function for auth utils
+
   useEffect(() => {
     setNavigateFunction(() => navigate('/login'));
   }, [navigate]);
