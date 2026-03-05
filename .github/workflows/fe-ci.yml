@@ -1,4 +1,5 @@
-name: Backend CI
+name: Frontend CI
+
 on:
   push:
     paths:
@@ -6,18 +7,21 @@ on:
   pull_request:
     paths:
       - "fe/**"
+
 jobs:
-  test:
-    runs-on: unbuntu-lastest
+  build:
+    runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: fe
+
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: checkout code
-        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
