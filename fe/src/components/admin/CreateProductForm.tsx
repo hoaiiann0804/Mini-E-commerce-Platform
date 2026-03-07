@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useCreateProductMutation } from '@/services/adminProductApi';
-import { useGetCategoriesQuery } from '@/services/categoryApi';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import Select from '@/components/common/Select';
-import Modal from '@/components/common/Modal';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import React, { useState, useEffect } from "react";
+import { useCreateProductMutation } from "@/services/adminProductApi";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
+import Modal from "@/components/common/Modal";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import {
   PlusIcon,
   TrashIcon,
@@ -16,7 +16,7 @@ import {
   MagnifyingGlassIcon,
   SwatchIcon,
   Square2StackIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 interface CreateProductFormProps {
   isOpen: boolean;
@@ -25,9 +25,9 @@ interface CreateProductFormProps {
 }
 
 const statusOptions = [
-  { value: 'active', label: '✅ Đang bán' },
-  { value: 'inactive', label: '⏸️ Tạm dừng' },
-  { value: 'draft', label: '📝 Bản nháp' },
+  { value: "active", label: "✅ Đang bán" },
+  { value: "inactive", label: "⏸️ Tạm dừng" },
+  { value: "draft", label: "📝 Bản nháp" },
 ];
 
 interface Attribute {
@@ -40,7 +40,7 @@ interface Variant {
   id: string;
   name: string;
   price: number;
-  stock: number;
+  stockQuantity: number;
 }
 
 const CreateProductForm: React.FC<CreateProductFormProps> = ({
@@ -51,26 +51,26 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   const [createProduct, { isLoading }] = useCreateProductMutation();
   const { data: categories, isLoading: isCategoriesLoading } =
     useGetCategoriesQuery();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState("basic");
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    shortDescription: '',
-    price: '',
-    comparePrice: '',
-    stock: '',
-    sku: '',
-    status: 'active',
+    name: "",
+    description: "",
+    shortDescription: "",
+    price: "",
+    comparePrice: "",
+    stock: "",
+    sku: "",
+    status: "active",
     categoryIds: [] as string[],
-    images: '',
-    thumbnail: '',
+    images: "",
+    thumbnail: "",
     featured: false,
-    searchKeywords: '',
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
+    searchKeywords: "",
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
   });
 
   const [attributes, setAttributes] = useState<Attribute[]>([]);
@@ -103,7 +103,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   ) => {
     setFormData({ ...formData, [field]: value });
     if (errors[field]) {
-      setErrors({ ...errors, [field]: '' });
+      setErrors({ ...errors, [field]: "" });
     }
   };
 
@@ -111,7 +111,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   const addAttribute = () => {
     setAttributes([
       ...attributes,
-      { id: Date.now().toString(), name: '', value: '' },
+      { id: Date.now().toString(), name: "", value: "" },
     ]);
   };
 
@@ -131,7 +131,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   const addVariant = () => {
     setVariants([
       ...variants,
-      { id: Date.now().toString(), name: '', price: 0, stock: 0 },
+      { id: Date.now().toString(), name: "", price: 0, stockQuantity: 0 },
     ]);
   };
 
@@ -152,31 +152,31 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Vui lòng nhập tên sản phẩm';
+      newErrors.name = "Vui lòng nhập tên sản phẩm";
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Vui lòng nhập mô tả sản phẩm';
+      newErrors.description = "Vui lòng nhập mô tả sản phẩm";
     }
 
     if (!formData.shortDescription.trim()) {
-      newErrors.shortDescription = 'Vui lòng nhập mô tả ngắn';
+      newErrors.shortDescription = "Vui lòng nhập mô tả ngắn";
     }
 
     if (!formData.price || Number(formData.price) <= 0) {
-      newErrors.price = 'Giá sản phẩm phải lớn hơn 0';
+      newErrors.price = "Giá sản phẩm phải lớn hơn 0";
     }
 
     if (!formData.stock || Number(formData.stock) < 0) {
-      newErrors.stock = 'Số lượng tồn kho không được âm';
+      newErrors.stock = "Số lượng tồn kho không được âm";
     }
 
     if (!formData.sku.trim()) {
-      newErrors.sku = 'Vui lòng nhập mã SKU';
+      newErrors.sku = "Vui lòng nhập mã SKU";
     }
 
     if (formData.categoryIds.length === 0) {
-      newErrors.categoryIds = 'Vui lòng chọn ít nhất một danh mục';
+      newErrors.categoryIds = "Vui lòng chọn ít nhất một danh mục";
     }
 
     setErrors(newErrors);
@@ -189,11 +189,11 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         newErrors.description ||
         newErrors.shortDescription
       ) {
-        setActiveTab('basic');
+        setActiveTab("basic");
       } else if (newErrors.price || newErrors.stock) {
-        setActiveTab('pricing');
+        setActiveTab("pricing");
       } else if (newErrors.categoryIds) {
-        setActiveTab('categories');
+        setActiveTab("categories");
       }
     }
 
@@ -219,23 +219,23 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
           : undefined,
         stockQuantity: Number(formData.stock),
         sku: formData.sku.trim(),
-        status: formData.status as 'active' | 'inactive' | 'draft',
+        status: formData.status as "active" | "inactive" | "draft",
         categoryIds: formData.categoryIds,
         images: formData.images
-          ? formData.images.split(',').map((img) => img.trim())
+          ? formData.images.split(",").map((img) => img.trim())
           : [],
         thumbnail:
           formData.thumbnail ||
-          (formData.images ? formData.images.split(',')[0]?.trim() : ''),
+          (formData.images ? formData.images.split(",")[0]?.trim() : ""),
         featured: formData.featured,
         searchKeywords: formData.searchKeywords
-          ? formData.searchKeywords.split(',').map((kw) => kw.trim())
+          ? formData.searchKeywords.split(",").map((kw) => kw.trim())
           : [],
         seoTitle: formData.seoTitle || formData.name.trim(),
         seoDescription:
           formData.seoDescription || formData.shortDescription.trim(),
         seoKeywords: formData.seoKeywords
-          ? formData.seoKeywords.split(',').map((kw) => kw.trim())
+          ? formData.seoKeywords.split(",").map((kw) => kw.trim())
           : [],
         attributes: attributes
           .filter((attr) => attr.name.trim() && attr.value.trim())
@@ -248,7 +248,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
           .map((variant) => ({
             name: variant.name.trim(),
             price: variant.price,
-            stock: variant.stock,
+            stockQuantity: variant.stockQuantity,
           })),
       };
 
@@ -256,32 +256,32 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
       // Reset form
       setFormData({
-        name: '',
-        description: '',
-        shortDescription: '',
-        price: '',
-        comparePrice: '',
-        stock: '',
-        sku: '',
-        status: 'active',
+        name: "",
+        description: "",
+        shortDescription: "",
+        price: "",
+        comparePrice: "",
+        stock: "",
+        sku: "",
+        status: "active",
         categoryIds: [],
-        images: '',
-        thumbnail: '',
+        images: "",
+        thumbnail: "",
         featured: false,
-        searchKeywords: '',
-        seoTitle: '',
-        seoDescription: '',
-        seoKeywords: '',
+        searchKeywords: "",
+        seoTitle: "",
+        seoDescription: "",
+        seoKeywords: "",
       });
       setAttributes([]);
       setVariants([]);
       setErrors({});
-      setActiveTab('basic');
+      setActiveTab("basic");
 
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      console.error('Failed to create product:', error);
+      console.error("Failed to create product:", error);
       // Handle API errors
       if (error?.data?.errors) {
         const apiErrors: Record<string, string> = {};
@@ -296,38 +296,38 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   // Define tabs
   const tabs = [
     {
-      id: 'basic',
-      label: 'Thông tin cơ bản',
+      id: "basic",
+      label: "Thông tin cơ bản",
       icon: <DocumentTextIcon className="w-5 h-5" />,
     },
     {
-      id: 'pricing',
-      label: 'Giá & Kho hàng',
+      id: "pricing",
+      label: "Giá & Kho hàng",
       icon: <CurrencyDollarIcon className="w-5 h-5" />,
     },
     {
-      id: 'categories',
-      label: 'Phân loại',
+      id: "categories",
+      label: "Phân loại",
       icon: <TagIcon className="w-5 h-5" />,
     },
     {
-      id: 'images',
-      label: 'Hình ảnh',
+      id: "images",
+      label: "Hình ảnh",
       icon: <PhotoIcon className="w-5 h-5" />,
     },
     {
-      id: 'seo',
-      label: 'SEO',
+      id: "seo",
+      label: "SEO",
       icon: <MagnifyingGlassIcon className="w-5 h-5" />,
     },
     {
-      id: 'attributes',
-      label: 'Thuộc tính',
+      id: "attributes",
+      label: "Thuộc tính",
       icon: <SwatchIcon className="w-5 h-5" />,
     },
     {
-      id: 'variants',
-      label: 'Biến thể',
+      id: "variants",
+      label: "Biến thể",
       icon: <Square2StackIcon className="w-5 h-5" />,
     },
   ];
@@ -375,8 +375,8 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center px-4 py-2 text-sm font-medium rounded-t-lg whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-b-2 border-primary-500 dark:border-primary-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-b-2 border-primary-500 dark:border-primary-400"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
               }`}
             >
               <span className="mr-2">{tab.icon}</span>
@@ -388,7 +388,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         <form className="space-y-6 px-1">
           {/* Thông tin cơ bản */}
           <div
-            className={`space-y-6 ${activeTab === 'basic' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "basic" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-medium text-lg mb-4 text-neutral-800 dark:text-neutral-200 flex items-center">
@@ -403,7 +403,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   </label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                     error={errors.name}
                     placeholder="Nhập tên sản phẩm"
                   />
@@ -415,7 +415,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   </label>
                   <Input
                     value={formData.sku}
-                    onChange={(e) => handleInputChange('sku', e.target.value)}
+                    onChange={(e) => handleInputChange("sku", e.target.value)}
                     error={errors.sku}
                     placeholder="Nhập mã SKU"
                   />
@@ -429,7 +429,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     <textarea
                       value={formData.shortDescription}
                       onChange={(e) =>
-                        handleInputChange('shortDescription', e.target.value)
+                        handleInputChange("shortDescription", e.target.value)
                       }
                       rows={2}
                       maxLength={200}
@@ -454,7 +454,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <textarea
                     value={formData.description}
                     onChange={(e) =>
-                      handleInputChange('description', e.target.value)
+                      handleInputChange("description", e.target.value)
                     }
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white text-neutral-800 dark:text-neutral-200"
@@ -473,7 +473,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     id="featured"
                     checked={formData.featured as boolean}
                     onChange={(e) =>
-                      handleInputChange('featured', e.target.checked)
+                      handleInputChange("featured", e.target.checked)
                     }
                     className="h-4 w-4 text-primary-500 focus:ring-primary-400 border-gray-300 rounded"
                   />
@@ -490,7 +490,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* Giá & Kho hàng */}
           <div
-            className={`space-y-6 ${activeTab === 'pricing' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "pricing" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-medium text-lg mb-4 text-neutral-800 dark:text-neutral-200 flex items-center">
@@ -506,7 +506,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <Input
                     type="number"
                     value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    onChange={(e) => handleInputChange("price", e.target.value)}
                     error={errors.price}
                     placeholder="0"
                     min="0"
@@ -521,7 +521,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     type="number"
                     value={formData.comparePrice}
                     onChange={(e) =>
-                      handleInputChange('comparePrice', e.target.value)
+                      handleInputChange("comparePrice", e.target.value)
                     }
                     placeholder="0"
                     min="0"
@@ -538,7 +538,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <Input
                     type="number"
                     value={formData.stock}
-                    onChange={(e) => handleInputChange('stock', e.target.value)}
+                    onChange={(e) => handleInputChange("stock", e.target.value)}
                     error={errors.stock}
                     placeholder="0"
                     min="0"
@@ -582,7 +582,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* Phân loại & Trạng thái */}
           <div
-            className={`space-y-6 ${activeTab === 'categories' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "categories" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-medium text-lg mb-4 text-neutral-800 dark:text-neutral-200 flex items-center">
@@ -603,7 +603,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                         e.target.selectedOptions,
                         (option) => option.value
                       );
-                      handleInputChange('categoryIds', values);
+                      handleInputChange("categoryIds", values);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white text-neutral-800 dark:text-neutral-200"
                     size={5}
@@ -638,7 +638,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     <Select
                       options={statusOptions}
                       value={formData.status}
-                      onChange={(value) => handleInputChange('status', value)}
+                      onChange={(value) => handleInputChange("status", value)}
                     />
                   </div>
 
@@ -649,7 +649,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     <Input
                       value={formData.searchKeywords}
                       onChange={(e) =>
-                        handleInputChange('searchKeywords', e.target.value)
+                        handleInputChange("searchKeywords", e.target.value)
                       }
                       placeholder="Từ khóa cách nhau bởi dấu phẩy"
                     />
@@ -688,7 +688,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* Hình ảnh */}
           <div
-            className={`space-y-6 ${activeTab === 'images' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "images" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-medium text-lg mb-4 text-neutral-800 dark:text-neutral-200 flex items-center">
@@ -704,7 +704,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <textarea
                     value={formData.images}
                     onChange={(e) =>
-                      handleInputChange('images', e.target.value)
+                      handleInputChange("images", e.target.value)
                     }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white text-neutral-800 dark:text-neutral-200"
@@ -722,7 +722,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <Input
                     value={formData.thumbnail}
                     onChange={(e) =>
-                      handleInputChange('thumbnail', e.target.value)
+                      handleInputChange("thumbnail", e.target.value)
                     }
                     placeholder="https://example.com/thumbnail.jpg"
                   />
@@ -739,7 +739,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     Xem trước:
                   </h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                    {formData.images.split(',').map((url, index) => (
+                    {formData.images.split(",").map((url, index) => (
                       <div
                         key={index}
                         className="relative aspect-square bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600 overflow-hidden"
@@ -750,7 +750,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                           className="w-full h-full object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
-                              'https://via.placeholder.com/150?text=Error';
+                              "https://via.placeholder.com/150?text=Error";
                           }}
                         />
                       </div>
@@ -763,7 +763,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* SEO Tab */}
           <div
-            className={`space-y-6 ${activeTab === 'seo' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "seo" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <h3 className="font-medium text-lg mb-4 text-neutral-800 dark:text-neutral-200 flex items-center">
@@ -780,7 +780,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     <Input
                       value={formData.seoTitle}
                       onChange={(e) =>
-                        handleInputChange('seoTitle', e.target.value)
+                        handleInputChange("seoTitle", e.target.value)
                       }
                       placeholder="Tiêu đề hiển thị trên kết quả tìm kiếm"
                       maxLength={60}
@@ -799,7 +799,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                     <textarea
                       value={formData.seoDescription}
                       onChange={(e) =>
-                        handleInputChange('seoDescription', e.target.value)
+                        handleInputChange("seoDescription", e.target.value)
                       }
                       rows={3}
                       maxLength={160}
@@ -820,7 +820,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                   <Input
                     value={formData.seoKeywords}
                     onChange={(e) =>
-                      handleInputChange('seoKeywords', e.target.value)
+                      handleInputChange("seoKeywords", e.target.value)
                     }
                     placeholder="Các từ khóa cách nhau bởi dấu phẩy"
                   />
@@ -837,22 +837,22 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                 </h4>
                 <div className="space-y-1">
                   <div className="text-blue-600 dark:text-blue-400 text-lg font-medium line-clamp-1">
-                    {formData.seoTitle || formData.name || 'Tiêu đề sản phẩm'}
+                    {formData.seoTitle || formData.name || "Tiêu đề sản phẩm"}
                   </div>
                   <div className="text-green-700 dark:text-green-500 text-sm">
                     www.yourdomain.com/products/
                     {formData.name
                       ? formData.name
                           .toLowerCase()
-                          .replace(/[^\w\s]/gi, '')
-                          .replace(/\s+/g, '-')
-                      : 'ten-san-pham'}
+                          .replace(/[^\w\s]/gi, "")
+                          .replace(/\s+/g, "-")
+                      : "ten-san-pham"}
                   </div>
                   <div className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
                     {formData.seoDescription ||
                       formData.shortDescription ||
                       formData.description ||
-                      'Mô tả sản phẩm sẽ hiển thị ở đây. Hãy viết mô tả hấp dẫn để thu hút khách hàng click vào sản phẩm của bạn.'}
+                      "Mô tả sản phẩm sẽ hiển thị ở đây. Hãy viết mô tả hấp dẫn để thu hút khách hàng click vào sản phẩm của bạn."}
                   </div>
                 </div>
               </div>
@@ -861,7 +861,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* Thuộc tính */}
           <div
-            className={`space-y-6 ${activeTab === 'attributes' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "attributes" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
@@ -906,7 +906,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                           onChange={(e) =>
                             updateAttribute(
                               attribute.id,
-                              'name',
+                              "name",
                               e.target.value
                             )
                           }
@@ -922,7 +922,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                           onChange={(e) =>
                             updateAttribute(
                               attribute.id,
-                              'value',
+                              "value",
                               e.target.value
                             )
                           }
@@ -947,7 +947,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
 
           {/* Biến thể */}
           <div
-            className={`space-y-6 ${activeTab === 'variants' ? 'block' : 'hidden'}`}
+            className={`space-y-6 ${activeTab === "variants" ? "block" : "hidden"}`}
           >
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
@@ -993,7 +993,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                           placeholder="Ví dụ: Size M"
                           value={variant.name}
                           onChange={(e) =>
-                            updateVariant(variant.id, 'name', e.target.value)
+                            updateVariant(variant.id, "name", e.target.value)
                           }
                         />
                       </div>
@@ -1008,7 +1008,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                           onChange={(e) =>
                             updateVariant(
                               variant.id,
-                              'price',
+                              "price",
                               Number(e.target.value)
                             )
                           }
@@ -1022,11 +1022,11 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                         <Input
                           type="number"
                           placeholder="0"
-                          value={variant.stock}
+                          value={variant.stockQuantity}
                           onChange={(e) =>
                             updateVariant(
                               variant.id,
-                              'stock',
+                              "stock",
                               Number(e.target.value)
                             )
                           }

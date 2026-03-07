@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, MenuItem, FormControl, InputLabel, Select, SelectChangeEvent, CircularProgress } from '@mui/material';
-import { ICountry, IState, ICity } from 'country-state-city';
+import { Box, MenuItem, FormControl, InputLabel, Select, SelectChangeEvent } from '@mui/material';
+import { IState, ICity } from 'country-state-city';
 import { Country, State, City } from 'country-state-city';
 
 interface LocationSelectorsProps {
