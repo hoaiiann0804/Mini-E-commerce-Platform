@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg'|'small';
   color?: string;
   fullScreen?: boolean;
 }
