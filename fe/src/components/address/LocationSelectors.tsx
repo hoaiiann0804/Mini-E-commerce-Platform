@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Box, MenuItem, FormControl, InputLabel, Select, SelectChangeEvent } from '@mui/material';
-import { IState, ICity } from 'country-state-city';
-import { Country, State, City } from 'country-state-city';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Box,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
+import { fetchProvinces, fetchDistricts, fetchWards } from "@/services/locationApi";
+import type { Province, District, Ward } from "../../types/location.types";
 
 interface LocationSelectorsProps {
   onLocationChange: (location: {
@@ -18,134 +25,230 @@ interface LocationSelectorsProps {
   };
 }
 
-const LocationSelectors: React.FC<LocationSelectorsProps> = ({ 
-  onLocationChange, 
-  initialValues = {} 
+const LocationSelectors: React.FC<LocationSelectorsProps> = ({
+  onLocationChange,
+  initialValues = {},
 }) => {
-  const [selectedCountry, setSelectedCountry] = useState<string>(initialValues.country || '');
-  const [selectedState, setSelectedState] = useState<string>(initialValues.state || '');
-  const [selectedCity, setSelectedCity] = useState<string>(initialValues.city || '');
-  const [states, setStates] = useState<IState[]>([]);
-  const [cities, setCities] = useState<ICity[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
+
+  // Selected values (store codes for API calls, display names for UI)
+  const [selectedProvinceCode, setSelectedProvinceCode] = useState<string>("");
+  const [selectedDistrictCode, setSelectedDistrictCode] = useState<string>("");
+  const [selectedWardCode, setSelectedWardCode] = useState<string>("");
+
+  // Display names (for showing initial values)
+  const [provinceName, setProvinceName] = useState<string>(initialValues.country || "");
+  const [districtName, setDistrictName] = useState<string>(initialValues.state || "");
+  const [wardName, setWardName] = useState<string>(initialValues.city || "");
+
   const [loading, setLoading] = useState({
-    countries: false,
-    states: false,
-    cities: false
+    provinces: true,
+    districts: false,
+    wards: false,
   });
 
-  const countries = Country.getAllCountries();
-
+  // Load provinces on mount
   useEffect(() => {
-    if (selectedCountry) {
-      const countryData = countries.find(c => c.name === selectedCountry);
-      if (countryData) {
-        setLoading(prev => ({ ...prev, states: true }));
-        const countryStates = State.getStatesOfCountry(countryData.isoCode);
-        setStates(countryStates);
-        setLoading(prev => ({ ...prev, states: false }));
+    const loadProvinces = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, provinces: true }));
+        const data = await fetchProvinces();
+        setProvinces(data);
+      } catch (error) {
+        console.error("Failed to load provinces:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, provinces: false }));
       }
-    }
-  }, [selectedCountry]);
+    };
 
-  useEffect(() => {
-    if (selectedState && selectedCountry) {
-      const countryData = countries.find(c => c.name === selectedCountry);
-      if (countryData) {
-        const stateData = states.find(s => s.name === selectedState);
-        if (stateData) {
-          setLoading(prev => ({ ...prev, cities: true }));
-          const stateCities = City.getCitiesOfState(countryData.isoCode, stateData.isoCode);
-          setCities(stateCities);
-          setLoading(prev => ({ ...prev, cities: false }));
-        }
-      }
-    }
-  }, [selectedState, selectedCountry]);
+    loadProvinces();
+  }, []);
 
-  const handleCountryChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedCountry(value);
-    setSelectedState('');
-    setSelectedCity('');
-    setCities([]);
+  // Handle province change - load districts
+  const handleProvinceChange = async (event: SelectChangeEvent) => {
+    const provinceCode = event.target.value as string;
+    const province = provinces.find((p) => p.code.toString() === provinceCode);
+
+    setSelectedProvinceCode(provinceCode);
+    setProvinceName(province?.name_with_type || provinceCode);
+    setSelectedDistrictCode("");
+    setSelectedWardCode("");
+    setDistricts([]);
+    setWards([]);
+
+    // Notify parent
     onLocationChange({
-      country: value,
+      country: province?.name_with_type || null,
       state: null,
-      city: null
+      city: null,
+      countryCode: provinceCode,
+    });
+
+    // Load districts for selected province
+    if (provinceCode) {
+      try {
+        setLoading((prev) => ({ ...prev, districts: true }));
+        const districtData = await fetchDistricts(provinceCode);
+        setDistricts(districtData);
+      } catch (error) {
+        console.error("Failed to load districts:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, districts: false }));
+      }
+    }
+  };
+
+  // Handle district change - load wards
+  const handleDistrictChange = async (event: SelectChangeEvent) => {
+    const districtCode = event.target.value as string;
+    const district = districts.find((d) => d.code.toString() === districtCode);
+
+    setSelectedDistrictCode(districtCode);
+    setDistrictName(district?.name_with_type || districtCode);
+    setSelectedWardCode("");
+    setWards([]);
+
+    // Notify parent
+    onLocationChange({
+      country: provinceName,
+      state: district?.name_with_type || null,
+      city: null,
+      countryCode: selectedProvinceCode,
+      stateCode: districtCode,
+    });
+
+    // Load wards for selected district
+    if (districtCode) {
+      try {
+        setLoading((prev) => ({ ...prev, wards: true }));
+        const wardData = await fetchWards(districtCode);
+        setWards(wardData);
+      } catch (error) {
+        console.error("Failed to load wards:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, wards: false }));
+      }
+    }
+  };
+
+  // Handle ward change
+  const handleWardChange = (event: SelectChangeEvent) => {
+    const wardCode = event.target.value as string;
+    const ward = wards.find((w) => w.code.toString() === wardCode);
+
+    setSelectedWardCode(wardCode);
+    setWardName(ward?.name_with_type || wardCode);
+
+    // Notify parent
+    onLocationChange({
+      country: provinceName,
+      state: districtName,
+      city: ward?.name_with_type || null,
+      countryCode: selectedProvinceCode,
+      stateCode: selectedDistrictCode,
     });
   };
 
-  const handleStateChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedState(value);
-    setSelectedCity('');
-    onLocationChange({
-      country: selectedCountry,
-      state: value,
-      city: null
-    });
-  };
-
-  const handleCityChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedCity(value);
-    onLocationChange({
-      country: selectedCountry,
-      state: selectedState,
-      city: value
-    });
-  };
+  // Show loading while provinces are being loaded
+  if (loading.provinces && provinces.length === 0) {
+    return (
+      <Box display="flex" flexDirection="column" gap={2} width="100%">
+        <FormControl fullWidth>
+          <InputLabel id="province-label">Tỉnh/Thành phố</InputLabel>
+          <Select
+            labelId="province-label"
+            label="Tỉnh/Thành phố"
+            disabled
+            value=""
+          >
+            <MenuItem disabled>Đang tải...</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth disabled>
+          <InputLabel id="district-label">Quận/Huyện</InputLabel>
+          <Select
+            labelId="district-label"
+            label="Quận/Huyện"
+            disabled
+            value=""
+          />
+        </FormControl>
+        <FormControl fullWidth disabled>
+          <InputLabel id="ward-label">Phường/Xã</InputLabel>
+          <Select
+            labelId="ward-label"
+            label="Phường/Xã"
+            disabled
+            value=""
+          />
+        </FormControl>
+      </Box>
+    );
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap={2} width="100%">
+      {/* Province/Tinh Thanh Pho */}
       <FormControl fullWidth>
-        <InputLabel id="country-label">Country</InputLabel>
+        <InputLabel id="province-label">Tỉnh/Thành phố</InputLabel>
         <Select
-          labelId="country-label"
-          value={selectedCountry}
-          label="Country"
-          onChange={handleCountryChange}
-          disabled={loading.countries}
+          labelId="province-label"
+          value={selectedProvinceCode}
+          label="Tỉnh/Thành phố"
+          onChange={handleProvinceChange}
+          disabled={loading.provinces}
         >
-          {countries.map((country) => (
-            <MenuItem key={country.isoCode} value={country.name}>
-              {country.name}
+          {provinces.map((province) => (
+            <MenuItem key={province.code} value={province.code.toString()}>
+              {province.name_with_type}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
+      {/* District/Quan Huyen */}
       <FormControl fullWidth>
-        <InputLabel id="state-label">State/Province</InputLabel>
+        <InputLabel id="district-label">Quận/Huyện</InputLabel>
         <Select
-          labelId="state-label"
-          value={selectedState}
-          label="State/Province"
-          onChange={handleStateChange}
-          disabled={!selectedCountry || loading.states}
+          labelId="district-label"
+          value={selectedDistrictCode}
+          label="Quận/Huyện"
+          onChange={handleDistrictChange}
+          disabled={!selectedProvinceCode || loading.districts}
         >
-          {states.map((state) => (
-            <MenuItem key={state.isoCode} value={state.name}>
-              {state.name}
-            </MenuItem>
-          ))}
+          {loading.districts ? (
+            <MenuItem disabled>Đang tải...</MenuItem>
+          ) : (
+            districts.map((district) => (
+              <MenuItem key={district.code} value={district.code.toString()}>
+                {district.name_with_type}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
 
+      {/* Ward/Phuong Xa */}
       <FormControl fullWidth>
-        <InputLabel id="city-label">City</InputLabel>
+        <InputLabel id="ward-label">Phường/Xã</InputLabel>
         <Select
-          labelId="city-label"
-          value={selectedCity}
-          label="City"
-          onChange={handleCityChange}
-          disabled={!selectedState || loading.cities}
+          labelId="ward-label"
+          value={selectedWardCode}
+          label="Phường/Xã"
+          onChange={handleWardChange}
+          disabled={!selectedDistrictCode || loading.wards}
         >
-          {cities.map((city) => (
-            <MenuItem key={city.name} value={city.name}>
-              {city.name}
-            </MenuItem>
-          ))}
+          {loading.wards ? (
+            <MenuItem disabled>Đang tải...</MenuItem>
+          ) : (
+            wards.map((ward) => (
+              <MenuItem key={ward.code} value={ward.code.toString()}>
+                {ward.name_with_type}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
     </Box>
@@ -153,3 +256,4 @@ const LocationSelectors: React.FC<LocationSelectorsProps> = ({
 };
 
 export default LocationSelectors;
+

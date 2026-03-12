@@ -194,7 +194,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-            {formatCurrency(stats?.overview.totalRevenue || 0)}
+            {formatCurrency(stats?.overview?.totalRevenue || 0)}
           </div>
           {stats?.growth.revenue !== undefined && (
             <div
@@ -250,7 +250,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-            {stats?.overview.totalOrders || 0}
+            {stats?.overview?.totalOrders || 0}
           </div>
           {stats?.growth.orders !== undefined && (
             <div
@@ -306,7 +306,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-            {stats?.overview.totalUsers || 0}
+            {stats?.overview?.totalUsers || 0}
           </div>
           {stats?.growth.users !== undefined && (
             <div
@@ -362,7 +362,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-            {stats?.overview.totalProducts || 0}
+            {stats?.overview?.totalProducts || 0}
           </div>
           <div className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
             {t('admin.dashboard.stats.activeProducts')}
@@ -371,7 +371,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Pending Orders Alert */}
-      {stats?.overview.pendingOrders > 0 && (
+      {(stats?.overview?.pendingOrders ?? 0) > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-8">
           <div className="flex items-center">
             <svg
@@ -390,7 +390,7 @@ const DashboardPage: React.FC = () => {
             </svg>
             <span className="text-yellow-800 dark:text-yellow-200 font-medium">
               {t('admin.dashboard.alerts.pendingOrders', {
-                count: stats.overview.pendingOrders,
+                count: stats?.overview?.pendingOrders ?? 0,
               })}
             </span>
             <Link

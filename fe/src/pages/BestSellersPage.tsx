@@ -4,9 +4,12 @@ import ProductCard from "@/components/features/ProductCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Select from "@/components/common/Select";
 import Pagination from "@/components/common/Pagination";
+import { Product } from "@/types/product.types";
+
+type SortOption = "popular" | "price_asc" | "price_desc" | "newest";
 
 const BestSellersPage: React.FC = () => {
-  const [sortOption, setSortOption] = useState("popular");
+  const [sortOption, setSortOption] = useState<SortOption>("popular");
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 12;
 
@@ -30,7 +33,7 @@ const BestSellersPage: React.FC = () => {
   ];
 
   const handleSortChange = (value: string) => {
-    setSortOption(value);
+    setSortOption(value as SortOption);
     setCurrentPage(1);
   };
 
@@ -119,7 +122,7 @@ const BestSellersPage: React.FC = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {productsData?.products.map((product) => (
+            {productsData?.products.map((product: Product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

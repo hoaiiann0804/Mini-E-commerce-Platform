@@ -12,9 +12,7 @@ import {
   Tag,
 } from 'antd';
 import {
-  RocketOutlined,
-  BulbOutlined,
-  TestTubeOutlined,
+  ExperimentOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
 import DynamicProductTitle from '@/components/product/DynamicProductTitle';
@@ -141,9 +139,9 @@ const DynamicProductTestPage: React.FC = () => {
         <Card style={{ marginBottom: 24 }}>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div>
-              <Title level={2}>
+                <Title level={2}>
                 <Space>
-                  <TestTubeOutlined style={{ color: '#1890ff' }} />
+                  <ExperimentOutlined style={{ color: '#1890ff' }} />
                   Dynamic Product Naming - Test Lab
                 </Space>
               </Title>

@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import Button from '@/components/common/Button';
 import { PremiumButton } from '@/components/common';
 import Input from '@/components/common/Input';
 import { useRegisterMutation } from '@/services/authApi';
-import { loginSuccess } from '@/features/auth/authSlice';
 
 const RegisterPage: React.FC = () => {
-  const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -104,8 +100,7 @@ const RegisterPage: React.FC = () => {
 
       // Show success message to user
       setSuccessMessage(
-        result.message ||
-          'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.'
+        'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.'
       );
 
       // Clear form

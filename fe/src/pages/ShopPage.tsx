@@ -5,11 +5,9 @@ import ProductListCard from '@/components/features/ProductListCard';
 import FilterPanel from '@/components/features/FilterPanel';
 import Pagination from '@/components/common/Pagination';
 import Select from '@/components/common/Select';
-import Button from '@/components/common/Button';
 import { PremiumButton } from '@/components/common';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Product, ProductFilters } from '@/types/product.types';
-import { Category } from '@/types/category.types';
 import { useGetProductsQuery } from '@/services/productApi';
 import { useGetCategoriesQuery } from '@/services/categoryApi';
 
@@ -55,7 +53,6 @@ const ShopPage: React.FC = () => {
   const {
     data: productsData,
     isLoading: isProductsLoading,
-    error: productsError,
   } = useGetProductsQuery({
     categoryId,
     search,
@@ -403,7 +400,7 @@ const ShopPage: React.FC = () => {
                       : 'space-y-8'
                   }
                 >
-                  {productsData?.data?.products?.map((product) =>
+                  {productsData?.data?.products?.map((product: Product) =>
                     viewMode === 'grid' ? (
                       <ProductCard key={product.id} {...product} />
                     ) : (

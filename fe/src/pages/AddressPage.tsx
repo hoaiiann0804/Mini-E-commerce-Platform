@@ -1,19 +1,14 @@
-
-
-
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, Suspense } from "react";
 import {
   Typography,
   Box,
+  Button,
   TextField,
   FormControlLabel,
   Checkbox,
   Radio,
   RadioGroup,
   FormLabel,
-  FormControl,
-
-  Button,
   Grid,
   Paper,
   Alert,
@@ -22,16 +17,18 @@ import {
   Card,
   CardContent,
   IconButton,
-  Divider,
-} from '@mui/material';
+} from "@mui/material";
 import { Edit, Delete, Check, Map, EyeOff } from "lucide-react";
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-
-import LocationSelectors from "@/components/address/LocationSelectors";
-import AddressMapPicker from "@/components/address/AddressMapPicker";
+const LocationSelectors = React.lazy(
+  () => import("@/components/address/LocationSelectors")
+);
+const AddressMapPicker = React.lazy(
+  () => import("@/components/address/AddressMapPicker")
+);
 import {
   useGetAddressesQuery,
   useAddAddressMutation,
@@ -50,20 +47,24 @@ const useAddressSchema = () =>
         lastName: yup.string().required("Vui lòng nhập họ"),
         phone: yup.string().required("Vui lòng nhập số điện thoại"),
         address1: yup.string().required("Vui lòng nhập địa chỉ"),
+        address2: yup.string().optional(),
         city: yup.string().required("Vui lòng chọn thành phố"),
         state: yup.string().required("Vui lòng chọn tỉnh/thành phố"),
         country: yup.string().required("Vui lòng chọn quốc gia"),
         zip: yup.string().required("Vui lòng nhập mã bưu điện"),
         isDefault: yup.boolean().default(false),
-        addressType: yup.string().oneOf(["home", "office", "other"]).default("home"),
+        addressType: yup
+          .string()
+          .oneOf(["home", "office", "other"])
+          .default("home"),
       }),
     []
   );
 
 interface LocationValues {
-  country: string;
-  state: string;
-  city: string;
+  country: string | null;
+  state: string | null;
+  city: string | null;
   countryCode?: string;
   stateCode?: string;
 }
@@ -72,16 +73,21 @@ const AddressPage = () => {
   const schema = useAddressSchema();
 
   // API hooks
-  const { data: addresses = [], isLoading: isLoadingAddresses, refetch } = useGetAddressesQuery();
+  const {
+    data: addresses = [],
+    isLoading: isLoadingAddresses,
+    refetch,
+  } = useGetAddressesQuery();
   const [addAddress, { isLoading: isAdding }] = useAddAddressMutation();
   const [updateAddress, { isLoading: isUpdating }] = useUpdateAddressMutation();
   const [deleteAddress] = useDeleteAddressMutation();
   const [setDefaultAddress] = useSetDefaultAddressMutation();
 
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showMap, setShowMap] = useState(false);
-  const [mapPosition, setMapPosition] = useState<{ lat: number; lng: number } | undefined>(undefined);
+  const [mapPosition, setMapPosition] = useState<
+    { lat: number; lng: number } | undefined
+  >(undefined);
   const [location, setLocation] = useState<LocationValues>({
     country: "",
     state: "",
@@ -95,11 +101,15 @@ const AddressPage = () => {
     severity: "success" as "success" | "error",
   });
 
-  const showSnackbar = useCallback((message: string, severity: "success" | "error") => {
-    setSnackbar({ open: true, message, severity });
-  }, []);
+  const showSnackbar = useCallback(
+    (message: string, severity: "success" | "error") => {
+      setSnackbar({ open: true, message, severity });
+    },
+    []
+  );
 
-  const handleCloseSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
+  const handleCloseSnackbar = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
 
   const {
     control,
@@ -128,34 +138,37 @@ const AddressPage = () => {
   const handleLocationChange = useCallback(
     (newLoc: LocationValues) => {
       setLocation(newLoc);
-      setValue("country", newLoc.country, { shouldValidate: true });
-      setValue("state", newLoc.state, { shouldValidate: true });
-      setValue("city", newLoc.city, { shouldValidate: true });
+      setValue("country", newLoc.country || "", { shouldValidate: true });
+      setValue("state", newLoc.state || "", { shouldValidate: true });
+      setValue("city", newLoc.city || "", { shouldValidate: true });
     },
     [setValue]
   );
 
-  const handleLocationSelect = useCallback((lat: number, lng: number, address: string) => {
-    setMapPosition({ lat, lng });
-    setValue('address1', address, { shouldValidate: true });
-    
-    // Also update the location fields if we can extract them from the address
-    const addressParts = address.split(',').map(part => part.trim());
-    if (addressParts.length >= 3) {
-      const city = addressParts[addressParts.length - 2];
-      const country = addressParts[addressParts.length - 1];
-      
-      setValue('city', city, { shouldValidate: true });
-      setValue('country', country, { shouldValidate: true });
-      
-      // Update location state
-      setLocation(prev => ({
-        ...prev,
-        city,
-        country,
-      }));
-    }
-  }, [setValue, setLocation]);
+  const handleLocationSelect = useCallback(
+    (lat: number, lng: number, address: string) => {
+      setMapPosition({ lat, lng });
+      setValue("address1", address, { shouldValidate: true });
+
+      // Also update the location fields if we can extract them from the address
+      const addressParts = address.split(",").map((part) => part.trim());
+      if (addressParts.length >= 3) {
+        const city = addressParts[addressParts.length - 2];
+        const country = addressParts[addressParts.length - 1];
+
+        setValue("city", city, { shouldValidate: true });
+        setValue("country", country, { shouldValidate: true });
+
+        // Update location state
+        setLocation((prev) => ({
+          ...prev,
+          city,
+          country,
+        }));
+      }
+    },
+    [setValue, setLocation]
+  );
 
   const onSubmit = async (data: any) => {
     try {
@@ -177,7 +190,10 @@ const AddressPage = () => {
       resetForm();
       await refetch();
     } catch (err: any) {
-      showSnackbar(err?.data?.message || "Có lỗi xảy ra khi lưu địa chỉ", "error");
+      showSnackbar(
+        err?.data?.message || "Có lỗi xảy ra khi lưu địa chỉ",
+        "error"
+      );
     }
   };
 
@@ -219,26 +235,39 @@ const AddressPage = () => {
   };
 
   // Handle setting default address
-  const handleSetDefault = useCallback(async (id: string) => {
-    try {
-      await setDefaultAddress(id).unwrap();
-      showSnackbar("Đã đặt địa chỉ mặc định", "success");
-      await refetch();
-    } catch {
-      showSnackbar("Không thể cập nhật địa chỉ mặc định", "error");
-    }
-  }, [setDefaultAddress, showSnackbar, refetch]);
+  const handleSetDefault = useCallback(
+    async (id: string) => {
+      try {
+        await setDefaultAddress(id).unwrap();
+        showSnackbar("Đã đặt địa chỉ mặc định", "success");
+        await refetch();
+      } catch {
+        showSnackbar("Không thể cập nhật địa chỉ mặc định", "error");
+      }
+    },
+    [setDefaultAddress, showSnackbar, refetch]
+  );
 
   const resetForm = () => {
     reset();
     setEditingAddress(null);
-    setLocation({ country: "", state: "", city: "", countryCode: "", stateCode: "" });
+    setLocation({
+      country: "",
+      state: "",
+      city: "",
+      countryCode: "",
+      stateCode: "",
+    });
   };
 
   const isSubmitting = isAdding || isUpdating;
 
   // Render form input field with error handling
-  const renderInput = (name: keyof typeof schema.fields, label: string, options: { type?: string; multiline?: boolean } = {}) => (
+  const renderInput = (
+    name: keyof typeof schema.fields,
+    label: string,
+    options: { type?: string; multiline?: boolean } = {}
+  ) => (
     <Controller
       name={name}
       control={control}
@@ -247,7 +276,7 @@ const AddressPage = () => {
           {...field}
           fullWidth
           label={label}
-          type={options.type || 'text'}
+          type={options.type || "text"}
           multiline={options.multiline}
           rows={options.multiline ? 3 : undefined}
           error={!!errors[name]}
@@ -269,59 +298,88 @@ const AddressPage = () => {
         <Paper sx={{ p: 3, mb: 4 }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>{renderInput("firstName", "Tên")}</Grid>
-              <Grid item xs={12} md={6}>{renderInput("lastName", "Họ")}</Grid>
-              <Grid item xs={12} md={6}>{renderInput("phone", "Số điện thoại")}</Grid>
+              <Grid item xs={12} md={6}>
+                {renderInput("firstName", "Tên")}
+              </Grid>
+              <Grid item xs={12} md={6}>
+                {renderInput("lastName", "Họ")}
+              </Grid>
+              <Grid item xs={12} md={6}>
+                {renderInput("phone", "Số điện thoại")}
+              </Grid>
 
               <Grid item xs={12}>
                 <Typography variant="subtitle1">Địa chỉ</Typography>
-                <LocationSelectors
-                  onLocationChange={handleLocationChange}
-                  initialValues={location}
-                />
+                <Suspense
+                  fallback={
+                    <Typography variant="subtitle1">Địa chỉ</Typography>
+                  }
+                >
+                  <LocationSelectors
+                    onLocationChange={handleLocationChange}
+                    initialValues={{
+                      country: location.country || undefined,
+                      state: location.state || undefined,
+                      city: location.city || undefined,
+                    }}
+                  />
+                </Suspense>
 
                 <Box sx={{ mt: 2, mb: 2 }}>
                   <Button
                     variant="outlined"
                     size="small"
                     onClick={() => setShowMap(!showMap)}
-                    startIcon={showMap ? <EyeOff size={16} /> : <Map size={16} />}
+                    startIcon={
+                      showMap ? <EyeOff size={16} /> : <Map size={16} />
+                    }
                     sx={{ mb: 1 }}
                   >
-                    {showMap ? 'Ẩn bản đồ' : 'Chọn vị trí trên bản đồ'}
+                    {showMap ? "Ẩn bản đồ" : "Chọn vị trí trên bản đồ"}
                   </Button>
                   {showMap && (
-                    <Box sx={{ height: 300, width: '100%', borderRadius: 1, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-                      <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
-                        {isLoading && (
-                          <Box sx={{ 
-                            position: 'absolute', 
-                            top: 0, 
-                            left: 0, 
-                            right: 0, 
-                            bottom: 0, 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            zIndex: 1000
-                          }}>
+                    <Box
+                      sx={{
+                        height: 300,
+                        width: "100%",
+                        borderRadius: 1,
+                        overflow: "hidden",
+                        border: "1px solid #e0e0e0",
+                      }}
+                    >
+                      <Suspense
+                        fallback={
+                          <Box
+                            sx={{
+                              height: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
                             <CircularProgress />
                           </Box>
-                        )}
+                        }
+                      >
                         <AddressMapPicker
                           onLocationSelect={handleLocationSelect}
                           initialPosition={mapPosition}
-                          address={watch('address1')}
-                          onAddressChange={(address) => setValue('address1', address, { shouldValidate: true })}
+                          address={watch("address1")}
+                          onAddressChange={(address) =>
+                            setValue("address1", address, {
+                              shouldValidate: true,
+                            })
+                          }
                         />
-                      </Box>
+                      </Suspense>
                     </Box>
                   )}
                 </Box>
               </Grid>
 
-              <Grid item xs={12}>{renderInput("address1", "Địa chỉ cụ thể")}</Grid>
+              <Grid item xs={12}>
+                {renderInput("address1", "Địa chỉ cụ thể")}
+              </Grid>
               <Grid item xs={12}>
                 <Controller
                   name="address2"
@@ -339,7 +397,9 @@ const AddressPage = () => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>{renderInput("zip", "Mã bưu chính")}</Grid>
+              <Grid item xs={12} md={6}>
+                {renderInput("zip", "Mã bưu chính")}
+              </Grid>
 
               <Grid item xs={12}>
                 <FormLabel>Loại địa chỉ</FormLabel>
@@ -348,9 +408,21 @@ const AddressPage = () => {
                   control={control}
                   render={({ field }) => (
                     <RadioGroup row {...field}>
-                      <FormControlLabel value="home" control={<Radio />} label="Nhà riêng" />
-                      <FormControlLabel value="office" control={<Radio />} label="Văn phòng" />
-                      <FormControlLabel value="other" control={<Radio />} label="Khác" />
+                      <FormControlLabel
+                        value="home"
+                        control={<Radio />}
+                        label="Nhà riêng"
+                      />
+                      <FormControlLabel
+                        value="office"
+                        control={<Radio />}
+                        label="Văn phòng"
+                      />
+                      <FormControlLabel
+                        value="other"
+                        control={<Radio />}
+                        label="Khác"
+                      />
                     </RadioGroup>
                   )}
                 />
@@ -362,16 +434,31 @@ const AddressPage = () => {
                   control={control}
                   render={({ field }) => (
                     <FormControlLabel
-                      control={<Checkbox checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
                       label="Đặt làm địa chỉ mặc định"
                     />
                   )}
                 />
               </Grid>
 
-              <Grid item xs={12} display="flex" justifyContent="flex-end" gap={2}>
+              <Grid
+                item
+                xs={12}
+                display="flex"
+                justifyContent="flex-end"
+                gap={2}
+              >
                 {editingAddress && (
-                  <Button variant="outlined" onClick={resetForm} disabled={isSubmitting}>
+                  <Button
+                    variant="outlined"
+                    onClick={resetForm}
+                    disabled={isSubmitting}
+                  >
                     Hủy
                   </Button>
                 )}
@@ -389,10 +476,14 @@ const AddressPage = () => {
         </Paper>
 
         {/* Address List */}
-        <Typography variant="h5" gutterBottom>Danh sách địa chỉ</Typography>
+        <Typography variant="h5" gutterBottom>
+          Danh sách địa chỉ
+        </Typography>
 
         {isLoadingAddresses ? (
-          <Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>
+          <Box display="flex" justifyContent="center" py={4}>
+            <CircularProgress />
+          </Box>
         ) : addresses.length === 0 ? (
           <Paper sx={{ p: 3, textAlign: "center" }}>
             <Typography>Bạn chưa có địa chỉ nào</Typography>
@@ -406,8 +497,13 @@ const AddressPage = () => {
                     <Box display="flex" justifyContent="space-between">
                       <Typography fontWeight="bold">{address.name}</Typography>
                       <Box>
-                        <IconButton onClick={() => handleEdit(address)}><Edit fontSize="small" /></IconButton>
-                        <IconButton onClick={() => handleDelete(address.id)} color="error">
+                        <IconButton onClick={() => handleEdit(address)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => address.id && handleDelete(address.id)}
+                          color="error"
+                        >
                           <Delete fontSize="small" />
                         </IconButton>
                       </Box>
@@ -420,10 +516,15 @@ const AddressPage = () => {
                     <Typography variant="body2" mt={1}>
                       {`${address.address1}, ${address.city}, ${address.state}, ${address.country}`}
                     </Typography>
-                    <Typography variant="body2">Điện thoại: {address.phone}</Typography>
+                    <Typography variant="body2">
+                      Điện thoại: {address.phone}
+                    </Typography>
 
-                    {!address.isDefault && (
-                      <Button size="small" onClick={() => handleEdit(address)}>
+                    {!address.isDefault && address.id && (
+                      <Button
+                        size="small"
+                        onClick={() => handleSetDefault(address.id!)}
+                      >
                         Đặt làm mặc định
                       </Button>
                     )}
@@ -451,5 +552,3 @@ const AddressPage = () => {
 };
 
 export default AddressPage;
-
-

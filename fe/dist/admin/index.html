@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Fashion Store</title>
+    <meta name="description" content="Admin dashboard for Fashion Store" />
+    <script type="module">
+      // Redirect to the main app with the admin route
+      window.location.href =
+        '/#/admin' + window.location.pathname.replace('/admin', '');
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          flex-direction: column;
+        "
+      >
+        <h1>Loading Admin Dashboard...</h1>
+        <p>
+          If you are not redirected automatically, please
+          <a href="/">click here</a>.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,14 +1,23 @@
 // Order Types
 import { Address } from './user.types';
 
+export enum OrderStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  SHIPPED = 'shipped',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled',
+}
+
 export interface OrderItem {
+  id?: string;
   productId: string;
   variantId?: string;
   name: string;
   sku?: string;
   price: number;
   quantity: number;
-  subtotal: number;
+  subtotal?: number;
   image: string;
   attributes?: Record<string, string>;
 }
@@ -21,12 +30,6 @@ export interface PaymentDetails {
   date: string;
 }
 
-export type OrderStatus =
-  | 'pending'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type PaymentMethod =
   | 'credit_card'
@@ -36,23 +39,26 @@ export type PaymentMethod =
 
 export interface Order {
   id: string;
-  number: string;
+  number?: string;
   userId: string;
   status: OrderStatus;
   items: OrderItem[];
-  shipping: Address;
-  billing: Address;
+  shippingAddress: Address;
+  billingAddress: Address;
   paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
+  paymentStatus?: PaymentStatus;
   paymentDetails?: PaymentDetails;
   subtotal: number;
   tax: number;
   shippingCost: number;
-  discount: number;
+  discount?: number;
   total: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  trackingNumber?: string | null;
+  estimatedDelivery?: string | null;
+  shippingMethod?: string;
 }
 
 export interface OrdersResponse {

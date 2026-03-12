@@ -43,6 +43,7 @@ import VariantModal from "@/components/modals/VariantModal";
 
 // Types
 import { ProductFormData, ProductAttribute, ProductVariant } from "@/types";
+import { Category } from "@/types/category.types";
 
 // Utils
 import {
@@ -74,7 +75,7 @@ const EditProductPage: React.FC = () => {
     attributes,
     setAttributes,
     attributeModalVisible,
-    editingAttribute,
+    editingAttributeForModal,
     handleAddAttribute,
     handleDeleteAttribute,
     openAttributeModal,
@@ -305,9 +306,6 @@ const EditProductPage: React.FC = () => {
     isSubmitting: isUpdating,
   });
 
-  // State để theo dõi quá trình tải dữ liệu
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-
   // Load product data into form
   useEffect(() => {
     if (productResponse?.data) {
@@ -338,9 +336,9 @@ const EditProductPage: React.FC = () => {
         Array.isArray(product.images)
       ) {
         const imageElements = product.images
-          .filter((img) => img.includes("data:image"))
+          .filter((img: string) => img.includes("data:image"))
           .map(
-            (img) =>
+            (img: string) =>
               `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
           )
           .join("<br/>");
@@ -507,7 +505,15 @@ const EditProductPage: React.FC = () => {
     return "Cập nhật sản phẩm thất bại. Vui lòng thử lại.";
   };
 
-  const categories = categoriesResponse?.data || [];
+  // Helper function to get categories as array
+  const getCategoriesArray = (): Category[] => {
+    const data = categoriesResponse?.data;
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    return [data];
+  };
+
+  const categories = getCategoriesArray();
 
   // Handle loading and error states
   if (isLoadingProduct) {
@@ -666,7 +672,7 @@ const EditProductPage: React.FC = () => {
         <AttributeModal
           visible={attributeModalVisible}
           onClose={closeAttributeModal}
-          attribute={editingAttribute}
+          attribute={editingAttributeForModal}
           onSave={handleAddAttribute}
         />
       )}

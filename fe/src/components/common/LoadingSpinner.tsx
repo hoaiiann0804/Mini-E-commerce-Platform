@@ -1,30 +1,32 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg'|'small';
+  size?: "sm" | "md" | "lg" | "small" | "large";
   color?: string;
   fullScreen?: boolean;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
-  color = 'primary',
+  size = "md",
+  color = "primary",
   fullScreen = false,
 }) => {
   const sizeClasses = {
-    sm: 'w-5 h-5',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
+    sm: "w-5 h-5",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
   };
 
   const colorClasses = {
-    primary: 'text-primary-500',
-    secondary: 'text-secondary-500',
-    white: 'text-white',
-    gray: 'text-neutral-400',
+    primary: "text-primary-500",
+    secondary: "text-secondary-500",
+    white: "text-white",
+    gray: "text-neutral-400",
   };
 
-  const spinnerSize = sizeClasses[size];
+  const normalizedSize: keyof typeof sizeClasses =
+    size === "small" ? "sm" : size === "large" ? "lg" : size;
+  const spinnerSize = sizeClasses[normalizedSize];
   const spinnerColor =
     colorClasses[color as keyof typeof colorClasses] || colorClasses.primary;
 

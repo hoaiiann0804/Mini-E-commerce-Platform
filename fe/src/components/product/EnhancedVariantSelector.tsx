@@ -154,7 +154,7 @@ const EnhancedVariantSelector: React.FC<EnhancedVariantSelectorProps> = ({
               {nameDetails?.affectingAttributes && (
                 <Space wrap size="small">
                   {nameDetails.affectingAttributes.map((attr: any) => (
-                    <Tag key={attr.id} color="blue" size="small">
+                    <Tag key={attr.id} color="blue" style={{ fontSize: 11 }}>
                       {attr.groupName}: {attr.nameTemplate}
                     </Tag>
                   ))}
@@ -186,7 +186,11 @@ const EnhancedVariantSelector: React.FC<EnhancedVariantSelectorProps> = ({
 
                   {isNameAffecting && (
                     <Tooltip title="Thuộc tính này ảnh hưởng đến tên sản phẩm">
-                      <Tag color="blue" size="small" icon={<BulbOutlined />}>
+                      <Tag
+                        color="blue"
+                        icon={<BulbOutlined />}
+                        style={{ fontSize: 11 }}
+                      >
                         Tên động
                       </Tag>
                     </Tooltip>
@@ -315,7 +319,7 @@ const EnhancedVariantSelector: React.FC<EnhancedVariantSelectorProps> = ({
                 <Tag
                   key={`${attrName}-${value}`}
                   color={isNameAffecting ? 'blue' : 'default'}
-                  size="small"
+                  style={{ fontSize: 11 }}
                   closable
                   onClose={() => onAttributeChange(attrName, undefined)}
                 >

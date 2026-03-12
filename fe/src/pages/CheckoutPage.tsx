@@ -2,19 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Button, Radio, Space, Divider } from "antd";
-import {
-  ArrowRightOutlined,
-  CheckCircleOutlined,
-  LoadingOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { Button, Radio, Space } from "antd";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 // Add address related imports and types
 import { useGetAddressesQuery } from "@/services/userApi";
 import type { Address } from "@/types/user.types";
-
-import CustomButton from "@/components/common/Button";
 import PremiumButton from "@/components/common/PremiumButton";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
@@ -36,19 +29,22 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Address management state
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  );
   const [isUsingCustomAddress, setIsUsingCustomAddress] = useState(false);
 
   // Fetch user's addresses
-  const { data: addresses = [], isLoading: isLoadingAddresses } = useGetAddressesQuery();
+  const { data: addresses = [], isLoading: isLoadingAddresses } =
+    useGetAddressesQuery();
 
   // Find the default address
-  const defaultAddress = addresses.find(addr => addr.isDefault);
+  const defaultAddress = addresses.find((addr) => addr.isDefault);
 
   // Set default address when addresses are loaded
   useEffect(() => {
     if (defaultAddress && !selectedAddressId && !isUsingCustomAddress) {
-      setSelectedAddressId(defaultAddress.id);
+      setSelectedAddressId(defaultAddress.id || null);
       // Pre-fill form with default address
       fillFormWithAddress(defaultAddress);
     }
@@ -57,7 +53,7 @@ const CheckoutPage: React.FC = () => {
   // Helper function to fill form with address data
   const fillFormWithAddress = (address: Address) => {
     const [firstName, ...lastNameParts] = address.name?.split(" ") || [];
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       firstName: firstName || "",
       lastName: lastNameParts.join(" ") || "",
@@ -72,7 +68,7 @@ const CheckoutPage: React.FC = () => {
 
   // Handle address selection
   const handleAddressSelect = (address: Address) => {
-    setSelectedAddressId(address.id);
+    setSelectedAddressId(address.id || null);
     setIsUsingCustomAddress(false);
     fillFormWithAddress(address);
   };
@@ -82,7 +78,7 @@ const CheckoutPage: React.FC = () => {
     setSelectedAddressId(null);
     setIsUsingCustomAddress(true);
     // Reset form fields
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
@@ -295,8 +291,9 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  // Handle same as shipping checkbox
-  const handleSameAsShipping = (checked: boolean) => {
+  // Handle same as shipping checkbox (used for billing address logic)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleSameAsShipping = (checked: boolean) => {
     setFormData((prev) => ({
       ...prev,
       sameAsShipping: checked,
@@ -433,7 +430,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   // Handle payment success
-  const handlePaymentSuccess = async (paymentIntent: any) => {
+  const handlePaymentSuccess = async (_paymentIntent: any) => {
     dispatch(
       addNotification({
         type: "success",
@@ -479,8 +476,9 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  // Handle form submission for non-Stripe payments
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle form submission for non-Stripe payments (unused, kept for potential future use)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.paymentMethod === "stripe") {
@@ -621,7 +619,9 @@ const CheckoutPage: React.FC = () => {
                 ) : (
                   <div className="space-y-2 mb-4">
                     <Radio.Group
-                      value={isUsingCustomAddress ? 'custom' : selectedAddressId}
+                      value={
+                        isUsingCustomAddress ? "custom" : selectedAddressId
+                      }
                       className="w-full"
                     >
                       <Space direction="vertical" className="w-full">
@@ -634,15 +634,18 @@ const CheckoutPage: React.FC = () => {
                           >
                             <div className="ml-2">
                               <div className="flex items-center">
-                                <span className="font-medium">{address.name}</span>
+                                <span className="font-medium">
+                                  {address.name}
+                                </span>
                                 {address.isDefault && (
                                   <span className="ml-2 text-xs bg-primary-100 text-primary-800 px-2 py-0.5 rounded-full">
-                                    {t('address.default')}
+                                    {t("address.default")}
                                   </span>
                                 )}
                               </div>
                               <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                                {address.address1}, {address.city}, {address.state}, {address.country}
+                                {address.address1}, {address.city},{" "}
+                                {address.state}, {address.country}
                               </div>
                               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                                 {address.phone}
@@ -658,7 +661,9 @@ const CheckoutPage: React.FC = () => {
                           className="w-full p-3 border rounded-md hover:border-primary-500 transition-colors"
                         >
                           <div className="ml-2">
-                            <div className="font-medium">{t('checkout.useCustomAddress')}</div>
+                            <div className="font-medium">
+                              {t("checkout.useCustomAddress")}
+                            </div>
                           </div>
                         </Radio>
                       </Space>
@@ -667,10 +672,10 @@ const CheckoutPage: React.FC = () => {
                     <Button
                       type="link"
                       icon={<PlusOutlined />}
-                      onClick={() => navigate('/account/addresses')}
+                      onClick={() => navigate("/account/addresses")}
                       className="p-0 text-sm"
                     >
-                      {t('checkout.manageAddresses')}
+                      {t("checkout.manageAddresses")}
                     </Button>
                   </div>
                 )}
@@ -718,9 +723,13 @@ const CheckoutPage: React.FC = () => {
                   <Input
                     label={t("checkout.shippingInfo.address")}
                     value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("address", e.target.value)
+                    }
                     error={errors.address}
-                    disabled={!isUsingCustomAddress && selectedAddressId !== null}
+                    disabled={
+                      !isUsingCustomAddress && selectedAddressId !== null
+                    }
                     required
                   />
                 </div>
@@ -755,7 +764,9 @@ const CheckoutPage: React.FC = () => {
                     onChange={(value) => handleInputChange("country", value)}
                     options={countries}
                     error={errors.country}
-                    disabled={!isUsingCustomAddress && selectedAddressId !== null}
+                    disabled={
+                      !isUsingCustomAddress && selectedAddressId !== null
+                    }
                     required
                   />
                 </div>
@@ -794,254 +805,254 @@ const CheckoutPage: React.FC = () => {
                 </label>
               ))}
             </div>
-          
           )}
 
-        {/* Payment Method */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
-            {isRepayingOrder
-              ? t("checkout.repaymentMethod.title")
-              : t("checkout.paymentMethod.title")}
-          </h2>
+          {/* Payment Method */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
+              {isRepayingOrder
+                ? t("checkout.repaymentMethod.title")
+                : t("checkout.paymentMethod.title")}
+            </h2>
 
-          <div className="space-y-3 mb-6">
-            {paymentMethods.map((method) => (
-              <label
-                key={method.value}
-                className="flex items-center p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700"
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value={method.value}
-                  checked={formData.paymentMethod === method.value}
-                  onChange={(e) =>
-                    handleInputChange("paymentMethod", e.target.value)
-                  }
-                  className="mr-3"
-                />
-                <div className="font-medium text-neutral-800 dark:text-neutral-100">
-                  {method.label}
-                </div>
-              </label>
-            ))}
-          </div>
-
-          {/* Other payment methods info */}
-          {/* PayPal section removed */}
-
-          {formData.paymentMethod === "bank_transfer" && (
-            <div className="p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
-              {!currentOrder ? (
-                <>
-                  <h4 className="font-semibold text-neutral-800 dark:text-neutral-100 mb-2">
-                    {t("checkout.bankTransfer.instructions")}
-                  </h4>
-                  <div className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
-                    <p className="text-blue-700 dark:text-blue-300 font-medium">
-                      Vui lòng tạo đơn hàng trước để nhận mã QR thanh toán
-                    </p>
-                    <p>
-                      Mã QR thanh toán sẽ được hiển thị sau khi bạn tạo đơn
-                      hàng
-                    </p>
+            <div className="space-y-3 mb-6">
+              {paymentMethods.map((method) => (
+                <label
+                  key={method.value}
+                  className="flex items-center p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700"
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={method.value}
+                    checked={formData.paymentMethod === method.value}
+                    onChange={(e) =>
+                      handleInputChange("paymentMethod", e.target.value)
+                    }
+                    className="mr-3"
+                  />
+                  <div className="font-medium text-neutral-800 dark:text-neutral-100">
+                    {method.label}
                   </div>
-                </>
-              ) : (
-                <BankTransferQR
-                  amount={total / 100}
-                  orderId={currentOrder.id}
-                />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Order Notes */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-4">
-            Order Notes (Optional)
-          </h2>
-          <textarea
-            value={formData.notes}
-            onChange={(e) => handleInputChange("notes", e.target.value)}
-            placeholder="Any special instructions for your order..."
-            className="w-full p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100"
-            rows={3}
-          />
-        </div>
-      </div>
-
-      {/* Right Column - Order Summary */}
-      <div className="space-y-6">
-        {/* Order Summary */}
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 sticky top-4">
-          <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
-            {t("checkout.orderSummary.title")}
-          </h2>
-
-          {/* Cart Items or Repay Order */}
-          {isRepayingOrder ? (
-            <div className="space-y-4 mb-6">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="text-blue-800 dark:text-blue-200">
-                  <div className="font-semibold mb-2">
-                    {t("checkout.repayOrder.title")}
-                  </div>
-                  <div className="text-sm mb-1">
-                    {t("checkout.repayOrder.id")}: {currentOrder.id}
-                  </div>
-                  <div className="text-lg font-semibold">
-                    {t("checkout.repayOrder.amount")}:{" "}
-                    {formatPrice(currentOrder.total)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 mb-6">
-              {items.map((item) => (
-                <CartItem
-                  key={`${item.id}-${item.variantId || "default"}`}
-                  item={item}
-                  readonly
-                />
+                </label>
               ))}
             </div>
-          )}
 
-          {/* Totals */}
-          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">
-            {!isRepayingOrder ? (
-              <>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.subtotal")}</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.shipping")}</span>
-                  <span>
-                    {shippingCost === 0
-                      ? t("checkout.orderSummary.freeShipping")
-                      : formatPrice(shippingCost)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.tax")}</span>
-                  <span>{formatPrice(tax)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                  <span>{t("checkout.orderSummary.total")}</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                <span>{t("checkout.orderSummary.total")}</span>
-                <span>{formatPrice(currentOrder.total)}</span>
+            {/* Other payment methods info */}
+            {/* PayPal section removed */}
+
+            {formData.paymentMethod === "bank_transfer" && (
+              <div className="p-4 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
+                {!currentOrder ? (
+                  <>
+                    <h4 className="font-semibold text-neutral-800 dark:text-neutral-100 mb-2">
+                      {t("checkout.bankTransfer.instructions")}
+                    </h4>
+                    <div className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
+                      <p className="text-blue-700 dark:text-blue-300 font-medium">
+                        Vui lòng tạo đơn hàng trước để nhận mã QR thanh toán
+                      </p>
+                      <p>
+                        Mã QR thanh toán sẽ được hiển thị sau khi bạn tạo đơn
+                        hàng
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <BankTransferQR
+                    amount={total / 100}
+                    orderId={currentOrder.id}
+                  />
+                )}
               </div>
             )}
           </div>
 
-          {/* Complete Order Button (for bank transfer after QR is shown) */}
-          {formData.paymentMethod === "bank_transfer" && currentOrder && (
-            <PremiumButton
-              variant="success"
-              size="large"
-              iconType="check"
-              isProcessing={isProcessing}
-              processingText="Đang xử lý..."
-              onClick={() => handlePaymentSuccess({ id: currentOrder.id })}
-              className="w-full mt-6 h-14 text-lg font-semibold"
-            >
-              Tôi đã thanh toán
-            </PremiumButton>
-          )}
+          {/* Order Notes */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-4">
+              Order Notes (Optional)
+            </h2>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
+              placeholder="Any special instructions for your order..."
+              className="w-full p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100"
+              rows={3}
+            />
+          </div>
+        </div>
 
-          {/* Create Order Button for Bank Transfer */}
-          {formData.paymentMethod === "bank_transfer" && !currentOrder && (
-            <PremiumButton
-              variant="primary"
-              size="large"
-              iconType="arrow-right"
-              isProcessing={isProcessing}
-              processingText="Processing..."
-              onClick={handleStripeOrderCreation} // Reuse the same function for creating order
-              className="w-full mt-6 h-14 text-lg font-semibold"
-            >
-              {t("checkout.createOrder") || "Tạo đơn hàng và nhận mã QR"}
-            </PremiumButton>
-          )}
+        {/* Right Column - Order Summary */}
+        <div className="space-y-6">
+          {/* Order Summary */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 sticky top-4">
+            <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100 mb-6">
+              {t("checkout.orderSummary.title")}
+            </h2>
 
-          {/* Create Order Button (for Stripe) */}
-          {formData.paymentMethod === "stripe" && !currentOrder && (
-            <PremiumButton
-              variant="primary"
-              size="large"
-              iconType="arrow-right"
-              isProcessing={isProcessing}
-              processingText="Processing..."
-              onClick={handleStripeOrderCreation}
-              className="w-full mt-6 h-14 text-lg font-semibold"
-            >
-              Continue to Payment
-            </PremiumButton>
-          )}
-
-          {/* Stripe Payment Form */}
-          {formData.paymentMethod === "stripe" && currentOrder && (
-            <div className="mt-6">
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="text-blue-800 dark:text-blue-200">
-                  <div className="font-semibold">
-                    {currentOrder.isRepay
-                      ? "Thanh toán lại đơn hàng"
-                      : "Order Created Successfully!"}
-                  </div>
-                  {currentOrder.number && (
-                    <div className="text-sm">
-                      Order #{currentOrder.number}
+            {/* Cart Items or Repay Order */}
+            {isRepayingOrder ? (
+              <div className="space-y-4 mb-6">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-blue-800 dark:text-blue-200">
+                    <div className="font-semibold mb-2">
+                      {t("checkout.repayOrder.title")}
                     </div>
-                  )}
-                  <div className="text-sm">
-                    Please complete your payment below.
+                    <div className="text-sm mb-1">
+                      {t("checkout.repayOrder.id")}: {currentOrder.id}
+                    </div>
+                    <div className="text-lg font-semibold">
+                      {t("checkout.repayOrder.amount")}:{" "}
+                      {formatPrice(currentOrder.total)}
+                    </div>
                   </div>
                 </div>
               </div>
-              <StripePaymentForm
-                amount={parseFloat(currentOrder.total) / 25000} // Convert VND to USD (approximate rate)
-                currency="usd"
-                orderId={currentOrder.id}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                onProcessing={handlePaymentProcessing}
-              />
-            </div>
-          )}
+            ) : (
+              <div className="space-y-4 mb-6">
+                {items.map((item) => (
+                  <CartItem
+                    key={`${item.id}-${item.variantId || "default"}`}
+                    item={item}
+                    readonly
+                  />
+                ))}
+              </div>
+            )}
 
-          {/* Security Notice */}
-          <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <div className="flex items-center text-green-800 dark:text-green-200">
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-              <div>
-                <div className="font-semibold">
-                  {t("checkout.securityNotice.title")}
+            {/* Totals */}
+            <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">
+              {!isRepayingOrder ? (
+                <>
+                  <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                    <span>{t("checkout.orderSummary.subtotal")}</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                    <span>{t("checkout.orderSummary.shipping")}</span>
+                    <span>
+                      {shippingCost === 0
+                        ? t("checkout.orderSummary.freeShipping")
+                        : formatPrice(shippingCost)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                    <span>{t("checkout.orderSummary.tax")}</span>
+                    <span>{formatPrice(tax)}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-700">
+                    <span>{t("checkout.orderSummary.total")}</span>
+                    <span>{formatPrice(total)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+                  <span>{t("checkout.orderSummary.total")}</span>
+                  <span>{formatPrice(currentOrder.total)}</span>
                 </div>
-                <div className="text-sm">
-                  {t("checkout.securityNotice.message")}
+              )}
+            </div>
+
+            {/* Complete Order Button (for bank transfer after QR is shown) */}
+            {formData.paymentMethod === "bank_transfer" && currentOrder && (
+              <PremiumButton
+                variant="success"
+                size="large"
+                iconType="check"
+                isProcessing={isProcessing}
+                processingText="Đang xử lý..."
+                onClick={() => handlePaymentSuccess({ id: currentOrder.id })}
+                className="w-full mt-6 h-14 text-lg font-semibold"
+              >
+                Tôi đã thanh toán
+              </PremiumButton>
+            )}
+
+            {/* Create Order Button for Bank Transfer */}
+            {formData.paymentMethod === "bank_transfer" && !currentOrder && (
+              <PremiumButton
+                variant="primary"
+                size="large"
+                iconType="arrow-right"
+                isProcessing={isProcessing}
+                processingText="Processing..."
+                onClick={handleStripeOrderCreation} // Reuse the same function for creating order
+                className="w-full mt-6 h-14 text-lg font-semibold"
+              >
+                {t("checkout.createOrder") || "Tạo đơn hàng và nhận mã QR"}
+              </PremiumButton>
+            )}
+
+            {/* Create Order Button (for Stripe) */}
+            {formData.paymentMethod === "stripe" && !currentOrder && (
+              <PremiumButton
+                variant="primary"
+                size="large"
+                iconType="arrow-right"
+                isProcessing={isProcessing}
+                processingText="Processing..."
+                onClick={handleStripeOrderCreation}
+                className="w-full mt-6 h-14 text-lg font-semibold"
+              >
+                Continue to Payment
+              </PremiumButton>
+            )}
+
+            {/* Stripe Payment Form */}
+            {formData.paymentMethod === "stripe" && currentOrder && (
+              <div className="mt-6">
+                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-blue-800 dark:text-blue-200">
+                    <div className="font-semibold">
+                      {currentOrder.isRepay
+                        ? "Thanh toán lại đơn hàng"
+                        : "Order Created Successfully!"}
+                    </div>
+                    {currentOrder.number && (
+                      <div className="text-sm">
+                        Order #{currentOrder.number}
+                      </div>
+                    )}
+                    <div className="text-sm">
+                      Please complete your payment below.
+                    </div>
+                  </div>
+                </div>
+                <StripePaymentForm
+                  amount={parseFloat(currentOrder.total) / 25000} // Convert VND to USD (approximate rate)
+                  currency="usd"
+                  orderId={currentOrder.id}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  onProcessing={handlePaymentProcessing}
+                />
+              </div>
+            )}
+
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="flex items-center text-green-800 dark:text-green-200">
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                <div>
+                  <div className="font-semibold">
+                    {t("checkout.securityNotice.title")}
+                  </div>
+                  <div className="text-sm">
+                    {t("checkout.securityNotice.message")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1049,7 +1060,6 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
     </div>
-    </div >
   );
 };
 

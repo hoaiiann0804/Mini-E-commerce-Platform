@@ -13,6 +13,7 @@ interface SelectProps {
   label?: string;
   error?: string;
   disabled?: boolean;
+  required?: boolean;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ const Select: React.FC<SelectProps> = ({
   label,
   error,
   disabled = false,
+  required = false,
   className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,6 +75,7 @@ const Select: React.FC<SelectProps> = ({
       {label && (
         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
           {label}
+          {required && <span className="text-error ml-1">*</span>}
         </label>
       )}
 

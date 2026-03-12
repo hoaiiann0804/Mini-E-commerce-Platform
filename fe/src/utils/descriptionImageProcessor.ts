@@ -1,12 +1,13 @@
 import { message } from 'antd';
 
+// Update ProcessDescriptionOptions to use correct category type
 export interface ProcessDescriptionOptions {
   productId?: string;
   category?: 'product' | 'user' | 'review';
   uploadImageFn: (params: {
     base64Data: string;
     options?: {
-      category?: string;
+      category?: 'product' | 'user' | 'review';
       productId?: string;
     };
   }) => Promise<any>;

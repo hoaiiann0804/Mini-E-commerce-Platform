@@ -5,6 +5,7 @@ interface RatingProps {
   onChange?: (value: number) => void;
   size?: 'small' | 'medium' | 'large';
   interactive?: boolean;
+  readonly?: boolean;
   className?: string;
   showCount?: boolean;
   count?: number;
@@ -15,11 +16,13 @@ export const Rating: React.FC<RatingProps> = ({
   onChange,
   size = 'medium',
   interactive = false,
+  readonly = false,
   className = '',
   showCount = false,
   count,
 }) => {
   const [hoverValue, setHoverValue] = React.useState<number | null>(null);
+  const isInteractive = interactive && !readonly;
 
   // Determine star size based on the size prop
   const starSizeClass = {
@@ -37,21 +40,21 @@ export const Rating: React.FC<RatingProps> = ({
 
   // Handle mouse enter on a star
   const handleMouseEnter = (index: number) => {
-    if (interactive) {
+    if (isInteractive) {
       setHoverValue(index);
     }
   };
 
   // Handle mouse leave from the rating component
   const handleMouseLeave = () => {
-    if (interactive) {
+    if (isInteractive) {
       setHoverValue(null);
     }
   };
 
   // Handle click on a star
   const handleClick = (index: number) => {
-    if (interactive && onChange) {
+    if (isInteractive && onChange) {
       onChange(index);
     }
   };
@@ -72,7 +75,7 @@ export const Rating: React.FC<RatingProps> = ({
             size={starSizeClass}
             onMouseEnter={() => handleMouseEnter(index)}
             onClick={() => handleClick(index)}
-            interactive={interactive}
+            interactive={isInteractive}
           />
         ))}
       </div>
