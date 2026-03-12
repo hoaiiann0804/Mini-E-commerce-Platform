@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, Select, Input, Row, Col, Alert } from 'antd';
-import { Category } from '@/types/product';
+import { Category } from '@/types/category.types';
 
 const { TextArea } = Input;
 const { Option } = Select;

@@ -17,7 +17,7 @@ export interface User {
 }
 
 export interface Address {
-  id: string;
+  id?: string;
   name?: string; // Label for the address (e.g., "Home", "Work")
   firstName: string;
   lastName: string;
@@ -29,5 +29,8 @@ export interface Address {
   zip: string;
   country: string;
   phone?: string;
-  isDefault: boolean;
+  isDefault?: boolean;
+  addressType?: "home" | "office" | "other";
+  countryCode?: string;
+  stateCode?: string;
 }

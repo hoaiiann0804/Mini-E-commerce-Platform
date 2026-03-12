@@ -69,7 +69,7 @@ const DynamicProductTitle: React.FC<DynamicProductTitleProps> = ({
     } catch (err: any) {
       console.error('Error generating dynamic name:', err);
       setError('Không thể tạo tên động');
-      setDynamicName(product.name); // Fallback to original name
+      setDynamicName(product.name); 
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,6 @@ const DynamicProductTitle: React.FC<DynamicProductTitleProps> = ({
         <Alert
           message={error}
           type="error"
-          size="small"
           showIcon
           style={{ marginTop: 8 }}
         />
@@ -134,7 +133,6 @@ const DynamicProductTitle: React.FC<DynamicProductTitleProps> = ({
           {hasAttributeChanges && (
             <Tag
               color="blue"
-              size="small"
               icon={<BulbOutlined />}
               style={{
                 position: 'absolute',

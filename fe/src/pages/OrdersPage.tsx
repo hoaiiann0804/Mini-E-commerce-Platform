@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Button from '@/components/common/Button';
 import { PremiumButton } from '@/components/common';
@@ -9,7 +9,6 @@ import {
   useCancelOrderMutation,
   useRepayOrderMutation,
 } from '@/services/orderApi';
-import { formatPrice } from '@/utils/format';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { toast } from '@/utils/toast';
@@ -35,7 +34,6 @@ const paymentStatusColors: Record<string, string> = {
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +45,6 @@ const OrdersPage: React.FC = () => {
     data: ordersResponse,
     isLoading,
     isError,
-    error,
     refetch,
   } = useGetUserOrdersQuery({ page: currentPage, limit: 10 }, { skip: !user });
 
@@ -385,15 +382,15 @@ const OrdersPage: React.FC = () => {
                             className="w-12 h-12 rounded-lg border-2 border-white dark:border-neutral-800 overflow-hidden bg-neutral-100 dark:bg-neutral-700 flex-shrink-0"
                             style={{ zIndex: 10 - index }}
                           >
-                            {item.Product?.images?.[0] ? (
+                            {item.image ? (
                               <img
-                                src={item.Product.images[0]}
-                                alt={item.Product.name}
+                                src={item.image}
+                                alt={item.name}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-xs font-medium text-neutral-500">
-                                {item.Product?.name?.charAt(0) || '?'}
+                                {item.name?.charAt(0) || '?'}
                               </div>
                             )}
                           </div>
@@ -412,7 +409,7 @@ const OrdersPage: React.FC = () => {
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">
                           {order.items
                             .slice(0, 2)
-                            .map((item) => item.Product?.name)
+                            .map((item) => item.name)
                             .join(', ')}
                           {order.items.length > 2 && '...'}
                         </p>
@@ -472,21 +469,21 @@ const OrdersPage: React.FC = () => {
                                 className="flex items-center gap-4 p-4 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700"
                               >
                                 <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-700">
-                                  {item.Product?.images?.[0] ? (
+                                  {item.image ? (
                                     <img
-                                      src={item.Product.images[0]}
-                                      alt={item.Product.name}
+                                      src={item.image}
+                                      alt={item.name}
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-neutral-500">
-                                      {item.Product?.name?.charAt(0) || '?'}
+                                      {item.name?.charAt(0) || '?'}
                                     </div>
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-medium text-neutral-800 dark:text-neutral-100 truncate">
-                                    {item.Product?.name || 'Unknown Product'}
+                                    {item.name || 'Unknown Product'}
                                   </h4>
                                   <div className="flex items-center gap-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                                     <span>Qty: {item.quantity}</span>

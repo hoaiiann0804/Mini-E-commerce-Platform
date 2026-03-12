@@ -59,7 +59,7 @@ const CategoriesPage: React.FC = () => {
     useCreateCategoryMutation();
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdateCategoryMutation();
-  const [deleteCategory, { isLoading: isDeleting }] =
+  const [deleteCategory] =
     useDeleteCategoryMutation();
 
   const categories = Array.isArray(categoriesData?.data)
@@ -221,7 +221,7 @@ const CategoriesPage: React.FC = () => {
       title: 'Hành động',
       key: 'actions',
       width: 120,
-      render: (_, record: Category) => (
+      render: (_: unknown, record: Category) => (
         <Space>
           <Button
             type="link"

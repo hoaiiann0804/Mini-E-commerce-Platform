@@ -1,5 +1,5 @@
-import { ProductVariant } from '@/types/product';
-import { useEffect, useState } from 'react';
+import { ProductVariant } from "@/types/product";
+import { useEffect, useState } from "react";
 
 export const useProductVariants = (
   initialVariants: ProductVariant[] = [],
@@ -16,7 +16,7 @@ export const useProductVariants = (
     if (form && variants.length > 0) {
       // Tính tổng số lượng tồn kho từ tất cả các biến thể
       const totalStock = variants.reduce((total, variant) => {
-        const stock = parseInt(variant.stock?.toString() || '0');
+        const stock = parseInt(variant.stockQuantity?.toString() || "0");
         return total + (isNaN(stock) ? 0 : stock);
       }, 0);
 
@@ -25,9 +25,9 @@ export const useProductVariants = (
       let totalWeightedStock = 0;
 
       variants.forEach((variant) => {
-        const stock = parseInt(variant.stock?.toString() || '0');
+        const stock = parseInt(variant.stockQuantity?.toString() || "0");
         const price = Math.min(
-          parseFloat(variant.price?.toString() || '0'),
+          parseFloat(variant.price?.toString() || "0"),
           99999999.99
         );
         if (stock > 0 && price > 0) {
@@ -45,7 +45,7 @@ export const useProductVariants = (
         price:
           averagePrice > 0
             ? Math.round(averagePrice)
-            : form.getFieldValue('price') || 0,
+            : form.getFieldValue("price") || 0,
       });
     }
   }, [variants, form]);

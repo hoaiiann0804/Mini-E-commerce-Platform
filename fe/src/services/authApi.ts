@@ -5,7 +5,6 @@ import {
   LoginCredentials,
   RegisterData,
 } from "@/types/auth.types";
-import { authenticateUser, getUserByEmail } from "@/data/mockUsers";
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -116,7 +115,7 @@ export const authApi = api.injectEndpoints({
           return {
             error: {
               status: "FETCH_ERROR",
-              data: error instanceof Error ? error.message : "Network error",
+              error: error instanceof Error ? error.message : "Network error",
             },
           };
         }

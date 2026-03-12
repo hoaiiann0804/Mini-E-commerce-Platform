@@ -1,6 +1,9 @@
 import { api } from './api';
 import { User, Address } from '@/types/user.types';
 
+// Re-export Address type
+export type { Address } from '@/types/user.types';
+
 export interface UpdateProfileRequest {
   firstName?: string;
   lastName?: string;

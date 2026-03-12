@@ -85,7 +85,12 @@ const ProductsPage: React.FC = () => {
   const pagination = productsResponse?.data?.pagination;
 
   // Xử lý dữ liệu danh mục từ API
-  const apiCategories = categoriesResponse?.data || [];
+  // API có thể trả về Category[] | Category nên cần xử lý type
+  const apiCategories = Array.isArray(categoriesResponse?.data) 
+    ? categoriesResponse.data 
+    : categoriesResponse?.data 
+      ? [categoriesResponse.data] 
+      : [];
 
   // Tạo options cho dropdown danh mục
   const categoryOptions = [
@@ -436,7 +441,7 @@ const ProductsPage: React.FC = () => {
             <Pagination
               current={currentPage}
               total={pagination.totalItems}
-              pageSize={pagination.limit}
+              pageSize={pagination.itemsPerPage}
               onChange={setCurrentPage}
               showSizeChanger={false}
               showQuickJumper
