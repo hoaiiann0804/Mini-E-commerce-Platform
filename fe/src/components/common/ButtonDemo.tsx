@@ -1,7 +1,7 @@
-import React from 'react';
-import Button from './Button';
-import IconButton from './IconButton';
-import ButtonGroup from './ButtonGroup';
+import React from "react";
+import Button from "./Button";
+import IconButton from "./IconButton";
+import ButtonGroup from "./ButtonGroup";
 
 const ButtonDemo: React.FC = () => {
   return (

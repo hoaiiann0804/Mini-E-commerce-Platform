@@ -3,7 +3,6 @@ import { ProductFormData } from '@/types';
 export const sampleLaptopData: Partial<ProductFormData> = {
   // Basic Info
   name: 'MacBook Pro 16-inch M3 Max',
-  slug: 'macbook-pro-16-inch-m3-max',
   shortDescription:
     'Laptop cao cấp với chip M3 Max mạnh mẽ, màn hình Liquid Retina XDR 16 inch, pin 22 giờ. Hoàn hảo cho chuyên gia sáng tạo và lập trình viên.',
   description: `
@@ -72,43 +71,28 @@ export const sampleLaptopData: Partial<ProductFormData> = {
   `,
 
   // Pricing
-  basePrice: 89990000,
-  salePrice: 84990000,
-  costPrice: 75000000,
-  onSale: true,
+  price: 89990000,
+  compareAtPrice: 84990000,
 
-  // Inventory
-  trackInventory: true,
+  // Stock
   stockQuantity: 50,
-  lowStockThreshold: 5,
-  allowBackorder: false,
-  weight: 2.16,
-  length: 35.57,
-  width: 24.81,
-  height: 1.68,
+  inStock: true,
   sku: 'MBP16-M3MAX-1TB-SG',
 
   // Status
   status: 'active',
   featured: true,
-  tags: ['laptop', 'macbook', 'apple', 'm3-max', 'professional', 'creative'],
 
   // SEO
-  metaTitle:
+  seoTitle:
     'MacBook Pro 16-inch M3 Max - Laptop cao cấp cho chuyên gia | TechStore',
-  metaDescription:
+  seoDescription:
     'MacBook Pro 16-inch M3 Max với chip M3 Max mạnh mẽ, màn hình Liquid Retina XDR, pin 22 giờ. Giá tốt nhất, bảo hành chính hãng. Mua ngay!',
-  metaKeywords:
-    'macbook pro 16, m3 max, laptop apple, macbook pro 2024, laptop cao cấp',
-
-  // Shipping
-  freeShipping: true,
-  shippingClass: 'standard',
+  seoKeywords:
+    ['macbook pro 16', 'm3 max', 'laptop apple', 'macbook pro 2024', 'laptop cao cấp'],
 
   // Warranty
-  warrantyPeriod: 12,
-  warrantyType: 'manufacturer',
-  warrantyDescription: 'Bảo hành chính hãng Apple 12 tháng toàn cầu',
+  warrantyMonths: 12,
 };
 
 export const sampleLaptopAttributes = [

@@ -10,8 +10,10 @@ export interface Review {
   comment: string;
   images?: string[];
   isVerifiedPurchase: boolean;
+  verified?: boolean; // For mock data compatibility
   likes: number;
   dislikes: number;
+  helpful: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,11 +43,11 @@ export interface ReviewFilters {
   verified?: boolean;
   withImages?: boolean;
   sort?:
-    | 'newest'
-    | 'oldest'
-    | 'highest_rating'
-    | 'lowest_rating'
-    | 'most_helpful';
+    | "newest"
+    | "oldest"
+    | "highest_rating"
+    | "lowest_rating"
+    | "most_helpful";
   page?: number;
   limit?: number;
 }

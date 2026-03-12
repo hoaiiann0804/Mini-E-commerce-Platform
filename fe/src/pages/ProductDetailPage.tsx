@@ -6,16 +6,15 @@ import ProductCard from "@/components/features/ProductCard";
 import ProductReviews from "@/components/features/ProductReviews";
 import WarrantySelection from "@/components/product/WarrantySelection";
 import ProductVariantSelector from "@/components/product/ProductVariantSelector";
-import DynamicProductTitle from "@/components/product/DynamicProductTitle";
 import SimpleDynamicTitle from "@/components/product/SimpleDynamicTitle";
 import ProductDetailsSection from "@/components/product/ProductDetailsSection";
 import { useAddToWishlistMutation } from "@/services/wishlistApi";
 import { productApi } from "@/services/productApi";
-import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
+import { Product, ProductVariant, ProductAttribute } from "@/types/product.types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart } from "lucide-react";
+
 
 import { useMemo } from "react";
 import {
@@ -27,7 +26,7 @@ import {
 import { RootState } from "@/store";
 import { v4 as uuidv4 } from "uuid";
 import { LeftOutlined, RightOutlined, EyeOutlined } from "@ant-design/icons";
-import { Image, message } from "antd";
+import { Image } from "antd";
 
 import { addItem, setServerCart } from "@/features/cart/cartSlice";
 import { addNotification } from "@/features/ui/uiSlice";
@@ -70,7 +69,6 @@ const ProductDetailPage: React.FC = () => {
     Record<string, string>
   >({});
   const [selectedWarranties, setSelectedWarranties] = useState<string[]>([]);
-  const [dynamicProductName, setDynamicProductName] = useState<string>("");
   const [mappedAttributes, setMappedAttributes] = useState<
     Record<string, string>
   >({});
@@ -192,10 +190,6 @@ const ProductDetailPage: React.FC = () => {
     // console.log(quantity);
   };
 
-  const handleDynamicNameUpdate = (newName: string, details: any) => {
-    setDynamicProductName(newName);
-  };
-
   // Handle warranty selection
   const handleWarrantyChange = (packageIds: string[]) => {
     setSelectedWarranties(packageIds);
@@ -237,8 +231,8 @@ const ProductDetailPage: React.FC = () => {
         );
         if (!allSelected) {
           const missingAttributes = product.attributes
-            .filter((attr) => !selectedAttributes[attr.name])
-            .map((attr) => attr.name);
+            .filter((attr: ProductAttribute) => !selectedAttributes[attr.name])
+            .map((attr: ProductAttribute) => attr.name);
 
           dispatch(
             addNotification({
@@ -466,7 +460,7 @@ const ProductDetailPage: React.FC = () => {
       // Tìm variant ID dựa trên thuộc tính đã chọn
       let variantId: string | undefined;
       if (product.variants && Object.keys(selectedAttributes).length > 0) {
-        const selectedVariant = product.variants.find((variant) => {
+        const selectedVariant = product.variants.find((variant: ProductVariant) => {
           if (!variant.attributes) return false;
           return Object.entries(selectedAttributes).every(
             ([key, value]) => variant.attributes[key] === value
@@ -711,7 +705,7 @@ const ProductDetailPage: React.FC = () => {
           {/* Thumbnail gallery */}
           {product.images.length > 1 && (
             <div className="grid grid-cols-5 gap-3">
-              {product.images.map((image, index) => (
+              {product.images.map((image: string, index: number) => (
                 <button
                   key={index}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
@@ -867,7 +861,7 @@ const ProductDetailPage: React.FC = () => {
           {/* Dynamic Attributes Selector */}
           {product.attributes && product.attributes.length > 0 && (
             <div className="mb-6">
-              {product.attributes.map((attribute) => {
+              {product.attributes.map((attribute: ProductAttribute) => {
                 const attributeValuesWithStock = getAttributeValuesWithStock(
                   product,
                   attribute.name,
@@ -1123,7 +1117,7 @@ const ProductDetailPage: React.FC = () => {
             Sản phẩm liên quan
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.slice(0, 4).map((product) => (
+            {relatedProducts.slice(0, 4).map((product: Product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

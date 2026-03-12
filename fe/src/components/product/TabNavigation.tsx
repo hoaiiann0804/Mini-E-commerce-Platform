@@ -12,7 +12,7 @@ interface TabNavigationProps {
   tabOrder: string[];
   isLastTab?: boolean;
   completedSteps?: Record<string, boolean>;
-  onSubmit?: () => void;
+  onSubmit?: (values?: any) => void;
   isSubmitting?: boolean;
   submitText?: string;
   loadingText?: string;

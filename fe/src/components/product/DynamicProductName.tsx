@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Form,
-  Input,
   Alert,
   Skeleton,
   Tag,
@@ -15,7 +14,10 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useDebounce } from '@/hooks/useDebounce';
-import { attributeService } from '@/services/attributeService';
+import {
+  attributeService,
+  type NamePreviewResponse,
+} from '@/services/attributeService';
 
 const { Text, Title } = Typography;
 
@@ -27,25 +29,6 @@ interface DynamicProductNameProps {
   disabled?: boolean;
 }
 
-interface NamePreview {
-  originalName: string;
-  generatedName: string;
-  hasChanges: boolean;
-  parts: string[];
-  affectingAttributes?: Array<{
-    id: string;
-    name: string;
-    nameTemplate: string;
-    groupName: string;
-    groupType: string;
-  }>;
-  suggestions?: Array<{
-    attributeValues: Record<string, string>;
-    displayName: string;
-    fullName: string;
-  }>;
-}
-
 const DynamicProductName: React.FC<DynamicProductNameProps> = ({
   baseName,
   selectedAttributes = {},
@@ -55,7 +38,9 @@ const DynamicProductName: React.FC<DynamicProductNameProps> = ({
 }) => {
   const form = Form.useFormInstance();
   const [loading, setLoading] = useState(false);
-  const [namePreview, setNamePreview] = useState<NamePreview | null>(null);
+  const [namePreview, setNamePreview] = useState<NamePreviewResponse | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Debounce the inputs to avoid too many API calls
@@ -72,7 +57,8 @@ const DynamicProductName: React.FC<DynamicProductNameProps> = ({
   }, [debouncedBaseName, debouncedAttributes, disabled]);
 
   const generateName = async () => {
-    if (!shouldGenerateName) {
+    const safeBaseName = debouncedBaseName?.trim();
+    if (!shouldGenerateName || !safeBaseName) {
       setNamePreview(null);
       return;
     }
@@ -82,7 +68,7 @@ const DynamicProductName: React.FC<DynamicProductNameProps> = ({
 
     try {
       const response = await attributeService.generateNameRealTime({
-        baseName: debouncedBaseName,
+        baseName: safeBaseName,
         attributeValues: debouncedAttributes,
         productId,
       });
@@ -271,7 +257,7 @@ const DynamicProductName: React.FC<DynamicProductNameProps> = ({
                   // Could implement click to apply suggestion
                 }}
               >
-                {suggestion.displayName}
+                {suggestion}
               </Tag>
             ))}
           </Space>

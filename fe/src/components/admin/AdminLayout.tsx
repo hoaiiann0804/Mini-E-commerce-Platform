@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setTheme } from "@/features/ui/uiSlice";
 import { ConfigProvider, theme as antdTheme, Button, Drawer } from "antd";
-import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
-  const { t } = useTranslation();
-  const { user, getUserFullName } = useAuth();
+  const { getUserFullName } = useAuth();
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.ui.theme);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Handle window resize for responsive design
   useEffect(() => {
     const handleResize = () => {
-      setWindowWidth(window.innerWidth);
       if (window.innerWidth >= 768) {
         setMobileMenuOpen(false);
       }

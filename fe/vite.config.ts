@@ -6,11 +6,18 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   build: {
-    sourcemap: true,
+    // Disable sourcemaps for production to reduce bundle size
+    sourcemap: false,
+    // Enable chunk splitting
+    rollupOptions: {
+      output: {},
+    },
+    // Additional optimizations
+    chunkSizeWarningLimit: 600,
+    minify: 'esbuild',
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
-    exclude: [],
   },
   resolve: {
     alias: {
@@ -65,3 +72,4 @@ export default defineConfig({
     },
   },
 });
+

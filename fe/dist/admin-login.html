@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Admin Login Test</title>
+  </head>
+  <body>
+    <h1>Admin Login Test</h1>
+    <button onclick="loginAdmin()">Login as Admin</button>
+    <div id="result"></div>
+
+    <script>
+      async function loginAdmin() {
+        try {
+          const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: 'admin@example.com',
+              password: '123456',
+            }),
+          });
+
+          const data = await response.json();
+          console.log('Login response:', data);
+
+          if (data.status === 'success') {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            document.getElementById('result').innerHTML = `
+                        <p>Login successful!</p>
+                        <p>Token: ${data.token.substring(0, 50)}...</p>
+                        <p>User: ${data.user.email}</p>
+                        <p>Role: ${data.user.role}</p>
+                        <a href="/admin/dashboard">Go to Admin Dashboard</a>
+                    `;
+          } else {
+            document.getElementById('result').innerHTML =
+              `<p>Login failed: ${data.message}</p>`;
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          document.getElementById('result').innerHTML =
+            `<p>Login error: ${error.message}</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCreateProductMutation } from '@/services/adminProductApi';
-import { useGetCategoriesQuery } from '@/services/categoryApi';
-import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
-import Select from '@/components/common/Select';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateProductMutation } from "@/services/adminProductApi";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
+import Button from "@/components/common/Button";
+import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -20,7 +20,7 @@ import {
   TrashIcon,
   InformationCircleIcon,
   ExclamationTriangleIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 interface ProductFormData {
   // Core fields
@@ -37,9 +37,9 @@ interface ProductFormData {
   inStock: boolean;
   stockQuantity: number;
   sku: string;
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
   featured: boolean;
-  condition: 'new' | 'like-new' | 'used' | 'refurbished';
+  condition: "new" | "like-new" | "used" | "refurbished";
 
   // Categories
   categoryIds: string[];
@@ -69,7 +69,7 @@ interface Specification {
 interface ParentAttribute {
   id: string;
   name: string;
-  type: 'color' | 'size' | 'material' | 'custom';
+  type: "color" | "size" | "material" | "custom";
   values: string[];
   required: boolean;
 }
@@ -89,60 +89,60 @@ interface ProductVariant {
 
 const STEPS = [
   {
-    id: 'basic',
-    title: 'Thông tin cơ bản',
+    id: "basic",
+    title: "Thông tin cơ bản",
     icon: <DocumentTextIcon className="w-5 h-5" />,
-    description: 'Thông tin sản phẩm chính',
+    description: "Thông tin sản phẩm chính",
   },
   {
-    id: 'pricing',
-    title: 'Giá & Kho hàng',
+    id: "pricing",
+    title: "Giá & Kho hàng",
     icon: <CurrencyDollarIcon className="w-5 h-5" />,
-    description: 'Giá bán và tồn kho',
+    description: "Giá bán và tồn kho",
   },
   {
-    id: 'categories',
-    title: 'Danh mục',
+    id: "categories",
+    title: "Danh mục",
     icon: <TagIcon className="w-5 h-5" />,
-    description: 'Phân loại sản phẩm',
+    description: "Phân loại sản phẩm",
   },
   {
-    id: 'specifications',
-    title: 'Thông số kỹ thuật',
+    id: "specifications",
+    title: "Thông số kỹ thuật",
     icon: <SwatchIcon className="w-5 h-5" />,
-    description: 'Chi tiết kỹ thuật',
+    description: "Chi tiết kỹ thuật",
   },
   {
-    id: 'variants',
-    title: 'Biến thể',
+    id: "variants",
+    title: "Biến thể",
     icon: <SwatchIcon className="w-5 h-5" />,
-    description: 'Thuộc tính và biến thể',
+    description: "Thuộc tính và biến thể",
   },
   {
-    id: 'media',
-    title: 'Hình ảnh',
+    id: "media",
+    title: "Hình ảnh",
     icon: <PhotoIcon className="w-5 h-5" />,
-    description: 'Hình ảnh sản phẩm',
+    description: "Hình ảnh sản phẩm",
   },
   {
-    id: 'seo',
-    title: 'SEO',
+    id: "seo",
+    title: "SEO",
     icon: <MagnifyingGlassIcon className="w-5 h-5" />,
-    description: 'Tối ưu hóa SEO',
+    description: "Tối ưu hóa SEO",
   },
 ];
 
 const SPEC_CATEGORIES = [
-  'Bộ xử lý',
-  'Bộ nhớ',
-  'Màn hình',
-  'Đồ họa',
-  'Lưu trữ',
-  'Kết nối',
-  'Pin & Sạc',
-  'Thiết kế',
-  'Hệ điều hành',
-  'Khác',
+  "Bộ xử lý",
+  "Bộ nhớ",
+  "Màn hình",
+  "Đồ họa",
+  "Lưu trữ",
+  "Kết nối",
+  "Pin & Sạc",
+  "Thiết kế",
+  "Hệ điều hành",
+  "Khác",
 ];
 
 const CreateProductPageOptimized: React.FC = () => {
@@ -156,24 +156,24 @@ const CreateProductPageOptimized: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<ProductFormData>({
-    name: '',
-    baseName: '',
-    description: '',
-    shortDescription: '',
+    name: "",
+    baseName: "",
+    description: "",
+    shortDescription: "",
     price: 0,
     compareAtPrice: undefined,
     images: [],
-    thumbnail: '',
+    thumbnail: "",
     inStock: true,
     stockQuantity: 0,
-    sku: '',
-    status: 'active',
+    sku: "",
+    status: "active",
     featured: false,
-    condition: 'new',
+    condition: "new",
     categoryIds: [],
     searchKeywords: [],
-    seoTitle: '',
-    seoDescription: '',
+    seoTitle: "",
+    seoDescription: "",
     seoKeywords: [],
     specifications: [],
     isVariantProduct: false,
@@ -202,25 +202,25 @@ const CreateProductPageOptimized: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     switch (stepId) {
-      case 'basic':
-        if (!formData.name.trim()) newErrors.name = 'Tên sản phẩm bắt buộc';
+      case "basic":
+        if (!formData.name.trim()) newErrors.name = "Tên sản phẩm bắt buộc";
         if (!formData.description.trim())
-          newErrors.description = 'Mô tả bắt buộc';
+          newErrors.description = "Mô tả bắt buộc";
         if (!formData.shortDescription.trim())
-          newErrors.shortDescription = 'Mô tả ngắn bắt buộc';
+          newErrors.shortDescription = "Mô tả ngắn bắt buộc";
         break;
 
-      case 'pricing':
+      case "pricing":
         if (!formData.isVariantProduct) {
-          if (formData.price <= 0) newErrors.price = 'Giá phải lớn hơn 0';
+          if (formData.price <= 0) newErrors.price = "Giá phải lớn hơn 0";
           if (formData.stockQuantity < 0)
-            newErrors.stockQuantity = 'Tồn kho không được âm';
+            newErrors.stockQuantity = "Tồn kho không được âm";
         }
         break;
 
-      case 'categories':
+      case "categories":
         if (formData.categoryIds.length === 0)
-          newErrors.categoryIds = 'Chọn ít nhất 1 danh mục';
+          newErrors.categoryIds = "Chọn ít nhất 1 danh mục";
         break;
     }
 
@@ -255,7 +255,7 @@ const CreateProductPageOptimized: React.FC = () => {
         shortDescription: formData.shortDescription,
         price: formData.isVariantProduct ? 0 : formData.price,
         comparePrice: formData.isVariantProduct
-          ? null
+          ? undefined
           : formData.compareAtPrice,
         images: formData.images,
         thumbnail: formData.thumbnail || formData.images[0],
@@ -270,17 +270,17 @@ const CreateProductPageOptimized: React.FC = () => {
         seoTitle: formData.seoTitle,
         seoDescription: formData.seoDescription,
         seoKeywords: formData.seoKeywords,
-        specifications: formData.specifications.map((spec, index) => ({
+        specifications: formData.specifications.map((spec) => ({
           name: spec.name,
           value: spec.value,
           category: spec.category,
         })),
         isVariantProduct: formData.isVariantProduct,
-        attributes: formData.parentAttributes.map((attr, index) => ({
+        attributes: formData.parentAttributes.map((attr) => ({
           name: attr.name,
-          values: attr.values,
+          value: attr.values.join(","),
         })),
-        variants: formData.variants.map((variant, index) => ({
+        variants: formData.variants.map((variant) => ({
           name: variant.name,
           sku: variant.sku,
           price: variant.price,
@@ -288,24 +288,24 @@ const CreateProductPageOptimized: React.FC = () => {
           stockQuantity: variant.stockQuantity,
           attributes: variant.attributeValues,
           images: variant.images,
-          isDefault: variant.isDefault || index === 0,
+          isDefault: variant.isDefault,
           isAvailable: variant.isAvailable,
         })),
       };
 
       await createProduct(payload).unwrap();
-      navigate('/admin/products');
+      navigate("/admin/products");
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error("Error creating product:", error);
     }
   };
 
   // Specification handlers
-  const addSpecification = (category: string = 'Khác') => {
+  const addSpecification = (category: string = "Khác") => {
     const newSpec: Specification = {
       id: Date.now().toString(),
-      name: '',
-      value: '',
+      name: "",
+      value: "",
       category,
     };
     setFormData((prev) => ({
@@ -338,8 +338,8 @@ const CreateProductPageOptimized: React.FC = () => {
   const addAttribute = () => {
     const newAttr: ParentAttribute = {
       id: Date.now().toString(),
-      name: '',
-      type: 'custom',
+      name: "",
+      type: "custom",
       values: [],
       required: false,
     };
@@ -376,8 +376,8 @@ const CreateProductPageOptimized: React.FC = () => {
     const combinations = generateCombinations(formData.parentAttributes);
     const variants: ProductVariant[] = combinations.map((combo, index) => ({
       id: Date.now().toString() + index,
-      name: Object.values(combo).join(' - '),
-      sku: `${formData.sku || 'PROD'}-${index + 1}`,
+      name: Object.values(combo).join(" - "),
+      sku: `${formData.sku || "PROD"}-${index + 1}`,
       price: formData.price,
       compareAtPrice: formData.compareAtPrice,
       stockQuantity: 0,
@@ -410,7 +410,7 @@ const CreateProductPageOptimized: React.FC = () => {
     const step = STEPS[currentStep];
 
     switch (step.id) {
-      case 'basic':
+      case "basic":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -505,17 +505,17 @@ const CreateProductPageOptimized: React.FC = () => {
                 </label>
                 <Select
                   value={formData.condition}
-                  onValueChange={(value) =>
+                  onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      condition: value as any,
+                      condition: value as "new" | "like-new" | "used" | "refurbished",
                     }))
                   }
                   options={[
-                    { value: 'new', label: 'Mới' },
-                    { value: 'like-new', label: 'Như mới' },
-                    { value: 'used', label: 'Đã sử dụng' },
-                    { value: 'refurbished', label: 'Tân trang' },
+                    { value: "new", label: "Mới" },
+                    { value: "like-new", label: "Như mới" },
+                    { value: "used", label: "Đã sử dụng" },
+                    { value: "refurbished", label: "Tân trang" },
                   ]}
                 />
               </div>
@@ -526,13 +526,13 @@ const CreateProductPageOptimized: React.FC = () => {
                 </label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, status: value as any }))
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, status: value as "active" | "inactive" | "draft" }))
                   }
                   options={[
-                    { value: 'active', label: 'Đang bán' },
-                    { value: 'inactive', label: 'Tạm dừng' },
-                    { value: 'draft', label: 'Bản nháp' },
+                    { value: "active", label: "Đang bán" },
+                    { value: "inactive", label: "Tạm dừng" },
+                    { value: "draft", label: "Bản nháp" },
                   ]}
                 />
               </div>
@@ -572,7 +572,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'pricing':
+      case "pricing":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -581,8 +581,8 @@ const CreateProductPageOptimized: React.FC = () => {
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300">
                 {formData.isVariantProduct
-                  ? 'Giá sẽ được thiết lập cho từng biến thể'
-                  : 'Thiết lập giá bán và số lượng tồn kho'}
+                  ? "Giá sẽ được thiết lập cho từng biến thể"
+                  : "Thiết lập giá bán và số lượng tồn kho"}
               </p>
             </div>
 
@@ -612,7 +612,7 @@ const CreateProductPageOptimized: React.FC = () => {
                   </label>
                   <Input
                     type="number"
-                    value={formData.compareAtPrice || ''}
+                    value={formData.compareAtPrice || ""}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
@@ -687,7 +687,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'categories':
+      case "categories":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
@@ -768,7 +768,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'specifications':
+      case "specifications":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
@@ -834,7 +834,7 @@ const CreateProductPageOptimized: React.FC = () => {
                                 onChange={(e) =>
                                   updateSpecification(
                                     spec.id,
-                                    'name',
+                                    "name",
                                     e.target.value
                                   )
                                 }
@@ -847,7 +847,7 @@ const CreateProductPageOptimized: React.FC = () => {
                                 onChange={(e) =>
                                   updateSpecification(
                                     spec.id,
-                                    'value',
+                                    "value",
                                     e.target.value
                                   )
                                 }
@@ -873,7 +873,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'variants':
+      case "variants":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
@@ -882,8 +882,8 @@ const CreateProductPageOptimized: React.FC = () => {
               </h3>
               <p className="text-sm text-orange-700 dark:text-orange-300">
                 {formData.isVariantProduct
-                  ? 'Tạo thuộc tính và biến thể cho sản phẩm'
-                  : 'Chỉ áp dụng cho sản phẩm có biến thể'}
+                  ? "Tạo thuộc tính và biến thể cho sản phẩm"
+                  : "Chỉ áp dụng cho sản phẩm có biến thể"}
               </p>
             </div>
 
@@ -930,7 +930,7 @@ const CreateProductPageOptimized: React.FC = () => {
                                 onChange={(e) =>
                                   updateAttribute(
                                     attr.id,
-                                    'name',
+                                    "name",
                                     e.target.value
                                   )
                                 }
@@ -943,14 +943,14 @@ const CreateProductPageOptimized: React.FC = () => {
                               </label>
                               <Select
                                 value={attr.type}
-                                onValueChange={(value) =>
-                                  updateAttribute(attr.id, 'type', value)
+                                onChange={(value) =>
+                                  updateAttribute(attr.id, "type", value as "color" | "size" | "material" | "custom")
                                 }
                                 options={[
-                                  { value: 'color', label: 'Màu sắc' },
-                                  { value: 'size', label: 'Kích thước' },
-                                  { value: 'material', label: 'Chất liệu' },
-                                  { value: 'custom', label: 'Tuỳ chỉnh' },
+                                  { value: "color", label: "Màu sắc" },
+                                  { value: "size", label: "Kích thước" },
+                                  { value: "material", label: "Chất liệu" },
+                                  { value: "custom", label: "Tuỳ chỉnh" },
                                 ]}
                               />
                             </div>
@@ -962,7 +962,7 @@ const CreateProductPageOptimized: React.FC = () => {
                                   onChange={(e) =>
                                     updateAttribute(
                                       attr.id,
-                                      'required',
+                                      "required",
                                       e.target.checked
                                     )
                                   }
@@ -986,12 +986,12 @@ const CreateProductPageOptimized: React.FC = () => {
                               Giá trị
                             </label>
                             <Input
-                              value={attr.values.join(', ')}
+                              value={attr.values.join(", ")}
                               onChange={(e) =>
                                 updateAttribute(
                                   attr.id,
-                                  'values',
-                                  e.target.value.split(',').map((v) => v.trim())
+                                  "values",
+                                  e.target.value.split(",").map((v) => v.trim())
                                 )
                               }
                               placeholder="Nhập giá trị, cách nhau bởi dấu phẩy"
@@ -1169,10 +1169,10 @@ const CreateProductPageOptimized: React.FC = () => {
                           </div>
 
                           <div className="mt-3 text-sm text-gray-600">
-                            <strong>Thuộc tính:</strong>{' '}
+                            <strong>Thuộc tính:</strong>{" "}
                             {Object.entries(variant.attributeValues)
                               .map(([key, value]) => `${key}: ${value}`)
-                              .join(', ')}
+                              .join(", ")}
                           </div>
                         </div>
                       ))}
@@ -1184,7 +1184,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'media':
+      case "media":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
@@ -1201,12 +1201,12 @@ const CreateProductPageOptimized: React.FC = () => {
                 URLs hình ảnh
               </label>
               <textarea
-                value={formData.images.join('\n')}
+                value={formData.images.join("\n")}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
                     images: e.target.value
-                      .split('\n')
+                      .split("\n")
                       .filter((url) => url.trim()),
                   }))
                 }
@@ -1244,7 +1244,7 @@ const CreateProductPageOptimized: React.FC = () => {
                         className="w-full h-32 object-cover rounded-lg"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
-                            'https://via.placeholder.com/200x200?text=Error';
+                            "https://via.placeholder.com/200x200?text=Error";
                         }}
                       />
                       {formData.thumbnail === url && (
@@ -1260,7 +1260,7 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
-      case 'seo':
+      case "seo":
         return (
           <div className="space-y-6">
             <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
@@ -1312,12 +1312,12 @@ const CreateProductPageOptimized: React.FC = () => {
                   Từ khóa SEO
                 </label>
                 <Input
-                  value={formData.seoKeywords.join(', ')}
+                  value={formData.seoKeywords.join(", ")}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
                       seoKeywords: e.target.value
-                        .split(',')
+                        .split(",")
                         .map((k) => k.trim())
                         .filter((k) => k),
                     }))
@@ -1331,12 +1331,12 @@ const CreateProductPageOptimized: React.FC = () => {
                   Từ khóa tìm kiếm
                 </label>
                 <Input
-                  value={formData.searchKeywords.join(', ')}
+                  value={formData.searchKeywords.join(", ")}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
                       searchKeywords: e.target.value
-                        .split(',')
+                        .split(",")
                         .map((k) => k.trim())
                         .filter((k) => k),
                     }))
@@ -1368,7 +1368,7 @@ const CreateProductPageOptimized: React.FC = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => navigate('/admin/products')}
+            onClick={() => navigate("/admin/products")}
             className="text-gray-600 hover:text-gray-900"
           >
             <ArrowLeftIcon className="w-5 h-5" />
@@ -1392,10 +1392,10 @@ const CreateProductPageOptimized: React.FC = () => {
               <div
                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                   index === currentStep
-                    ? 'border-blue-500 bg-blue-500 text-white'
+                    ? "border-blue-500 bg-blue-500 text-white"
                     : completedSteps.has(step.id)
-                      ? 'border-green-500 bg-green-500 text-white'
-                      : 'border-gray-300 bg-white text-gray-400'
+                      ? "border-green-500 bg-green-500 text-white"
+                      : "border-gray-300 bg-white text-gray-400"
                 }`}
               >
                 {completedSteps.has(step.id) ? (
@@ -1447,7 +1447,7 @@ const CreateProductPageOptimized: React.FC = () => {
               onClick={handleSubmit}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Tạo sản phẩm'}
+              {isLoading ? <LoadingSpinner size="sm" /> : "Tạo sản phẩm"}
             </Button>
           ) : (
             <Button variant="primary" onClick={handleNext}>

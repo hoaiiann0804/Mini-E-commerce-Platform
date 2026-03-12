@@ -20,6 +20,14 @@ export interface AdminOrder {
   estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
+  // Shipping info
+  shippingFirstName?: string;
+  shippingLastName?: string;
+  shippingEmail?: string;
+  shippingPhone?: string;
+  shippingAddress?: string;
+  shippingCity?: string;
+  shippingCountry?: string;
   User: {
     id: string;
     firstName: string;

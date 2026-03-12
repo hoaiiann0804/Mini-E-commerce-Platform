@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { RootState } from '@/store';
-import { Rnd } from 'react-rnd';
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { RootState } from "@/store";
+import { Rnd } from "react-rnd";
 
 // Components
-import ChatMessage from './ChatMessage';
-import ChatInput from './ChatInput';
-import ChatSuggestions from './ChatSuggestions';
-import ChatProductList from './ChatProductList';
-import ChatToggleButton from './ChatToggleButton';
-import ChatHeaderContent from './ChatHeaderContent';
-import ChatQuickActions from './ChatQuickActions';
-import ChatEmptyState from './ChatEmptyState';
-import ChatResizeIndicator from './ChatResizeIndicator';
+import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
+import ChatSuggestions from "./ChatSuggestions";
+import ChatProductList from "./ChatProductList";
+import ChatToggleButton from "./ChatToggleButton";
+import ChatHeaderContent from "./ChatHeaderContent";
+import ChatQuickActions from "./ChatQuickActions";
+import ChatEmptyState from "./ChatEmptyState";
+import ChatResizeIndicator from "./ChatResizeIndicator";
 
 // Services & API
 import {
@@ -21,23 +21,23 @@ import {
   useTrackChatbotAnalyticsMutation,
   ChatbotResponse,
   ProductRecommendation,
-} from '../services/chatbotApi';
+} from "../services/chatbotApi";
 
 // Hooks & Constants
-import { useChatWidget } from '../hooks/useChatWidget';
+import { useChatWidget } from "../hooks/useChatWidget";
 import {
   CHAT_WIDGET_CONFIG,
   RESIZE_HANDLE_STYLES,
   RESIZE_HANDLE_CLASSES,
-} from '../constants/chatWidget';
+} from "../constants/chatWidget";
 
 // Styles
-import './ChatWidget.css';
+import "./ChatWidget.css";
 
 export interface Message {
   id: string;
   text: string;
-  sender: 'user' | 'ai';
+  sender: "user" | "ai";
   isLoading?: boolean;
   suggestions?: string[];
   products?: ProductRecommendation[];
@@ -51,9 +51,7 @@ export interface Message {
 
 const ChatWidget: React.FC = () => {
   const { t } = useTranslation();
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user } = useSelector((state: RootState) => state.auth);
 
   // Custom hook for chat widget state management
   const {
@@ -63,15 +61,13 @@ const ChatWidget: React.FC = () => {
     messages,
     messagesEndRef,
     chatWidgetRef,
+    chatWidgetDomRef,
     toggleChat,
     closeChat,
     addMessage,
     removeMessage,
-    updateMessage,
     applyChanges,
     setSize,
-    setPosition,
-    setMessages,
   } = useChatWidget();
 
   // API hooks
@@ -90,7 +86,7 @@ const ChatWidget: React.FC = () => {
     const userMessage: Message = {
       id: Date.now().toString(),
       text,
-      sender: 'user',
+      sender: "user",
     };
 
     addMessage(userMessage);
@@ -99,17 +95,17 @@ const ChatWidget: React.FC = () => {
     const loadingId = (Date.now() + 1).toString();
     addMessage({
       id: loadingId,
-      text: '',
-      sender: 'ai',
+      text: "",
+      sender: "ai",
       isLoading: true,
     });
 
     try {
-      console.log('Sending message to AI:', text);
+      console.log("Sending message to AI:", text);
 
       // Track analytics
       await trackAnalytics({
-        event: 'message_sent',
+        event: "message_sent",
         userId: user?.id,
         sessionId,
         metadata: { message: text },
@@ -131,12 +127,12 @@ const ChatWidget: React.FC = () => {
         context,
       }).unwrap();
 
-      console.log('Received AI response:', apiResponse);
+      console.log("Received AI response:", apiResponse);
 
       // Handle different response structures
       let response: ChatbotResponse;
       if (
-        (apiResponse as any).status === 'success' &&
+        (apiResponse as any).status === "success" &&
         (apiResponse as any).data
       ) {
         // New API structure
@@ -158,25 +154,25 @@ const ChatWidget: React.FC = () => {
       addMessage({
         id: (Date.now() + 2).toString(),
         text: response.response,
-        sender: 'ai',
+        sender: "ai",
         suggestions: response.suggestions,
         products: response.products,
         actions: response.actions,
       });
     } catch (error: any) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
 
       // Determine appropriate error message
-      let errorMessage = t('chat.errors.general');
+      let errorMessage = t("chat.errors.general");
 
-      if (error.message === 'Request timeout') {
-        errorMessage = t('chat.errors.timeout');
+      if (error.message === "Request timeout") {
+        errorMessage = t("chat.errors.timeout");
       } else if (error.status === 404) {
-        errorMessage = t('chat.errors.notFound');
+        errorMessage = t("chat.errors.notFound");
       } else if (error.status === 429) {
-        errorMessage = t('chat.errors.tooManyRequests');
+        errorMessage = t("chat.errors.tooManyRequests");
       } else if (error.status >= 500) {
-        errorMessage = t('chat.errors.serverError');
+        errorMessage = t("chat.errors.serverError");
       }
 
       // Remove loading message and add error message
@@ -184,11 +180,11 @@ const ChatWidget: React.FC = () => {
       addMessage({
         id: (Date.now() + 2).toString(),
         text: errorMessage,
-        sender: 'ai' as const,
+        sender: "ai" as const,
         suggestions: [
-          t('chat.suggestions.tryAgain'),
-          t('chat.suggestions.findProducts'),
-          t('chat.suggestions.contactSupport'),
+          t("chat.suggestions.tryAgain"),
+          t("chat.suggestions.findProducts"),
+          t("chat.suggestions.contactSupport"),
         ],
       });
     }
@@ -207,11 +203,11 @@ const ChatWidget: React.FC = () => {
     position: any
   ) => {
     // Add resize-feedback class for visual feedback
-    ref.classList.add('resize-feedback');
+    ref.classList.add("resize-feedback");
 
     // Remove the class after animation completes
     setTimeout(() => {
-      ref.classList.remove('resize-feedback');
+      ref.classList.remove("resize-feedback");
     }, CHAT_WIDGET_CONFIG.ANIMATION_DURATION.RESIZE);
   };
 
@@ -260,6 +256,7 @@ const ChatWidget: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
           }}
+          ref={chatWidgetDomRef}
         >
           <Rnd
             ref={chatWidgetRef}
@@ -294,7 +291,7 @@ const ChatWidget: React.FC = () => {
                   className="animate-in slide-in-from-bottom-2 duration-500"
                 >
                   <ChatMessage message={message} />
-                  {message.sender === 'ai' && (
+                  {message.sender === "ai" && (
                     <>
                       {/* Show products if available */}
                       {message.products && message.products.length > 0 && (

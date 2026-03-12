@@ -13,6 +13,15 @@ interface SearchBarProps {
   isExpanded?: boolean;
 }
 
+interface SearchSuggestion {
+  id: string | number;
+  name: string;
+  thumbnail?: string;
+  categoryName?: string;
+  categories?: { name: string }[];
+  price: number;
+}
+
 const SearchBar: React.FC<SearchBarProps> = ({
   className = '',
   placeholder,
@@ -84,7 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   // Get suggestions from search results
-  const suggestions = searchResults?.data?.products || [];
+  const suggestions: SearchSuggestion[] = searchResults?.data?.products || [];
 
   // Handle click outside to close search
   useEffect(() => {
@@ -122,7 +131,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  const handleSuggestionClick = (id: number) => {
+  const handleSuggestionClick = (id: string | number) => {
     // Find the product name to save as search term
     const product = suggestions.find((p) => p.id === id);
     if (product && product.name) {
@@ -328,7 +337,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               <div className="border-t border-neutral-200 dark:border-neutral-700 max-h-80 overflow-y-auto">
                 {isFetching ? (
                   <div className="p-4 text-center text-neutral-500 dark:text-neutral-400">
-                    <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-neutral-500 dark:border-neutral-400 border-r-2 border-neutral-500 dark:border-neutral-400 mr-2"></div>
+                    <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-r-2 border-neutral-500 dark:border-neutral-400 mr-2"></div>
                     {i18n.language === 'vi' ? 'Đang tải...' : 'Loading...'}
                   </div>
                 ) : isError ? (

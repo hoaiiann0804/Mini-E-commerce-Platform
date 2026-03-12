@@ -12,9 +12,12 @@ interface Variant {
   id?: string;
   name: string;
   price: number;
-  stock: number;
+  compareAtPrice?: number;
+  stock?: number;
+  stockQuantity: number;
   sku?: string;
-  attributes?: Record<string, string>;
+  attributes: Record<string, string>;
+  specifications?: Record<string, any>;
   value?: string;
 }
 
@@ -69,7 +72,8 @@ const VariantModal: React.FC<VariantModalProps> = ({
       name: name.trim(),
       price: price || 0,
       stock: stock || 0,
-      sku: sku ? sku.trim() : '',
+      stockQuantity: stock || 0,
+      sku: sku ? sku.trim() : undefined,
       attributes: filteredAttributes,
     };
 
@@ -142,7 +146,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
               { type: 'number', min: 0, message: 'Giá phải lớn hơn 0' },
             ]}
           >
-            <InputNumber
+            <InputNumber<number>
               placeholder="1,000,000"
               min={0}
               step={1000}
@@ -150,7 +154,9 @@ const VariantModal: React.FC<VariantModalProps> = ({
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
               }
-              parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              parser={(value) =>
+                Number((value ?? '').replace(/\$\s?|(,*)/g, '')) || 0
+              }
               addonAfter="₫"
             />
           </Form.Item>

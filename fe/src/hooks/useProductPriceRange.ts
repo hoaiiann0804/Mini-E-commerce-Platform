@@ -7,6 +7,7 @@ export const useProductPriceRange = (basePrice: number, variants?: any[]) => {
       const processedVariants = variants.map((variant: any) => ({
         id: variant.id,
         name: variant.name,
+        sku: variant.sku,
         price: parseFloat(variant.price),
         stockQuantity: variant.stockQuantity,
         attributes: variant.attributes,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Row, Col, Typography, Table, Space, Alert } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { ProductAttribute } from '@/types/product';
+import { ProductAttribute } from '@/types/product.types';
 
 const { Title, Text } = Typography;
 

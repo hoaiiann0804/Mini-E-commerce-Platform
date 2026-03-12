@@ -14,11 +14,15 @@ import { formatPrice, parsePrice } from '@/utils/format';
 interface CartItemProps {
   item: CartItemType;
   isCheckout?: boolean;
+  readonly?: boolean;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item, isCheckout = false }) => {
+const CartItem: React.FC<CartItemProps> = ({ item, isCheckout = false, readonly = false }) => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  // Use readonly prop if provided, otherwise fall back to isCheckout
+  const isReadOnly = readonly || isCheckout;
 
   const [updateCartItem, { isLoading: isUpdating }] =
     useUpdateCartItemMutation();
@@ -130,7 +134,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, isCheckout = false }) => {
 
         {/* Quantity controls */}
         <div className="mt-2 flex justify-between items-center">
-          {!isCheckout ? (
+          {!isReadOnly ? (
             <div className="flex items-center">
               <button
                 onClick={() => handleQuantityChange(item.quantity - 1)}
@@ -193,7 +197,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, isCheckout = false }) => {
             </div>
           )}
 
-          {!isCheckout && (
+          {!isReadOnly && (
             <button
               onClick={handleRemove}
               disabled={isRemoving}

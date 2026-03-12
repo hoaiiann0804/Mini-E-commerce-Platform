@@ -101,7 +101,7 @@ export const getUserByEmail = (email: string): User | undefined => {
 
 export const authenticateUser = (
   email: string,
-  password: string
+  _password: string
 ): { user: User; token: string } | null => {
   // In a real app, you would verify the password
   // For this mock, we'll just check if the email exists

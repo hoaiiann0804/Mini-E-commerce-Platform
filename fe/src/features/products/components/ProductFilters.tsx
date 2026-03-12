@@ -7,7 +7,7 @@ import {
   setAttributes,
   clearFilters,
 } from '../productsSlice';
-import { Category } from '@/services/categoryApi';
+import { Category } from '@/types/category.types';
 import Button from '@/components/common/Button';
 
 interface ProductFiltersProps {

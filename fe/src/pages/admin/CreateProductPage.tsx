@@ -41,7 +41,46 @@ import ValidationAlerts from '@/components/product/ValidationAlerts';
 
 // Types
 import { AttributeGroup } from '@/services/attributeApi';
-import { ProductFormData } from '@/types';
+import { ProductFormData, ProductAttribute } from '@/types';
+
+// Types for attribute modal conversion
+interface Attribute {
+  id?: string;
+  name: string;
+  value: string;
+}
+
+// Convert ProductAttribute (from hook) to Attribute (for modal)
+const toAttribute = (productAttr: ProductAttribute | null | undefined): Attribute | null => {
+  if (!productAttr) return null;
+  return {
+    id: productAttr.id,
+    name: productAttr.name,
+    value: productAttr.value || productAttr.values.join(', '), // Use string version if available, otherwise convert from array
+  };
+};
+
+// Convert Attribute (from modal) to ProductAttribute (for hook)
+const toProductAttribute = (attr: Attribute): ProductAttribute => {
+  return {
+    id: attr.id || `attr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    productId: '',
+    name: attr.name,
+    value: attr.value, // Store the string version for form/modal compatibility
+    values: attr.value.split(',').map((v) => v.trim()).filter((v) => v),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+};
+
+// Convert ProductAttribute[] to Attribute[] for VariantModal
+const toAttributeArray = (productAttrs: ProductAttribute[]): Attribute[] => {
+  return productAttrs.map((attr) => ({
+    id: attr.id,
+    name: attr.name,
+    value: attr.value || attr.values.join(', '), // Use string version if available, otherwise convert from array
+  }));
+};
 
 // Utils
 import {
@@ -78,7 +117,7 @@ const CreateProductPage: React.FC = () => {
   // API hooks
   const { data: categoriesResponse, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery();
-  const { data: warrantyData, isLoading: isWarrantyLoading } =
+  const { isLoading: isWarrantyLoading } =
     useGetWarrantyPackagesQuery({ isActive: true });
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [convertBase64ToImage] = useConvertBase64ToImageMutation();
@@ -102,6 +141,26 @@ const CreateProductPage: React.FC = () => {
     openVariantModal,
     closeVariantModal,
   } = useProductVariants([], form);
+
+  // Wrapper for opening attribute modal - convert ProductAttribute to Attribute
+  const openAttributeModalWrapper = (attribute?: ProductAttribute) => {
+    const converted = toAttribute(attribute);
+    openAttributeModal(converted as any);
+  };
+
+  // Wrapper for handling attribute save - convert Attribute to ProductAttribute
+  const handleAddAttributeWrapper = (attribute: Attribute) => {
+    const converted = toProductAttribute(attribute);
+    handleAddAttribute(converted);
+  };
+
+  // Wrapper for passing attributes to VariantModal - convert ProductAttribute[] to Attribute[]
+  const variantModalAttributes = toAttributeArray(attributes);
+
+  // Wrapper to convert ProductVariant to Variant for VariantModal
+  const handleEditVariant = (variant: any) => {
+    openVariantModal(variant);
+  };
 
   // Debug: Log attributes whenever they change
   useEffect(() => {
@@ -316,7 +375,7 @@ const CreateProductPage: React.FC = () => {
             attributes.length > 0
               ? attributes.map((attr) => ({
                   name: attr.name,
-                  value: attr.value,
+                  value: attr.values.join(', '), // Convert array to comma-separated string
                 }))
               : [],
           variants: hasVariants
@@ -327,8 +386,8 @@ const CreateProductPage: React.FC = () => {
                 compareAtPrice: variant.compareAtPrice
                   ? parseFloat(variant.compareAtPrice.toString())
                   : undefined,
-                stockQuantity: parseInt(variant.stock?.toString() || '0') || 0,
-                stock: parseInt(variant.stock?.toString() || '0') || 0,
+                stockQuantity: parseInt(variant.stockQuantity?.toString() || '0') || 0,
+                stock: parseInt(variant.stockQuantity?.toString() || '0') || 0,
                 sku: variant.sku || `VAR-${Date.now()}-${index + 1}`,
                 isDefault: index === 0, // First variant is default
                 isAvailable: true,
@@ -447,7 +506,11 @@ const CreateProductPage: React.FC = () => {
     return 'Tạo sản phẩm thất bại. Vui lòng thử lại.';
   };
 
-  const categories = categoriesResponse?.data || [];
+  const categories = Array.isArray(categoriesResponse?.data) 
+    ? categoriesResponse.data 
+    : categoriesResponse?.data 
+      ? [categoriesResponse.data] 
+      : [];
 
   // Tab order constant
   const TAB_ORDER = [
@@ -607,7 +670,7 @@ const CreateProductPage: React.FC = () => {
           <ProductVariantsSection
             variants={variants}
             onAddVariant={() => openVariantModal()}
-            onEditVariant={(variant) => openVariantModal(variant)}
+            onEditVariant={handleEditVariant}
             onDeleteVariant={handleDeleteVariant}
           />
           <TabNavigation
@@ -831,8 +894,8 @@ const CreateProductPage: React.FC = () => {
         <AttributeModal
           visible={attributeModalVisible}
           onClose={closeAttributeModal}
-          attribute={editingAttribute}
-          onSave={handleAddAttribute}
+          attribute={toAttribute(editingAttribute)}
+          onSave={handleAddAttributeWrapper}
         />
       )}
 
@@ -842,7 +905,7 @@ const CreateProductPage: React.FC = () => {
           onClose={closeVariantModal}
           variant={editingVariant}
           onSave={handleAddVariant}
-          attributes={attributes}
+          attributes={variantModalAttributes as any}
         />
       )}
     </div>
