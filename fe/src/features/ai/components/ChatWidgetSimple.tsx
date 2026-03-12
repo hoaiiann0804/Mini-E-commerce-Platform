@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { RootState } from '../../../app/store';
+import { RootState } from '../../../store';
 import { geminiService } from '../services/geminiService';
 import './ChatWidget.css';
 
@@ -14,7 +14,7 @@ const ChatWidgetSimple: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, user } = useSelector(
+  const {  } = useSelector(
     (state: RootState) => state.auth
   );
 
@@ -53,7 +53,7 @@ const ChatWidgetSimple: React.FC = () => {
       document.body.classList.add('chat-widget-open');
 
       // Ngăn chặn sự kiện click bên ngoài
-      const handleClickOutside = (e: MouseEvent) => {
+      const handleClickOutside = (e: Event) => {
         // Ngăn chặn tất cả các sự kiện click trên document
         e.stopPropagation();
 
@@ -131,7 +131,8 @@ const ChatWidgetSimple: React.FC = () => {
 
     try {
       // Gọi API AI để lấy phản hồi
-      const response = await geminiService.generateContent(text);
+      const aiResponse = await geminiService.sendMessage(text);
+      const response = aiResponse.text;
 
       // Xóa tin nhắn "đang nhập" và thêm phản hồi từ AI
       setMessages((prev) => {
@@ -141,12 +142,12 @@ const ChatWidgetSimple: React.FC = () => {
           {
             id: (Date.now() + 2).toString(),
             text: response,
-            sender: 'ai',
-            suggestions: ['Tìm thêm sản phẩm', 'Xem giỏ hàng', 'Hỏi thêm'],
+            sender: 'ai' as const,
+            suggestions: aiResponse.suggestions || ['Tìm thêm sản phẩm', 'Xem giỏ hàng', 'Hỏi thêm'],
           },
         ];
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating AI response:', error);
 
       // Xử lý lỗi

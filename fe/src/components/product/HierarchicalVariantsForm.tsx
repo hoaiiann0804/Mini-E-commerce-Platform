@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Card,
   Typography,
@@ -16,14 +16,14 @@ import {
   Row,
   Col,
   message,
-} from 'antd';
+} from "antd";
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
-} from '@ant-design/icons';
-import { AttributeGroup, AttributeValue } from '@/services/attributeApi';
+} from "@ant-design/icons";
+import { AttributeGroup, AttributeValue } from "@/services/attributeApi";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -90,7 +90,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
 
   const handleGenerateVariants = () => {
     if (attributeGroups.length === 0) {
-      message.warning('Vui lòng tạo thuộc tính trước khi tạo biến thể!');
+      message.warning("Vui lòng tạo thuộc tính trước khi tạo biến thể!");
       return;
     }
 
@@ -111,7 +111,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
 
         return {
           id: `variant-${Date.now()}-${index}`,
-          name: attributeNames.join(' - '),
+          name: attributeNames.join(" - "),
           sku: `VAR-${Date.now()}-${index}`,
           price: basePrice,
           stock: 0,
@@ -151,7 +151,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
   const handleDeleteVariant = (variantId: string) => {
     const newVariants = variants.filter((v) => v.id !== variantId);
     onVariantsChange(newVariants);
-    message.success('Đã xóa biến thể!');
+    message.success("Đã xóa biến thể!");
   };
 
   const handleSubmit = async () => {
@@ -170,7 +170,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
 
       const variant: ProductVariant = {
         id: editingVariant?.id || `variant-${Date.now()}`,
-        name: values.name || attributeNames.join(' - '),
+        name: values.name || attributeNames.join(" - "),
         sku: values.sku || `VAR-${Date.now()}`,
         price: values.price || 0,
         stock: values.stock || 0,
@@ -185,30 +185,30 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
           v.id === editingVariant.id ? variant : v
         );
         onVariantsChange(newVariants);
-        message.success('Cập nhật biến thể thành công!');
+        message.success("Cập nhật biến thể thành công!");
       } else {
         // Add new variant
         onVariantsChange([...variants, variant]);
-        message.success('Thêm biến thể thành công!');
+        message.success("Thêm biến thể thành công!");
       }
 
       setIsModalVisible(false);
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error("Validation failed:", error);
     }
   };
 
   const getAttributeDisplayName = (groupId: string, valueId: string) => {
     const group = attributeGroups.find((g) => g.id === groupId);
     const value = group?.values?.find((v) => v.id === valueId);
-    return value ? `${group?.name}: ${value.name}` : 'N/A';
+    return value ? `${group?.name}: ${value.name}` : "N/A";
   };
 
   const columns = [
     {
-      title: 'Tên biến thể',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên biến thể",
+      dataIndex: "name",
+      key: "name",
       render: (name: string, record: ProductVariant) => (
         <div>
           <div>{name}</div>
@@ -218,9 +218,9 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
       ),
     },
     {
-      title: 'Thuộc tính',
-      dataIndex: 'attributeValues',
-      key: 'attributeValues',
+      title: "Thuộc tính",
+      dataIndex: "attributeValues",
+      key: "attributeValues",
       render: (attributeValues: Record<string, string>) => (
         <div>
           {Object.entries(attributeValues).map(([groupId, valueId]) => (
@@ -232,24 +232,24 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
       ),
     },
     {
-      title: 'SKU',
-      dataIndex: 'sku',
-      key: 'sku',
+      title: "SKU",
+      dataIndex: "sku",
+      key: "sku",
     },
     {
-      title: 'Giá',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Giá",
+      dataIndex: "price",
+      key: "price",
       render: (price: number) => `${price.toLocaleString()}đ`,
     },
     {
-      title: 'Tồn kho',
-      dataIndex: 'stock',
-      key: 'stock',
+      title: "Tồn kho",
+      dataIndex: "stock",
+      key: "stock",
     },
     {
-      title: 'Hành động',
-      key: 'actions',
+      title: "Hành động",
+      key: "actions",
       width: 120,
       render: (_: any, record: ProductVariant) => (
         <Space>
@@ -316,11 +316,11 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
 
       {/* Modal for adding/editing variant */}
       <Modal
-        title={editingVariant ? 'Sửa biến thể' : 'Thêm biến thể'}
+        title={editingVariant ? "Sửa biến thể" : "Thêm biến thể"}
         open={isModalVisible}
         onOk={handleSubmit}
         onCancel={() => setIsModalVisible(false)}
-        okText={editingVariant ? 'Cập nhật' : 'Thêm'}
+        okText={editingVariant ? "Cập nhật" : "Thêm"}
         cancelText="Hủy"
         width={800}
       >
@@ -331,7 +331,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
                 name="name"
                 label="Tên biến thể"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập tên biến thể!' },
+                  { required: true, message: "Vui lòng nhập tên biến thể!" },
                 ]}
               >
                 <Input placeholder="Tên biến thể" />
@@ -341,7 +341,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
               <Form.Item
                 name="sku"
                 label="SKU"
-                rules={[{ required: true, message: 'Vui lòng nhập SKU!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập SKU!" }]}
               >
                 <Input placeholder="SKU" />
               </Form.Item>
@@ -353,16 +353,18 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
               <Form.Item
                 name="price"
                 label="Giá"
-                rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
               >
-                <InputNumber
-                  style={{ width: '100%' }}
+                <InputNumber<number>
+                  style={{ width: "100%" }}
                   placeholder="Giá"
                   min={0}
                   formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                   }
-                  parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                  parser={(value) =>
+                    Number((value ?? "").replace(/\$\s?|(,*)/g, "")) || 0
+                  }
                 />
               </Form.Item>
             </Col>
@@ -373,12 +375,12 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
                 rules={[
                   {
                     required: true,
-                    message: 'Vui lòng nhập số lượng tồn kho!',
+                    message: "Vui lòng nhập số lượng tồn kho!",
                   },
                 ]}
               >
                 <InputNumber
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   placeholder="Tồn kho"
                   min={0}
                 />
@@ -408,7 +410,7 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
               <div key={group.id} style={{ marginBottom: 16 }}>
                 <Text strong>{group.name}:</Text>
                 <Select
-                  style={{ width: '100%', marginTop: 8 }}
+                  style={{ width: "100%", marginTop: 8 }}
                   placeholder={`Chọn ${group.name}`}
                   value={selectedAttributes[group.id]}
                   onChange={(value) => {
@@ -424,11 +426,11 @@ const HierarchicalVariantsForm: React.FC<HierarchicalVariantsFormProps> = ({
                       {value.priceAdjustment !== 0 && (
                         <span
                           style={{
-                            color: value.priceAdjustment > 0 ? 'green' : 'red',
+                            color: value.priceAdjustment > 0 ? "green" : "red",
                           }}
                         >
-                          {' '}
-                          ({value.priceAdjustment > 0 ? '+' : ''}
+                          {" "}
+                          ({value.priceAdjustment > 0 ? "+" : ""}
                           {value.priceAdjustment.toLocaleString()}đ)
                         </span>
                       )}

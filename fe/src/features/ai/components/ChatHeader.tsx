@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon, LightningIcon } from './icons/index';
-import { GeminiServiceType } from '../services/geminiService';
+import { GeminiService } from '../services/geminiService';
 
 interface ChatHeaderProps {
   onClose: () => void;
-  geminiService: GeminiServiceType;
+  geminiService: GeminiService;
 }
 
 /**

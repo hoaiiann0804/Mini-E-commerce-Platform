@@ -78,7 +78,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     description: "",
     price: 0,
     comparePrice: undefined,
-    stock: 0,
+    stockQuantity : 0,
     categoryIds: [],
     status: "active",
     featured: false,
@@ -101,7 +101,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
   // Effect để lưu lại giá trị form khi có thay đổi
   React.useEffect(() => {
-    const subscription = form.getFieldsValue(true);
+    // const subscription = form.getFieldsValue(true);
     return () => {
       // Lưu lại giá trị form khi component unmount hoặc re-render
       const values = form.getFieldsValue(true);
@@ -521,7 +521,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             ? allValues.searchKeywords
                 .split(",")
                 .map((kw: string) => kw.trim())
-                .filter((kw) => kw)
+                .filter((kw: string) => kw)
             : [],
         seoTitle:
           allValues.seoTitle || (allValues.name ? allValues.name.trim() : ""),
@@ -550,7 +550,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             ? allValues.seoKeywords
                 .split(",")
                 .map((kw: string) => kw.trim())
-                .filter((kw) => kw)
+                .filter((kw: string) => kw)
             : [],
         attributes: attributes
           .filter((attr) => attr.name.trim() && attr.value.trim())
@@ -563,6 +563,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           .map((variant) => ({
             name: variant.name.trim(),
             price: Number(variant.price) || 0,
+            stockQuantity: Number(variant.stock) || 0,
             stock: Number(variant.stock) || 0,
           })),
       };

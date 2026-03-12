@@ -129,44 +129,8 @@ const AddressMapPicker: React.FC<AddressMapPickerProps> = ({
     }
   }, [onAddressChange, onLocationSelect]);
 
-    // Search for locations
-    const searchLocation = async (query: string) => {
-        if (!query.trim()) {
-            setSearchResults([]);
-            return;
-        }
 
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
-            );
-            const results = await response.json();
-            setSearchResults(results);
-        } catch (error) {
-            console.error('Error searching location:', error);
-            setSearchResults([]);
-        }
-    };
 
-    // Handle search input change
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        searchLocation(query);
-    };
-
-    // Handle search result selection
-    const handleSelectResult = async (result: any) => {
-        const lat = parseFloat(result.lat);
-        const lng = parseFloat(result.lon);
-
-        if (map) {
-            updateMarkerPosition(map, lat, lng);
-            await reverseGeocode(lat, lng);
-            setSearchQuery('');
-            setSearchResults([]);
-        }
-    };
 
     // Handle address input blur
     const handleAddressBlur = () => {
@@ -224,6 +188,7 @@ const AddressMapPicker: React.FC<AddressMapPickerProps> = ({
             setAddress(newAddress);
             if (onAddressChange) onAddressChange(newAddress);
           }}
+          onBlur={handleAddressBlur}
           disabled={disabled}
           multiline
           rows={2}

@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import type { RootState } from '@/store';
 import { Message } from '../types/Message';
 import { useSendChatbotMessageMutation } from '../services/chatbotApi';
+import type { ChatbotApiResponse } from '../services/chatbotApi';
 import { useGetCartQuery } from '@/services/cartApi';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@/store';
 import { setServerCart } from '@/features/cart/cartSlice';
 import type { BackendCart, BackendCartItem } from '@/services/cartApi';
-import type { ServerCart } from '@/features/cart/cartSlice';
+import type { ServerCart } from '@/types/cart.types';
 import { geminiService } from '../services/geminiService';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -120,59 +120,45 @@ const ChatWidgetPortal: React.FC = () => {
       console.log('Sending message to AI:', text);
 
       // Thêm timeout để tránh treo UI nếu API quá chậm
-      const timeoutPromise = new Promise((_, reject) => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Request timeout')), 10000);
       });
 
       // Call API với timeout và xử lý lỗi
-      let response;
-      try {
-        response = await Promise.race([
-          sendChatbotMessage({
-            message: text,
-            userId: user?.id,
-            sessionId: sessionId,
-            context: {
-              isAuthenticated,
-              currentPage: window.location.pathname,
-              userAgent: navigator.userAgent,
-              timestamp: new Date().toISOString(),
-            },
-          }).unwrap(),
-          timeoutPromise,
-        ]);
-      } catch (innerError: any) {
-        console.error('Inner error during API call:', innerError);
-        throw innerError;
-      }
+      const apiResponse = await Promise.race([
+        sendChatbotMessage({
+          message: text,
+          userId: user?.id,
+          sessionId: sessionId,
+          context: {
+            isAuthenticated,
+            currentPage: window.location.pathname,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+          },
+        }).unwrap(),
+        timeoutPromise,
+      ]);
+
+      const response = apiResponse as ChatbotApiResponse;
 
       console.log('Received AI response:', response);
 
       // Xóa tin nhắn "đang nhập" và thêm phản hồi từ API
-      const responseData = response as {
-        status: string;
-        data: {
-          response?: string;
-          cart?: BackendCart;
-          suggestions?: string[];
-          products?: any[];
-          actions?: any[];
-        };
-      };
-
-      if (responseData.status === 'success' && responseData.data) {
+      if (response.status === 'success' && response.data) {
         // Nếu có dữ liệu giỏ hàng mới (khi thêm sản phẩm thành công)
-        if (responseData.data.cart) {
-          const { items, totalItems, subtotal } = responseData.data.cart;
+        if ('cart' in response.data && response.data.cart) {
+          const cartData = response.data.cart as BackendCart;
+          const { items, totalItems, subtotal } = cartData;
 
           // Tạo cấu trúc dữ liệu giỏ hàng phù hợp với Redux store
           const serverCart: ServerCart = {
-            id: responseData.data.cart.id || 'guest-cart',
+            id: cartData.id || 'guest-cart',
             items: items.map((item: BackendCartItem) => ({
               id: item.id,
-              cartId: responseData.data.cart?.id || 'guest-cart',
+              cartId: cartData.id || 'guest-cart',
               productId: item.productId,
-              variantId: item.variantId || null,
+              variantId: item.variantId || undefined,
               quantity: item.quantity,
               price: item.ProductVariant?.price || item.Product?.price || 0,
               Product: {
@@ -210,22 +196,22 @@ const ChatWidgetPortal: React.FC = () => {
             ...filtered,
             {
               id: (Date.now() + 2).toString(),
-              text: response.data.response,
-              sender: 'ai',
-              suggestions: response.data.suggestions || [
+              text: response.data?.response || '',
+              sender: 'ai' as const,
+              suggestions: response.data?.suggestions || [
                 t('chat.suggestions.findProducts') || 'Tìm thêm sản phẩm',
                 t('chat.suggestions.viewCart') || 'Xem giỏ hàng',
                 t('chat.suggestions.askMore') || 'Hỏi thêm',
               ],
-              products: response.data.products,
-              actions: response.data.actions,
+              products: response.data?.products,
+              actions: response.data?.actions,
             },
           ];
         });
       } else {
         throw new Error(response.message || 'Lỗi không xác định');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating AI response:', error);
 
       // Xác định thông báo lỗi phù hợp
@@ -233,19 +219,22 @@ const ChatWidgetPortal: React.FC = () => {
         t('chat.errors.general') ||
         'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.';
 
-      if (error.message === 'Request timeout') {
+      // Type guard for error handling
+      const err = error as { message?: string; status?: number };
+      
+      if (err.message === 'Request timeout') {
         errorMessage =
           t('chat.errors.timeout') ||
           'Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.';
-      } else if (error.status === 404) {
+      } else if (err.status === 404) {
         errorMessage =
           t('chat.errors.notFound') ||
           'Không tìm thấy dịch vụ AI. Vui lòng thử lại sau.';
-      } else if (error.status === 429) {
+      } else if (err.status === 429) {
         errorMessage =
           t('chat.errors.tooManyRequests') ||
           'Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.';
-      } else if (error.status >= 500) {
+      } else if (err.status && err.status >= 500) {
         errorMessage =
           t('chat.errors.serverError') || 'Lỗi máy chủ. Vui lòng thử lại sau.';
       }

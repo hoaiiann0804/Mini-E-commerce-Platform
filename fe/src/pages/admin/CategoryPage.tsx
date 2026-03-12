@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   PencilIcon,
   TrashIcon,
-  PlusIcon,
   FolderIcon,
   ArrowPathIcon,
   FolderPlusIcon,
@@ -37,7 +35,6 @@ interface CategoryFormData {
 }
 
 const CategoryPage: React.FC = () => {
-  const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
 
   // API hooks
@@ -758,7 +755,7 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
                 }
@@ -798,14 +795,14 @@ const CategoryPage: React.FC = () => {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <label className="block font-medium mb-1 text-neutral-700 dark:text-neutral-300">
                   Thứ tự sắp xếp
                 </label>
                 <Input
                   type="number"
-                  value={formData.sortOrder.toString()}
+                  value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
                       'sortOrder',
@@ -822,7 +819,7 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <div className="mt-2">
                   <Checkbox
-                    checked={formData.isActive}
+                    checked={formData.isActive ?? true}
                     onChange={(e) =>
                       handleInputChange('isActive', e.target.checked)
                     }
@@ -889,7 +886,7 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
                 }
@@ -936,7 +933,7 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={formData.sortOrder.toString()}
+                  value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
                       'sortOrder',
@@ -953,7 +950,7 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <div className="mt-2">
                   <Checkbox
-                    checked={formData.isActive}
+                    checked={formData.isActive ?? true}
                     onChange={(e) =>
                       handleInputChange('isActive', e.target.checked)
                     }

@@ -78,7 +78,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             // Clear the editor first
             quill.setText('');
             // Then paste the HTML content
-            quill.dangerouslyPasteHTML(displayValue);
+            quill.clipboard.dangerouslyPasteHTML(displayValue);
           } else {
             // For plain text, use setText
             quill.setText(displayValue);

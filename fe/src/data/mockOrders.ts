@@ -6,19 +6,19 @@ export const mockOrders: Order[] = [
     userId: 'user1',
     items: [
       {
-        id: 'item1',
         productId: '1',
         name: 'Premium Wireless Headphones',
         price: 129.99,
         quantity: 1,
+        subtotal: 129.99,
         image: 'https://placehold.co/600x400?text=Headphones',
       },
       {
-        id: 'item2',
         productId: '3',
         name: 'Portable Bluetooth Speaker',
         price: 99.99,
         quantity: 1,
+        subtotal: 99.99,
         image: 'https://placehold.co/600x400?text=Bluetooth+Speaker',
       },
     ],
@@ -60,11 +60,11 @@ export const mockOrders: Order[] = [
     userId: 'user1',
     items: [
       {
-        id: 'item3',
         productId: '4',
         name: 'Ultra-Slim Laptop',
         price: 899.99,
         quantity: 1,
+        subtotal: 899.99,
         image: 'https://placehold.co/600x400?text=Laptop',
       },
     ],
@@ -106,19 +106,19 @@ export const mockOrders: Order[] = [
     userId: 'user1',
     items: [
       {
-        id: 'item4',
         productId: '2',
         name: 'Smart Fitness Watch',
         price: 149.99,
         quantity: 1,
+        subtotal: 149.99,
         image: 'https://placehold.co/600x400?text=Fitness+Watch',
       },
       {
-        id: 'item5',
         productId: '5',
         name: 'Wireless Charging Pad',
         price: 49.99,
         quantity: 2,
+        subtotal: 99.98,
         image: 'https://placehold.co/600x400?text=Charging+Pad',
       },
     ],

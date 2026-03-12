@@ -6,9 +6,7 @@
 import {
   Product,
   ProductVariant,
-  ProductAttribute,
-} from '@/types/product.types';
-
+} from "@/types/product.types";
 /**
  * Get available stock for specific attribute combination
  */
@@ -148,12 +146,12 @@ export const getVariantPrice = (
  * Check if all required attributes are selected
  */
 export const areAllAttributesSelected = (
-  attributes: ProductAttribute[],
+  attributes: Record<string, string>,
   selectedAttributes: Record<string, string>
 ): boolean => {
-  if (!attributes || attributes.length === 0) return true;
+  if (!attributes || Object.keys(attributes).length === 0) return true;
 
-  return attributes.every((attr) => selectedAttributes[attr.name]);
+  return Object.keys(attributes).every((attrName) => selectedAttributes[attrName]);
 };
 
 /**
@@ -164,24 +162,21 @@ export const getAttributeValuesWithStock = (
   attributeName: string,
   selectedAttributes: Record<string, string> = {}
 ): Array<{ value: string; stock: number; available: boolean }> => {
-  const attribute = product.attributes?.find(
-    (attr) => attr.name === attributeName
-  );
-  if (!attribute) return [];
+  // With Record<string, string> attributes, we can't determine all possible values
+  // from the attributes alone. This function would need product.variants to work properly.
+  // For now, return a single value based on the attribute name if it exists
+  const attributeValue = product.attributes?.[attributeName];
+  if (!attributeValue) return [];
 
-  return attribute.values.map((value) => {
-    // Create a temporary combination with this value
-    const tempAttributes = { ...selectedAttributes, [attributeName]: value };
+  // If product has variants, get stock for this specific combination
+  const tempAttributes = { ...selectedAttributes, [attributeName]: attributeValue };
+  const stock = getVariantStock(product, tempAttributes);
 
-    // Get stock for this specific combination
-    const stock = getVariantStock(product, tempAttributes);
-
-    return {
-      value,
-      stock,
-      available: stock > 0,
-    };
-  });
+  return [{
+    value: attributeValue,
+    stock,
+    available: stock > 0,
+  }];
 };
 
 /**
@@ -221,7 +216,7 @@ export const getAttributeValueStockWithContext = (
  * Format stock display text
  */
 export const formatStockText = (stock: number): string => {
-  if (stock === 0) return 'Hết hàng';
+  if (stock === 0) return "Hết hàng";
   if (stock < 10) return `Chỉ còn ${stock} sản phẩm`;
   return `Còn ${stock} sản phẩm`;
 };
@@ -230,7 +225,7 @@ export const formatStockText = (stock: number): string => {
  * Get stock status color
  */
 export const getStockStatusColor = (stock: number): string => {
-  if (stock === 0) return 'text-red-500';
-  if (stock < 10) return 'text-orange-500';
-  return 'text-green-500';
+  if (stock === 0) return "text-red-500";
+  if (stock < 10) return "text-orange-500";
+  return "text-green-500";
 };

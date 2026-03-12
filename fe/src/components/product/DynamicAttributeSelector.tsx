@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Select,
@@ -13,19 +13,20 @@ import {
   Button,
   Switch,
   Tooltip,
-} from 'antd';
+} from "antd";
 import {
   BulbOutlined,
   SettingOutlined,
-  EyeOutlined,
-  SyncOutlined,
   InfoCircleOutlined,
-} from '@ant-design/icons';
-import { attributeService } from '@/services/attributeService';
-import DynamicProductName from './DynamicProductName';
+} from "@ant-design/icons";
+import {
+  attributeService,
+  type AttributeValue as ServiceAttributeValue,
+} from "@/services/attributeService";
+import DynamicProductName from "./DynamicProductName";
 
 const { Option } = Select;
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 interface AttributeGroup {
   id: string;
@@ -34,20 +35,7 @@ interface AttributeGroup {
   type: string;
   isRequired: boolean;
   sortOrder: number;
-  values: AttributeValue[];
-}
-
-interface AttributeValue {
-  id: string;
-  name: string;
-  value: string;
-  colorCode?: string;
-  imageUrl?: string;
-  priceAdjustment: number;
-  sortOrder: number;
-  isActive: boolean;
-  affectsName: boolean;
-  nameTemplate?: string;
+  values: ServiceAttributeValue[];
 }
 
 interface DynamicAttributeSelectorProps {
@@ -76,12 +64,10 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
     Record<string, string>
   >({});
   const [nameAffectingAttributes, setNameAffectingAttributes] = useState<
-    AttributeValue[]
+    ServiceAttributeValue[]
   >([]);
   const [showOnlyNameAffecting, setShowOnlyNameAffecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const form = Form.useFormInstance();
 
   // Load attribute groups
   useEffect(() => {
@@ -97,8 +83,8 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
         setAttributeGroups(response.data);
       }
     } catch (err: any) {
-      setError('Failed to load attribute groups');
-      console.error('Error loading attribute groups:', err);
+      setError("Failed to load attribute groups");
+      console.error("Error loading attribute groups:", err);
     } finally {
       setLoading(false);
     }
@@ -112,7 +98,7 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
         setNameAffectingAttributes(response.data);
       }
     } catch (err: any) {
-      console.error('Error loading name affecting attributes:', err);
+      console.error("Error loading name affecting attributes:", err);
     }
   };
 
@@ -143,14 +129,10 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
     }
   };
 
-  const getAttributesByType = (type: string) => {
-    return attributeGroups.filter((group) => group.type === type);
-  };
-
   const getVisibleAttributeGroups = () => {
     if (showOnlyNameAffecting) {
       return attributeGroups.filter((group) =>
-        group.values.some((value) => value.affectsName)
+        group.values.some((value) => value.affectsName === true)
       );
     }
     return attributeGroups;
@@ -166,18 +148,19 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
     return null;
   };
 
-  const renderAttributeValue = (value: AttributeValue, groupType: string) => {
-    const isNameAffecting = value.affectsName;
+  const renderAttributeValue = (value: ServiceAttributeValue) => {
+    const isNameAffecting = value.affectsName === true;
+    const priceAdjustment = value.priceAdjustment ?? 0;
 
     return (
       <Option key={value.id} value={value.id}>
-        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Space style={{ width: "100%", justifyContent: "space-between" }}>
           <span>
             {value.name}
-            {value.priceAdjustment !== 0 && (
+            {priceAdjustment !== 0 && (
               <Text type="secondary" style={{ marginLeft: 8 }}>
-                {value.priceAdjustment > 0 ? '+' : ''}
-                {value.priceAdjustment.toLocaleString()} VNĐ
+                {priceAdjustment > 0 ? "+" : ""}
+                {priceAdjustment.toLocaleString()} VNĐ
               </Text>
             )}
           </span>
@@ -185,8 +168,8 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
             <Tooltip
               title={`Ảnh hưởng tên: ${value.nameTemplate || value.name}`}
             >
-              <Tag color="blue" size="small">
-                {value.nameTemplate || 'NAME'}
+              <Tag color="blue" style={{ fontSize: 12, paddingInline: 6 }}>
+                {value.nameTemplate || "NAME"}
               </Tag>
             </Tooltip>
           )}
@@ -242,7 +225,7 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
         }
         extra={
           <Space>
-            <span style={{ fontSize: '12px', color: '#666' }}>
+            <span style={{ fontSize: "12px", color: "#666" }}>
               Chỉ xem thuộc tính ảnh hưởng tên:
             </span>
             <Switch
@@ -287,7 +270,7 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
                     {group.isRequired && <Text type="danger">*</Text>}
                     {group.values.some((v) => v.affectsName) && (
                       <Tooltip title="Nhóm thuộc tính này có ảnh hưởng đến tên sản phẩm">
-                        <Tag color="blue" size="small">
+                        <Tag color="blue" style={{ fontSize: 12, paddingInline: 6 }}>
                           <BulbOutlined style={{ fontSize: 10 }} />
                         </Tag>
                       </Tooltip>
@@ -297,7 +280,7 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
                 extra={
                   group.description && (
                     <Tooltip title={group.description}>
-                      <InfoCircleOutlined style={{ color: '#1890ff' }} />
+                      <InfoCircleOutlined style={{ color: "#1890ff" }} />
                     </Tooltip>
                   )
                 }
@@ -308,15 +291,15 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
                   value={selectedAttributes[group.id]}
                   onChange={(value) => handleAttributeChange(group.id, value)}
                   disabled={disabled}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   showSearch
                   optionFilterProp="children"
                   notFoundContent="Không tìm thấy thuộc tính"
                 >
                   {group.values
-                    .filter((value) => value.isActive)
-                    .sort((a, b) => a.sortOrder - b.sortOrder)
-                    .map((value) => renderAttributeValue(value, group.type))}
+                    .filter((value) => value.isActive !== false)
+                    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                    .map((value) => renderAttributeValue(value))}
                 </Select>
               </Form.Item>
             </Col>
@@ -360,9 +343,9 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
               return (
                 <Tag
                   key={`${groupId}-${valueId}`}
-                  color={isNameAffecting ? 'blue' : 'default'}
+                  color={isNameAffecting ? "blue" : "default"}
                   closable
-                  onClose={() => handleAttributeChange(groupId, '')}
+                  onClose={() => handleAttributeChange(groupId, "")}
                 >
                   <Space size="small">
                     <span>{info.group.name}:</span>
@@ -384,3 +367,4 @@ const DynamicAttributeSelector: React.FC<DynamicAttributeSelectorProps> = ({
 };
 
 export default DynamicAttributeSelector;
+

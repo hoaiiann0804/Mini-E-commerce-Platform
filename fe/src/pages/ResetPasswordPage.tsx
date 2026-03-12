@@ -8,7 +8,8 @@ import { useResetPasswordMutation } from "@/services/authApi";
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const { token: tokenFromParams } = useParams<{ token: string }>();
+  const params = useParams<{ token?: string }>();
+  const tokenFromParams = params.token;
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -74,14 +75,12 @@ const ResetPasswordPage: React.FC = () => {
       setTimeout(() => {
         navigate("/login");
       }, 3000);
-    } catch (err) {
-      setError(
-        t(
-          typeof err === "string"
-            ? err
-            : err?.data || "Đặt lại mật khẩu thất bại"
-        )
-      );
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'data' in err 
+        ? (err as { data?: string }).data 
+        : "Đặt lại mật khẩu thất bại";
+      const finalErrorMessage = typeof err === "string" ? err : (errorMessage || "Đặt lại mật khẩu thất bại");
+      setError(t(finalErrorMessage));
     }
   };
 

@@ -117,9 +117,9 @@ export const adminProductApi = api.injectEndpoints({
       AdminProductsResponse,
       AdminProductsFilter | void
     >({
-      query: (filters = {}) => ({
+      query: (filters) => ({
         url: '/admin/products',
-        params: filters,
+        params: filters ?? {},
       }),
       providesTags: (result) =>
         result
@@ -156,7 +156,7 @@ export const adminProductApi = api.injectEndpoints({
         method: 'PUT',
         body: productData,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: 'Product', id },
         { type: 'Product', id: 'ADMIN_LIST' },
       ],
@@ -168,7 +168,7 @@ export const adminProductApi = api.injectEndpoints({
         url: `/admin/products/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: 'Product', id },
         { type: 'Product', id: 'ADMIN_LIST' },
       ],
@@ -177,7 +177,7 @@ export const adminProductApi = api.injectEndpoints({
     // Get single product for admin
     getAdminProductById: builder.query<ApiResponse<AdminProduct>, string>({
       query: (id) => `/admin/products/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Product', id }],
+      providesTags: (_result, _error, id) => [{ type: 'Product', id }],
     }),
   }),
 });
