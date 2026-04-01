@@ -1,0 +1,2 @@
+# ignore root env
+.env.env
