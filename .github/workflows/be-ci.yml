@@ -5,6 +5,7 @@ on:
     paths:
       - "be/**"
       - "docker-compose.dev.yml"
+      - ".github/workflows/**"
   pull_request:
     paths:
       - "be/**"
