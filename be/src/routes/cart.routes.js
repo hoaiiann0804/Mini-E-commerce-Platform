@@ -24,16 +24,16 @@ const { optionalAuthenticate } = require('../middlewares/authenticate');
  *       type: object
  *       properties:
  *         id:
- *           type: integer
+ *           type: string
  *           description: Cart item ID
  *         cartId:
- *           type: integer
+ *           type: string 
  *           description: Cart ID
  *         productId:
- *           type: integer
+ *           type: string
  *           description: Product ID
  *         variantId:
- *           type: integer
+ *           type: string
  *           description: Product variant ID
  *         quantity:
  *           type: integer

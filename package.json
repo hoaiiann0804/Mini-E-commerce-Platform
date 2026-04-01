@@ -7,6 +7,7 @@
     "docker:down": "docker compose -f docker-compose.dev.yml down",
     "docker:down:v": "docker compose -f docker-compose.dev.yml down -v",
     "docker:restart": "docker compose -f docker-compose.dev.yml restart",
+    "docker:stop": "docker compose -f docker-compose.dev.yml stop",
     "docker:logs": "docker compose -f docker-compose.dev.yml logs -f",
     "docker:logs:api": "docker compose -f docker-compose.dev.yml logs -f api",
     "docker:ps": "docker compose -f docker-compose.dev.yml ps",
