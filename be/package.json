@@ -14,7 +14,7 @@
     "docker:logs:api": "docker compose -f ../docker-compose.dev.yml logs -f api",
     "docker:ps": "docker compose -f ../docker-compose.dev.yml ps",
     "docker:build:api": "docker compose -f ../docker-compose.dev.yml build api",
-    "test": "jest --runInBand --passWithNoTests",
+    "test": "jest --passWithNoTests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:migrate": "sequelize-cli db:migrate",
