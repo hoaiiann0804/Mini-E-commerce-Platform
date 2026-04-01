@@ -225,9 +225,8 @@ const ProductDetailPage: React.FC = () => {
     } else {
       // Legacy attribute-based variant selection
       if (product.attributes && product.attributes.length > 0) {
-        const allSelected = areAllAttributesSelected(
-          product.attributes,
-          selectedAttributes
+        const allSelected = product.attributes.every(
+          (attr: any) => selectedAttributes[attr.name]
         );
         if (!allSelected) {
           const missingAttributes = product.attributes

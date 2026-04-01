@@ -13,6 +13,13 @@ export interface OrderItem {
   subtotal: number;
   image?: string;
   attributes?: Record<string, any>;
+  Product?: {
+    id?: string;
+    name?: string;
+    thumbnail?: string;
+    images?: string[];
+    price?: number;
+  };
   createdAt: string;
   updatedAt: string;
 }
