@@ -1,14 +1,19 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const imageService = require("../services/imageService");
 const { AppError } = require("../middlewares/errorHandler");
 
+const TEMP_UPLOAD_DIR = path.join(__dirname, "../../uploads/temp");
+
 // Configure multer for temporary file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const tempDir = path.join(__dirname, "../../uploads/temp");
-    cb(null, tempDir);
+    if (!fs.existsSync(TEMP_UPLOAD_DIR)) {
+      fs.mkdirSync(TEMP_UPLOAD_DIR, { recursive: true });
+    }
+    cb(null, TEMP_UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = uuidv4();

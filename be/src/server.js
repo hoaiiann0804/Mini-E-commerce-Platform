@@ -48,7 +48,7 @@ const connectDB = async () => {
       // Use alter: true instead of force: true to preserve data
       // force: true will DROP and recreate tables (DELETES ALL DATA)
       // alter: true will modify existing tables to match models
-      await sequelize.sync({ alter: true });
+      await sequelize.sync();
       logger.info(
         'Database tables synchronized successfully (preserving data).'
       );
