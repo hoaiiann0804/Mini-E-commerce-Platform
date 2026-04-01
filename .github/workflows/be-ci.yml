@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - "be/**"
+      - "docker-compose.dev.yml"
   pull_request:
     paths:
       - "be/**"
+      - "docker-compose.dev.yml"
 
 jobs:
   test:
