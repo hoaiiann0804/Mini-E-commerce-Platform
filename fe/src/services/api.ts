@@ -12,7 +12,7 @@ import type {
  */
 const API_CONFIG = {
   DEFAULT_URL: "http://localhost:8888/api",
-  TIMEOUT: 10000,
+  TIMEOUT: 30000, // Increased timeout to 30 seconds
   HEADERS: {
     ACCEPT: "application/json",
     CONTENT_TYPE: "application/json",
