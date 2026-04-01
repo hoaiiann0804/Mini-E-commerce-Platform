@@ -3,10 +3,7 @@
  * Utilities for managing product variants and stock
  */
 
-import {
-  Product,
-  ProductVariant,
-} from "@/types/product.types";
+import { Product, ProductAttribute, ProductVariant } from "@/types/product.types";
 /**
  * Get available stock for specific attribute combination
  */
@@ -151,7 +148,9 @@ export const areAllAttributesSelected = (
 ): boolean => {
   if (!attributes || Object.keys(attributes).length === 0) return true;
 
-  return Object.keys(attributes).every((attrName) => selectedAttributes[attrName]);
+  return Object.keys(attributes).every(
+    (attrName) => selectedAttributes[attrName]
+  );
 };
 
 /**
@@ -162,21 +161,56 @@ export const getAttributeValuesWithStock = (
   attributeName: string,
   selectedAttributes: Record<string, string> = {}
 ): Array<{ value: string; stock: number; available: boolean }> => {
-  // With Record<string, string> attributes, we can't determine all possible values
-  // from the attributes alone. This function would need product.variants to work properly.
-  // For now, return a single value based on the attribute name if it exists
-  const attributeValue = product.attributes?.[attributeName];
-  if (!attributeValue) return [];
+  if (!product.attributes || !product.variants) {
+    return [];
+  }
 
-  // If product has variants, get stock for this specific combination
-  const tempAttributes = { ...selectedAttributes, [attributeName]: attributeValue };
-  const stock = getVariantStock(product, tempAttributes);
+  const attributeList = Array.isArray(product.attributes)
+    ? (product.attributes as ProductAttribute[])
+    : [];
+  const variants = product.variants ?? [];
 
-  return [{
-    value: attributeValue,
-    stock,
-    available: stock > 0,
-  }];
+  const attributeDefinition = attributeList.find(
+    (attr) => attr.name === attributeName
+  );
+
+  if (!attributeDefinition || !attributeDefinition.values) {
+    return [];
+  }
+
+  // Attributes selected for other categories
+  const otherSelectedAttributes: Record<string, string> = {
+    ...selectedAttributes,
+  };
+  delete otherSelectedAttributes[attributeName];
+
+  return attributeDefinition.values.map((value: string) => {
+    // Find all variants that could potentially match if we select this value
+    const potentiallyMatchingVariants = variants.filter((variant) => {
+      if (!variant.attributes) return false;
+
+      // Check if this variant has the current value for the current attribute
+      if (variant.attributes[attributeName] !== value) {
+        return false;
+      }
+
+      // Check if this variant also matches all *other* selected attributes
+      return Object.entries(otherSelectedAttributes).every(
+        ([key, selectedValue]) => variant.attributes[key] === selectedValue
+      );
+    });
+
+    const totalStockForValue = potentiallyMatchingVariants.reduce(
+      (sum, variant) => sum + variant.stockQuantity,
+      0
+    );
+
+    return {
+      value,
+      stock: totalStockForValue,
+      available: totalStockForValue > 0,
+    };
+  });
 };
 
 /**

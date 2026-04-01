@@ -8,6 +8,7 @@ import {
   useGetUserOrdersQuery,
   useCancelOrderMutation,
   useRepayOrderMutation,
+  OrderItem,
 } from '@/services/orderApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
@@ -122,6 +123,12 @@ const OrdersPage: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const getItemDisplayName = (item: OrderItem) => {
+    const productName = item.Product?.name || item.name || 'Unknown Product';
+    const variantName = item.attributes?.variant;
+    return variantName ? `${productName} (${variantName})` : productName;
   };
 
   if (!user) {
@@ -382,17 +389,20 @@ const OrdersPage: React.FC = () => {
                             className="w-12 h-12 rounded-lg border-2 border-white dark:border-neutral-800 overflow-hidden bg-neutral-100 dark:bg-neutral-700 flex-shrink-0"
                             style={{ zIndex: 10 - index }}
                           >
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xs font-medium text-neutral-500">
-                                {item.name?.charAt(0) || '?'}
-                              </div>
-                            )}
+                            {(() => {
+                              const displayName = getItemDisplayName(item);
+                              return item.image ? (
+                                <img
+                                  src={item.image}
+                                  alt={displayName}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs font-medium text-neutral-500">
+                                  {displayName?.charAt(0) || '?'}
+                                </div>
+                              );
+                            })()}
                           </div>
                         ))}
                         {order.items.length > 4 && (
@@ -409,7 +419,7 @@ const OrdersPage: React.FC = () => {
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">
                           {order.items
                             .slice(0, 2)
-                            .map((item) => item.name)
+                            .map((item) => getItemDisplayName(item))
                             .join(', ')}
                           {order.items.length > 2 && '...'}
                         </p>
@@ -468,30 +478,37 @@ const OrdersPage: React.FC = () => {
                                 key={item.id}
                                 className="flex items-center gap-4 p-4 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700"
                               >
-                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-700">
-                                  {item.image ? (
-                                    <img
-                                      src={item.image}
-                                      alt={item.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-neutral-500">
-                                      {item.name?.charAt(0) || '?'}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-neutral-800 dark:text-neutral-100 truncate">
-                                    {item.name || 'Unknown Product'}
-                                  </h4>
-                                  <div className="flex items-center gap-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                                    <span>Qty: {item.quantity}</span>
-                                    <span>
-                                      Price: {formatCurrency(item.price)}
-                                    </span>
-                                  </div>
-                                </div>
+                                {(() => {
+                                  const displayName = getItemDisplayName(item);
+                                  return (
+                                    <>
+                                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100 dark:bg-neutral-700">
+                                        {item.image ? (
+                                          <img
+                                            src={item.image}
+                                            alt={displayName}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                                            {displayName?.charAt(0) || '?'}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <h4 className="font-medium text-neutral-800 dark:text-neutral-100 truncate">
+                                          {displayName}
+                                        </h4>
+                                        <div className="flex items-center gap-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                                          <span>Qty: {item.quantity}</span>
+                                          <span>
+                                            Price: {formatCurrency(item.price)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </>
+                                  );
+                                })()}
                                 <div className="text-right">
                                   <p className="font-semibold text-neutral-800 dark:text-neutral-100">
                                     {formatCurrency(item.quantity * item.price)}
