@@ -17,11 +17,11 @@ class ImageService {
   // Initialize upload directories
   async initializeDirectories() {
     const dirs = [
+      path.join(this.uploadDir, "temp"),
       path.join(this.uploadDir, "images/products"),
       path.join(this.uploadDir, "images/thumbnails"),
       path.join(this.uploadDir, "images/users"),
       path.join(this.uploadDir, "images/reviews"),
-      path.join(this.uploadDir, "images/temp"),
     ];
 
     for (const dir of dirs) {

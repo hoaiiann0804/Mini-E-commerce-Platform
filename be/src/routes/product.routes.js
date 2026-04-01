@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const productController = require('../controllers/product.controller');
-const { validateRequest } = require('../middlewares/validateRequest');
-const { productSchema } = require('../validators/product.validator');
-const { authenticate } = require('../middlewares/authenticate');
-const { authorize } = require('../middlewares/authorize');
+const productController = require("../controllers/product.controller");
+const { validateRequest } = require("../middlewares/validateRequest");
+const { productSchema } = require("../validators/product.validator");
+const { authenticate } = require("../middlewares/authenticate");
+const { authorize } = require("../middlewares/authorize");
 
 /**
  * @swagger
@@ -82,17 +82,16 @@ const { authorize } = require('../middlewares/authorize');
  *     tags: [Products]
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: Number of items per page
+ *         description: Number of items per page (max 100)
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Base64 encoded cursor for pagination (lastValue and lastId of the previous page's last item)
  *       - in: query
  *         name: sort
  *         schema:
@@ -150,18 +149,14 @@ const { authorize } = require('../middlewares/authorize');
  *                 data:
  *                   type: object
  *                   properties:
- *                     total:
- *                       type: integer
- *                     pages:
- *                       type: integer
- *                     currentPage:
- *                       type: integer
+ *                     nextCursor:
+ *                       type: string
  *                     products:
  *                       type: array
  *                       items:
  *                         $ref: '#/components/schemas/Product'
  */
-router.get('/', productController.getAllProducts);
+router.get("/", productController.getAllProducts);
 
 /**
  * @swagger
@@ -180,7 +175,7 @@ router.get('/', productController.getAllProducts);
  *       200:
  *         description: List of featured products
  */
-router.get('/featured', productController.getFeaturedProducts);
+router.get("/featured", productController.getFeaturedProducts);
 
 /**
  * @swagger
@@ -199,7 +194,7 @@ router.get('/featured', productController.getFeaturedProducts);
  *       200:
  *         description: List of new arrival products
  */
-router.get('/new-arrivals', productController.getNewArrivals);
+router.get("/new-arrivals", productController.getNewArrivals);
 
 /**
  * @swagger
@@ -225,7 +220,7 @@ router.get('/new-arrivals', productController.getNewArrivals);
  *       200:
  *         description: List of best selling products
  */
-router.get('/best-sellers', productController.getBestSellers);
+router.get("/best-sellers", productController.getBestSellers);
 
 /**
  * @swagger
@@ -257,7 +252,7 @@ router.get('/best-sellers', productController.getBestSellers);
  *       200:
  *         description: List of discounted products
  */
-router.get('/deals', productController.getDeals);
+router.get("/deals", productController.getDeals);
 
 /**
  * @swagger
@@ -275,7 +270,7 @@ router.get('/deals', productController.getDeals);
  *       200:
  *         description: Available filters for products
  */
-router.get('/filters', productController.getProductFilters);
+router.get("/filters", productController.getProductFilters);
 
 /**
  * @swagger
@@ -308,7 +303,7 @@ router.get('/filters', productController.getProductFilters);
  *       400:
  *         description: Missing search query
  */
-router.get('/search', productController.searchProducts);
+router.get("/search", productController.searchProducts);
 
 /**
  * @swagger
@@ -329,7 +324,7 @@ router.get('/search', productController.searchProducts);
  *       404:
  *         description: Product not found
  */
-router.get('/slug/:slug', productController.getProductBySlug);
+router.get("/slug/:slug", productController.getProductBySlug);
 
 /**
  * @swagger
@@ -342,7 +337,7 @@ router.get('/slug/:slug', productController.getProductBySlug);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Product ID
  *       - in: query
  *         name: limit
@@ -356,7 +351,7 @@ router.get('/slug/:slug', productController.getProductBySlug);
  *       404:
  *         description: Product not found
  */
-router.get('/:id/related', productController.getRelatedProducts);
+router.get("/:id/related", productController.getRelatedProducts);
 
 /**
  * @swagger
@@ -369,7 +364,7 @@ router.get('/:id/related', productController.getRelatedProducts);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Product ID
  *     responses:
  *       200:
@@ -377,7 +372,7 @@ router.get('/:id/related', productController.getRelatedProducts);
  *       404:
  *         description: Product not found
  */
-router.get('/:id/variants', productController.getProductVariants);
+router.get("/:id/variants", productController.getProductVariants);
 
 /**
  * @swagger
@@ -390,7 +385,7 @@ router.get('/:id/variants', productController.getProductVariants);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Product ID
  *     responses:
  *       200:
@@ -398,7 +393,7 @@ router.get('/:id/variants', productController.getProductVariants);
  *       404:
  *         description: Product not found
  */
-router.get('/:id/reviews-summary', productController.getProductReviewsSummary);
+router.get("/:id/reviews-summary", productController.getProductReviewsSummary);
 
 /**
  * @swagger
@@ -411,7 +406,7 @@ router.get('/:id/reviews-summary', productController.getProductReviewsSummary);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Product ID
  *     responses:
  *       200:
@@ -419,7 +414,7 @@ router.get('/:id/reviews-summary', productController.getProductReviewsSummary);
  *       404:
  *         description: Product not found
  */
-router.get('/:id', productController.getProductById);
+router.get("/:id", productController.getProductById);
 
 /**
  * @swagger
@@ -479,9 +474,9 @@ router.get('/:id', productController.getProductById);
  *         description: Not authorized
  */
 router.post(
-  '/',
+  "/",
   authenticate,
-  authorize('admin'),
+  authorize("admin"),
   validateRequest(productSchema),
   productController.createProduct
 );
@@ -547,9 +542,9 @@ router.post(
  *         description: Product not found
  */
 router.put(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('admin'),
+  authorize("admin"),
   validateRequest(productSchema),
   productController.updateProduct
 );
@@ -580,9 +575,9 @@ router.put(
  *         description: Product not found
  */
 router.delete(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize('admin'),
+  authorize("admin"),
   productController.deleteProduct
 );
 

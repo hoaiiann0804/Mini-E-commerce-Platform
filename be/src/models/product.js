@@ -1,9 +1,9 @@
-const { DataTypes } = require('sequelize');
-const slugify = require('slugify');
-const sequelize = require('../config/sequelize');
+const { DataTypes } = require("sequelize");
+const slugify = require("slugify");
+const sequelize = require("../config/sequelize");
 
 const Product = sequelize.define(
-  'Product',
+  "Product",
   {
     id: {
       type: DataTypes.UUID,
@@ -43,19 +43,19 @@ const Product = sequelize.define(
     },
     images: {
       type: DataTypes.TEXT,
-      defaultValue: '[]',
+      defaultValue: "[]",
       get() {
-        const value = this.getDataValue('images');
+        const value = this.getDataValue("images");
         if (!value) return [];
         try {
-          return typeof value === 'string' ? JSON.parse(value) : value;
+          return typeof value === "string" ? JSON.parse(value) : value;
         } catch (error) {
           return [];
         }
       },
       set(value) {
         this.setDataValue(
-          'images',
+          "images",
           Array.isArray(value)
             ? JSON.stringify(value)
             : JSON.stringify(value || [])
@@ -80,61 +80,57 @@ const Product = sequelize.define(
       unique: true,
     },
     status: {
-      type: DataTypes.ENUM('active', 'inactive', 'draft'),
-      defaultValue: 'active',
+      type: DataTypes.ENUM("active", "inactive", "draft"),
+      defaultValue: "active",
     },
     featured: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
     searchKeywords: {
-      type: DataTypes.TEXT,
-      defaultValue: '[]',
-      field: 'search_keywords',
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: "[]",
+      field: "search_keywords",
       get() {
-        const value = this.getDataValue('searchKeywords');
+        const value = this.getDataValue("searchKeywords");
         if (!value) return [];
         try {
-          return typeof value === 'string' ? JSON.parse(value) : value;
+          return typeof value === "string" ? JSON.parse(value) : value;
         } catch (error) {
           return [];
         }
       },
       set(value) {
-        this.setDataValue(
-          'searchKeywords',
-          Array.isArray(value)
-            ? JSON.stringify(value)
-            : JSON.stringify(value || [])
-        );
+        this.setDataValue("searchKeywords", Array.isArray(value) ? value : []);
       },
     },
     seoTitle: {
       type: DataTypes.TEXT,
       allowNull: true,
-      field: 'seo_title',
+      field: "seo_title",
     },
     seoDescription: {
       type: DataTypes.TEXT,
       allowNull: true,
-      field: 'seo_description',
+      field: "seo_description",
     },
     seoKeywords: {
       type: DataTypes.TEXT,
-      defaultValue: '[]',
-      field: 'seo_keywords',
+      defaultValue: "[]",
+      field: "seo_keywords",
       get() {
-        const value = this.getDataValue('seoKeywords');
+        const value = this.getDataValue("seoKeywords");
         if (!value) return [];
         try {
-          return typeof value === 'string' ? JSON.parse(value) : value;
+          return typeof value === "string" ? JSON.parse(value) : value;
         } catch (error) {
           return [];
         }
       },
       set(value) {
         this.setDataValue(
-          'seoKeywords',
+          "seoKeywords",
           Array.isArray(value)
             ? JSON.stringify(value)
             : JSON.stringify(value || [])
@@ -144,21 +140,21 @@ const Product = sequelize.define(
     // Technical specifications for laptops/computers
     specifications: {
       type: DataTypes.TEXT,
-      defaultValue: '[]',
-      field: 'specifications',
+      defaultValue: "[]",
+      field: "specifications",
       get() {
-        const value = this.getDataValue('specifications');
+        const value = this.getDataValue("specifications");
         if (!value) return [];
         try {
-          return typeof value === 'string' ? JSON.parse(value) : value;
+          return typeof value === "string" ? JSON.parse(value) : value;
         } catch (error) {
           return [];
         }
       },
       set(value) {
         this.setDataValue(
-          'specifications',
-          typeof value === 'object'
+          "specifications",
+          typeof value === "object"
             ? JSON.stringify(value)
             : JSON.stringify(value || [])
         );
@@ -166,24 +162,39 @@ const Product = sequelize.define(
     },
     // Product condition
     condition: {
-      type: DataTypes.ENUM('new', 'like-new', 'used', 'refurbished'),
-      defaultValue: 'new',
+      type: DataTypes.ENUM("new", "like-new", "used", "refurbished"),
+      defaultValue: "new",
     },
     // Base name for variant products
     baseName: {
       type: DataTypes.TEXT,
       allowNull: true,
-      field: 'base_name',
+      field: "base_name",
     },
     // Whether this product uses variants
     isVariantProduct: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-      field: 'is_variant_product',
+      field: "is_variant_product",
+    },
+    avgRating: {
+      type: DataTypes.DECIMAL(3, 2),
+      defaultValue: 0,
+      field: "avg_rating",
+    },
+    reviewCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: "review_count",
+    },
+    minVariantPrice: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      field: "min_variant_price",
     },
   },
   {
-    tableName: 'products',
+    tableName: "products",
     timestamps: true,
     hooks: {
       beforeValidate: (product) => {
@@ -195,14 +206,14 @@ const Product = sequelize.define(
               lower: true,
               strict: true,
             }) +
-            '-' +
+            "-" +
             randomString;
         }
       },
       beforeCreate: async (product) => {
         // Auto-generate search keywords when creating new product
         if (!product.searchKeywords || product.searchKeywords.length === 0) {
-          const keywordGeneratorService = require('../services/keywordGenerator.service');
+          const keywordGeneratorService = require("../services/keywordGenerator.service");
           product.searchKeywords = keywordGeneratorService.generateKeywords({
             name: product.name,
             shortDescription: product.shortDescription,
@@ -214,12 +225,12 @@ const Product = sequelize.define(
       beforeUpdate: async (product) => {
         // Auto-regenerate search keywords when updating product
         if (
-          product.changed('name') ||
-          product.changed('shortDescription') ||
-          product.changed('description') ||
-          product.changed('category')
+          product.changed("name") ||
+          product.changed("shortDescription") ||
+          product.changed("description") ||
+          product.changed("category")
         ) {
-          const keywordGeneratorService = require('../services/keywordGenerator.service');
+          const keywordGeneratorService = require("../services/keywordGenerator.service");
           product.searchKeywords = keywordGeneratorService.generateKeywords({
             name: product.name,
             shortDescription: product.shortDescription,

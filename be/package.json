@@ -14,10 +14,11 @@
     "docker:logs:api": "docker compose -f ../docker-compose.dev.yml logs -f api",
     "docker:ps": "docker compose -f ../docker-compose.dev.yml ps",
     "docker:build:api": "docker compose -f ../docker-compose.dev.yml build api",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --passWithNoTests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:migrate": "sequelize-cli db:migrate",
+    "db:create": "npx sequelize-cli migration:generate",
     "db:seed": "sequelize-cli db:seed:all",
     "db:reset": "sequelize-cli db:drop && sequelize-cli db:create && sequelize-cli db:migrate && sequelize-cli db:seed:all",
     "import:sample": "node import-sample-data.js",
@@ -72,6 +73,6 @@
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "sequelize-cli": "^6.6.3",
-    "supertest": "^7.1.1"
+    "supertest": "^7.2.2"
   }
 }

@@ -11,185 +11,434 @@ const { AppError } = require("../middlewares/errorHandler");
 const { Op } = require("sequelize");
 
 // Get all products with pagination
+// const getAllProducts = async (req, res, next) => {
+//   try {
+//     const {
+//       // page = 1,
+//       cursor,
+//       limit = 10,
+//       sort = "createdAt",
+//       order = "DESC",
+//       category,
+//       search,
+//       inStock,
+//       featured,
+//       status,
+//     } = req.query;
+
+//     const LimitInt = Math.min(100, parseInt(limit) || 10);
+
+//     const sortField = "createdAt";
+//     const sortOrder = "DESC";
+
+//     const whereConditions = {};
+
+//     if (cursor) {
+//       try {
+//         const decodedCursor = JSON.parse(
+//           Buffer.from(cursor, "base64").toString("ascii")
+//         );
+
+//         whereConditions[Op.or] = [
+//           {
+//             [sortField]: { [Op.lt]: new Date(decodedCursor.lastValue) },
+//           },
+
+//           {
+//             [sortField]: new Date(decodedCursor.lastValue),
+//             id: { [Op.lt]: decodedCursor.lastId },
+//           },
+//         ];
+//       } catch (err) {
+//         throw new AppError("Invalid cursor", 400);
+//       }
+//     }
+
+//     if (inStock !== undefined) whereConditions.inStock = inStock === "true";
+//     if (featured !== undefined) whereConditions.featured = featured === "true";
+//     if (status !== undefined) whereConditions.status = status;
+//     else whereConditions.status = "active";
+
+//     if (search) {
+//       whereConditions.name = { [Op.iLike]: `%${search}%` };
+//     }
+
+//     const include = [];
+
+//     if (category) {
+//       const isUUID =
+//         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+//           category
+//         );
+//       const categoryWhere = isUUID ? { id: category } : { slug: category };
+//       include.push({
+//         model: Category,
+//         as: "categories",
+//         attributes: [],
+//         through: { attributes: [] },
+//         required: true,
+//       });
+
+//       // const categoryIdCondition = isUUID
+//       //   ? `pc.category_id='${category}'`
+//       //   : `c.slug='${category.replace("'", "''")}'`;
+
+//       // const productIdsResult = await sequelize.query(
+//       //   `SELECT DISTINCT pc.product_id
+
+//       //   FROM product_categories pc
+
+//       //   JOIN categories c ON c.id = pc.category_id
+
+//       //   WHERE ${categoryIdCondition}`,
+
+//       //   { type: sequelize.QueryTypes.SELECT }
+//       // );
+
+//       // const ids = productIdsResult.map((r) => r.product_id);
+
+//       // if (ids.length === 0) {
+//       //   return res.status(200).json({
+//       //     status: "success",
+
+//       //     data: {
+//       //       total: 0,
+//       //       nextCursor: null,
+//       //       currentPage: 1,
+//       //       products: [],
+//       //     },
+//       //   });
+//       // }
+
+//       // productIdFilter = ids;
+//     }
+
+//     // const total = await Product.count({
+//     //   where: cursor
+//     //     ? undefined
+//     //     : {
+//     //         ...(productIdFilter ? { id: { [Op.in]: productIdFilter } } : {}),
+//     //       },
+//     // });
+
+//     const productsRaw = await Product.findAll({
+//       attributes: [
+//         "id",
+//         "name",
+//         "slug",
+//         "price",
+//         "compareAtPrice",
+//         "thumbnail",
+//         "inStock",
+//         "featured",
+//         "createdAt",
+//         "reviewCount",
+//         "avgRating",
+//         "minVariantPrice",
+//       ],
+
+//       // where: {
+//       //   ...whereConditions,
+
+//       //   ...(productIdFilter ? { id: { [Op.in]: productIdFilter } } : {}),
+//       // },
+
+//       // include: [
+//       //   {
+//       //     association: "categories",
+
+//       //     through: { attributes: [] },
+
+//       //     attributes: ["id", "name", "slug"],
+
+//       //     required: !!productIdFilter,
+//       //   },
+//       // ],
+//       where: whereConditions,
+//       include: include,
+//       limit: LimitInt,
+
+//       order: [
+//         [sortField, sortOrder],
+
+//         ["id", sortOrder],
+//       ],
+
+//       // subQuery: false,
+//       distinct: true,
+//     });
+
+//     // const productIds = productsRaw.map((p) => p.id);
+
+//     if (productsRaw.length === 0) {
+//       return res.status(200).json({
+//         status: "success",
+//         data: {
+//           // total,
+//           // pages: cursor ? null : Math.ceil(total / LimitInt),
+//           // currentPage: cursor ? null : 1,
+//           nextCursor: null,
+//           products: [],
+//         },
+//       });
+//     }
+
+//     // const [minVariantPrices, ratingsAgg] = await Promise.all([
+//     //   ProductVariant.findAll({
+//     //     attributes: [
+//     //       "productId",
+//     //       [sequelize.fn("MIN", sequelize.col("price")), "minPrice"],
+//     //     ],
+
+//     //     where: { productId: { [Op.in]: productIds } },
+
+//     //     group: ["productId"],
+
+//     //     raw: true,
+//     //   }),
+
+//     //   Review.findAll({
+//     //     attributes: [
+//     //       "productId",
+
+//     //       [sequelize.fn("AVG", sequelize.col("rating")), "avgRating"],
+
+//     //       [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+//     //     ],
+
+//     //     where: { productId: { [Op.in]: productIds } },
+
+//     //     group: ["productId"],
+
+//     //     raw: true,
+//     //   }),
+//     // ]);
+
+//     // const minPriceMap = {};
+
+//     // minVariantPrices.forEach((r) => {
+//     //   minPriceMap[r.productId] = parseFloat(r.minPrice);
+//     // });
+
+//     // const ratingsAgg = await Review.findAll({
+
+//     //   attributes: [
+
+//     //     "productId",
+
+//     //     [sequelize.fn("AVG", sequelize.col("rating")), "avgRating"],
+
+//     //     [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+
+//     //   ],
+
+//     //   where: { productId: { [Op.in]: productIds } },
+
+//     //   group: ["productId"],
+
+//     //   raw: true,
+
+//     // });
+
+//     // const ratingMaps = {};
+
+//     // ratingsAgg.forEach((r) => {
+//     //   ratingMaps[r.productId] = {
+//     //     average: parseFloat(parseFloat(r.avgRating || 0).toFixed(1)),
+
+//     //     count: parseInt(r.count || 0),
+//     //   };
+//     // });
+
+//     const products = productsRaw.map((p) => {
+//       const pj = p.toJSON();
+
+//       // const variantMin = minPriceMap[pj.id];
+//       // const variantMin = pj.minVariantPrice
+//       //   ? parseFloat(pj.minVariantPrice)
+//       //   : null;
+
+//       // const displayPrice =
+//       //   typeof variantMin === "number" && !isNaN(variantMin)
+//       //     ? variantMin
+//       //     : parseFloat(pj.price) || 0;
+
+//       const displayPrice =
+//         (pj.minVariantPrice !== null) & (pj.minVariantPrice > 0)
+//           ? parseFloat(pj.minVariantPrice)
+//           : parseFloat(pj.price) || 0;
+
+//       // const processedImages = pj.images
+
+//       //   ? pj.images.map((img) => img.replace(/\\/g, "/"))
+
+//       //   : [];
+
+//       // const ratings = ratingMaps[pj.id] || { average: 0, count: 0 };
+//       const ratings = {
+//         average: parseFloat(parseFloat(pj.avgRating || "0").toFixed(1)),
+//         count: parseInt(pj.reviewCount || 0),
+//       };
+
+//       delete pj.minVariantPrice;
+//       delete pj.avgRating;
+//       delete pj.reviewCount;
+//       return {
+//         ...pj,
+
+//         // images: processedImages,
+
+//         price: displayPrice,
+
+//         compareAtPrice: pj.compareAtPrice
+//           ? parseFloat(pj.compareAtPrice)
+//           : null,
+
+//         ratings,
+//       };
+//     });
+
+//     let nextCursor = null;
+
+//     if (products.length === LimitInt) {
+//       const lastProduct = products[products.length - 1];
+//       const cursorPayload = {
+//         lastValue: lastProduct[sortField],
+//         lastId: lastProduct.id,
+//       };
+
+//       nextCursor = Buffer.from(JSON.stringify(cursorPayload)).toString(
+//         "base64"
+//       );
+//     }
+
+//     res.status(200).json({
+//       status: "success",
+
+//       data: {
+//         // total,
+//         // pages: Math.ceil(total / LimitInt),
+//         // currentPage: pageInt,
+//         nextCursor,
+//         products,
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 const getAllProducts = async (req, res, next) => {
   try {
     const {
-      page = 1,
+      cursor,
       limit = 10,
-      sort = "createdAt",
-      order = "DESC",
       category,
       search,
-      minPrice,
-      maxPrice,
       inStock,
       featured,
       status,
     } = req.query;
 
-    // Build filter conditions
+    const limitInt = Math.min(100, parseInt(limit) || 10);
+    const sortField = "createdAt";
+    const sortOrder = "DESC";
+
     const whereConditions = {};
-    const includeConditions = [];
 
-    // Search filter
-    if (search) {
-      whereConditions[Op.or] = [
-        { name: { [Op.iLike]: `%${search}%` } },
-        { description: { [Op.iLike]: `%${search}%` } },
-        { shortDescription: { [Op.iLike]: `%${search}%` } },
-        { searchKeywords: { [Op.contains]: [search] } },
-      ];
+    if (cursor) {
+      try {
+        const decodedCursor = JSON.parse(
+          Buffer.from(cursor, "base64").toString("ascii")
+        );
+        whereConditions[Op.or] = [
+          { [sortField]: { [Op.lt]: new Date(decodedCursor.lastValue) } },
+          {
+            [sortField]: new Date(decodedCursor.lastValue),
+            id: { [Op.lt]: decodedCursor.lastId },
+          },
+        ];
+      } catch (err) {
+        return next(new AppError("Invalid cursor", 400));
+      }
     }
 
-    // Price filter
-    if (minPrice) {
-      whereConditions.price = {
-        ...whereConditions.price,
-        [Op.gte]: parseFloat(minPrice),
-      };
-    }
+    if (inStock !== undefined) whereConditions.inStock = inStock === "true";
+    if (featured !== undefined) whereConditions.featured = featured === "true";
+    whereConditions.status = status || "active";
+    if (search) whereConditions.name = { [Op.iLike]: `%${search}%` };
 
-    if (maxPrice) {
-      whereConditions.price = {
-        ...whereConditions.price,
-        [Op.lte]: parseFloat(maxPrice),
-      };
-    }
-
-    // Stock filter
-    if (inStock !== undefined) {
-      whereConditions.inStock = inStock === "true";
-    }
-
-    // Featured filter
-    if (featured !== undefined) {
-      whereConditions.featured = featured === "true";
-    }
-
-    // Status filter - mặc định chỉ lấy sản phẩm active
-    if (status !== undefined) {
-      whereConditions.status = status;
-    } else {
-      whereConditions.status = "active";
-    }
-
-    // Category filter
+    const include = [];
     if (category) {
-      // Kiểm tra xem category có phải là UUID hợp lệ không
-      const isValidUUID =
+      const isUUID =
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
           category
         );
-
-      if (isValidUUID) {
-        // Nếu là UUID, tìm theo ID
-        includeConditions.push({
-          association: "categories",
-          where: { id: category },
-          through: { attributes: [] },
-        });
-      } else {
-        // Nếu không phải UUID, tìm theo slug
-        includeConditions.push({
-          association: "categories",
-          where: { slug: category },
-          through: { attributes: [] },
-        });
-      }
-    } else {
-      includeConditions.push({
-        association: "categories",
+      include.push({
+        model: Category,
+        as: "categories",
+        where: isUUID ? { id: category } : { slug: category },
+        attributes: [],
         through: { attributes: [] },
+        required: true,
       });
     }
 
-    // Include attributes for product details (not for filtering)
-    includeConditions.push({
-      association: "attributes",
-      required: false,
-    });
-
-    // Include variants for price range calculation
-    includeConditions.push({
-      association: "variants",
-      required: false,
-    });
-
-    // Include reviews for ratings
-    includeConditions.push({
-      association: "reviews",
-      attributes: ["rating"],
-    });
-
-    // Get products
-    const { count, rows: productsRaw } = await Product.findAndCountAll({
+    const productsRaw = await Product.findAll({
+      attributes: [
+        "id",
+        "name",
+        "slug",
+        "price",
+        "compareAtPrice",
+        "thumbnail",
+        "inStock",
+        "featured",
+        "createdAt",
+        "reviewCount",
+        "avgRating",
+        "minVariantPrice",
+      ],
       where: whereConditions,
-      include: includeConditions,
-      distinct: true,
-      limit: parseInt(limit),
-      offset: (parseInt(page) - 1) * parseInt(limit),
-      order: [[sort, order]],
+      include: include,
+      limit: limitInt,
+      order: [
+        [sortField, sortOrder],
+        ["id", sortOrder],
+      ],
+      subQuery: false,
     });
 
-    // Process products to add ratings
-    const products = productsRaw.map((product) => {
-      const productJson = product.toJSON();
-
-      // Calculate average rating
-      const ratings = {
-        average: 0,
-        count: 0,
-      };
-
-      if (productJson.reviews && productJson.reviews.length > 0) {
-        const totalRating = productJson.reviews.reduce(
-          (sum, review) => sum + review.rating,
-          0
-        );
-        ratings.average = parseFloat(
-          (totalRating / productJson.reviews.length).toFixed(1)
-        );
-        ratings.count = productJson.reviews.length;
-      }
-
-      // Use variant price if available, otherwise use product price
-      let displayPrice = parseFloat(productJson.price) || 0;
-      let compareAtPrice = parseFloat(productJson.compareAtPrice) || null;
-
-      if (productJson.variants && productJson.variants.length > 0) {
-        // Sort variants by price (ascending) to get the lowest price first
-        const sortedVariants = productJson.variants.sort(
-          (a, b) => parseFloat(a.price) - parseFloat(b.price)
-        );
-        displayPrice = parseFloat(sortedVariants[0].price) || displayPrice;
-      }
-
-      // Replace backslashes with forward slashes in images for URL compatibility
-      const processedImages = productJson.images
-        ? productJson.images.map((img) => img.replace(/\\/g, "/"))
-        : [];
-
-      // Add ratings and remove reviews from response
-      delete productJson.reviews;
+    const products = productsRaw.map((p) => {
+      const { minVariantPrice, avgRating, reviewCount, ...productData } = p.get(
+        { plain: true }
+      );
 
       return {
-        ...productJson,
-        images: processedImages,
-        price: displayPrice,
-        compareAtPrice,
-        ratings,
+        ...productData,
+        price:
+          minVariantPrice && parseFloat(minVariantPrice) > 0
+            ? parseFloat(minVariantPrice)
+            : parseFloat(productData.price) || 0,
+        ratings: {
+          average: parseFloat(parseFloat(avgRating || 0).toFixed(1)),
+          count: parseInt(reviewCount || 0),
+        },
       };
     });
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        total: count,
-        pages: Math.ceil(count / limit),
-        currentPage: parseInt(page),
-        products,
-      },
-    });
+    let nextCursor = null;
+    if (products.length === limitInt) {
+      const lastProduct = products[products.length - 1];
+      const cursorPayload = {
+        lastValue: lastProduct[sortField],
+        lastId: lastProduct.id,
+      };
+      nextCursor = Buffer.from(JSON.stringify(cursorPayload)).toString(
+        "base64"
+      );
+    }
+
+    res.status(200).json({ status: "success", data: { nextCursor, products } });
   } catch (error) {
     next(error);
   }
@@ -279,9 +528,9 @@ const getProductById = async (req, res, next) => {
     // Construct image URLs for productImages
     const productImagesWithUrls = productJson.productImages
       ? productJson.productImages.map((image) => ({
-        ...image,
-        url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
-      }))
+          ...image,
+          url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
+        }))
       : [];
 
     // Also fix images array in product data
@@ -671,11 +920,11 @@ const updateProduct = async (req, res, next) => {
     } = req.body;
 
     // Debug request body
-    console.log("UpdateProduct request body:", {
-      compareAtPrice,
-      hasCompareAtPrice: req.body.hasOwnProperty("compareAtPrice"),
-      // Note: comparePrice is not a valid field in the Product model
-    });
+    // console.log("UpdateProduct request body:", {
+    //   compareAtPrice,
+    //   hasCompareAtPrice: req.body.hasOwnProperty("compareAtPrice"),
+    //   // Note: comparePrice is not a valid field in the Product model
+    // });
 
     // Find product
     const product = await Product.findByPk(id);
@@ -766,7 +1015,7 @@ const updateProduct = async (req, res, next) => {
 
     // Update warranty packages - chỉ khi warrantyPackageIds được gửi trong request
     if (req.body.hasOwnProperty("warrantyPackageIds")) {
-      console.log("🛡️ Processing warranty packages:", warrantyPackageIds);
+      // console.log("🛡️ Processing warranty packages:", warrantyPackageIds);
 
       if (warrantyPackageIds && warrantyPackageIds.length > 0) {
         // Verify warranty packages exist
@@ -775,33 +1024,33 @@ const updateProduct = async (req, res, next) => {
           where: { id: { [Op.in]: warrantyPackageIds } },
         });
 
-        console.log(
-          "✅ Found warranties:",
-          warranties.map((w) => ({ id: w.id, name: w.name }))
-        );
-        console.log(
-          "📊 Expected:",
-          warrantyPackageIds.length,
-          "Found:",
-          warranties.length
-        );
+        // console.log(
+        //   "✅ Found warranties:",
+        //   warranties.map((w) => ({ id: w.id, name: w.name }))
+        // );
+        // console.log(
+        //   "📊 Expected:",
+        //   warrantyPackageIds.length,
+        //   "Found:",
+        //   warranties.length
+        // );
 
         if (warranties.length !== warrantyPackageIds.length) {
-          console.log("❌ Warranty package count mismatch!");
+          // console.log("❌ Warranty package count mismatch!");
           throw new AppError("Một hoặc nhiều gói bảo hành không tồn tại", 400);
         }
 
         await product.setWarrantyPackages(warranties, { transaction });
-        console.log("💾 Warranty packages updated successfully");
+        // console.log("💾 Warranty packages updated successfully");
       } else {
         // Remove all warranty packages if empty array is sent
-        console.log("🗑️ Removing all warranty packages");
+        // console.log("🗑️ Removing all warranty packages");
         await product.setWarrantyPackages([], { transaction });
       }
     } else {
-      console.log(
-        "⏭️ No warrantyPackageIds in request, skipping warranty update"
-      );
+      // console.log(
+      //   "⏭️ No warrantyPackageIds in request, skipping warranty update"
+      // );
     }
 
     await transaction.commit();
@@ -992,9 +1241,9 @@ const getRelatedProducts = async (req, res, next) => {
     // Nếu không tìm thấy sản phẩm liên quan theo danh mục hoặc sản phẩm không có danh mục
     // Trả về các sản phẩm mới nhất hoặc sản phẩm nổi bật
     if (relatedProductsRaw.length === 0) {
-      console.log(
-        `No related products found for product ${id}. Returning recent products instead.`
-      );
+      // console.log(
+      //   `No related products found for product ${id}. Returning recent products instead.`
+      // );
 
       relatedProductsRaw = await Product.findAll({
         include: [
@@ -1419,7 +1668,7 @@ const getProductFilters = async (req, res, next) => {
   try {
     const { categoryId } = req.query;
 
-    console.log("Getting product filters with categoryId:", categoryId);
+    // console.log("Getting product filters with categoryId:", categoryId);
 
     // Build where condition
     const whereCondition = {};
@@ -1485,7 +1734,6 @@ const getProductFilters = async (req, res, next) => {
       }
     }
 
-    // Xây dựng điều kiện lọc sản phẩm theo danh mục
     let productFilter = {};
     if (actualCategoryId) {
       productFilter = {
@@ -1497,7 +1745,6 @@ const getProductFilters = async (req, res, next) => {
       };
     }
 
-    // Get brands
     const brands = await ProductAttribute.findAll({
       attributes: ["values"],
       where: {
@@ -1507,7 +1754,6 @@ const getProductFilters = async (req, res, next) => {
       raw: true,
     });
 
-    // Get colors
     const colors = await ProductAttribute.findAll({
       attributes: ["values"],
       where: {
@@ -1517,7 +1763,6 @@ const getProductFilters = async (req, res, next) => {
       raw: true,
     });
 
-    // Get sizes
     const sizes = await ProductAttribute.findAll({
       attributes: ["values"],
       where: {
@@ -1527,7 +1772,6 @@ const getProductFilters = async (req, res, next) => {
       raw: true,
     });
 
-    // Get other attributes
     const otherAttributes = await ProductAttribute.findAll({
       attributes: ["name", "values"],
       where: {
@@ -1538,7 +1782,6 @@ const getProductFilters = async (req, res, next) => {
       raw: true,
     });
 
-    // Xử lý dữ liệu trả về
     const uniqueBrands = new Set();
     brands.forEach((brand) => {
       if (brand.values && Array.isArray(brand.values)) {
