@@ -8,6 +8,7 @@ const {
 } = require('../validators/order.validator');
 const { authenticate } = require('../middlewares/authenticate');
 const { authorize } = require('../middlewares/authorize');
+const { orderLimter } = require('../middlewares/rateLimiter');
 
 /**
  * @swagger
@@ -246,7 +247,7 @@ router.use(authenticate);
  *         description: Not authenticated
  */
 router.post(
-  '/',
+  '/', orderLimter,
   validateRequest(createOrderSchema),
   orderController.createOrder
 );
