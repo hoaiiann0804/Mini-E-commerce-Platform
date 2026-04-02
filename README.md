@@ -1,8 +1,7 @@
+﻿🛍️ **E-Commerce Mini**
+# E-Commerce Mini | Bilingual README (English / Tiếng Việt)
 
- 🛍️ **E-Commerce Mini**
- # E-Commerce Mini | Bilingual README (English / Tiếng Việt)
-
-> Last synchronized with source code on **March 4, 2026**
+> Last synchronized with source code on **April 2, 2026**
 
 ## 1. Project Overview | Tổng quan dự án
 
@@ -10,7 +9,7 @@
 |---|---|
 | **E-Commerce Mini** is a full-stack e-commerce platform with AI chatbot integration (Gemini), Stripe payment, admin management, and multilingual UI. | **E-Commerce Mini** là nền tảng thương mại điện tử full-stack, tích hợp chatbot AI (Gemini), thanh toán Stripe, trang quản trị và giao diện đa ngôn ngữ. |
 | The codebase is split into `fe/` (React + TypeScript + Vite) and `be/` (Node.js + Express + Sequelize + PostgreSQL). | Mã nguồn được tách thành `fe/` (React + TypeScript + Vite) và `be/` (Node.js + Express + Sequelize + PostgreSQL). |
-| Development now supports Docker Compose with dedicated scripts at root and backend levels. | Luồng phát triển hiện hỗ trợ Docker Compose với các script ở cả root và backend. |
+| Development supports Docker Compose with dedicated scripts at root and backend levels. | Luồng phát triển hỗ trợ Docker Compose với các script ở cả root và backend. |
 
 ### 1.1 Workflow Diagrams | Sơ đồ luồng hoạt động
 
@@ -20,9 +19,9 @@
 graph TB
     subgraph "Frontend (React + TypeScript)"
         A[User Interface] --> B[React Components]
-        B --> C[State Management - Zustand]
+        B --> C[State Management - Redux Toolkit + RTK Query]
         C --> D[API Services]
-        D --> E[HTTP Client - Axios]
+        D --> E[HTTP Client - fetchBaseQuery / Axios]
     end
 
     subgraph "Backend (Node.js + Express)"
@@ -158,8 +157,8 @@ sequenceDiagram
 Frontend (fe/src/)
 ├── components/          # UI components tái sử dụng
 ├── pages/               # Các trang chính
-├── store/               # State management
-├── services/            # API calls
+├── store/               # Redux Toolkit store
+├── services/            # API calls (RTK Query + Axios)
 ├── hooks/               # Custom hooks
 ├── utils/               # Helper functions
 └── types/               # Type definitions
@@ -223,18 +222,20 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "State Store"
-        A[Auth Store] --> B[User Info, Token]
-        C[Cart Store] --> D[Items, Total, Quantity]
-        E[Product Store] --> F[Products, Categories, Filters]
-        G[UI Store] --> H[Loading, Modals, Notifications]
+    subgraph "State Store (Redux Toolkit)"
+        A[Auth Slice] --> B[User Info, Token]
+        C[Cart Slice] --> D[Items, Total, Quantity]
+        E[Product Slice] --> F[Products, Categories, Filters]
+        G[UI Slice] --> H[Loading, Modals, Notifications]
+        I[Chat Slice] --> J[Chat Messages, Status]
     end
 
     subgraph "React Components"
-        I[Login Component] --> A
-        J[Cart Component] --> C
-        K[Product List] --> E
-        L[Loading Spinner] --> G
+        K[Login Component] --> A
+        L[Cart Component] --> C
+        M[Product List] --> E
+        N[Loading Spinner] --> G
+        O[Chat Widget] --> I
     end
 ```
 
@@ -299,7 +300,7 @@ graph TD
 | Authentication with JWT for customer and admin roles. | Xác thực JWT cho vai trò khách hàng và admin. |
 | Product browsing with search, filters, sorting, and variants. | Duyệt sản phẩm với tìm kiếm, lọc, sắp xếp và biến thể. |
 | Cart and checkout flow with Stripe payment integration. | Luồng giỏ hàng và thanh toán với tích hợp Stripe. |
-| AI chatbot assistant powered by Gemini (with fallback behavior). | Trợ lý chatbot AI dùng Gemini (có cơ chế fallback). |
+| AI chatbot assistant powered by Gemini (backend service, with optional client-side demo mode). | Trợ lý chatbot AI dùng Gemini (dịch vụ backend, có chế độ demo phía client). |
 | Admin dashboard for users, products, orders, reviews, and warranty packages. | Dashboard admin quản lý người dùng, sản phẩm, đơn hàng, đánh giá và gói bảo hành. |
 | Responsive and multilingual UI with i18n support. | Giao diện responsive và đa ngôn ngữ với i18n. |
 
@@ -316,10 +317,10 @@ graph TD
 
 | Layer | English | Tiếng Việt |
 |---|---|---|
-| Frontend | React 18, TypeScript, Vite, Redux Toolkit, Tailwind CSS, i18next | React 18, TypeScript, Vite, Redux Toolkit, Tailwind CSS, i18next |
+| Frontend | React 18, TypeScript, Vite, Redux Toolkit + RTK Query, Axios, Tailwind CSS, i18next | React 18, TypeScript, Vite, Redux Toolkit + RTK Query, Axios, Tailwind CSS, i18next |
 | Backend | Node.js, Express, Sequelize, PostgreSQL, JWT, Swagger | Node.js, Express, Sequelize, PostgreSQL, JWT, Swagger |
 | Payments | Stripe | Stripe |
-| AI | Gemini API | Gemini API |
+| AI | Gemini API (server + optional client demo) | Gemini API (server + demo phía client) |
 | DevOps (Local) | Docker Compose (`db`, `api`) | Docker Compose (`db`, `api`) |
 
 ## 5. Project Structure | Cấu trúc thư mục
@@ -461,7 +462,7 @@ npm run docker:down
 | REDIS_* | string/number | Redis settings (if enabled) | Cấu hình Redis (nếu bật) |
 | STRIPE_SECRET_KEY | string | Stripe secret key | Khóa bí mật Stripe |
 | STRIPE_WEBHOOK_SECRET | string | Stripe webhook verification secret | Khóa xác thực webhook Stripe |
-| GEMINI_API_KEY | string | Gemini API key | API key Gemini |
+| GEMINI_API_KEY | string | Gemini API key (server-side) | API key Gemini (server-side) |
 | UPLOAD_DIR | string | Upload directory path | Thư mục upload |
 | MAX_FILE_SIZE | number | Upload file size limit | Giới hạn kích thước tệp |
 | DATABASE_URL | string | Optional full DB connection URI | URI kết nối DB đầy đủ (tuỳ chọn) |
@@ -476,7 +477,9 @@ npm run docker:down
 | VITE_APP_VERSION | string | App version metadata | Phiên bản ứng dụng |
 | VITE_BUILD_SOURCEMAP | boolean string | Generate source maps for build | Bật/tắt source map khi build |
 | VITE_STRIPE_PUBLISHABLE_KEY | string | Stripe publishable key | Khóa public Stripe |
-| VITE_GEMINI_API_KEY | string | Gemini key used client-side features | Gemini key cho tính năng phía client |
+| VITE_GEMINI_API_KEY | string | Gemini key for client-side demo mode | Gemini key cho demo phía client |
+
+> Note: Client-side Gemini key is optional and should be a **demo** key. For production, prefer server-side Gemini calls via `GEMINI_API_KEY` in backend to avoid exposing secrets.
 
 ## 10. Admin API (Validated Parameters) | API Admin (tham số đã validate)
 
@@ -535,7 +538,7 @@ Auth: `adminAuthenticate` middleware required for all routes.
 | categoryId | UUID / String | Filter by category | Lọc theo danh mục |
 | search | string | Search keyword | Từ khóa tìm kiếm |
 | minPrice / maxPrice | number | Price range filter | Lọc theo khoảng giá |
-| sort | 'price_asc' \| 'price_desc' \| 'newest' \| 'popular' | Sorting mode | Chế độ sắp xếp |
+| sort | 'price_asc' \\| 'price_desc' \\| 'newest' \\| 'popular' | Sorting mode | Chế độ sắp xếp |
 | page / limit | number | Pagination controls | Điều khiển phân trang |
 | brand / color / size | string[] | Attribute-based filters | Bộ lọc theo thuộc tính |
 | [key: string] | any | Dynamic attribute filters | Bộ lọc động mở rộng |
@@ -545,13 +548,20 @@ Auth: `adminAuthenticate` middleware required for all routes.
 | Field | Type | English | Tiếng Việt |
 |---|---|---|---|
 | name, description, shortDescription | string | Core product content | Nội dung sản phẩm cơ bản |
+| baseName | string | Base name for variants | Tên gốc cho biến thể |
+| sku | string | Product SKU | Mã SKU sản phẩm |
 | price, compareAtPrice | number | Pricing fields | Trường giá |
 | stockQuantity, inStock | number, boolean | Stock control | Quản lý tồn kho |
-| status | 'active' \| 'inactive' \| 'draft' | Product publish status | Trạng thái sản phẩm |
-| condition | 'new' \| 'like-new' \| 'used' \| 'refurbished' | Product condition | Tình trạng sản phẩm |
+| images, thumbnail | string[] / string | Media fields | Ảnh sản phẩm |
 | categoryIds | string[] | Category associations | Liên kết danh mục |
-| attributes, variants, specifications | structured arrays | Variant-capable product model | Mô hình sản phẩm có biến thể |
-| warrantyPackageIds | string[] | Linked warranty plans | Liên kết gói bảo hành |
+| status, featured | enum, boolean | Publish & featured | Trạng thái & nổi bật |
+| condition | enum | Product condition | Tình trạng sản phẩm |
+| seoTitle, seoDescription, seoKeywords | string / string[] | SEO fields | Trường SEO |
+| searchKeywords | string[] | Search keywords | Từ khóa tìm kiếm |
+| specifications | array | Specifications list | Danh sách thông số |
+| attributes, variants | object / array | Variant-capable model | Mô hình có biến thể |
+| warrantyMonths, warrantyPackageIds | number / string[] | Warranty linkage | Liên kết bảo hành |
+| isVariantProduct | boolean | Variant product flag | Cờ sản phẩm có biến thể |
 
 ## 12. Runtime Logic Notes | Ghi chú logic vận hành
 
