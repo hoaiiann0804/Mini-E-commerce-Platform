@@ -10,6 +10,7 @@ const {
   emailSchema,
   verifyEmailSchema,
 } = require('../validators/user.validator');
+const { authLimiter } = require('../middlewares/rateLimiter');
 const { authenticate } = require('../middlewares/authenticate');
 
 /**
@@ -59,6 +60,7 @@ const { authenticate } = require('../middlewares/authenticate');
  */
 router.post(
   '/register',
+  authLimiter,
   validateRequest(registerSchema),
   authController.register
 );
@@ -90,7 +92,12 @@ router.post(
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', validateRequest(loginSchema), authController.login);
+router.post(
+  '/login',
+  authLimiter,
+  validateRequest(loginSchema),
+  authController.login
+);
 
 /**
  * @swagger
@@ -183,6 +190,7 @@ router.post(
  */
 router.post(
   '/resend-verification',
+  authLimiter,
   validateRequest(emailSchema),
   authController.resendVerification
 );
@@ -210,7 +218,7 @@ router.post(
  *       401:
  *         description: Invalid or expired refresh token
  */
-router.post('/refresh-token', authController.refreshToken);
+router.post('/refresh-token', authLimiter, authController.refreshToken);
 
 /**
  * @swagger
@@ -238,6 +246,7 @@ router.post('/refresh-token', authController.refreshToken);
  */
 router.post(
   '/forgot-password',
+  authLimiter,
   validateRequest(forgotPasswordSchema),
   authController.forgotPassword
 );
@@ -271,6 +280,7 @@ router.post(
  */
 router.post(
   '/reset-password',
+  authLimiter,
   validateRequest(resetPasswordSchema),
   authController.resetPassword
 );
