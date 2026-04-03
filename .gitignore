@@ -1,3 +1,5 @@
 # ignore root env
 
 .env
+ops/env/.env.dev
+
