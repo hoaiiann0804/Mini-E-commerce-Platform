@@ -1,7 +1,29 @@
 require('dotenv').config();
+const dns = require('dns');
 const app = require('./app');
 const sequelize = require('./config/sequelize');
 const logger = require('./utils/logger');
+
+// Optional: force IPv4 DNS resolution to bypass getaddrinfo/DNS issues in some environments
+if (process.env.FORCE_DNS_IPV4 === 'true') {
+  const originalLookup = dns.lookup.bind(dns);
+  dns.lookup = (hostname, options, callback) => {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    dns.resolve4(hostname, (err, addresses) => {
+      if (err) return callback(err);
+      if (!addresses || addresses.length === 0) {
+        return callback(new Error(`No A records for ${hostname}`));
+      }
+      return callback(null, addresses[0], 4);
+    });
+  };
+  // keep a reference in case needed for debugging
+  dns.lookup._original = originalLookup;
+  logger.info('FORCE_DNS_IPV4 enabled: dns.lookup patched to use resolve4');
+}
 
 // Load all models first (without relationships)
 const models = [
