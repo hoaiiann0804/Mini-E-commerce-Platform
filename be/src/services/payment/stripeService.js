@@ -1,8 +1,50 @@
 const Stripe = require('stripe');
+const https = require('https');
+const dns = require('dns');
 const { AppError } = require('../../middlewares/errorHandler');
 
-// Initialize Stripe with secret key
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+// Force IPv4 DNS resolution via resolve4 to bypass getaddrinfo/DNS issues in some Docker setups
+const ipv4Lookup = (hostname, options, callback) => {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+  const opts = options || {};
+  const wantAll = opts.all === true;
+
+  dns.resolve4(hostname, (err, addresses) => {
+    if (err) return callback(err);
+    if (!addresses || addresses.length === 0) {
+      return callback(new Error(`No A records for ${hostname}`));
+    }
+
+    if (wantAll) {
+      const records = addresses.map((address) => ({ address, family: 4 }));
+      return callback(null, records);
+    }
+
+    return callback(null, addresses[0], 4);
+  });
+};
+
+const httpAgent = new https.Agent({ lookup: ipv4Lookup });
+
+// Initialize Stripe with secret key and a custom HTTP client that uses our agent
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY, {
+  httpAgent,
+  httpClient: Stripe.createNodeHttpClient(httpAgent),
+});
+
+// Temporarily override dns.lookup during Stripe calls to bypass getaddrinfo issues
+const withDnsLookupOverride = async (fn) => {
+  const originalLookup = dns.lookup;
+  dns.lookup = ipv4Lookup;
+  try {
+    return await fn();
+  } finally {
+    dns.lookup = originalLookup;
+  }
+};
 
 class StripeService {
   /**
@@ -25,14 +67,16 @@ class StripeService {
         originalAmount: amount,
       });
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: stripeAmount, // VND doesn't use decimals
-        currency,
-        metadata,
-        automatic_payment_methods: {
-          enabled: true,
-        },
-      });
+      const paymentIntent = await withDnsLookupOverride(() =>
+        stripe.paymentIntents.create({
+          amount: stripeAmount, // VND doesn't use decimals
+          currency,
+          metadata,
+          automatic_payment_methods: {
+            enabled: true,
+          },
+        })
+      );
 
       return {
         clientSecret: paymentIntent.client_secret,
@@ -61,8 +105,9 @@ class StripeService {
    */
   async confirmPaymentIntent(paymentIntentId) {
     try {
-      const paymentIntent =
-        await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await withDnsLookupOverride(() =>
+        stripe.paymentIntents.retrieve(paymentIntentId)
+      );
       return paymentIntent;
     } catch (error) {
       console.error('Stripe confirmPaymentIntent error:', error);
@@ -80,11 +125,13 @@ class StripeService {
    */
   async createCustomer({ email, name, metadata = {} }) {
     try {
-      const customer = await stripe.customers.create({
-        email,
-        name,
-        metadata,
-      });
+      const customer = await withDnsLookupOverride(() =>
+        stripe.customers.create({
+          email,
+          name,
+          metadata,
+        })
+      );
 
       return customer;
     } catch (error) {
@@ -100,7 +147,9 @@ class StripeService {
    */
   async getCustomer(customerId) {
     try {
-      const customer = await stripe.customers.retrieve(customerId);
+      const customer = await withDnsLookupOverride(() =>
+        stripe.customers.retrieve(customerId)
+      );
       return customer;
     } catch (error) {
       console.error('Stripe getCustomer error:', error);
@@ -131,7 +180,9 @@ class StripeService {
         refundData.amount = Math.round(amount * 100); // Convert to cents
       }
 
-      const refund = await stripe.refunds.create(refundData);
+      const refund = await withDnsLookupOverride(() =>
+        stripe.refunds.create(refundData)
+      );
       return refund;
     } catch (error) {
       console.error('Stripe createRefund error:', error);
@@ -167,10 +218,12 @@ class StripeService {
    */
   async getPaymentMethods(customerId) {
     try {
-      const paymentMethods = await stripe.paymentMethods.list({
-        customer: customerId,
-        type: 'card',
-      });
+      const paymentMethods = await withDnsLookupOverride(() =>
+        stripe.paymentMethods.list({
+          customer: customerId,
+          type: 'card',
+        })
+      );
 
       return paymentMethods.data;
     } catch (error) {
@@ -186,10 +239,12 @@ class StripeService {
    */
   async createSetupIntent(customerId) {
     try {
-      const setupIntent = await stripe.setupIntents.create({
-        customer: customerId,
-        payment_method_types: ['card'],
-      });
+      const setupIntent = await withDnsLookupOverride(() =>
+        stripe.setupIntents.create({
+          customer: customerId,
+          payment_method_types: ['card'],
+        })
+      );
 
       return {
         clientSecret: setupIntent.client_secret,
