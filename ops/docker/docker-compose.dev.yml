@@ -1,0 +1,49 @@
+﻿services:
+  db:
+    image: postgres:15
+    container_name: e-commerce-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    mem_limit: 1g
+    cpus: 0.5
+    ports:
+      - "5438:5432"
+    volumes:
+      - pgdata_ecommerce:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: ../../be
+      dockerfile: Dockerfile
+    container_name: e-commerce-web
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    dns_opt:
+      - use-vc
+    ports:
+      - "8888:8888"
+    env_file:
+      - ../../be/.env
+      - ../../ops/env/.env.dev
+    environment:
+      NODE_OPTIONS: --dns-result-order=ipv4first
+    volumes:
+      - ../../uploads:/app/uploads
+    mem_limit: 1g
+    cpus: 0.5
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata_ecommerce:
+    name: e-commrcemini_pgdata_ecommerce
