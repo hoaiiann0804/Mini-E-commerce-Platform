@@ -340,7 +340,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         return <ProductPricingForm />;
 
       case "media":
-        return <ProductImagesForm />;
+        return <ProductImagesForm form={form} />;
 
       case "category":
         return (
