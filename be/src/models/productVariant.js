@@ -175,8 +175,8 @@ const ProductVariant = sequelize.define(
           console.log(
             `>>> Auto-updated minPrice for Product ${variant.productId}: ${minPrice}`
           );
-        } catch (err) {
-          console.log("Hook afterDestroy (Price) error", err.message);
+        } catch (error) {
+          console.log("Hook afterSave (Price) error", error.message);
         }
 
         try {
@@ -191,7 +191,7 @@ const ProductVariant = sequelize.define(
             inStock: (totalShock || 0) > 0,
           });
         } catch (error) {
-          console.error("Hook afterSave (Stock) error:", err.message);
+          console.error("Hook afterSave (Stock) error:", error.message);
         }
       },
       afterDestroy: async (variant, options) => {
@@ -239,7 +239,7 @@ const ProductVariant = sequelize.define(
             }
           );
         } catch (error) {
-          console.error("Hook afterDestroy (Stock) error:", err.message);
+          console.error("Hook afterDestroy (Stock) error:", error.message);
         }
       },
     },
