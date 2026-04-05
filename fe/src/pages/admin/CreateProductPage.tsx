@@ -759,7 +759,7 @@ const CreateProductPage: React.FC = () => {
       disabled: !isTabAccessible('images'),
       children: (
         <>
-          <ProductImagesForm />
+          <ProductImagesForm form={form} />
           <TabNavigation
             activeTab={activeTab}
             setActiveTab={setActiveTab}
