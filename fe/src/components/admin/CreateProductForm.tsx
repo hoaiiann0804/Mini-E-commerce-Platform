@@ -214,7 +214,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         description: formData.description.trim(),
         shortDescription: formData.shortDescription.trim(),
         price: Number(formData.price),
-        comparePrice: formData.comparePrice
+        compareAtPrice: formData.comparePrice
           ? Number(formData.comparePrice)
           : undefined,
         stockQuantity: Number(formData.stock),
