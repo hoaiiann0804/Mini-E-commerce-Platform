@@ -2,10 +2,17 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateProductMutation } from "@/services/adminProductApi";
 import { useGetCategoriesQuery } from "@/services/categoryApi";
+import { useConvertBase64ToImageMutation } from "@/services/imageApi";
+import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
+import { WarrantyPackage } from "@/types/product.types";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import {
+  hasBase64Images,
+  processDescriptionImages,
+} from "@/utils/descriptionImageProcessor";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -20,6 +27,7 @@ import {
   TrashIcon,
   InformationCircleIcon,
   ExclamationTriangleIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 interface ProductFormData {
@@ -43,6 +51,9 @@ interface ProductFormData {
 
   // Categories
   categoryIds: string[];
+
+  // Warranty
+  warrantyPackageIds: string[];
 
   // SEO
   searchKeywords: string[];
@@ -125,6 +136,12 @@ const STEPS = [
     description: "Hình ảnh sản phẩm",
   },
   {
+    id: "warranty",
+    title: "B?o h?nh",
+    icon: <ShieldCheckIcon className="w-5 h-5" />,
+    description: "G?i b?o h?nh",
+  },
+  {
     id: "seo",
     title: "SEO",
     icon: <MagnifyingGlassIcon className="w-5 h-5" />,
@@ -145,11 +162,14 @@ const SPEC_CATEGORIES = [
   "Khác",
 ];
 
-const CreateProductPageOptimized: React.FC = () => {
+const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
   const [createProduct, { isLoading }] = useCreateProductMutation();
   const { data: categories, isLoading: isCategoriesLoading } =
     useGetCategoriesQuery();
+  const { data: warrantyData, isLoading: isWarrantyLoading } =
+    useGetWarrantyPackagesQuery({ isActive: true });
+  const [convertBase64ToImage] = useConvertBase64ToImageMutation();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
@@ -171,6 +191,7 @@ const CreateProductPageOptimized: React.FC = () => {
     featured: false,
     condition: "new",
     categoryIds: [],
+    warrantyPackageIds: [],
     searchKeywords: [],
     seoTitle: "",
     seoDescription: "",
@@ -181,7 +202,6 @@ const CreateProductPageOptimized: React.FC = () => {
     variants: [],
   });
 
-  // Auto-fill fields
   useEffect(() => {
     if (formData.name && !formData.baseName) {
       setFormData((prev) => ({ ...prev, baseName: prev.name }));
@@ -197,7 +217,60 @@ const CreateProductPageOptimized: React.FC = () => {
     }
   }, [formData.name, formData.shortDescription]);
 
-  // Validation
+  useEffect(() => {
+    if (!formData.isVariantProduct) return;
+
+    const totalStock = formData.variants.reduce(
+      (sum, v) => sum + Number(v.stockQuantity ?? (v as any).stock ?? 0),
+      0
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      stockQuantity: totalStock,
+      inStock: totalStock > 0,
+    }));
+  }, [formData.isVariantProduct, formData.variants]);
+
+  useEffect(() => {
+    const warrantyPackages: WarrantyPackage[] =
+      warrantyData?.data?.warrantyPackages || [];
+    if (warrantyPackages.length === 0) return;
+
+    const freePackageIds = warrantyPackages
+      .filter((pkg) => pkg.price === 0)
+      .map((pkg) => pkg.id);
+
+    if (freePackageIds.length === 0) return;
+
+    setFormData((prev) => {
+      const current = prev.warrantyPackageIds || [];
+      const needsUpdate = freePackageIds.some((id) => !current.includes(id));
+      if (!needsUpdate) return prev;
+      return {
+        ...prev,
+        warrantyPackageIds: Array.from(
+          new Set([...current, ...freePackageIds])
+        ),
+      };
+    });
+  }, [warrantyData]);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+
+  const formatDuration = (months: number) => {
+    if (months === 0) return "Theo sản phẩm";
+    if (months < 12) return `${months} tháng`;
+    if (months === 12) return "1 năm";
+    return `${Math.floor(months / 12)} năm${
+      months % 12 > 0 ? ` ${months % 12} tháng` : ""
+    }`;
+  };
+
   const validateStep = (stepId: string): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -215,6 +288,12 @@ const CreateProductPageOptimized: React.FC = () => {
           if (formData.price <= 0) newErrors.price = "Giá phải lớn hơn 0";
           if (formData.stockQuantity < 0)
             newErrors.stockQuantity = "Tồn kho không được âm";
+        }
+        break;
+
+      case "variants":
+        if (formData.isVariantProduct && formData.variants.length === 0) {
+          newErrors.variants = "Cần tạo ít nhất 1 biến thể";
         }
         break;
 
@@ -248,24 +327,42 @@ const CreateProductPageOptimized: React.FC = () => {
     if (!validateStep(STEPS[currentStep].id)) return;
 
     try {
+      let processedDescription = formData.description;
+      if (hasBase64Images(processedDescription)) {
+        const result = await processDescriptionImages(processedDescription, {
+          productId: undefined,
+          category: "product",
+          uploadImageFn: async ({ base64Data, options }) => {
+            return await convertBase64ToImage({
+              base64Data,
+              options,
+            }).unwrap();
+          },
+        });
+
+        if (result.hasChanges) {
+          processedDescription = result.processedDescription;
+        }
+      }
+
       const payload = {
         name: formData.name,
         baseName: formData.baseName || formData.name,
-        description: formData.description,
+        description: processedDescription,
         shortDescription: formData.shortDescription,
         price: formData.isVariantProduct ? 0 : formData.price,
-        comparePrice: formData.isVariantProduct
-          ? undefined
-          : formData.compareAtPrice,
+        compareAtPrice: formData.compareAtPrice,
         images: formData.images,
         thumbnail: formData.thumbnail || formData.images[0],
         inStock: formData.isVariantProduct ? true : formData.inStock,
+        stockQuantity: formData.isVariantProduct ? 0 : formData.stockQuantity,
         stock: formData.isVariantProduct ? 0 : formData.stockQuantity,
         sku: formData.isVariantProduct ? undefined : formData.sku,
         status: formData.status,
         featured: formData.featured,
         condition: formData.condition,
         categoryIds: formData.categoryIds,
+        warrantyPackageIds: formData.warrantyPackageIds,
         searchKeywords: formData.searchKeywords,
         seoTitle: formData.seoTitle,
         seoDescription: formData.seoDescription,
@@ -508,7 +605,11 @@ const CreateProductPageOptimized: React.FC = () => {
                   onChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      condition: value as "new" | "like-new" | "used" | "refurbished",
+                      condition: value as
+                        | "new"
+                        | "like-new"
+                        | "used"
+                        | "refurbished",
                     }))
                   }
                   options={[
@@ -527,7 +628,10 @@ const CreateProductPageOptimized: React.FC = () => {
                 <Select
                   value={formData.status}
                   onChange={(value) =>
-                    setFormData((prev) => ({ ...prev, status: value as "active" | "inactive" | "draft" }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      status: value as "active" | "inactive" | "draft",
+                    }))
                   }
                   options={[
                     { value: "active", label: "Đang bán" },
@@ -585,6 +689,10 @@ const CreateProductPageOptimized: React.FC = () => {
                   : "Thiết lập giá bán và số lượng tồn kho"}
               </p>
             </div>
+
+            {errors.variants && (
+              <p className="text-red-500 text-sm">{errors.variants}</p>
+            )}
 
             {!formData.isVariantProduct ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -944,7 +1052,15 @@ const CreateProductPageOptimized: React.FC = () => {
                               <Select
                                 value={attr.type}
                                 onChange={(value) =>
-                                  updateAttribute(attr.id, "type", value as "color" | "size" | "material" | "custom")
+                                  updateAttribute(
+                                    attr.id,
+                                    "type",
+                                    value as
+                                      | "color"
+                                      | "size"
+                                      | "material"
+                                      | "custom"
+                                  )
                                 }
                                 options={[
                                   { value: "color", label: "Màu sắc" },
@@ -1260,6 +1376,109 @@ const CreateProductPageOptimized: React.FC = () => {
           </div>
         );
 
+      case "warranty":
+        return (
+          <div className="space-y-6">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <h3 className="font-medium text-amber-900 dark:text-amber-100 mb-2">
+                G?i b?o h?nh
+              </h3>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Ch?n g?i b?o h?nh ?i k?m cho s?n ph?m (n?u c?)
+              </p>
+            </div>
+
+            {isWarrantyLoading ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner size="sm" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(() => {
+                  const warrantyPackages: WarrantyPackage[] =
+                    warrantyData?.data?.warrantyPackages || [];
+                  if (warrantyPackages.length === 0) {
+                    return (
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-yellow-800 dark:text-yellow-200">
+                        Hi?n ch?a c? g?i b?o h?nh n?o ???c c?u h?nh.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {warrantyPackages.map((pkg) => {
+                        const checked = formData.warrantyPackageIds.includes(
+                          pkg.id
+                        );
+                        return (
+                          <label
+                            key={pkg.id}
+                            className={`border rounded-lg p-4 cursor-pointer transition ${
+                              checked
+                                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                                : "border-gray-200 dark:border-gray-700"
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  const isChecked = e.target.checked;
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    warrantyPackageIds: isChecked
+                                      ? Array.from(
+                                          new Set([
+                                            ...prev.warrantyPackageIds,
+                                            pkg.id,
+                                          ])
+                                        )
+                                      : prev.warrantyPackageIds.filter(
+                                          (id) => id !== pkg.id
+                                        ),
+                                  }));
+                                }}
+                                className="mt-1"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{pkg.name}</span>
+                                  <span className="text-green-600 font-semibold">
+                                    {pkg.price === 0
+                                      ? "Mi?n ph?"
+                                      : formatPrice(pkg.price)}
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                  Th?i h?n: {formatDuration(pkg.durationMonths)}
+                                </div>
+                                {pkg.description && (
+                                  <div className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                                    {pkg.description}
+                                  </div>
+                                )}
+                                {pkg.coverage && pkg.coverage.length > 0 && (
+                                  <ul className="mt-2 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+                                    {pkg.coverage.map((item, idx) => (
+                                      <li key={idx}>{item}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        );
+
       case "seo":
         return (
           <div className="space-y-6">
@@ -1461,4 +1680,4 @@ const CreateProductPageOptimized: React.FC = () => {
   );
 };
 
-export default CreateProductPageOptimized;
+export default CreateProductPage;

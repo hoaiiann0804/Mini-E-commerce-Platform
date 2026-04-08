@@ -149,6 +149,7 @@ const HomePage: React.FC = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                compareAtPrice={product.compareAtPrice}
                 thumbnail={product.thumbnail}
                 slug={product.slug}
                 images={product.images || [product.thumbnail]}
@@ -220,6 +221,7 @@ const HomePage: React.FC = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                compareAtPrice={product.compareAtPrice}
                 thumbnail={product.thumbnail}
                 slug={product.slug}
                 images={product.images || [product.thumbnail]}
@@ -291,6 +293,7 @@ const HomePage: React.FC = () => {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                compareAtPrice={product.compareAtPrice}
                 thumbnail={product.thumbnail}
                 slug={product.slug}
                 images={product.images || [product.thumbnail]}
