@@ -74,96 +74,116 @@ module.exports = {
       }
     }
 
-    // Create warranty_packages table
-    await queryInterface.createTable('warranty_packages', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      duration_months: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      price: {
-        type: Sequelize.DECIMAL(12, 2),
-        allowNull: false,
-        defaultValue: 0,
-      },
-      terms: {
-        type: Sequelize.JSONB,
-        defaultValue: {},
-      },
-      coverage: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
-        defaultValue: [],
-      },
-      is_active: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true,
-      },
-      sort_order: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0,
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-    });
+    // Create warranty_packages table (if not exists)
+    let warrantyPackagesTableDescription;
+    try {
+      warrantyPackagesTableDescription =
+        await queryInterface.describeTable('warranty_packages');
+    } catch (error) {
+      warrantyPackagesTableDescription = null;
+    }
 
-    // Create product_warranties junction table
-    await queryInterface.createTable('product_warranties', {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
-      product_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'products',
-          key: 'id',
+    if (!warrantyPackagesTableDescription) {
+      await queryInterface.createTable('warranty_packages', {
+        id: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          primaryKey: true,
         },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      warranty_package_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'warranty_packages',
-          key: 'id',
+        name: {
+          type: Sequelize.STRING,
+          allowNull: false,
         },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      is_default: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-    });
+        description: {
+          type: Sequelize.TEXT,
+          allowNull: true,
+        },
+        duration_months: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        price: {
+          type: Sequelize.DECIMAL(12, 2),
+          allowNull: false,
+          defaultValue: 0,
+        },
+        terms: {
+          type: Sequelize.JSONB,
+          defaultValue: {},
+        },
+        coverage: {
+          type: Sequelize.ARRAY(Sequelize.STRING),
+          defaultValue: [],
+        },
+        is_active: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: true,
+        },
+        sort_order: {
+          type: Sequelize.INTEGER,
+          defaultValue: 0,
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        updated_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+      });
+    }
+
+    // Create product_warranties junction table (if not exists)
+    let productWarrantiesTableDescription;
+    try {
+      productWarrantiesTableDescription =
+        await queryInterface.describeTable('product_warranties');
+    } catch (error) {
+      productWarrantiesTableDescription = null;
+    }
+
+    if (!productWarrantiesTableDescription) {
+      await queryInterface.createTable('product_warranties', {
+        id: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          primaryKey: true,
+        },
+        product_id: {
+          type: Sequelize.UUID,
+          allowNull: false,
+          references: {
+            model: 'products',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE',
+        },
+        warranty_package_id: {
+          type: Sequelize.UUID,
+          allowNull: false,
+          references: {
+            model: 'warranty_packages',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE',
+        },
+        is_default: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+        },
+        created_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        updated_at: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+      });
+    }
 
     // Add indexes if they don't exist
     try {
