@@ -41,11 +41,25 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('product_categories', ['product_id']);
-    await queryInterface.addIndex('product_categories', ['category_id']);
-    await queryInterface.addIndex('product_categories', ['product_id', 'category_id'], {
-      unique: true,
-    });
+    try {
+      await queryInterface.addIndex('product_categories', ['product_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('product_categories', ['category_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('product_categories', ['product_id', 'category_id'], {
+        unique: true,
+      });
+    } catch (error) {
+      // unique index might already exist
+    }
   },
 
   async down(queryInterface, Sequelize) {

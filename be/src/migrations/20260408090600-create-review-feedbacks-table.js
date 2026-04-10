@@ -45,11 +45,25 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('review_feedbacks', ['review_id']);
-    await queryInterface.addIndex('review_feedbacks', ['user_id']);
-    await queryInterface.addIndex('review_feedbacks', ['review_id', 'user_id'], {
-      unique: true,
-    });
+    try {
+      await queryInterface.addIndex('review_feedbacks', ['review_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('review_feedbacks', ['user_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('review_feedbacks', ['review_id', 'user_id'], {
+        unique: true,
+      });
+    } catch (error) {
+      // unique index might already exist
+    }
   },
 
   async down(queryInterface, Sequelize) {

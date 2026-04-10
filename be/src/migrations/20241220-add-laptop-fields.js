@@ -162,7 +162,7 @@ module.exports = {
         },
         warranty_package_id: {
           type: Sequelize.UUID,
-          allowNull: false,
+w          allowNull: false,
           references: {
             model: 'warranty_packages',
             key: 'id',
