@@ -41,11 +41,25 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('wishlists', ['user_id']);
-    await queryInterface.addIndex('wishlists', ['product_id']);
-    await queryInterface.addIndex('wishlists', ['user_id', 'product_id'], {
-      unique: true,
-    });
+    try {
+      await queryInterface.addIndex('wishlists', ['user_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('wishlists', ['product_id']);
+    } catch (error) {
+      // index might already exist
+    }
+
+    try {
+      await queryInterface.addIndex('wishlists', ['user_id', 'product_id'], {
+        unique: true,
+      });
+    } catch (error) {
+      // unique index might already exist
+    }
   },
 
   async down(queryInterface, Sequelize) {
