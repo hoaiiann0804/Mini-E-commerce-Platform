@@ -1,69 +1,23 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
 const imageService = require("../services/imageService");
 const { AppError } = require("../middlewares/errorHandler");
-
-const TEMP_UPLOAD_DIR = path.join(__dirname, "../../uploads/temp");
-
-// Configure multer for temporary file storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (!fs.existsSync(TEMP_UPLOAD_DIR)) {
-      fs.mkdirSync(TEMP_UPLOAD_DIR, { recursive: true });
-    }
-    cb(null, TEMP_UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = uuidv4();
-    const ext = path.extname(file.originalname);
-    cb(null, `temp_${uniqueSuffix}${ext}`);
-  },
-});
-
-// File filter for images
-const fileFilter = (req, file, cb) => {
-  const allowedMimes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(
-      new AppError("Only image files are allowed (JPEG, PNG, GIF, WebP)", 400),
-      false
-    );
-  }
-};
-
-// Multer configuration
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
-    files: 10, // Maximum 10 files
-  },
-});
-
+const uploadCloudinary = require("../middlewares/cloudinaryUploadMiddleware");
+const multer = require("multer");
 class ImageController {
   // Upload single image
   async uploadSingle(req, res, next) {
     try {
-      const uploadMiddleware = upload.single("image");
+      // Use the pre-configured uploadCloudinary middleware
+      const uploadMiddleware = uploadCloudinary.single("image");
 
       uploadMiddleware(req, res, async (err) => {
         if (err) {
           if (err instanceof multer.MulterError) {
             if (err.code === "LIMIT_FILE_SIZE") {
               return next(
-                new AppError("File too large. Maximum size is 10MB", 400)
+                new AppError(
+                  `File too large. Maximum size is ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
+                  400
+                )
               );
             }
             return next(new AppError(`Upload error: ${err.message}`, 400));
@@ -80,8 +34,8 @@ class ImageController {
             category: req.body.category || "product",
             productId: req.body.productId || null,
             userId: req.user?.id || null,
-            generateThumbs: req.body.generateThumbs !== "false",
-            optimize: req.body.optimize !== "false",
+            // generateThumbs and optimize are handled by Cloudinary now, no need to pass these options
+            // If you need specific Cloudinary transformations, you'd add them to `cloudinaryUploadMiddleware.js` params
           };
 
           const result = await imageService.uploadImage(req.file, options);
@@ -103,14 +57,18 @@ class ImageController {
   // Upload multiple images
   async uploadMultiple(req, res, next) {
     try {
-      const uploadMiddleware = upload.array("images", 10);
+      // Use the pre-configured uploadCloudinary middleware
+      const uploadMiddleware = uploadCloudinary.array("images", 10); // Max 10 files is defined in cloudinaryUploadMiddleware.js limits
 
       uploadMiddleware(req, res, async (err) => {
         if (err) {
           if (err instanceof multer.MulterError) {
             if (err.code === "LIMIT_FILE_SIZE") {
               return next(
-                new AppError("File too large. Maximum size is 10MB", 400)
+                new AppError(
+                  `File too large. Maximum size is ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
+                  400
+                )
               );
             }
             if (err.code === "LIMIT_FILE_COUNT") {
@@ -130,8 +88,8 @@ class ImageController {
             category: req.body.category || "product",
             productId: req.body.productId || null,
             userId: req.user?.id || null,
-            generateThumbs: req.body.generateThumbs !== "false",
-            optimize: req.body.optimize !== "false",
+            // generateThumbs and optimize are handled by Cloudinary now
+            // If you need specific Cloudinary transformations, you'd add them to `cloudinaryUploadMiddleware.js` params
           };
 
           const result = await imageService.uploadMultipleImages(
@@ -162,8 +120,8 @@ class ImageController {
       res.status(200).json({
         status: "success",
         data: {
-          ...image.toJSON(),
-          url: `${process.env.BASE_URL || "http://localhost:8888"}/uploads/${image.filePath}`,
+          ...image.toJSON(), // image.filePath now directly contains the Cloudinary URL
+          url: image.filePath, // Use the Cloudinary URL directly
         },
       });
     } catch (error) {
@@ -179,7 +137,7 @@ class ImageController {
 
       const imagesWithUrls = images.map((image) => ({
         ...image.toJSON(),
-        url: `${process.env.BASE_URL || "http://localhost:8888"}/uploads/${image.filePath.replace(/\\/g, "/")}`,
+        url: image.filePath, // Use the Cloudinary URL directly
       }));
 
       res.status(200).json({
@@ -209,10 +167,10 @@ class ImageController {
     }
   }
 
-  // Convert base64 to file
+  // Convert base64 to file (may be unimplemented depending on storage backend)
   async convertBase64(req, res, next) {
     try {
-      const { base64Data, category, productId } = req.body;
+      const { base64Data, category, productId } = req.body || {};
 
       if (!base64Data) {
         return next(new AppError("base64Data is required", 400));
@@ -224,10 +182,7 @@ class ImageController {
         userId: req.user?.id || null,
       };
 
-      const result = await imageService.convertBase64ToFile(
-        base64Data,
-        options
-      );
+      const result = await imageService.convertBase64ToFile(base64Data, options);
 
       res.status(200).json({
         status: "success",
@@ -239,7 +194,7 @@ class ImageController {
     }
   }
 
-  // Cleanup orphaned files
+  // Cleanup orphaned files (admin)
   async cleanupOrphanedFiles(req, res, next) {
     try {
       const result = await imageService.cleanupOrphanedFiles();
