@@ -337,7 +337,12 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         );
 
       case "pricing":
-        return <ProductPricingForm />;
+        return (
+          <ProductPricingForm
+            hasVariants={Boolean(formData?.variants?.length)}
+            variants={formData?.variants || []}
+          />
+        );
 
       case "media":
         return <ProductImagesForm form={form} />;

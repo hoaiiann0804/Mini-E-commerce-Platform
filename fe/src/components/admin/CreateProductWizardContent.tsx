@@ -4,8 +4,9 @@ import { useGetCategoriesQuery } from "@/services/categoryApi";
 
 // Kiểm tra xem một chuỗi có phải là URL hình ảnh hay không
 const isImageUrl = (url: string): boolean => {
-  // Chấp nhận tất cả các URL
-  return true;
+  if (!url || typeof url !== 'string') return false;
+  // Simple regex to check for common image file extensions
+  return /\.(jpeg|jpg|gif|png|webp|svg)$/i.test(url);
 };
 import {
   Steps,

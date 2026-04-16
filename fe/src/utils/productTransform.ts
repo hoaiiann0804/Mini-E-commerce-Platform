@@ -38,8 +38,73 @@ export interface TransformedProduct {
  * Transform a single product from backend format to frontend format
  */
 export const transformProduct = (product: RawProduct): TransformedProduct => {
+  const isAbsoluteUrl = (url: unknown): url is string => {
+    if (typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    return (
+      /^https?:\/\//i.test(trimmed) ||
+      trimmed.startsWith('data:') ||
+      trimmed.startsWith('blob:')
+    );
+  };
+
+  const isLegacyLocalUploadUrl = (url: unknown): boolean => {
+    if (typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    return (
+      trimmed.startsWith('/uploads/') ||
+      trimmed.startsWith('uploads/') ||
+      trimmed.startsWith('images/') ||
+      trimmed.includes('localhost:8888/uploads')
+    );
+  };
+
+  const coerceStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.filter((v) => typeof v === 'string');
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed)
+          ? parsed.filter((v) => typeof v === 'string')
+          : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Prefer relational images (productImages) if backend provides them (Cloudinary URLs)
+  const relationalImageUrls: string[] = Array.isArray((product as any).productImages)
+    ? (product as any).productImages
+        .map((img: any) => img?.url || img?.filePath)
+        .filter((u: any) => isAbsoluteUrl(u) && !isLegacyLocalUploadUrl(u))
+    : [];
+
+  const rawImages = coerceStringArray((product as any).images);
+  const cleanedImages = rawImages
+    .map((u) => (typeof u === 'string' ? u.trim() : ''))
+    .filter((u) => isAbsoluteUrl(u) && !isLegacyLocalUploadUrl(u));
+
+  const finalImages =
+    relationalImageUrls.length > 0 ? relationalImageUrls : cleanedImages;
+
+  const rawThumbnail = typeof (product as any).thumbnail === 'string' ? (product as any).thumbnail.trim() : '';
+  const finalThumbnail =
+    rawThumbnail && isAbsoluteUrl(rawThumbnail) && !isLegacyLocalUploadUrl(rawThumbnail)
+      ? rawThumbnail
+      : finalImages[0] || '';
+
+  const fallbackThumbnail = `https://placehold.co/400x400/f1f5f9/64748b?text=${encodeURIComponent(
+    (product as any)?.name || 'Product'
+  )}`;
+  const thumbnailWithFallback = finalThumbnail || fallbackThumbnail;
+  const imagesWithFallback = finalImages.length > 0 ? finalImages : [thumbnailWithFallback];
+
   return {
     ...product,
+    images: imagesWithFallback,
+    thumbnail: thumbnailWithFallback,
     price: parseFloat(String(product.price)),
     compareAtPrice: product.compareAtPrice
       ? parseFloat(String(product.compareAtPrice))
