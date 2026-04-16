@@ -3,7 +3,16 @@ const path = require("path");
 const fs = require("fs").promises;
 const { v4: uuidv4 } = require("uuid");
 const Image = require("../models/image");
+const Product = require("../models/product");
 const { AppError } = require("../middlewares/errorHandler");
+const cloudinary = require("cloudinary").v2;
+
+// Configure Cloudinary (uploads are handled via multer-storage-cloudinary middleware)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Base URL for generating full image URLs
 const BASE_URL = process.env.BASE_URL || "http://localhost:8888";
@@ -158,75 +167,109 @@ class ImageService {
         category = "product",
         productId = null,
         userId = null,
+        // With Cloudinary these are handled via transformations; kept for API compatibility
         generateThumbs = true,
         optimize = true,
       } = options;
 
-      // Generate unique filename
-      const fileName = this.generateUniqueFileName(file.originalname);
-      const filePath = this.generateFilePath(category, fileName);
-      const fullPath = path.join(this.uploadDir, filePath);
+      const cloudinaryPublicId = file.filename || file.public_id;
+      const cloudinaryUrl = file.path || file.secure_url || file.url;
 
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-
-      // Process and save image
-      if (optimize) {
-        await this.processImage(file.path, fullPath, {
-          quality: 90,
-        });
-      } else {
-        // Just move the file
-        await fs.copyFile(file.path, fullPath);
+      if (!cloudinaryPublicId || !cloudinaryUrl) {
+        throw new AppError(
+          "Cloudinary upload did not return public_id or url",
+          500
+        );
       }
 
-      // Get image dimensions
-      const dimensions = await this.getImageDimensions(fullPath);
+      const width = Number.isFinite(file.width) ? file.width : null;
+      const height = Number.isFinite(file.height) ? file.height : null;
+      const dimensions = { width, height };
 
-      // Save to database
+      const mimeType =
+        file.mimetype || (file.format ? `image/${file.format}` : "image/webp");
+      const fileSize = file.size ?? file.bytes ?? 0;
+
       const imageRecord = await Image.create({
         originalName: file.originalname,
-        fileName: fileName,
-        filePath: filePath,
-        fileSize: file.size,
-        mimeType: file.mimetype,
-        width: dimensions.width,
-        height: dimensions.height,
+        fileName: cloudinaryPublicId,
+        filePath: cloudinaryUrl,
+        fileSize: fileSize,
+        mimeType: mimeType,
+        width,
+        height,
         category: category,
         productId: productId,
         userId: userId,
       });
 
-      // Generate thumbnails if requested
-      let thumbnails = [];
-      if (generateThumbs && category === "product") {
-        thumbnails = await this.generateThumbnails(
-          fullPath,
-          fileName,
-          category
-        );
-      }
+      const thumbnails = [];
 
-      // Clean up temp file
-      try {
-        await fs.unlink(file.path);
-      } catch (error) {
-        console.error("Error cleaning up temp file:", error);
+      // Keep Product.images and Product.thumbnail in sync for FE compatibility
+      if (productId) {
+        try {
+          const product = await Product.findByPk(productId);
+          if (product) {
+            const existingImages = Array.isArray(product.images)
+              ? product.images
+              : [];
+
+            // Remove legacy local URLs/paths now that Cloudinary is the source of truth
+            const cleanedImages = existingImages.filter((url) => {
+              if (typeof url !== "string") return false;
+              const trimmed = url.trim();
+              if (!trimmed) return false;
+              if (trimmed.startsWith("/uploads/")) return false;
+              if (trimmed.startsWith("uploads/")) return false;
+              if (trimmed.startsWith("images/")) return false;
+              if (trimmed.includes("localhost:8888/uploads")) return false;
+              // Drop legacy relative paths (FE prefixes these with /uploads/ which no longer exists)
+              if (!/^https?:\/\//i.test(trimmed)) return false;
+              return true;
+            });
+
+            const nextImages = Array.from(
+              new Set([...cleanedImages, cloudinaryUrl])
+            );
+
+            product.images = nextImages;
+
+            const thumb =
+              typeof product.thumbnail === "string" ? product.thumbnail : "";
+            if (
+              !thumb ||
+              thumb.startsWith("/uploads/") ||
+              thumb.startsWith("uploads/") ||
+              thumb.startsWith("images/") ||
+              thumb.includes("localhost:8888/uploads")
+            ) {
+              product.thumbnail = cloudinaryUrl;
+            }
+
+            await product.save();
+          }
+        } catch (err) {
+          console.warn(
+            "Failed to sync Product images/thumbnail:",
+            err?.message || err
+          );
+        }
       }
 
       return {
         id: imageRecord.id,
-        fileName: fileName,
-        filePath: filePath,
-        url: `${BASE_URL}/uploads/${filePath}`,
+        fileName: cloudinaryPublicId,
+        filePath: cloudinaryUrl,
+        url: cloudinaryUrl, // The direct Cloudinary URL
         originalName: file.originalname,
-        size: file.size,
+        size: fileSize,
         dimensions,
         thumbnails,
         category,
       };
     } catch (error) {
       console.error("Error uploading image:", error);
+      if (error instanceof AppError) throw error;
       throw new AppError("Failed to upload image", 500);
     }
   }
@@ -276,30 +319,38 @@ class ImageService {
   async deleteImage(id) {
     try {
       const image = await this.getImageById(id);
-      const fullPath = path.join(this.uploadDir, image.filePath);
-
-      // Delete file from filesystem
-      try {
-        await fs.unlink(fullPath);
-      } catch (error) {
-        console.error("Error deleting file:", error);
+      if (!image) {
+        throw new AppError("Image not found", 404);
       }
 
-      // Delete thumbnails if they exist
-      if (image.category === "product") {
-        const thumbSizes = ["small", "medium", "large"];
-        for (const size of thumbSizes) {
-          try {
-            const thumbFileName = `${path.parse(image.fileName).name}_${size}${path.extname(image.fileName)}`;
-            const thumbPath = path.join(
-              this.uploadDir,
-              "images/thumbnails",
-              thumbFileName
+      // Delete from Cloudinary using its public_id (stored in image.fileName)
+      await cloudinary.uploader.destroy(image.fileName);
+      console.log(`🗑️ Deleted image from Cloudinary: ${image.fileName}`);
+
+      // Sync Product.images/thumbnail (Product stores urls in its `images` field)
+      if (image.productId) {
+        try {
+          const product = await Product.findByPk(image.productId);
+          if (product) {
+            const existingImages = Array.isArray(product.images)
+              ? product.images
+              : [];
+            const nextImages = existingImages.filter(
+              (url) => typeof url === "string" && url !== image.filePath
             );
-            await fs.unlink(thumbPath);
-          } catch (error) {
-            // Ignore thumbnail deletion errors
+
+            product.images = nextImages;
+            if (product.thumbnail === image.filePath) {
+              product.thumbnail = nextImages[0] || null;
+            }
+
+            await product.save();
           }
+        } catch (err) {
+          console.warn(
+            "Failed to sync Product after image delete:",
+            err?.message || err
+          );
         }
       }
 
@@ -325,124 +376,134 @@ class ImageService {
     }
   }
 
-  // Convert base64 to file
+  // NOTE: Functions like `convertBase64ToFile`, `cleanupOrphanedFiles`,
+  // and `getAllFiles` are designed for local file system.
+  // If you need similar functionality with Cloudinary, you would need to
+  // implement them using Cloudinary's Admin API (e.g., search for assets, delete assets).
+  // For this project, we'll assume direct uploads via Multer-Cloudinary.
   async convertBase64ToFile(base64Data, options = {}) {
     try {
-      const { category = "product", productId = null, userId = null } = options;
-
-      // Extract mime type and base64 data
-      const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-      if (!matches || matches.length !== 3) {
-        throw new AppError("Invalid base64 data", 400);
+      if (!base64Data || typeof base64Data !== "string") {
+        throw new AppError("base64Data is required", 400);
       }
 
-      const mimeType = matches[1];
-      const base64 = matches[2];
+      const {
+        category = "product",
+        productId = null,
+        userId = null,
+      } = options;
 
-      // Determine file extension
-      const ext = mimeType.split("/")[1];
-      const fileName = `${uuidv4()}.${ext}`;
-      const filePath = this.generateFilePath(category, fileName);
-      const fullPath = path.join(this.uploadDir, filePath);
+      const trimmed = base64Data.trim();
+      const isDataUrl = trimmed.startsWith("data:image/");
 
-      // Ensure directory exists
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
+      // If client sends raw base64, assume png (recommend sending full data URL instead)
+      const dataUrl = isDataUrl ? trimmed : `data:image/png;base64,${trimmed}`;
 
-      // Convert and save
-      const buffer = Buffer.from(base64, "base64");
-      await fs.writeFile(fullPath, buffer);
+      const publicId = `img-${Date.now()}-${uuidv4()}`;
 
-      // Get image dimensions
-      const dimensions = await this.getImageDimensions(fullPath);
-
-      // Save to database
-      const imageRecord = await Image.create({
-        originalName: `converted_${fileName}`,
-        fileName: fileName,
-        filePath: filePath,
-        fileSize: buffer.length,
-        mimeType: mimeType,
-        width: dimensions.width,
-        height: dimensions.height,
-        category: category,
-        productId: productId,
-        userId: userId,
+      const uploadResult = await cloudinary.uploader.upload(dataUrl, {
+        folder: "ecommerce-mini",
+        public_id: publicId,
+        resource_type: "image",
+        overwrite: false,
       });
+
+      const cloudinaryPublicId = uploadResult.public_id;
+      const cloudinaryUrl = uploadResult.secure_url || uploadResult.url;
+
+      if (!cloudinaryPublicId || !cloudinaryUrl) {
+        throw new AppError("Cloudinary upload failed", 500);
+      }
+
+      const mimeType = uploadResult.format
+        ? `image/${uploadResult.format}`
+        : "image";
+
+      const imageRecord = await Image.create({
+        originalName: isDataUrl ? "base64-image" : "base64-image.png",
+        fileName: cloudinaryPublicId,
+        filePath: cloudinaryUrl,
+        fileSize: uploadResult.bytes || 0,
+        mimeType,
+        width: uploadResult.width || null,
+        height: uploadResult.height || null,
+        category,
+        productId,
+        userId,
+      });
+
+      // Keep Product.images and Product.thumbnail in sync (same behavior as multipart upload)
+      if (productId) {
+        try {
+          const product = await Product.findByPk(productId);
+          if (product) {
+            const existingImages = Array.isArray(product.images)
+              ? product.images
+              : [];
+
+            const cleanedImages = existingImages.filter((url) => {
+              if (typeof url !== "string") return false;
+              const u = url.trim();
+              if (!u) return false;
+              if (u.startsWith("/uploads/")) return false;
+              if (u.startsWith("uploads/")) return false;
+              if (u.startsWith("images/")) return false;
+              if (u.includes("localhost:8888/uploads")) return false;
+              if (!/^https?:\/\//i.test(u)) return false;
+              return true;
+            });
+
+            product.images = Array.from(new Set([...cleanedImages, cloudinaryUrl]));
+
+            const thumb =
+              typeof product.thumbnail === "string" ? product.thumbnail : "";
+            if (
+              !thumb ||
+              thumb.startsWith("/uploads/") ||
+              thumb.startsWith("uploads/") ||
+              thumb.startsWith("images/") ||
+              thumb.includes("localhost:8888/uploads")
+            ) {
+              product.thumbnail = cloudinaryUrl;
+            }
+
+            await product.save();
+          }
+        } catch (err) {
+          console.warn(
+            "Failed to sync Product images/thumbnail after base64 upload:",
+            err?.message || err
+          );
+        }
+      }
 
       return {
         id: imageRecord.id,
-        fileName: fileName,
-        filePath: filePath,
-        url: `${BASE_URL}/uploads/${filePath}`,
-        originalName: `converted_${fileName}`,
-        size: buffer.length,
-        dimensions,
+        fileName: cloudinaryPublicId,
+        filePath: cloudinaryUrl,
+        url: cloudinaryUrl,
+        originalName: imageRecord.originalName,
+        size: uploadResult.bytes || 0,
+        dimensions: { width: uploadResult.width || null, height: uploadResult.height || null },
+        thumbnails: [],
         category,
       };
     } catch (error) {
+      if (error instanceof AppError) throw error;
       console.error("Error converting base64 to file:", error);
       throw new AppError("Failed to convert base64 to file", 500);
     }
   }
 
-  // Cleanup orphaned files
   async cleanupOrphanedFiles() {
-    try {
-      // Get all files in upload directory
-      const allFiles = await this.getAllFiles(this.uploadDir);
-
-      // Get all active images from database
-      const activeImages = await Image.findAll({
-        where: { isActive: true },
-        attributes: ["filePath"],
-      });
-
-      const activeFilePaths = new Set(activeImages.map((img) => img.filePath));
-
-      // Find orphaned files
-      const orphanedFiles = allFiles.filter((filePath) => {
-        const relativePath = path.relative(this.uploadDir, filePath);
-        return !activeFilePaths.has(relativePath);
-      });
-
-      // Delete orphaned files
-      for (const filePath of orphanedFiles) {
-        try {
-          await fs.unlink(filePath);
-          console.log(`Deleted orphaned file: ${filePath}`);
-        } catch (error) {
-          console.error(`Error deleting orphaned file ${filePath}:`, error);
-        }
-      }
-
-      return {
-        totalFiles: allFiles.length,
-        activeFiles: activeImages.length,
-        orphanedFiles: orphanedFiles.length,
-        deletedFiles: orphanedFiles.length,
-      };
-    } catch (error) {
-      console.error("Error cleaning up orphaned files:", error);
-      throw new AppError("Failed to cleanup orphaned files", 500);
-    }
+    throw new AppError(
+      "Orphaned file cleanup not implemented for Cloudinary",
+      501
+    );
   }
 
-  // Helper method to get all files recursively
-  async getAllFiles(dirPath) {
-    const files = [];
-    const items = await fs.readdir(dirPath, { withFileTypes: true });
-
-    for (const item of items) {
-      const fullPath = path.join(dirPath, item.name);
-      if (item.isDirectory()) {
-        const subFiles = await this.getAllFiles(fullPath);
-        files.push(...subFiles);
-      } else {
-        files.push(fullPath);
-      }
-    }
-
-    return files;
+  async getAllFiles() {
+    throw new AppError("Get all files not implemented for Cloudinary", 501);
   }
 }
 

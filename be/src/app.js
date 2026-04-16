@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const routes = require("./routes");
+const aiRoutes = require("./routes/aiRoutes"); // Import AI routes
 const { errorHandler } = require("./middlewares/errorHandler");
 const path = require("path");
 
@@ -28,7 +29,8 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL || "https://yourdomain.com"
+        ? process.env.FRONTEND_URL ||
+          "https://mini-e-commerce-platform-eight.vercel.app/"
         : [
             "http://localhost:3000",
             "http://localhost:5173",
@@ -81,12 +83,15 @@ app.use(xss());
 // Compression middleware
 app.use(compression());
 
-// Serve uploaded files statically
-//Kiểm tra xem folder /uploads có được public chưa:
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
+// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
+// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
+// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
+// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // API routes
 app.use("/api", routes);
+app.use("/api/ai", aiRoutes); // Add AI routes
 
 // Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

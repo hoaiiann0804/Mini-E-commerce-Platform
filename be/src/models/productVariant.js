@@ -163,13 +163,14 @@ const ProductVariant = sequelize.define(
           });
           await Product.update(
             {
-              minVariantPrice: minPrice || 0,
+              minVariantPrice: minPrice,
+              ...(minPrice !== null ? { price: minPrice } : {}),
             },
             {
               where: {
                 id: variant.productId,
-                transaction: options.transaction,
               },
+              transaction: options.transaction,
             }
           );
           console.log(
@@ -180,16 +181,22 @@ const ProductVariant = sequelize.define(
         }
 
         try {
-          const totalShock = await ProductVariant.sum("stock_quantity", {
+          const totalShock = await ProductVariant.sum("stockQuantity", {
             where: {
               productId: variant.productId,
             },
             transaction: options.transaction,
           });
-          await Product.update({
-            stockQuantity: totalShock || 0,
-            inStock: (totalShock || 0) > 0,
-          });
+          await Product.update(
+            {
+              stockQuantity: totalShock || 0,
+              inStock: (totalShock || 0) > 0,
+            },
+            {
+              where: { id: variant.productId },
+              transaction: options.transaction,
+            }
+          );
         } catch (error) {
           console.error("Hook afterSave (Stock) error:", error.message);
         }
@@ -206,13 +213,14 @@ const ProductVariant = sequelize.define(
           });
           await Product.update(
             {
-              minVariantPrice: minPrice || 0,
+              minVariantPrice: minPrice,
+              ...(minPrice !== null ? { price: minPrice } : {}),
             },
             {
               where: {
                 id: variant.productId,
-                transaction: options.transaction,
               },
+              transaction: options.transaction,
             }
           );
         } catch (error) {
@@ -220,7 +228,7 @@ const ProductVariant = sequelize.define(
         }
 
         try {
-          const totalShock = await ProductVariant.sum("stock_quantity", {
+          const totalShock = await ProductVariant.sum("stockQuantity", {
             where: {
               productId: variant.productId,
             },
@@ -233,7 +241,7 @@ const ProductVariant = sequelize.define(
             },
             {
               where: {
-                productId: variant.productId,
+                id: variant.productId,
               },
               transaction: options.transaction,
             }

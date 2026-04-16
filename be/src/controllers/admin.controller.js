@@ -7,17 +7,17 @@ const {
   OrderItem,
   ProductAttribute,
   ProductVariant,
-} = require('../models');
-const { Op, Sequelize } = require('sequelize');
-const { catchAsync } = require('../utils/catchAsync');
-const { AppError } = require('../middlewares/errorHandler');
-const { AdminAuditService } = require('../services/adminAuditService');
+} = require("../models");
+const { Op, Sequelize } = require("sequelize");
+const { catchAsync } = require("../utils/catchAsync");
+const { AppError } = require("../middlewares/errorHandler");
+const { AdminAuditService } = require("../services/adminAuditService");
 const {
   calculateTotalStock,
   updateProductTotalStock,
   validateVariantAttributes,
   generateVariantSku,
-} = require('../utils/productHelpers');
+} = require("../utils/productHelpers");
 
 /**
  * Dashboard - Thống kê tổng quan
@@ -33,17 +33,17 @@ const getDashboardStats = catchAsync(async (req, res) => {
   const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
 
   // Thống kê tổng quan
-  const totalUsers = await User.count({ where: { role: 'customer' } });
+  const totalUsers = await User.count({ where: { role: "customer" } });
   const totalProducts = await Product.count();
   const totalOrders = await Order.count();
-  const totalRevenue = await Order.sum('total', {
-    where: { status: 'delivered' },
+  const totalRevenue = await Order.sum("total", {
+    where: { status: "delivered" },
   });
 
   // Thống kê theo tháng
   const monthlyUsers = await User.count({
     where: {
-      role: 'customer',
+      role: "customer",
       createdAt: { [Op.gte]: startOfMonth },
     },
   });
@@ -52,9 +52,9 @@ const getDashboardStats = catchAsync(async (req, res) => {
     where: { createdAt: { [Op.gte]: startOfMonth } },
   });
 
-  const monthlyRevenue = await Order.sum('total', {
+  const monthlyRevenue = await Order.sum("total", {
     where: {
-      status: 'delivered',
+      status: "delivered",
       createdAt: { [Op.gte]: startOfMonth },
     },
   });
@@ -62,7 +62,7 @@ const getDashboardStats = catchAsync(async (req, res) => {
   // So sánh với tháng trước
   const lastMonthUsers = await User.count({
     where: {
-      role: 'customer',
+      role: "customer",
       createdAt: {
         [Op.gte]: startOfLastMonth,
         [Op.lte]: endOfLastMonth,
@@ -79,9 +79,9 @@ const getDashboardStats = catchAsync(async (req, res) => {
     },
   });
 
-  const lastMonthRevenue = await Order.sum('total', {
+  const lastMonthRevenue = await Order.sum("total", {
     where: {
-      status: 'delivered',
+      status: "delivered",
       createdAt: {
         [Op.gte]: startOfLastMonth,
         [Op.lte]: endOfLastMonth,
@@ -103,38 +103,38 @@ const getDashboardStats = catchAsync(async (req, res) => {
   // Top sản phẩm bán chạy
   const topProducts = await OrderItem.findAll({
     attributes: [
-      'productId',
-      [Sequelize.fn('SUM', Sequelize.col('quantity')), 'totalSold'],
+      "productId",
+      [Sequelize.fn("SUM", Sequelize.col("quantity")), "totalSold"],
       [
         Sequelize.fn(
-          'SUM',
+          "SUM",
           Sequelize.literal('quantity * "OrderItem"."price"')
         ),
-        'totalRevenue',
+        "totalRevenue",
       ],
     ],
     include: [
       {
         model: Product,
-        attributes: ['name', 'images', 'price'],
+        attributes: ["name", "images", "price"],
       },
     ],
-    group: ['productId', 'Product.id'],
-    order: [[Sequelize.fn('SUM', Sequelize.col('quantity')), 'DESC']],
+    group: ["productId", "Product.id"],
+    order: [[Sequelize.fn("SUM", Sequelize.col("quantity")), "DESC"]],
     limit: 5,
   });
 
   // Đơn hàng gần đây cần xử lý
   const pendingOrders = await Order.count({
-    where: { status: 'pending' },
+    where: { status: "pending" },
   });
 
   const processingOrders = await Order.count({
-    where: { status: 'processing' },
+    where: { status: "processing" },
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       overview: {
         totalUsers,
@@ -156,8 +156,8 @@ const getDashboardStats = catchAsync(async (req, res) => {
       },
       topProducts: topProducts.map((item) => ({
         product: item.Product,
-        totalSold: parseInt(item.getDataValue('totalSold')),
-        totalRevenue: parseFloat(item.getDataValue('totalRevenue')),
+        totalSold: parseInt(item.getDataValue("totalSold")),
+        totalRevenue: parseFloat(item.getDataValue("totalRevenue")),
       })),
     },
   });
@@ -167,10 +167,10 @@ const getDashboardStats = catchAsync(async (req, res) => {
  * Thống kê chi tiết theo khoảng thời gian
  */
 const getDetailedStats = catchAsync(async (req, res) => {
-  const { startDate, endDate, groupBy = 'day' } = req.query;
+  const { startDate, endDate, groupBy = "day" } = req.query;
 
   if (!startDate || !endDate) {
-    throw new AppError('Vui lòng cung cấp ngày bắt đầu và ngày kết thúc', 400);
+    throw new AppError("Vui lòng cung cấp ngày bắt đầu và ngày kết thúc", 400);
   }
 
   const start = new Date(startDate);
@@ -179,31 +179,31 @@ const getDetailedStats = catchAsync(async (req, res) => {
   // Format theo groupBy
   let dateFormat;
   switch (groupBy) {
-    case 'hour':
-      dateFormat = '%Y-%m-%d %H:00:00';
+    case "hour":
+      dateFormat = "%Y-%m-%d %H:00:00";
       break;
-    case 'day':
-      dateFormat = '%Y-%m-%d';
+    case "day":
+      dateFormat = "%Y-%m-%d";
       break;
-    case 'week':
-      dateFormat = '%Y-%u';
+    case "week":
+      dateFormat = "%Y-%u";
       break;
-    case 'month':
-      dateFormat = '%Y-%m';
+    case "month":
+      dateFormat = "%Y-%m";
       break;
     default:
-      dateFormat = '%Y-%m-%d';
+      dateFormat = "%Y-%m-%d";
   }
 
   // Thống kê đơn hàng theo thời gian
   const orderStats = await Order.findAll({
     attributes: [
       [
-        Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
-        'period',
+        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
+        "period",
       ],
-      [Sequelize.fn('COUNT', Sequelize.col('id')), 'orderCount'],
-      [Sequelize.fn('SUM', Sequelize.col('total')), 'revenue'],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "orderCount"],
+      [Sequelize.fn("SUM", Sequelize.col("total")), "revenue"],
     ],
     where: {
       createdAt: {
@@ -211,12 +211,12 @@ const getDetailedStats = catchAsync(async (req, res) => {
       },
     },
     group: [
-      Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
+      Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
     ],
     order: [
       [
-        Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
-        'ASC',
+        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
+        "ASC",
       ],
     ],
   });
@@ -225,39 +225,39 @@ const getDetailedStats = catchAsync(async (req, res) => {
   const userStats = await User.findAll({
     attributes: [
       [
-        Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
-        'period',
+        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
+        "period",
       ],
-      [Sequelize.fn('COUNT', Sequelize.col('id')), 'newUsers'],
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "newUsers"],
     ],
     where: {
-      role: 'customer',
+      role: "customer",
       createdAt: {
         [Op.between]: [start, end],
       },
     },
     group: [
-      Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
+      Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
     ],
     order: [
       [
-        Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), dateFormat),
-        'ASC',
+        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
+        "ASC",
       ],
     ],
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       orders: orderStats.map((stat) => ({
-        period: stat.getDataValue('period'),
-        orderCount: parseInt(stat.getDataValue('orderCount')),
-        revenue: parseFloat(stat.getDataValue('revenue') || 0),
+        period: stat.getDataValue("period"),
+        orderCount: parseInt(stat.getDataValue("orderCount")),
+        revenue: parseFloat(stat.getDataValue("revenue") || 0),
       })),
       users: userStats.map((stat) => ({
-        period: stat.getDataValue('period'),
-        newUsers: parseInt(stat.getDataValue('newUsers')),
+        period: stat.getDataValue("period"),
+        newUsers: parseInt(stat.getDataValue("newUsers")),
       })),
     },
   });
@@ -270,10 +270,10 @@ const getAllUsers = catchAsync(async (req, res) => {
   const {
     page = 1,
     limit = 10,
-    search = '',
-    role = '',
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
+    search = "",
+    role = "",
+    sortBy = "createdAt",
+    sortOrder = "DESC",
     isEmailVerified,
   } = req.query;
 
@@ -297,7 +297,7 @@ const getAllUsers = catchAsync(async (req, res) => {
 
   // Filter theo email verification
   if (isEmailVerified !== undefined) {
-    whereClause.isEmailVerified = isEmailVerified === 'true';
+    whereClause.isEmailVerified = isEmailVerified === "true";
   }
 
   const { count, rows: users } = await User.findAndCountAll({
@@ -306,12 +306,12 @@ const getAllUsers = catchAsync(async (req, res) => {
     offset: parseInt(offset),
     order: [[sortBy, sortOrder.toUpperCase()]],
     attributes: {
-      exclude: ['password', 'verificationToken', 'resetPasswordToken'],
+      exclude: ["password", "verificationToken", "resetPasswordToken"],
     },
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       users,
       pagination: {
@@ -334,17 +334,17 @@ const updateUser = catchAsync(async (req, res) => {
 
   const user = await User.findByPk(id);
   if (!user) {
-    throw new AppError('Không tìm thấy người dùng', 404);
+    throw new AppError("Không tìm thấy người dùng", 404);
   }
 
   // Không cho phép user tự update role của chính mình
   if (req.user.id === id && role && role !== user.role) {
-    throw new AppError('Không thể thay đổi role của chính mình', 403);
+    throw new AppError("Không thể thay đổi role của chính mình", 403);
   }
 
   // Không cho phép user tự deactivate tài khoản của chính mình
   if (req.user.id === id && isActive === false) {
-    throw new AppError('Không thể vô hiệu hóa tài khoản của chính mình', 403);
+    throw new AppError("Không thể vô hiệu hóa tài khoản của chính mình", 403);
   }
 
   const updatedUser = await user.update({
@@ -358,7 +358,7 @@ const updateUser = catchAsync(async (req, res) => {
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { user: updatedUser },
   });
 });
@@ -370,19 +370,19 @@ const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
 
   if (req.user.id === id) {
-    throw new AppError('Không thể xóa tài khoản của chính mình', 403);
+    throw new AppError("Không thể xóa tài khoản của chính mình", 403);
   }
 
   const user = await User.findByPk(id);
   if (!user) {
-    throw new AppError('Không tìm thấy người dùng', 404);
+    throw new AppError("Không tìm thấy người dùng", 404);
   }
 
   await user.destroy();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Xóa người dùng thành công',
+    status: "success",
+    message: "Xóa người dùng thành công",
   });
 });
 
@@ -396,27 +396,27 @@ const getProductById = catchAsync(async (req, res) => {
     include: [
       {
         model: Category,
-        as: 'categories',
+        as: "categories",
         through: { attributes: [] },
       },
       {
         model: ProductAttribute,
-        as: 'attributes',
+        as: "attributes",
       },
       {
         model: ProductVariant,
-        as: 'variants',
+        as: "variants",
       },
       {
-        model: require('../models').ProductSpecification,
-        as: 'productSpecifications',
+        model: require("../models").ProductSpecification,
+        as: "productSpecifications",
       },
       {
-        model: require('../models').WarrantyPackage,
-        as: 'warrantyPackages',
+        model: require("../models").WarrantyPackage,
+        as: "warrantyPackages",
         through: {
-          attributes: ['isDefault'],
-          as: 'productWarranty',
+          attributes: ["isDefault"],
+          as: "productWarranty",
         },
         where: { isActive: true },
         required: false,
@@ -425,11 +425,11 @@ const getProductById = catchAsync(async (req, res) => {
   });
 
   if (!product) {
-    throw new AppError('Không tìm thấy sản phẩm', 404);
+    throw new AppError("Không tìm thấy sản phẩm", 404);
   }
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { product },
   });
 });
@@ -439,7 +439,7 @@ const getProductById = catchAsync(async (req, res) => {
  */
 const createProduct = catchAsync(async (req, res) => {
   console.log(
-    'Create product request body:',
+    "Create product request body:",
     JSON.stringify(req.body, null, 2)
   );
   const {
@@ -448,10 +448,12 @@ const createProduct = catchAsync(async (req, res) => {
     description,
     shortDescription,
     price,
+    compareAtPrice,
     comparePrice,
+    compare_at_price,
     stock,
     sku,
-    status = 'active',
+    status = "active",
     images,
     thumbnail,
     inStock = true,
@@ -465,10 +467,13 @@ const createProduct = catchAsync(async (req, res) => {
     attributes = [],
     variants = [],
     // New fields for laptops/computers
-    condition = 'new',
+    condition = "new",
     specifications = {},
     warrantyPackageIds = [],
   } = req.body;
+
+  const normalizedCompareAtPrice =
+    compareAtPrice ?? comparePrice ?? compare_at_price ?? null;
 
   // Tạo SKU duy nhất nếu không được cung cấp
   const uniqueSku =
@@ -479,11 +484,11 @@ const createProduct = catchAsync(async (req, res) => {
     const existingProduct = await Product.findOne({ where: { sku } });
     if (existingProduct) {
       return res.status(400).json({
-        status: 'fail',
+        status: "fail",
         message: `Mã SKU '${sku}' đã tồn tại. Vui lòng sử dụng mã SKU khác.`,
         errors: [
           {
-            field: 'sku',
+            field: "sku",
             message: `Mã SKU '${sku}' đã tồn tại. Vui lòng sử dụng mã SKU khác.`,
           },
         ],
@@ -499,10 +504,10 @@ const createProduct = catchAsync(async (req, res) => {
     shortDescription: shortDescription || description,
     price,
     // Tạm thời bỏ qua compareAtPrice, sẽ cập nhật riêng
-    compareAtPrice: null,
+    compareAtPrice: normalizedCompareAtPrice,
     images: images || [],
     thumbnail: images && images[0] ? images[0] : thumbnail,
-    inStock: status === 'active',
+    inStock: status === "active",
     stockQuantity: stock || stockQuantity || 0,
     sku: uniqueSku,
     status,
@@ -517,14 +522,17 @@ const createProduct = catchAsync(async (req, res) => {
   });
 
   // Cập nhật compareAtPrice riêng bằng truy vấn SQL trực tiếp nếu có
-  console.log('comparePrice from request:', comparePrice);
-  if (comparePrice !== undefined) {
-    const { sequelize } = require('../models');
+  console.log(
+    "compareAtPrice normalized from request:",
+    normalizedCompareAtPrice
+  );
+  if (normalizedCompareAtPrice !== null) {
+    const { sequelize } = require("../models");
     await sequelize.query(
-      'UPDATE products SET compare_at_price = :comparePrice WHERE id = :id',
+      "UPDATE products SET compare_at_price = :comparePrice WHERE id = :id",
       {
         replacements: {
-          comparePrice: comparePrice,
+          comparePrice: normalizedCompareAtPrice,
           id: product.id,
         },
         type: sequelize.QueryTypes.UPDATE,
@@ -532,7 +540,7 @@ const createProduct = catchAsync(async (req, res) => {
     );
 
     // Cập nhật lại giá trị trong đối tượng product
-    product.compareAtPrice = comparePrice;
+    product.compareAtPrice = normalizedCompareAtPrice;
   }
 
   // Thêm categories nếu có
@@ -540,7 +548,7 @@ const createProduct = catchAsync(async (req, res) => {
     try {
       // Check if we need to create categories (for demo/development purposes)
       // In production, you would typically validate against existing categories
-      const { Category } = require('../models');
+      const { Category } = require("../models");
 
       // For each category ID, either find it or create a placeholder
       const categoryPromises = categoryIds.map(async (catId) => {
@@ -570,7 +578,7 @@ const createProduct = catchAsync(async (req, res) => {
         await product.setCategories(validCategoryIds);
       }
     } catch (error) {
-      console.error('Error handling categories:', error);
+      console.error("Error handling categories:", error);
       // Continue without categories if there's an error
     }
   }
@@ -578,14 +586,14 @@ const createProduct = catchAsync(async (req, res) => {
   // Xử lý attributes
   if (attributes && attributes.length > 0) {
     try {
-      console.log('Processing attributes:', attributes);
+      console.log("Processing attributes:", attributes);
       const attributePromises = attributes.map(async (attr) => {
         // Xử lý giá trị thuộc tính: nếu là chuỗi có dấu phẩy, tách thành mảng
         let attrValues = [];
-        if (typeof attr.value === 'string') {
+        if (typeof attr.value === "string") {
           // Tách chuỗi thành mảng dựa trên dấu phẩy và loại bỏ khoảng trắng
           attrValues = attr.value
-            .split(',')
+            .split(",")
             .map((v) => v.trim())
             .filter((v) => v);
         } else if (Array.isArray(attr.value)) {
@@ -603,12 +611,12 @@ const createProduct = catchAsync(async (req, res) => {
         return await ProductAttribute.create({
           productId: product.id,
           name: attr.name,
-          values: attrValues.length > 0 ? attrValues : ['Default'],
+          values: attrValues.length > 0 ? attrValues : ["Default"],
         });
       });
       await Promise.all(attributePromises);
     } catch (error) {
-      console.error('Error creating attributes:', error);
+      console.error("Error creating attributes:", error);
       throw error; // Ném lỗi để transaction có thể rollback
     }
   }
@@ -617,7 +625,7 @@ const createProduct = catchAsync(async (req, res) => {
   let createdVariants = [];
   if (variants && variants.length > 0) {
     try {
-      console.log('Processing variants:', variants);
+      console.log("Processing variants:", variants);
 
       // Lấy attributes để validate
       const productAttributes = await ProductAttribute.findAll({
@@ -652,7 +660,7 @@ const createProduct = catchAsync(async (req, res) => {
             //   );
             // }
           } catch (error) {
-            console.error('Lỗi khi xác thực thuộc tính biến thể:', error);
+            console.error("Lỗi khi xác thực thuộc tính biến thể:", error);
             // Không throw error, chỉ log để tiếp tục tạo biến thể
           }
         }
@@ -666,7 +674,7 @@ const createProduct = catchAsync(async (req, res) => {
         // Generate display name for variant
         const displayName =
           variant.displayName ||
-          Object.values(variantAttributes).join(' - ') ||
+          Object.values(variantAttributes).join(" - ") ||
           variant.name;
 
         // Tạo biến thể với dữ liệu đã được xác thực
@@ -676,7 +684,7 @@ const createProduct = catchAsync(async (req, res) => {
           sku: variantSku,
           attributes: variantAttributes,
           price: parseFloat(variant.price) || 0,
-          stockQuantity: parseInt(variant.stock) || 0,
+          stockQuantity: parseInt(variant.stockQuantity ?? variant.stock) || 0,
           images: variant.images || [],
           displayName,
           sortOrder: variant.sortOrder || 0,
@@ -687,17 +695,27 @@ const createProduct = catchAsync(async (req, res) => {
 
       createdVariants = await Promise.all(variantPromises);
 
-      // Update product total stock from variants
+      const minVariantPrice = createdVariants.reduce((min, v) => {
+        const variantPrice = parseFloat(v.price);
+        if (!Number.isFinite(variantPrice)) return min;
+        return min === null ? variantPrice : Math.min(min, variantPrice);
+      }, null);
+
+      // Update product stock + denormalized min price from variants
       const totalStock = calculateTotalStock(createdVariants);
       await Product.update(
         {
+          ...(minVariantPrice !== null
+            ? { price: minVariantPrice, minVariantPrice: minVariantPrice }
+            : {}),
+          isVariantProduct: true,
           stockQuantity: totalStock,
           inStock: totalStock > 0,
         },
         { where: { id: product.id } }
       );
     } catch (error) {
-      console.error('Error creating variants:', error);
+      console.error("Error creating variants:", error);
       throw error;
     }
   }
@@ -709,13 +727,13 @@ const createProduct = catchAsync(async (req, res) => {
     specifications.length > 0
   ) {
     try {
-      const { ProductSpecification } = require('../models');
+      const { ProductSpecification } = require("../models");
 
       const specificationData = specifications.map((spec, index) => ({
         productId: product.id,
         name: spec.name,
         value: spec.value,
-        category: spec.category || 'General',
+        category: spec.category || "General",
         sortOrder: spec.sortOrder || index,
       }));
 
@@ -724,7 +742,7 @@ const createProduct = catchAsync(async (req, res) => {
         `Created ${specifications.length} specifications for product ${product.id}`
       );
     } catch (error) {
-      console.error('Error creating specifications:', error);
+      console.error("Error creating specifications:", error);
       // Không throw error để không làm fail toàn bộ quá trình tạo product
     }
   }
@@ -736,18 +754,18 @@ const createProduct = catchAsync(async (req, res) => {
     warrantyPackageIds.length > 0
   ) {
     try {
-      console.log('Creating warranty packages:', warrantyPackageIds);
-      const { ProductWarranty, WarrantyPackage } = require('../models');
+      console.log("Creating warranty packages:", warrantyPackageIds);
+      const { ProductWarranty, WarrantyPackage } = require("../models");
 
       // Kiểm tra xem các warranty packages có tồn tại không
       console.log(
-        'Looking for warranty packages with IDs:',
+        "Looking for warranty packages with IDs:",
         warrantyPackageIds
       );
       const existingWarrantyPackages = await WarrantyPackage.findAll({
         where: { id: warrantyPackageIds, isActive: true },
       });
-      console.log('Found warranty packages:', existingWarrantyPackages.length);
+      console.log("Found warranty packages:", existingWarrantyPackages.length);
 
       if (existingWarrantyPackages.length > 0) {
         const warrantyPromises = existingWarrantyPackages.map(
@@ -766,7 +784,7 @@ const createProduct = catchAsync(async (req, res) => {
         );
       }
     } catch (error) {
-      console.error('Error creating warranty packages:', error);
+      console.error("Error creating warranty packages:", error);
       // Continue without warranty packages if there's an error
     }
   }
@@ -776,27 +794,27 @@ const createProduct = catchAsync(async (req, res) => {
     include: [
       {
         model: Category,
-        as: 'categories',
+        as: "categories",
         through: { attributes: [] },
       },
       {
         model: ProductAttribute,
-        as: 'attributes',
+        as: "attributes",
       },
       {
         model: ProductVariant,
-        as: 'variants',
+        as: "variants",
       },
       {
-        model: require('../models').ProductSpecification,
-        as: 'productSpecifications',
+        model: require("../models").ProductSpecification,
+        as: "productSpecifications",
       },
       {
-        model: require('../models').WarrantyPackage,
-        as: 'warrantyPackages',
+        model: require("../models").WarrantyPackage,
+        as: "warrantyPackages",
         through: {
-          attributes: ['isDefault'],
-          as: 'productWarranty',
+          attributes: ["isDefault"],
+          as: "productWarranty",
         },
         where: { isActive: true },
         required: false,
@@ -805,16 +823,16 @@ const createProduct = catchAsync(async (req, res) => {
   });
 
   // Log audit
-  console.log('req.user in createProduct:', req.user); // Debug log
+  console.log("req.user in createProduct:", req.user); // Debug log
   AdminAuditService.logProductAction(
     req.user,
-    'CREATE',
+    "CREATE",
     product.id,
     product.name
   );
 
   res.status(201).json({
-    status: 'success',
+    status: "success",
     data: { product: productWithRelations },
   });
 });
@@ -849,26 +867,26 @@ const updateProduct = catchAsync(async (req, res) => {
     warrantyPackageIds = [],
   } = req.body;
 
-  console.log('updateProduct - Request body keys:', Object.keys(req.body));
-  console.log('updateProduct - specifications:', specifications);
-  console.log('updateProduct - specifications type:', typeof specifications);
+  console.log("updateProduct - Request body keys:", Object.keys(req.body));
+  console.log("updateProduct - specifications:", specifications);
+  console.log("updateProduct - specifications type:", typeof specifications);
   console.log(
-    'updateProduct - specifications isArray:',
+    "updateProduct - specifications isArray:",
     Array.isArray(specifications)
   );
   console.log(
-    'updateProduct - hasOwnProperty specifications:',
-    req.body.hasOwnProperty('specifications')
+    "updateProduct - hasOwnProperty specifications:",
+    req.body.hasOwnProperty("specifications")
   );
-  console.log('updateProduct - warrantyPackageIds:', warrantyPackageIds);
+  console.log("updateProduct - warrantyPackageIds:", warrantyPackageIds);
   console.log(
-    'updateProduct - hasOwnProperty warrantyPackageIds:',
-    req.body.hasOwnProperty('warrantyPackageIds')
+    "updateProduct - hasOwnProperty warrantyPackageIds:",
+    req.body.hasOwnProperty("warrantyPackageIds")
   );
 
   const product = await Product.findByPk(id);
   if (!product) {
-    throw new AppError('Không tìm thấy sản phẩm', 404);
+    throw new AppError("Không tìm thấy sản phẩm", 404);
   }
 
   // Track changes for audit
@@ -889,48 +907,57 @@ const updateProduct = catchAsync(async (req, res) => {
   const updateData = {};
 
   // Chỉ cập nhật các trường có trong request body
-  if (req.body.hasOwnProperty('name')) updateData.name = name;
-  if (req.body.hasOwnProperty('description'))
+  if (req.body.hasOwnProperty("name")) updateData.name = name;
+  if (req.body.hasOwnProperty("description"))
     updateData.description = description;
-  if (req.body.hasOwnProperty('shortDescription'))
+  if (req.body.hasOwnProperty("shortDescription"))
     updateData.shortDescription = shortDescription;
-  if (req.body.hasOwnProperty('price')) updateData.price = price;
-  if (req.body.hasOwnProperty('images')) updateData.images = images;
-  if (req.body.hasOwnProperty('thumbnail')) updateData.thumbnail = thumbnail;
-  if (req.body.hasOwnProperty('inStock')) updateData.inStock = inStock;
-  if (req.body.hasOwnProperty('stockQuantity'))
+  if (req.body.hasOwnProperty("price")) updateData.price = price;
+  if (
+    req.body.hasOwnProperty("compareAtPrice") ||
+    req.body.hasOwnProperty("comparePrice") ||
+    req.body.hasOwnProperty("compare_at_price")
+  ) {
+    updateData.compareAtPrice =
+      compareAtPrice ?? comparePrice ?? req.body.compare_at_price ?? null;
+  }
+  if (req.body.hasOwnProperty("images")) updateData.images = images;
+  if (req.body.hasOwnProperty("thumbnail")) updateData.thumbnail = thumbnail;
+  if (req.body.hasOwnProperty("inStock")) updateData.inStock = inStock;
+  if (req.body.hasOwnProperty("stockQuantity"))
     updateData.stockQuantity = stockQuantity;
-  if (req.body.hasOwnProperty('sku')) updateData.sku = sku;
-  if (req.body.hasOwnProperty('status')) updateData.status = status;
-  if (req.body.hasOwnProperty('featured')) updateData.featured = featured;
-  if (req.body.hasOwnProperty('searchKeywords')) {
-    console.log('Updating searchKeywords:', searchKeywords);
+  if (req.body.hasOwnProperty("sku")) updateData.sku = sku;
+  if (req.body.hasOwnProperty("status")) updateData.status = status;
+  if (req.body.hasOwnProperty("featured")) updateData.featured = featured;
+  if (req.body.hasOwnProperty("searchKeywords")) {
+    console.log("Updating searchKeywords:", searchKeywords);
     updateData.searchKeywords = searchKeywords;
   }
-  if (req.body.hasOwnProperty('seoTitle')) updateData.seoTitle = seoTitle;
-  if (req.body.hasOwnProperty('seoDescription'))
+  if (req.body.hasOwnProperty("seoTitle")) updateData.seoTitle = seoTitle;
+  if (req.body.hasOwnProperty("seoDescription"))
     updateData.seoDescription = seoDescription;
-  if (req.body.hasOwnProperty('seoKeywords'))
+  if (req.body.hasOwnProperty("seoKeywords"))
     updateData.seoKeywords = seoKeywords;
 
   // Cập nhật sản phẩm với dữ liệu mới
-  console.log('UpdateData before update:', updateData);
+  console.log("UpdateData before update:", updateData);
   const updatedProduct = await product.update(updateData);
 
   // Cập nhật compareAtPrice riêng bằng truy vấn SQL trực tiếp nếu có trong request
   // Hỗ trợ cả compareAtPrice và comparePrice
   if (
-    req.body.hasOwnProperty('compareAtPrice') ||
-    req.body.hasOwnProperty('comparePrice')
+    false &&
+    (req.body.hasOwnProperty("compareAtPrice") ||
+      req.body.hasOwnProperty("comparePrice"))
   ) {
-    const { sequelize } = require('../models');
+    const { sequelize } = require("../models");
     // Ưu tiên sử dụng compareAtPrice, nếu không có thì dùng comparePrice
-    const priceToCompare = req.body.hasOwnProperty('compareAtPrice')
+    const priceToCompare = req.body.hasOwnProperty("compareAtPrice")
       ? compareAtPrice
       : comparePrice;
 
     await sequelize.query(
-      'UPDATE products SET compare_at_price = :compareAtPrice WHERE id = :id',
+      "UPDATE products SET compare_at_price = :compareAtPrice WHERE id = :id",
       {
         replacements: {
           compareAtPrice: priceToCompare,
@@ -954,7 +981,7 @@ const updateProduct = catchAsync(async (req, res) => {
     try {
       // Check if we need to create categories (for demo/development purposes)
       // In production, you would typically validate against existing categories
-      const { Category } = require('../models');
+      const { Category } = require("../models");
 
       // For each category ID, either find it or create a placeholder
       const categoryPromises = categoryIds.map(async (catId) => {
@@ -985,15 +1012,15 @@ const updateProduct = catchAsync(async (req, res) => {
         changes.categories = validCategoryIds;
       }
     } catch (error) {
-      console.error('Error handling categories:', error);
+      console.error("Error handling categories:", error);
       // Continue without categories if there's an error
     }
   }
 
   // Xử lý attributes - chỉ khi request có chứa field 'attributes'
-  if (req.body.hasOwnProperty('attributes') && Array.isArray(attributes)) {
+  if (req.body.hasOwnProperty("attributes") && Array.isArray(attributes)) {
     try {
-      console.log('Updating attributes:', attributes);
+      console.log("Updating attributes:", attributes);
 
       // Xóa tất cả attributes cũ
       await ProductAttribute.destroy({ where: { productId: id } });
@@ -1003,10 +1030,10 @@ const updateProduct = catchAsync(async (req, res) => {
         const attributePromises = attributes.map(async (attr) => {
           // Xử lý giá trị thuộc tính: nếu là chuỗi có dấu phẩy, tách thành mảng
           let attrValues = [];
-          if (typeof attr.value === 'string') {
+          if (typeof attr.value === "string") {
             // Tách chuỗi thành mảng dựa trên dấu phẩy và loại bỏ khoảng trắng
             attrValues = attr.value
-              .split(',')
+              .split(",")
               .map((v) => v.trim())
               .filter((v) => v);
           } else if (Array.isArray(attr.value)) {
@@ -1024,20 +1051,20 @@ const updateProduct = catchAsync(async (req, res) => {
           return await ProductAttribute.create({
             productId: id,
             name: attr.name,
-            values: attrValues.length > 0 ? attrValues : ['Default'],
+            values: attrValues.length > 0 ? attrValues : ["Default"],
           });
         });
         await Promise.all(attributePromises);
         changes.attributes = attributes.length;
       }
     } catch (error) {
-      console.error('Error updating attributes:', error);
+      console.error("Error updating attributes:", error);
       throw error; // Ném lỗi để transaction có thể rollback
     }
   }
 
   // Xử lý variants - chỉ khi request có chứa field 'variants'
-  if (req.body.hasOwnProperty('variants') && Array.isArray(variants)) {
+  if (req.body.hasOwnProperty("variants") && Array.isArray(variants)) {
     try {
       // Xóa tất cả variants cũ
       await ProductVariant.destroy({ where: { productId: id } });
@@ -1078,7 +1105,7 @@ const updateProduct = catchAsync(async (req, res) => {
               //   );
               // }
             } catch (error) {
-              console.error('Lỗi khi xác thực thuộc tính biến thể:', error);
+              console.error("Lỗi khi xác thực thuộc tính biến thể:", error);
               // Không throw error, chỉ log để tiếp tục tạo biến thể
             }
           }
@@ -1096,7 +1123,8 @@ const updateProduct = catchAsync(async (req, res) => {
             sku: variantSku,
             attributes: variantAttributes,
             price: parseFloat(variant.price) || 0,
-            stockQuantity: parseInt(variant.stock) || 0,
+            stockQuantity:
+              parseInt(variant.stockQuantity ?? variant.stock) || 0,
             images: variant.images || [],
           });
         });
@@ -1104,10 +1132,20 @@ const updateProduct = catchAsync(async (req, res) => {
         createdVariants = await Promise.all(variantPromises);
         changes.variants = variants.length;
 
-        // Update product total stock from variants
+        const minVariantPrice = createdVariants.reduce((min, v) => {
+          const variantPrice = parseFloat(v.price);
+          if (!Number.isFinite(variantPrice)) return min;
+          return min === null ? variantPrice : Math.min(min, variantPrice);
+        }, null);
+
+        // Update product stock + denormalized min price from variants
         const totalStock = calculateTotalStock(createdVariants);
         await Product.update(
           {
+            ...(minVariantPrice !== null
+              ? { price: minVariantPrice, minVariantPrice: minVariantPrice }
+              : {}),
+            isVariantProduct: true,
             stockQuantity: totalStock,
             inStock: totalStock > 0,
           },
@@ -1115,8 +1153,12 @@ const updateProduct = catchAsync(async (req, res) => {
         );
       } else {
         // If no variants, reset to product base stock
+        await Product.update(
+          { isVariantProduct: false, minVariantPrice: null },
+          { where: { id } }
+        );
         // Chỉ cập nhật nếu stockQuantity đã được gửi trong request
-        if (req.body.hasOwnProperty('stockQuantity')) {
+        if (req.body.hasOwnProperty("stockQuantity")) {
           await Product.update(
             {
               stockQuantity: stockQuantity,
@@ -1127,19 +1169,19 @@ const updateProduct = catchAsync(async (req, res) => {
         }
       }
     } catch (error) {
-      console.error('Error updating variants:', error);
+      console.error("Error updating variants:", error);
       throw error;
     }
   }
 
   // Xử lý specifications - chỉ khi request có chứa field 'specifications'
   if (
-    req.body.hasOwnProperty('specifications') &&
+    req.body.hasOwnProperty("specifications") &&
     Array.isArray(specifications)
   ) {
     try {
-      console.log('Updating specifications:', specifications);
-      const { ProductSpecification } = require('../models');
+      console.log("Updating specifications:", specifications);
+      const { ProductSpecification } = require("../models");
 
       // Xóa tất cả specifications cũ
       await ProductSpecification.destroy({ where: { productId: id } });
@@ -1150,7 +1192,7 @@ const updateProduct = catchAsync(async (req, res) => {
           productId: id,
           name: spec.name,
           value: spec.value,
-          category: spec.category || 'General',
+          category: spec.category || "General",
           sortOrder: spec.sortOrder || index,
         }));
 
@@ -1161,19 +1203,19 @@ const updateProduct = catchAsync(async (req, res) => {
         changes.specifications = specifications.length;
       }
     } catch (error) {
-      console.error('Error updating specifications:', error);
+      console.error("Error updating specifications:", error);
       throw error;
     }
   }
 
   // Xử lý warranty packages - chỉ khi request có chứa field 'warrantyPackageIds'
   if (
-    req.body.hasOwnProperty('warrantyPackageIds') &&
+    req.body.hasOwnProperty("warrantyPackageIds") &&
     Array.isArray(warrantyPackageIds)
   ) {
     try {
-      console.log('Updating warranty packages:', warrantyPackageIds);
-      const { ProductWarranty, WarrantyPackage } = require('../models');
+      console.log("Updating warranty packages:", warrantyPackageIds);
+      const { ProductWarranty, WarrantyPackage } = require("../models");
 
       // Xóa tất cả warranty packages cũ
       await ProductWarranty.destroy({ where: { productId: id } });
@@ -1182,14 +1224,14 @@ const updateProduct = catchAsync(async (req, res) => {
       if (warrantyPackageIds.length > 0) {
         // Kiểm tra xem các warranty packages có tồn tại không
         console.log(
-          'Looking for warranty packages with IDs:',
+          "Looking for warranty packages with IDs:",
           warrantyPackageIds
         );
         const existingWarrantyPackages = await WarrantyPackage.findAll({
           where: { id: warrantyPackageIds, isActive: true },
         });
         console.log(
-          'Found warranty packages:',
+          "Found warranty packages:",
           existingWarrantyPackages.length
         );
 
@@ -1211,7 +1253,7 @@ const updateProduct = catchAsync(async (req, res) => {
         }
       }
     } catch (error) {
-      console.error('Error updating warranty packages:', error);
+      console.error("Error updating warranty packages:", error);
       // Continue without warranty packages if there's an error
     }
   }
@@ -1221,27 +1263,27 @@ const updateProduct = catchAsync(async (req, res) => {
     include: [
       {
         model: Category,
-        as: 'categories',
+        as: "categories",
         through: { attributes: [] },
       },
       {
         model: ProductAttribute,
-        as: 'attributes',
+        as: "attributes",
       },
       {
         model: ProductVariant,
-        as: 'variants',
+        as: "variants",
       },
       {
-        model: require('../models').ProductSpecification,
-        as: 'productSpecifications',
+        model: require("../models").ProductSpecification,
+        as: "productSpecifications",
       },
       {
-        model: require('../models').WarrantyPackage,
-        as: 'warrantyPackages',
+        model: require("../models").WarrantyPackage,
+        as: "warrantyPackages",
         through: {
-          attributes: ['isDefault'],
-          as: 'productWarranty',
+          attributes: ["isDefault"],
+          as: "productWarranty",
         },
         where: { isActive: true },
         required: false,
@@ -1252,14 +1294,14 @@ const updateProduct = catchAsync(async (req, res) => {
   // Log audit
   AdminAuditService.logProductAction(
     req.user,
-    'UPDATE',
+    "UPDATE",
     product.id,
     product.name,
     changes
   );
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { product: productWithRelations },
   });
 });
@@ -1277,11 +1319,11 @@ const deleteProduct = catchAsync(async (req, res) => {
     ProductVariant,
     ProductCategory,
     sequelize,
-  } = require('../models');
+  } = require("../models");
 
   const product = await Product.findByPk(id);
   if (!product) {
-    throw new AppError('Không tìm thấy sản phẩm', 404);
+    throw new AppError("Không tìm thấy sản phẩm", 404);
   }
 
   // Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
@@ -1314,8 +1356,8 @@ const deleteProduct = catchAsync(async (req, res) => {
     await transaction.commit();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Xóa sản phẩm thành công',
+      status: "success",
+      message: "Xóa sản phẩm thành công",
     });
   } catch (error) {
     // Rollback transaction nếu có lỗi
@@ -1331,11 +1373,11 @@ const getAllProducts = catchAsync(async (req, res) => {
   const {
     page = 1,
     limit = 10,
-    search = '',
-    category = '',
-    status = '',
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
+    search = "",
+    category = "",
+    status = "",
+    sortBy = "createdAt",
+    sortOrder = "DESC",
     priceMin,
     priceMax,
     stockMin,
@@ -1391,12 +1433,12 @@ const getAllProducts = catchAsync(async (req, res) => {
   const includeClause = [
     {
       model: Category,
-      as: 'categories',
+      as: "categories",
       through: { attributes: [] },
     },
     {
       model: ProductVariant,
-      as: 'variants',
+      as: "variants",
       required: false,
     },
   ];
@@ -1416,7 +1458,7 @@ const getAllProducts = catchAsync(async (req, res) => {
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       products,
       pagination: {
@@ -1436,10 +1478,10 @@ const getAllReviews = catchAsync(async (req, res) => {
   const {
     page = 1,
     limit = 10,
-    productId = '',
-    rating = '',
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
+    productId = "",
+    rating = "",
+    sortBy = "createdAt",
+    sortOrder = "DESC",
   } = req.query;
 
   const offset = (page - 1) * limit;
@@ -1460,11 +1502,11 @@ const getAllReviews = catchAsync(async (req, res) => {
     include: [
       {
         model: User,
-        attributes: ['id', 'firstName', 'lastName', 'avatar'],
+        attributes: ["id", "firstName", "lastName", "avatar"],
       },
       {
         model: Product,
-        attributes: ['id', 'name', 'images'],
+        attributes: ["id", "name", "images"],
       },
     ],
     limit: parseInt(limit),
@@ -1473,7 +1515,7 @@ const getAllReviews = catchAsync(async (req, res) => {
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       reviews,
       pagination: {
@@ -1494,14 +1536,14 @@ const deleteReview = catchAsync(async (req, res) => {
 
   const review = await Review.findByPk(id);
   if (!review) {
-    throw new AppError('Không tìm thấy đánh giá', 404);
+    throw new AppError("Không tìm thấy đánh giá", 404);
   }
 
   await review.destroy();
 
   res.status(200).json({
-    status: 'success',
-    message: 'Xóa đánh giá thành công',
+    status: "success",
+    message: "Xóa đánh giá thành công",
   });
 });
 
@@ -1512,10 +1554,10 @@ const getAllOrders = catchAsync(async (req, res) => {
   const {
     page = 1,
     limit = 10,
-    status = '',
-    search = '',
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
+    status = "",
+    search = "",
+    sortBy = "createdAt",
+    sortOrder = "DESC",
     startDate,
     endDate,
   } = req.query;
@@ -1543,15 +1585,15 @@ const getAllOrders = catchAsync(async (req, res) => {
   const includeClause = [
     {
       model: User,
-      attributes: ['id', 'firstName', 'lastName', 'email', 'phone'],
+      attributes: ["id", "firstName", "lastName", "email", "phone"],
     },
     {
       model: OrderItem,
-      as: 'items',
+      as: "items",
       include: [
         {
           model: Product,
-          attributes: ['id', 'name', 'images', 'price'],
+          attributes: ["id", "name", "images", "price"],
         },
       ],
     },
@@ -1566,7 +1608,7 @@ const getAllOrders = catchAsync(async (req, res) => {
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: {
       orders,
       pagination: {
@@ -1587,19 +1629,19 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   const { status, note } = req.body;
 
   const validStatuses = [
-    'pending',
-    'processing',
-    'shipped',
-    'delivered',
-    'cancelled',
+    "pending",
+    "processing",
+    "shipped",
+    "delivered",
+    "cancelled",
   ];
   if (!validStatuses.includes(status)) {
-    throw new AppError('Trạng thái đơn hàng không hợp lệ', 400);
+    throw new AppError("Trạng thái đơn hàng không hợp lệ", 400);
   }
 
   const order = await Order.findByPk(id);
   if (!order) {
-    throw new AppError('Không tìm thấy đơn hàng', 404);
+    throw new AppError("Không tìm thấy đơn hàng", 404);
   }
 
   const updatedOrder = await order.update({
@@ -1608,7 +1650,7 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   });
 
   res.status(200).json({
-    status: 'success',
+    status: "success",
     data: { order: updatedOrder },
   });
 });
