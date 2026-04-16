@@ -1,80 +1,26 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
-const { AppError } = require('../middlewares/errorHandler');
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2; // Import Cloudinary SDK (only for deletion)
+const { AppError } = require("../middlewares/errorHandler");
+const uploadCloudinary = require("../middlewares/cloudinaryUploadMiddleware"); // Use the Cloudinary Multer instance
 
-// Create upload directories if they don't exist
-const uploadDirs = {
-  reviews: path.join(__dirname, '../../uploads/reviews'),
-  products: path.join(__dirname, '../../uploads/products'),
-  users: path.join(__dirname, '../../uploads/users'),
-};
-
-Object.values(uploadDirs).forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
-
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadType = req.params.type || 'general';
-    const uploadPath = uploadDirs[uploadType] || uploadDirs.products;
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = uuidv4();
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
-
-// File filter for images
-const fileFilter = (req, file, cb) => {
-  const allowedMimes = [
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(
-      new AppError('Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP)', 400),
-      false
-    );
-  }
-};
-
-// Multer configuration
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-    files: 10, // Maximum 10 files
-  },
-});
+// No need for local uploadDirs or multer.diskStorage configuration here.
+// All configuration is handled by cloudinaryUploadMiddleware.js
 
 // Upload single file
 const uploadSingle = async (req, res, next) => {
   try {
-    const uploadType = req.params.type || 'general';
-
-    // Use multer middleware
-    const uploadMiddleware = upload.single('file');
+    // Use the pre-configured uploadCloudinary middleware
+    const uploadMiddleware = uploadCloudinary.single("file"); // 'file' is the field name for single upload
 
     uploadMiddleware(req, res, (err) => {
       if (err) {
         if (err instanceof multer.MulterError) {
-          if (err.code === 'LIMIT_FILE_SIZE') {
+          if (err.code === "LIMIT_FILE_SIZE") {
             return next(
-              new AppError('File quá lớn. Kích thước tối đa 5MB', 400)
+              new AppError(
+                `File quá lớn. Kích thước tối đa ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
+                400
+              )
             );
           }
           return next(new AppError(`Lỗi upload: ${err.message}`, 400));
@@ -83,15 +29,19 @@ const uploadSingle = async (req, res, next) => {
       }
 
       if (!req.file) {
-        return next(new AppError('Không có file được upload', 400));
+        return next(new AppError("Không có file được upload", 400));
       }
 
-      // Generate URL for the uploaded file
-      const fileUrl = `/uploads/${uploadType}/${req.file.filename}`;
+      // req.file will contain Cloudinary response data
+      // req.file.path is the Cloudinary URL
+      // req.file.filename is the Cloudinary public_id
+      const fileUrl = req.file.path;
+      const filename = req.file.filename; // Cloudinary public_id
+      const uploadType = req.body.category || "general"; // Use category from body or default
 
       res.status(200).json({
-        status: 'success',
-        message: 'Upload file thành công',
+        status: "success",
+        message: "Upload file thành công",
         data: {
           filename: req.file.filename,
           originalName: req.file.originalname,
@@ -109,21 +59,24 @@ const uploadSingle = async (req, res, next) => {
 // Upload multiple files
 const uploadMultiple = async (req, res, next) => {
   try {
-    const uploadType = req.params.type || 'general';
-    const maxFiles = uploadType === 'reviews' ? 5 : 10;
+    const uploadType = req.params.type || "general";
+    const maxFiles = uploadType === "reviews" ? 5 : 10; // This limit should ideally be set in cloudinaryUploadMiddleware, but for now we follow old logic
 
-    // Use multer middleware for multiple files
-    const uploadMiddleware = upload.array('files', maxFiles);
+    // Use the pre-configured uploadCloudinary middleware for multiple files
+    const uploadMiddleware = uploadCloudinary.array("files", maxFiles); // 'files' is the field name
 
     uploadMiddleware(req, res, (err) => {
       if (err) {
         if (err instanceof multer.MulterError) {
-          if (err.code === 'LIMIT_FILE_SIZE') {
+          if (err.code === "LIMIT_FILE_SIZE") {
             return next(
-              new AppError('File quá lớn. Kích thước tối đa 5MB', 400)
+              new AppError(
+                `File quá lớn. Kích thước tối đa ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
+                400
+              )
             );
           }
-          if (err.code === 'LIMIT_FILE_COUNT') {
+          if (err.code === "LIMIT_FILE_COUNT") {
             return next(
               new AppError(`Số lượng file tối đa là ${maxFiles}`, 400)
             );
@@ -134,19 +87,19 @@ const uploadMultiple = async (req, res, next) => {
       }
 
       if (!req.files || req.files.length === 0) {
-        return next(new AppError('Không có file được upload', 400));
+        return next(new AppError("Không có file được upload", 400));
       }
 
       // Generate URLs for uploaded files
       const files = req.files.map((file) => ({
-        filename: file.filename,
+        filename: file.filename, // Cloudinary public_id
         originalName: file.originalname,
-        url: `/uploads/${uploadType}/${file.filename}`,
+        url: file.path, // Cloudinary URL
         size: file.size,
       }));
 
       res.status(200).json({
-        status: 'success',
+        status: "success",
         message: `Upload ${files.length} file thành công`,
         data: {
           files,
@@ -163,25 +116,26 @@ const uploadMultiple = async (req, res, next) => {
 // Delete uploaded file
 const deleteFile = async (req, res, next) => {
   try {
-    const { type, filename } = req.params;
+    const { publicId } = req.params; // Expecting Cloudinary public_id
 
-    if (!uploadDirs[type]) {
-      throw new AppError('Loại file không hợp lệ', 400);
+    if (!publicId) {
+      throw new AppError("Không tìm thấy public ID của file", 400);
     }
 
-    const filePath = path.join(uploadDirs[type], filename);
+    // Delete from Cloudinary
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log("Cloudinary deletion result:", result);
 
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      throw new AppError('File không tồn tại', 404);
+    if (result.result !== "ok") {
+      throw new AppError(
+        `Không thể xóa file từ Cloudinary: ${result.result}`,
+        500
+      );
     }
-
-    // Delete file
-    fs.unlinkSync(filePath);
 
     res.status(200).json({
-      status: 'success',
-      message: 'Xóa file thành công',
+      status: "success",
+      message: "Xóa file thành công",
     });
   } catch (error) {
     next(error);
@@ -191,6 +145,5 @@ const deleteFile = async (req, res, next) => {
 module.exports = {
   uploadSingle,
   uploadMultiple,
-  deleteFile,
-  upload, // Export multer instance for use in other controllers
+  deleteFile, // No longer exporting the local multer instance
 };

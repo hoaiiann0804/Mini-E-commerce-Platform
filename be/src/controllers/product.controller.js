@@ -529,7 +529,7 @@ const getProductById = async (req, res, next) => {
     const productImagesWithUrls = productJson.productImages
       ? productJson.productImages.map((image) => ({
           ...image,
-          url: `/uploads/${image.filePath.replace(/\\/g, "/")}`,
+          url: image.filePath,
         }))
       : [];
 
