@@ -21,12 +21,7 @@ const ProductDetailsSection: React.FC<ProductDetailsSectionProps> = ({
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    // Fix incorrect /api/uploads paths to /uploads (static file serving)
-    .replace(
-      /http:\/\/localhost:8888\/api\/uploads/g,
-      'http://localhost:8888/uploads'
-    );
+    .replace(/&nbsp;/g, ' ');
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">

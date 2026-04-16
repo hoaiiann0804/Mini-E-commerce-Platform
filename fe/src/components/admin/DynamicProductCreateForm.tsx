@@ -29,6 +29,7 @@ import ProductPricingForm from "../product/ProductPricingForm";
 import ProductImagesForm from "../product/ProductImagesForm";
 import ProductSeoForm from "../product/ProductSeoForm";
 import ProductCategoryForm from "../product/ProductCategoryForm";
+import { ProductVariant } from "@/types/product.types";
 
 // Import services
 import { useCreateProductMutation } from "@/services/adminProductApi";
@@ -46,6 +47,9 @@ interface ProductFormData {
   status: "active" | "inactive" | "draft";
   featured: boolean;
   isVariantProduct: boolean;
+
+  // Variants
+  variants?: ProductVariant[];
 
   // Pricing
   price: number;
@@ -337,7 +341,12 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         );
 
       case "pricing":
-        return <ProductPricingForm />;
+        return (
+          <ProductPricingForm
+            hasVariants={Boolean(formData?.variants?.length)}
+            variants={formData?.variants || []}
+          />
+        );
 
       case "media":
         return <ProductImagesForm form={form} />;

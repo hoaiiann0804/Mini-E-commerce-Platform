@@ -65,37 +65,22 @@ export const useProductForm = ({
           isStepValid = true;
           break;
         case 'pricing':
-          // Nếu có variants, stockQuantity có thể = 0 (vì variants sẽ có stock riêng)
-          // Nếu không có variants, cần kiểm tra cả price và stockQuantity
+          // Cho phép price/stock=0 nếu hasVariants
           const hasVariants = variants.length > 0;
+          const priceValue = values['price'];
+          const stockValue = values['stockQuantity'];
 
           if (hasVariants) {
-            // Nếu có variants, chỉ cần stockQuantity được định nghĩa (có thể = 0)
-            const stockValue = values['stockQuantity'];
-            isStepValid =
-              stockValue !== undefined &&
-              stockValue !== null &&
-              stockValue !== '';
+            // Has variants: chỉ cần fields defined (allow 0)
+            isStepValid = 
+              (priceValue !== undefined && priceValue !== null && priceValue !== '') &&
+              (stockValue !== undefined && stockValue !== null && stockValue !== '');
           } else {
-            // Nếu không có variants, cần price > 0 và stockQuantity >= 0
-            const priceValue = values['price'];
-            const stockValue = values['stockQuantity'];
-
-            const priceValid =
-              priceValue !== undefined &&
-              priceValue !== null &&
-              priceValue !== '' &&
-              parseFloat(priceValue.toString()) > 0;
-
-            const stockValid =
-              stockValue !== undefined &&
-              stockValue !== null &&
-              stockValue !== '' &&
-              parseInt(stockValue.toString()) >= 0;
-
+            // No variants: price >0, stock >=0
+            const priceValid = priceValue !== undefined && priceValue !== null && priceValue !== '' && parseFloat(priceValue.toString()) > 0;
+            const stockValid = stockValue !== undefined && stockValue !== null && stockValue !== '' && parseInt(stockValue.toString()) >= 0;
             isStepValid = priceValid && stockValid;
           }
-
           break;
         case 'category':
           const categoryValue = values['categoryIds'];

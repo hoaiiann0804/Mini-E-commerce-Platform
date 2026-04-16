@@ -2,13 +2,25 @@ import React from "react";
 import { Form, InputNumber, Switch, Row, Col, Alert } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 
+import { ProductVariant } from "@/types/product.types";
+
 interface ProductPricingFormProps {
   hasVariants?: boolean;
+  variants?: ProductVariant[];
 }
 
 const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
   hasVariants = false,
+  variants = [],
 }) => {
+  // Calculate from variants if available
+  const minPrice =
+    variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : 0;
+  const totalStock = variants.reduce(
+    (sum, v) => sum + (v.stockQuantity || 0),
+    0
+  );
+
   return (
     <Row gutter={[24, 16]}>
       {hasVariants && (
@@ -46,14 +58,18 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
           name="price"
           label="Giá bán"
           rules={
-            hasVariants
+            hasVariants && variants.length > 0
               ? []
               : [{ required: true, message: "Vui lòng nhập giá bán!" }]
           }
           tooltip={
-            hasVariants ? "Đây là giá mặc định khi không chọn biến thể" : ""
+            hasVariants && variants.length > 0
+              ? `Giá thấp nhất từ variants: ${minPrice.toLocaleString()}đ`
+              : "Giá sản phẩm"
           }
-          initialValue={hasVariants ? 0 : undefined}
+          initialValue={
+            hasVariants && variants.length > 0 ? minPrice : undefined
+          }
         >
           <InputNumber<number>
             placeholder="Nhập giá bán"
@@ -66,7 +82,7 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
             }
             addonAfter="đ"
             min={0}
-            disabled={hasVariants}
+            disabled={hasVariants && variants.length > 0}
           />
         </Form.Item>
       </Col>
@@ -95,24 +111,29 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
       <Col span={12}>
         <Form.Item
           name="stockQuantity"
-          label={hasVariants ? "Tổng số lượng tồn kho" : "Số lượng tồn kho"}
+          label={
+            hasVariants && totalStock > 0
+              ? `Tổng tồn kho: ${totalStock}`
+              : "Số lượng tồn kho"
+          }
           rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
           tooltip={
-            hasVariants
-              ? "Đây là tổng số lượng của tất cả biến thể. Hệ thống sẽ tự động cập nhật dựa trên số lượng của các biến thể."
+            hasVariants && totalStock > 0
+              ? `Tổng từ ${variants.length} variants`
               : "Số lượng sản phẩm có sẵn để bán"
           }
           extra={
-            hasVariants
-              ? "Số lượng này sẽ được tự động cập nhật dựa trên tổng số lượng của các biến thể"
+            hasVariants && totalStock > 0
+              ? `Tự động từ variants (cập nhật khi variants thay đổi)`
               : ""
           }
+          initialValue={totalStock}
         >
           <InputNumber
             placeholder="0"
             style={{ width: "100%" }}
             min={0}
-            disabled={hasVariants}
+            disabled={hasVariants && totalStock > 0}
           />
         </Form.Item>
       </Col>

@@ -11,6 +11,7 @@ import ProductDetailsSection from "@/components/product/ProductDetailsSection";
 import { useAddToWishlistMutation } from "@/services/wishlistApi";
 import { productApi } from "@/services/productApi";
 import { Product, ProductVariant, ProductAttribute } from "@/types/product.types";
+import type { ServerWishlist, ServerWishlistItem, WishlistItem } from "@/types/wishlist.types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
@@ -384,8 +385,25 @@ const ProductDetailPage: React.FC = () => {
           productId: product.id,
         }).unwrap();
         console.log("✅ API success, server wishlist:", response);
+        // Transform BackendWishlist to ServerWishlist format
+        const transformedWishlist: ServerWishlist = {
+          id: response.id as string || '',
+          items: (response.items || []).map((item: any) => ({
+            id: item.id,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            compareAtPrice: item.compareAtPrice,
+            thumbnail: item.thumbnail,
+            slug: item.slug,
+            dateAdded: new Date().toISOString()
+          })) as any[],
+          userId: 'current_user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
         // Update Redux store with server response
-        dispatch(setServerWishList(response));
+        dispatch(setServerWishList(transformedWishlist));
         // Show notification based on API response message
         dispatch(
           addNotification({
@@ -408,7 +426,8 @@ const ProductDetailPage: React.FC = () => {
           compareAtPrice: product.compareAtPrice,
           thumbnail: product.thumbnail,
           slug: product.slug,
-        };
+          dateAdded: new Date().toISOString(),
+        } as WishlistItem;
         dispatch(addItemWishlist(newItem));
         dispatch(
           addNotification({
@@ -438,7 +457,8 @@ const ProductDetailPage: React.FC = () => {
           compareAtPrice: product.compareAtPrice,
           thumbnail: product.thumbnail,
           slug: product.slug,
-        };
+          dateAdded: new Date().toISOString(),
+        } as WishlistItem;
         dispatch(addItemWishlist(newItem));
         dispatch(
           addNotification({

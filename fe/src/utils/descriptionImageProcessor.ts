@@ -92,7 +92,11 @@ export const processDescriptionImages = async (
         });
 
         if (result?.data) {
-          const uploadedUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8888'}${result.data.url}`;
+          const uploadedUrl =
+            typeof result?.data?.url === 'string' &&
+            /^https?:\/\//i.test(result.data.url)
+              ? result.data.url
+              : `${(import.meta.env.VITE_API_URL || 'http://localhost:8888/api').replace(/\/api\/?$/, '')}${result.data.url}`;
 
           // Replace base64 with uploaded URL in description
           processedDescription = processedDescription.replace(
