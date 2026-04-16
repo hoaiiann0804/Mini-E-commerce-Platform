@@ -29,6 +29,7 @@ import ProductPricingForm from "../product/ProductPricingForm";
 import ProductImagesForm from "../product/ProductImagesForm";
 import ProductSeoForm from "../product/ProductSeoForm";
 import ProductCategoryForm from "../product/ProductCategoryForm";
+import { ProductVariant } from "@/types/product.types";
 
 // Import services
 import { useCreateProductMutation } from "@/services/adminProductApi";
@@ -46,6 +47,9 @@ interface ProductFormData {
   status: "active" | "inactive" | "draft";
   featured: boolean;
   isVariantProduct: boolean;
+
+  // Variants
+  variants?: ProductVariant[];
 
   // Pricing
   price: number;

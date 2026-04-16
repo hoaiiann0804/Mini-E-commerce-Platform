@@ -1,4 +1,8 @@
 import axios from "axios";
+import { mockProducts } from "@/data/mockProducts";
+import { mockCategories } from "@/data/mockCategories";
+import { Product } from "@/types/product.types";
+import { Category } from "@/types/category.types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
@@ -46,7 +50,7 @@ export class GeminiService {
 
   private getProductsContext(): string {
     // Tạo context từ dữ liệu sản phẩm
-    const productsInfo = mockProducts.slice(0, 20).map((product) => ({
+    const productsInfo = mockProducts.slice(0, 20).map((product: Product) => ({
       id: product.id,
       name: product.name,
       price: `${product.price.toLocaleString("vi-VN")}đ`,
@@ -57,7 +61,7 @@ export class GeminiService {
       stock: product.stock,
     }));
 
-    const categoriesInfo = mockCategories.map((cat) => ({
+    const categoriesInfo = mockCategories.map((cat: Category) => ({
       id: cat.id,
       name: cat.name,
       description: cat.description || "",
