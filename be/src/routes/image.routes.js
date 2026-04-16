@@ -258,38 +258,6 @@ router.post("/upload-multiple", authenticate, imageController.uploadMultiple);
 
 /**
  * @swagger
- * /api/images/{id}:
- *   get:
- *     summary: Get image by ID
- *     tags: [Images]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Image ID
- *     responses:
- *       200:
- *         description: Image retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   $ref: '#/components/schemas/Image'
- *       404:
- *         description: Image not found
- */
-router.get("/:id", imageController.getImageById);
-
-/**
- * @swagger
  * /api/images/product/{productId}:
  *   get:
  *     summary: Get all images for a product
@@ -326,6 +294,38 @@ router.get("/:id", imageController.getImageById);
  *         description: Product not found
  */
 router.get("/product/:productId", imageController.getImagesByProductId);
+
+/**
+ * @swagger
+ * /api/images/{id}:
+ *   get:
+ *     summary: Get image by ID
+ *     tags: [Images]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Image ID
+ *     responses:
+ *       200:
+ *         description: Image retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   $ref: '#/components/schemas/Image'
+ *       404:
+ *         description: Image not found
+ */
+router.get("/:id", imageController.getImageById);
 
 /**
  * @swagger
