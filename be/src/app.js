@@ -30,7 +30,7 @@ app.use(
     origin:
       process.env.NODE_ENV === "production"
         ? process.env.FRONTEND_URL ||
-          "https://mini-e-commerce-platform-eight.vercel.app/"
+          "https://mini-e-commerce-platform-eight.vercel.app"
         : [
             "http://localhost:3000",
             "http://localhost:5173",

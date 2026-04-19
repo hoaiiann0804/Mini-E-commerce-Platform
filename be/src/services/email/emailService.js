@@ -1,49 +1,78 @@
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
+const getFrontendBaseUrl = () => {
+  const frontendUrl =
+    process.env.FRONTEND_URL ||
+    "https://mini-e-commerce-platform-eight.vercel.app";
+
+  return frontendUrl.replace(/\/+$/, "");
+};
 
 // Create transporter
-const createTransporter = () => {
-  // For development, use a test account
-  if (process.env.NODE_ENV === "development") {
-    return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: process.env.EMAIL_PORT || 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-  }
+// const createTransporter = () => {
+//   // For development, use a test account
+//   if (process.env.NODE_ENV === "development") {
+//     return nodemailer.createTransport({
+//       host: process.env.EMAIL_HOST || "smtp.gmail.com",
+//       port: Number(process.env.EMAIL_PORT) || 587,
+//       secure: false,
+//       auth: {
+//         user: process.env.EMAIL_USERNAME,
+//         pass: process.env.EMAIL_PASSWORD,
+//       },
+//     });
+//   }
 
-  // For production, use configured email service
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === "true",
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-};
+//   // For production, use configured email service
+//   return nodemailer.createTransport({
+//     host: process.env.EMAIL_HOST,
+//     port: Number(process.env.EMAIL_PORT),
+//     secure: process.env.EMAIL_SECURE === "true",
+//     auth: {
+//       user: process.env.EMAIL_USERNAME,
+//       pass: process.env.EMAIL_PASSWORD,
+//     },
+//   });
+// };
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("Missing RESEND_API_KEY");
+}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send email
 const sendEmail = async (options) => {
-  const transporter = createTransporter();
+  // console.log('CALL sendEmail', options.email)
+  // const transporter = createTransporter();
 
-  const mailOptions = {
-    from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
-    to: options.email,
-    subject: options.subject,
-    html: options.html,
-  };
+  // const mailOptions = {
+  //   from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+  //   to: options.email,
+  //   subject: options.subject,
+  //   html: options.html,
+  // };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    const send = await resend.emails.send({
+      from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+      to: options.email,
+      subject: options.subject,
+      html: options.html,
+    });
+    console.log("Email sent", send);
+    return send;
+  } catch (error) {
+    // console.log("Send email error", error);
+    throw error;
+  }
 };
 
 // Send verification email
 const sendVerificationEmail = async (email, token) => {
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+  // console.log("CALL sendVerificarionEmail", email);
+  const frontendBaseUrl = getFrontendBaseUrl();
+  const verificationUrl = `${frontendBaseUrl}/verify-email/${encodeURIComponent(
+    token
+  )}`;
 
   await sendEmail({
     email,
@@ -66,7 +95,10 @@ const sendVerificationEmail = async (email, token) => {
 
 // Send reset password email
 const sendResetPasswordEmail = async (email, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  const frontendBaseUrl = getFrontendBaseUrl();
+  const resetUrl = `${frontendBaseUrl}/reset-password?token=${encodeURIComponent(
+    token
+  )}`;
 
   await sendEmail({
     email,
