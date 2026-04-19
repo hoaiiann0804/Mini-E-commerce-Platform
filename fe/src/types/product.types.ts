@@ -91,6 +91,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   sort?: "price_asc" | "price_desc" | "newest" | "popular";
+  cursor?: string;
   page?: number;
   limit?: number;
   brand?: string[];

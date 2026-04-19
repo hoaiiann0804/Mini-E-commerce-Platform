@@ -1,0 +1,57 @@
+### Create product (có compareAtPrice)
+POST http://localhost:8888/api/admin/products
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAzYjQ2MWYwLWJlNzYtNDc0OS04NDg2LTVmZTU2MjQyNzU2NSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc3NjIzNTI5OCwiZXhwIjoxNzc2MzIxNjk4fQ.Va0DJKFC8rxjfHElMMtypUMqIyk9z30WU34zHO_BZOM
+
+{
+  "name": "Iphone 13 Pro max " ,
+  "baseName": "iPhone Test Compare 4",
+  "shortDescription": "Test compareAtPrice",
+  "description": "<p>Test compareAtPrice</p>",
+  "price": 39990000,
+  "compareAtPrice": 49999000,
+  "stock": 0,
+  "stockQuantity": 0,
+  "status": "active",
+  "featured": false,
+  "categoryIds": ["961cfa87-499b-4903-abe5-f1302ae14b8f"],
+  "images": ["http://localhost:8888/uploads/images/product/2026/04/test.jpg"],
+  "thumbnail": "http://localhost:8888/uploads/images/product/2026/04/test.jpg",
+  "condition": "new",
+  "inStock": true,
+  "specifications": [],
+  "warrantyPackageIds": [],
+  "searchKeywords": [],
+  "attributes": [
+    { "name": "Màu sắc", "value": "Cam" }
+  ],
+  "variants": [
+    {
+      "name": "Cam",
+      "variantName": "Cam",
+      "price": 39990000,
+      "stockQuantity": 11,
+      "stock": 11,
+      "sku": "VAR-TEST-1",
+      "isDefault": true,
+      "isAvailable": true,
+      "attributes": { "Màu sắc": "Cam" },
+      "specifications": {},
+      "images": []
+    },
+       {
+      "name": "Xanh",
+      "variantName": "Xanh",
+      "price": 39980000,
+      "stockQuantity": 11,
+      "stock": 11,
+      "sku": "VAR-TEST-1",
+      "isDefault": true,
+      "isAvailable": true,
+      "attributes": { "Màu sắc": "Xanh" },
+      "specifications": {},
+      "images": []
+    }
+  ],
+  "seoKeywords": []
+}

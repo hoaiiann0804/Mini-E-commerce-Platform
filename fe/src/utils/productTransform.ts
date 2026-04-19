@@ -177,6 +177,7 @@ export const createProductFiltersParams = (
   const params = new URLSearchParams();
 
   // Basic filters
+  if (filters.cursor) params.append('cursor', filters.cursor.toString());
   if (filters.page) params.append('page', filters.page.toString());
   if (filters.limit) params.append('limit', filters.limit.toString());
   if (filters.categoryId) params.append('category', filters.categoryId);
