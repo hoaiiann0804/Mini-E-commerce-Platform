@@ -1,1 +1,0 @@
-const a=(t,c)=>{if(c&&c.length>0){const n=c.map(o=>o.price),e=Math.min(...n),r=Math.max(...n);return{minPrice:e,maxPrice:r,priceText:e===r?`${e.toLocaleString("vi-VN")}đ`:`Từ ${e.toLocaleString("vi-VN")}đ`,basePrice:e}}return{minPrice:t,maxPrice:t,priceText:`${t.toLocaleString("vi-VN")}đ`,basePrice:t}},i=(t,c)=>t<=c?0:Math.round((t-c)/t*100);export{i as a,a as c};

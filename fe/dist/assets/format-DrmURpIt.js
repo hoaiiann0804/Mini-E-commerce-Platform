@@ -1,1 +1,0 @@
-const s=t=>{const r=typeof t=="string"?parseFloat(t):t;return isNaN(r)?"0đ":`${r.toLocaleString("vi-VN")}đ`},a=t=>{if(typeof t=="number")return t;const r=parseFloat(t);return isNaN(r)?0:r};export{s as f,a as p};
