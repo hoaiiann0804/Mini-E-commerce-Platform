@@ -304,6 +304,9 @@
 
   "checkout": {
     "title": "Thanh Toán",
+    "selectAddress": "Chọn địa chỉ",
+    "useCustomAddress": "Chọn đỉa chỉ có sẵn",
+    "manageAddresses": "Quản lý địa chỉ",
     "emptyCart": {
       "title": "Giỏ hàng của bạn đang trống",
       "message": "Thêm một số sản phẩm vào giỏ hàng trước khi tiến hành thanh toán.",
