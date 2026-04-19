@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '@/components/features/ProductCard';
 import ProductListCard from '@/components/features/ProductListCard';
 import FilterPanel from '@/components/features/FilterPanel';
-import Pagination from '@/components/common/Pagination';
 import Select from '@/components/common/Select';
 import { PremiumButton } from '@/components/common';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Product, ProductFilters } from '@/types/product.types';
-import { useGetProductsQuery } from '@/services/productApi';
+import { useLazyGetProductsQuery } from '@/services/productApi';
 import { useGetCategoriesQuery } from '@/services/categoryApi';
+import { ProductCardSkeleton } from '@/components/common/LoadingState';
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
@@ -33,8 +33,14 @@ const ShopPage: React.FC = () => {
     ? Number(searchParams.get('maxPrice'))
     : undefined;
   const sort = (searchParams.get('sort') as ProductFilters['sort']) || 'newest';
-  const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
   const limit = 12;
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   // Selected filters for filter panel
   const [selectedFilters, setSelectedFilters] = useState<
@@ -49,19 +55,7 @@ const ShopPage: React.FC = () => {
     max: maxPrice || 10000000, // 10 triệu VND
   });
 
-  // Use RTK Query hooks
-  const {
-    data: productsData,
-    isLoading: isProductsLoading,
-  } = useGetProductsQuery({
-    categoryId,
-    search,
-    minPrice,
-    maxPrice,
-    sort: sort as ProductFilters['sort'],
-    page,
-    limit,
-  });
+  const [triggerGetProducts, getProductsState] = useLazyGetProductsQuery();
 
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useGetCategoriesQuery();
@@ -78,6 +72,104 @@ const ShopPage: React.FC = () => {
     });
   }, [categoryId, minPrice, maxPrice, searchParams]);
 
+  const baseFilters = useMemo(() => {
+    return {
+      categoryId,
+      search,
+      minPrice,
+      maxPrice,
+      sort: sort as ProductFilters['sort'],
+      limit,
+    } satisfies ProductFilters;
+  }, [categoryId, search, minPrice, maxPrice, sort, limit]);
+
+  const mergeUniqueById = useCallback(
+    (existing: Product[], incoming: Product[]) => {
+      if (existing.length === 0) return incoming;
+      const seen = new Set(existing.map((p) => p.id));
+      const merged = [...existing];
+      for (const item of incoming) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          merged.push(item);
+        }
+      }
+      return merged;
+    },
+    []
+  );
+
+  const fetchProductsPage = useCallback(
+    async (cursor?: string | null) => {
+      try {
+        const result = await triggerGetProducts({
+          ...baseFilters,
+          cursor: cursor || undefined,
+        }).unwrap();
+
+        const pageProducts: Product[] = result?.data?.products || [];
+        const pageNextCursor: string | null = result?.data?.nextCursor ?? null;
+
+        setProducts((prev) =>
+          cursor ? mergeUniqueById(prev, pageProducts) : pageProducts
+        );
+        setNextCursor(pageNextCursor);
+        setInitialLoadDone(true);
+        return true;
+      } catch {
+        setInitialLoadDone(true);
+        setNextCursor(null);
+        return false;
+      }
+    },
+    [baseFilters, triggerGetProducts, mergeUniqueById]
+  );
+
+  const resetAndFetchFirstPage = useCallback(async () => {
+    setProducts([]);
+    setNextCursor(null);
+    setInitialLoadDone(false);
+    await fetchProductsPage(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [fetchProductsPage]);
+
+  // Initial fetch + refetch when filters change
+  useEffect(() => {
+    void resetAndFetchFirstPage();
+  }, [resetAndFetchFirstPage]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!nextCursor) return;
+    if (isLoadingMore || getProductsState.isFetching) return;
+
+    setIsLoadingMore(true);
+    try {
+      await fetchProductsPage(nextCursor);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [nextCursor, isLoadingMore, getProductsState.isFetching, fetchProductsPage]);
+
+  // Infinite scroll: observe sentinel at bottom
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (!nextCursor) return;
+        if (isLoadingMore || getProductsState.isFetching) return;
+        handleLoadMore();
+      },
+      { root: null, rootMargin: '300px', threshold: 0.01 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [nextCursor, isLoadingMore, getProductsState.isFetching, handleLoadMore]);
+
   // Update URL when filters change
   const updateFilters = (newFilters: Partial<ProductFilters>) => {
     const updatedParams = new URLSearchParams(searchParams);
@@ -91,10 +183,9 @@ const ShopPage: React.FC = () => {
       }
     });
 
-    // Reset to page 1 when filters change
-    if (Object.keys(newFilters).some((key) => key !== 'page')) {
-      updatedParams.set('page', '1');
-    }
+    // Cursor/page should not be in URL for ShopPage
+    updatedParams.delete('page');
+    updatedParams.delete('cursor');
 
     setSearchParams(updatedParams);
   };
@@ -104,10 +195,7 @@ const ShopPage: React.FC = () => {
     updateFilters({ sort: value as ProductFilters['sort'] });
   };
 
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    updateFilters({ page: newPage });
-  };
+  // Cursor-based infinite loading (no page param)
 
   // Handle price range change
   const handlePriceRangeChange = (range: { min: number; max: number }) => {
@@ -130,8 +218,8 @@ const ShopPage: React.FC = () => {
       }
     }
 
-    // Reset to page 1 when filters change
-    updatedParams.set('page', '1');
+    updatedParams.delete('page');
+    updatedParams.delete('cursor');
 
     setSearchParams(updatedParams);
   };
@@ -140,13 +228,15 @@ const ShopPage: React.FC = () => {
   const handleClearFilters = () => {
     const updatedParams = new URLSearchParams();
     if (search) updatedParams.set('search', search);
-    updatedParams.set('page', '1');
     updatedParams.set('sort', 'newest');
     setSearchParams(updatedParams);
   };
 
   // Determine if we're loading
-  const isLoading = isProductsLoading || isCategoriesLoading;
+  const isInitialLoading =
+    !initialLoadDone &&
+    (getProductsState.isFetching || getProductsState.isLoading);
+  const isLoading = isInitialLoading || isCategoriesLoading;
 
   // Prepare filter groups for filter panel
   const filterGroups = [
@@ -170,8 +260,8 @@ const ShopPage: React.FC = () => {
             Cửa Hàng Sản Phẩm
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 text-lg">
-            {productsData?.data?.total
-              ? `Hiển thị ${productsData.data.products?.length || 0} trong tổng số ${productsData.data.total} sản phẩm`
+            {products.length > 0
+              ? `Hiển thị ${products.length} sản phẩm`
               : 'Khám phá bộ sưu tập sản phẩm của chúng tôi'}
           </p>
         </div>
@@ -288,8 +378,8 @@ const ShopPage: React.FC = () => {
             {/* Sort and results count - Desktop */}
             <div className="hidden lg:flex justify-between items-center mb-6">
               <p className="text-neutral-600 dark:text-neutral-400">
-                {productsData?.data?.total
-                  ? `Hiển thị ${productsData.data.products?.length || 0} trong tổng số ${productsData.data.total} sản phẩm`
+                {products.length > 0
+                  ? `Hiển thị ${products.length} sản phẩm`
                   : 'Khám phá bộ sưu tập sản phẩm của chúng tôi'}
               </p>
 
@@ -357,11 +447,34 @@ const ShopPage: React.FC = () => {
 
             {/* Products grid */}
             {isLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <LoadingSpinner size="lg" />
+              <div
+                className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr'
+                    : 'space-y-8'
+                }
+              >
+                {Array.from({ length: limit }).map((_, index) => (
+                  <ProductCardSkeleton key={index} />
+                ))}
               </div>
-            ) : !productsData?.data?.products ||
-              productsData.data.products.length === 0 ? (
+            ) : getProductsState.isError && products.length === 0 ? (
+              <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
+                  Không thể tải sản phẩm
+                </h3>
+                <p className="text-neutral-500 dark:text-neutral-400 mb-6">
+                  Vui lòng thử lại.
+                </p>
+                <PremiumButton
+                  variant="primary"
+                  size="large"
+                  onClick={() => void resetAndFetchFirstPage()}
+                >
+                  Thử lại
+                </PremiumButton>
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-12 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -400,7 +513,7 @@ const ShopPage: React.FC = () => {
                       : 'space-y-8'
                   }
                 >
-                  {productsData?.data?.products?.map((product: Product) =>
+                  {products.map((product: Product) =>
                     viewMode === 'grid' ? (
                       <ProductCard key={product.id} {...product} />
                     ) : (
@@ -409,16 +522,34 @@ const ShopPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Pagination */}
-                {productsData?.data && productsData.data.pages > 1 && (
-                  <div className="mt-12 flex justify-center">
-                    <Pagination
-                      currentPage={page}
-                      totalPages={productsData.data.pages}
-                      onPageChange={handlePageChange}
-                    />
-                  </div>
-                )}
+                {/* Load more */}
+                <div className="mt-10 flex flex-col items-center gap-4">
+                  {nextCursor ? (
+                    <>
+                      <PremiumButton
+                        variant="outline"
+                        size="large"
+                        onClick={handleLoadMore}
+                        disabled={isLoadingMore || getProductsState.isFetching}
+                      >
+                        {isLoadingMore ? 'Loading...' : 'Load more'}
+                      </PremiumButton>
+                      <div ref={sentinelRef} className="h-1 w-full" />
+                      {(isLoadingMore || getProductsState.isFetching) && (
+                        <div className="py-2">
+                          <LoadingSpinner size="md" />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div ref={sentinelRef} className="h-1 w-full" />
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        You&#39;ve reached the end.
+                      </p>
+                    </>
+                  )}
+                </div>
               </>
             )}
           </div>

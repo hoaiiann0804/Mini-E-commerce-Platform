@@ -195,6 +195,7 @@ export const productApi = api.injectEndpoints({
 
 export const {
   useGetProductsQuery,
+  useLazyGetProductsQuery,
   useGetProductByIdQuery,
   useGetProductBySlugQuery,
   useGetFeaturedProductsQuery,
