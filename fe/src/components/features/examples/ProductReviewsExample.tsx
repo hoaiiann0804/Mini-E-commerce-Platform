@@ -1,22 +1,22 @@
-import { useState } from 'react';
-import ProductReviews from '../ProductReviews';
-import ReviewForm from '../ReviewForm';
-import ReviewList from '../ReviewList';
-import ReviewSummary from '../ReviewSummary';
+import { useState } from "react";
+import ProductReviews from "../ProductReviews";
+import ReviewForm from "../ReviewForm";
+import ReviewList from "../ReviewList";
+import ReviewSummary from "../ReviewSummary";
 
 /**
  * Example component showing how to use the review system
  * This component demonstrates different ways to integrate review components
  */
 const ProductReviewsExample: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState('product-1');
+  const [selectedProduct, setSelectedProduct] = useState("product-1");
   const [showForm, setShowForm] = useState(false);
 
   // Mock product data
   const products = [
-    { id: 'product-1', name: 'iPhone 15 Pro', rating: 4.5, reviews: 123 },
-    { id: 'product-2', name: 'Samsung Galaxy S24', rating: 4.2, reviews: 89 },
-    { id: 'product-3', name: 'Google Pixel 8', rating: 4.7, reviews: 156 },
+    { id: "product-1", name: "iPhone 15 Pro", rating: 4.5, reviews: 123 },
+    { id: "product-2", name: "Samsung Galaxy S24", rating: 4.2, reviews: 89 },
+    { id: "product-3", name: "Google Pixel 8", rating: 4.7, reviews: 156 },
   ];
 
   const selectedProductData = products.find((p) => p.id === selectedProduct);
@@ -63,7 +63,7 @@ const ProductReviewsExample: React.FC = () => {
                 onClick={() => setShowForm(!showForm)}
                 className="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
-                {showForm ? 'Ẩn' : 'Hiện'} Review Form
+                {showForm ? "Ẩn" : "Hiện"} Review Form
               </button>
 
               {showForm && (
@@ -72,7 +72,7 @@ const ProductReviewsExample: React.FC = () => {
                     productId={selectedProduct}
                     onSubmitSuccess={() => {
                       setShowForm(false);
-                      console.log('Review submitted successfully!');
+                      //console.log('Review submitted successfully!');
                     }}
                     onCancel={() => setShowForm(false)}
                   />

@@ -25,9 +25,9 @@ export default function () {
     shippingFirstName: `User-${__VU}`,
     shippingLastName: "Tester",
     shippingAddress1: "123 Đường ABC",
-    shippingCity: "Hồ Chí Minh",       // Tỉnh/Thành phố giao hàng
-    shippingState: "Thành phố HCM",   // Thêm cho chắc ăn
-    shippingZip: "70000",      // Mã bưu điện giao hàng (Bắt buộc)
+    shippingCity: "Hồ Chí Minh", // Tỉnh/Thành phố giao hàng
+    shippingState: "Thành phố HCM", // Thêm cho chắc ăn
+    shippingZip: "70000", // Mã bưu điện giao hàng (Bắt buộc)
     shippingCountry: "VN",
     shippingPhone: "0901234567",
 
@@ -35,14 +35,14 @@ export default function () {
     billingFirstName: "Nguyễn",
     billingLastName: "Tester",
     billingAddress1: "123 Đường ABC",
-    billingCity: "Hồ Chí Minh",        // Tỉnh/Thành phố thanh toán (BẮT BUỘC)
-    billingState: "Thành phố HCM",    // Thêm cho chắc ăn
-    billingZip: "70000",       // Mã bưu điện thanh toán (Bắt buộc)
+    billingCity: "Hồ Chí Minh", // Tỉnh/Thành phố thanh toán (BẮT BUỘC)
+    billingState: "Thành phố HCM", // Thêm cho chắc ăn
+    billingZip: "70000", // Mã bưu điện thanh toán (Bắt buộc)
     billingCountry: "VN",
     billingPhone: "0901234567",
 
-    paymentMethod: "cod", 
-    notes: "Test k6 concurrency"
+    paymentMethod: "cod",
+    notes: "Test k6 concurrency",
   });
   const params = {
     headers: {
@@ -53,9 +53,9 @@ export default function () {
 
   const res = http.post(url, payload, params);
   if (res.status !== 201) {
-    console.log(`--- LỖI TỪ USER ${__VU} ---`);
-    console.log(`Status: ${res.status}`);
-    console.log(`Body: ${res.body}`);
+    //console.log(`--- LỖI TỪ USER ${__VU} ---`);
+    //console.log(`Status: ${res.status}`);
+    //console.log(`Body: ${res.body}`);
   }
 
   check(res, {

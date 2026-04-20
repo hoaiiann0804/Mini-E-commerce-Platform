@@ -60,7 +60,7 @@ class StripeService {
       const stripeAmount =
         currency === 'vnd' ? Math.round(amount) : Math.round(amount * 100);
 
-      console.log('Creating Stripe payment intent with params:', {
+      //console.log('Creating Stripe payment intent with params:', {
         amount: stripeAmount,
         currency,
         metadata,

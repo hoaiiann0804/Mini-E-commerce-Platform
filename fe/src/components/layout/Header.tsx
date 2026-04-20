@@ -39,7 +39,7 @@ const Header: React.FC = () => {
   } = useAuth();
 
   // Debug logging for admin panel visibility
-  console.log("🔍 Header render:", {
+  //console.log("🔍 Header render:", {
     isAuthenticated,
     user,
     userRole: user?.role,
@@ -72,7 +72,7 @@ const Header: React.FC = () => {
     : localCartCount;
 
   // Debug logging for cart count
-  console.log("🛒 Cart count debug:", {
+  //console.log("🛒 Cart count debug:", {
     isAuthenticated,
     serverCartCount,
     localCartCount,
@@ -427,7 +427,7 @@ const Header: React.FC = () => {
                         "recentSearches",
                         JSON.stringify(updatedSearches)
                       );
-                      console.log(
+                      //console.log(
                         "Mobile search - saved searches:",
                         updatedSearches
                       );

@@ -1,27 +1,27 @@
-import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import React from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const AdminDebug: React.FC = () => {
   const { user, token } = useAuth();
 
   const handleTestAPI = async () => {
-    const storedToken = localStorage.getItem('token');
-    console.log('Stored token:', storedToken);
-    console.log('Auth token:', token);
-    console.log('User:', user);
+    const storedToken = localStorage.getItem("token");
+    //console.log('Stored token:', storedToken);
+    //console.log('Auth token:', token);
+    //console.log('User:', user);
 
     try {
-      const response = await fetch('/api/admin/dashboard', {
+      const response = await fetch("/api/admin/dashboard", {
         headers: {
           Authorization: `Bearer ${storedToken}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       const data = await response.json();
-      console.log('API Response:', data);
+      //console.log('API Response:', data);
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
     }
   };
 
@@ -31,9 +31,9 @@ const AdminDebug: React.FC = () => {
       <div className="text-sm text-yellow-700 space-y-1">
         <p>User: {user?.email}</p>
         <p>Role: {user?.role}</p>
-        <p>Token exists: {token ? 'Yes' : 'No'}</p>
+        <p>Token exists: {token ? "Yes" : "No"}</p>
         <p>
-          LocalStorage token: {localStorage.getItem('token') ? 'Yes' : 'No'}
+          LocalStorage token: {localStorage.getItem("token") ? "Yes" : "No"}
         </p>
         <button
           onClick={handleTestAPI}

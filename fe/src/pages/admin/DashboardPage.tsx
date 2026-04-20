@@ -1,30 +1,30 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useGetDashboardStatsQuery } from '@/services/adminDashboardApi';
-import { useGetAdminOrdersQuery } from '@/services/adminOrderApi';
-import { formatPrice } from '@/utils/format';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useGetDashboardStatsQuery } from "@/services/adminDashboardApi";
+import { useGetAdminOrdersQuery } from "@/services/adminOrderApi";
+import { formatPrice } from "@/utils/format";
 
 // Status badge colors
 const statusColors: Record<string, string> = {
   pending:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
   processing:
-    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   shipped:
-    'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300',
+    "bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300",
   delivered:
-    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
 const DashboardPage: React.FC = () => {
   const { t, i18n } = useTranslation();
 
   // Debug logging
-  console.log('DashboardPage - i18n ready:', i18n.isInitialized);
-  console.log('DashboardPage - current language:', i18n.language);
-  console.log('DashboardPage - test translation:', t('admin.dashboard.title'));
+  //console.log('DashboardPage - i18n ready:', i18n.isInitialized);
+  //console.log('DashboardPage - current language:', i18n.language);
+  //console.log('DashboardPage - test translation:', t('admin.dashboard.title'));
 
   // Fetch dashboard stats
   const {
@@ -39,21 +39,21 @@ const DashboardPage: React.FC = () => {
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
-    const currency = i18n.language === 'vi' ? 'VND' : 'USD';
+    const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
+    const currency = i18n.language === "vi" ? "VND" : "USD";
     return new Intl.NumberFormat(locale, {
-      style: 'currency',
+      style: "currency",
       currency: currency,
     }).format(amount);
   };
 
   // Format date
   const formatDate = (dateString: string) => {
-    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+    const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
     return new Date(dateString).toLocaleDateString(locale, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
@@ -64,9 +64,9 @@ const DashboardPage: React.FC = () => {
       value: Math.abs(growth).toFixed(1),
       isPositive,
       color: isPositive
-        ? 'text-green-600 dark:text-green-400'
-        : 'text-red-600 dark:text-red-400',
-      icon: isPositive ? 'up' : 'down',
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400",
+      icon: isPositive ? "up" : "down",
     };
   };
 
@@ -74,7 +74,7 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-8">
-          {t('admin.dashboard.title')}
+          {t("admin.dashboard.title")}
         </h1>
 
         {/* Loading Stats Cards */}
@@ -121,7 +121,7 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-8">
-          {t('admin.dashboard.title')}
+          {t("admin.dashboard.title")}
         </h1>
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-8 text-center">
           <div className="text-error-500 mb-4">
@@ -141,10 +141,10 @@ const DashboardPage: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-            {t('admin.dashboard.errors.loadingDashboard')}
+            {t("admin.dashboard.errors.loadingDashboard")}
           </h2>
           <p className="text-neutral-500 dark:text-neutral-400">
-            {t('admin.dashboard.errors.failedToLoad')}
+            {t("admin.dashboard.errors.failedToLoad")}
           </p>
         </div>
       </div>
@@ -158,12 +158,12 @@ const DashboardPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
-          {t('admin.dashboard.title')}
+          {t("admin.dashboard.title")}
         </h1>
         <div className="text-sm text-neutral-500 dark:text-neutral-400">
-          {t('admin.dashboard.lastUpdated')}:{' '}
+          {t("admin.dashboard.lastUpdated")}:{" "}
           {new Date().toLocaleString(
-            i18n.language === 'vi' ? 'vi-VN' : 'en-US'
+            i18n.language === "vi" ? "vi-VN" : "en-US"
           )}
         </div>
       </div>
@@ -174,7 +174,7 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              {t('admin.dashboard.stats.totalRevenue')}
+              {t("admin.dashboard.stats.totalRevenue")}
             </h2>
             <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-full">
               <svg
@@ -213,14 +213,14 @@ const DashboardPage: React.FC = () => {
                   strokeWidth={2}
                   d={
                     formatGrowth(stats.growth.revenue).isPositive
-                      ? 'M5 10l7-7m0 0l7 7m-7-7v18'
-                      : 'M19 14l-7 7m0 0l-7-7m7 7V3'
+                      ? "M5 10l7-7m0 0l7 7m-7-7v18"
+                      : "M19 14l-7 7m0 0l-7-7m7 7V3"
                   }
                 />
               </svg>
               <span>
-                {formatGrowth(stats.growth.revenue).value}%{' '}
-                {t('admin.dashboard.stats.fromLastMonth')}
+                {formatGrowth(stats.growth.revenue).value}%{" "}
+                {t("admin.dashboard.stats.fromLastMonth")}
               </span>
             </div>
           )}
@@ -230,7 +230,7 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              {t('admin.dashboard.stats.totalOrders')}
+              {t("admin.dashboard.stats.totalOrders")}
             </h2>
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
               <svg
@@ -269,14 +269,14 @@ const DashboardPage: React.FC = () => {
                   strokeWidth={2}
                   d={
                     formatGrowth(stats.growth.orders).isPositive
-                      ? 'M5 10l7-7m0 0l7 7m-7-7v18'
-                      : 'M19 14l-7 7m0 0l-7-7m7 7V3'
+                      ? "M5 10l7-7m0 0l7 7m-7-7v18"
+                      : "M19 14l-7 7m0 0l-7-7m7 7V3"
                   }
                 />
               </svg>
               <span>
-                {formatGrowth(stats.growth.orders).value}%{' '}
-                {t('admin.dashboard.stats.fromLastMonth')}
+                {formatGrowth(stats.growth.orders).value}%{" "}
+                {t("admin.dashboard.stats.fromLastMonth")}
               </span>
             </div>
           )}
@@ -286,7 +286,7 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              {t('admin.dashboard.stats.totalUsers')}
+              {t("admin.dashboard.stats.totalUsers")}
             </h2>
             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
               <svg
@@ -325,14 +325,14 @@ const DashboardPage: React.FC = () => {
                   strokeWidth={2}
                   d={
                     formatGrowth(stats.growth.users).isPositive
-                      ? 'M5 10l7-7m0 0l7 7m-7-7v18'
-                      : 'M19 14l-7 7m0 0l-7-7m7 7V3'
+                      ? "M5 10l7-7m0 0l7 7m-7-7v18"
+                      : "M19 14l-7 7m0 0l-7-7m7 7V3"
                   }
                 />
               </svg>
               <span>
-                {formatGrowth(stats.growth.users).value}%{' '}
-                {t('admin.dashboard.stats.fromLastMonth')}
+                {formatGrowth(stats.growth.users).value}%{" "}
+                {t("admin.dashboard.stats.fromLastMonth")}
               </span>
             </div>
           )}
@@ -342,7 +342,7 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 border border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              {t('admin.dashboard.stats.totalProducts')}
+              {t("admin.dashboard.stats.totalProducts")}
             </h2>
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
               <svg
@@ -365,7 +365,7 @@ const DashboardPage: React.FC = () => {
             {stats?.overview?.totalProducts || 0}
           </div>
           <div className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            {t('admin.dashboard.stats.activeProducts')}
+            {t("admin.dashboard.stats.activeProducts")}
           </div>
         </div>
       </div>
@@ -389,7 +389,7 @@ const DashboardPage: React.FC = () => {
               />
             </svg>
             <span className="text-yellow-800 dark:text-yellow-200 font-medium">
-              {t('admin.dashboard.alerts.pendingOrders', {
+              {t("admin.dashboard.alerts.pendingOrders", {
                 count: stats?.overview?.pendingOrders ?? 0,
               })}
             </span>
@@ -397,7 +397,7 @@ const DashboardPage: React.FC = () => {
               to="/admin/orders?status=pending"
               className="ml-auto text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium text-sm"
             >
-              {t('admin.dashboard.alerts.viewOrders')} →
+              {t("admin.dashboard.alerts.viewOrders")} →
             </Link>
           </div>
         </div>
@@ -408,13 +408,13 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-              {t('admin.dashboard.sections.recentOrders')}
+              {t("admin.dashboard.sections.recentOrders")}
             </h2>
             <Link
               to="/admin/orders"
               className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
-              {t('admin.dashboard.sections.viewAll')}
+              {t("admin.dashboard.sections.viewAll")}
             </Link>
           </div>
           <div className="overflow-x-auto">
@@ -437,19 +437,19 @@ const DashboardPage: React.FC = () => {
                 <thead className="bg-neutral-50 dark:bg-neutral-900">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                      {t('admin.dashboard.table.order')}
+                      {t("admin.dashboard.table.order")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                      {t('admin.dashboard.table.customer')}
+                      {t("admin.dashboard.table.customer")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                      {t('admin.dashboard.table.date')}
+                      {t("admin.dashboard.table.date")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                      {t('admin.dashboard.table.total')}
+                      {t("admin.dashboard.table.total")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                      {t('admin.dashboard.table.status')}
+                      {t("admin.dashboard.table.status")}
                     </th>
                   </tr>
                 </thead>
@@ -486,7 +486,7 @@ const DashboardPage: React.FC = () => {
               </table>
             ) : (
               <div className="p-6 text-center text-neutral-500 dark:text-neutral-400">
-                {t('admin.dashboard.table.noRecentOrders')}
+                {t("admin.dashboard.table.noRecentOrders")}
               </div>
             )}
           </div>
@@ -496,13 +496,13 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-              {t('admin.dashboard.sections.topProducts')}
+              {t("admin.dashboard.sections.topProducts")}
             </h2>
             <Link
               to="/admin/products"
               className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
             >
-              {t('admin.dashboard.sections.viewAll')}
+              {t("admin.dashboard.sections.viewAll")}
             </Link>
           </div>
           <div className="p-6">
@@ -532,7 +532,7 @@ const DashboardPage: React.FC = () => {
                       </p>
                       <div className="flex items-center space-x-4 mt-1">
                         <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                          {item.totalSold} {t('admin.dashboard.table.sold')}
+                          {item.totalSold} {t("admin.dashboard.table.sold")}
                         </span>
                         <span className="text-xs font-medium text-green-600 dark:text-green-400">
                           {formatCurrency(item.totalRevenue)}
@@ -549,7 +549,7 @@ const DashboardPage: React.FC = () => {
               </div>
             ) : (
               <div className="text-center text-neutral-500 dark:text-neutral-400">
-                {t('admin.dashboard.table.noProductData')}
+                {t("admin.dashboard.table.noProductData")}
               </div>
             )}
           </div>

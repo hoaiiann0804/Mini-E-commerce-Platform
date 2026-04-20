@@ -41,7 +41,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send email
 const sendEmail = async (options) => {
-  // console.log('CALL sendEmail', options.email)
+  // //console.log('CALL sendEmail', options.email)
   // const transporter = createTransporter();
 
   // const mailOptions = {
@@ -58,17 +58,17 @@ const sendEmail = async (options) => {
       subject: options.subject,
       html: options.html,
     });
-    console.log("Email sent", send);
+    //console.log("Email sent", send);
     return send;
   } catch (error) {
-    // console.log("Send email error", error);
+    // //console.log("Send email error", error);
     throw error;
   }
 };
 
 // Send verification email
 const sendVerificationEmail = async (email, token) => {
-  // console.log("CALL sendVerificarionEmail", email);
+  // //console.log("CALL sendVerificarionEmail", email);
   const frontendBaseUrl = getFrontendBaseUrl();
   const verificationUrl = `${frontendBaseUrl}/verify-email/${encodeURIComponent(
     token

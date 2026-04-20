@@ -53,7 +53,7 @@ export const processDescriptionImages = async (
     };
   }
 
-  console.log(`Found ${base64Images.length} base64 images to convert`);
+  //console.log(`Found ${base64Images.length} base64 images to convert`);
 
   let processedDescription = description;
   const uploadedImages: ProcessDescriptionResult['uploadedImages'] = [];
@@ -73,7 +73,7 @@ export const processDescriptionImages = async (
       const base64Data = base64Images[i];
 
       try {
-        console.log(`Converting image ${i + 1}/${base64Images.length}`);
+        //console.log(`Converting image ${i + 1}/${base64Images.length}`);
 
         // Update loading message
         message.loading({
@@ -110,7 +110,7 @@ export const processDescriptionImages = async (
             imageId: result.data.id,
           });
 
-          console.log(
+          //console.log(
             `Successfully converted image ${i + 1}: ${result.data.fileName}`
           );
         } else {

@@ -101,7 +101,7 @@ const ChatWidget: React.FC = () => {
     });
 
     try {
-      console.log("Sending message to AI:", text);
+      //console.log("Sending message to AI:", text);
 
       // Track analytics
       await trackAnalytics({
@@ -127,7 +127,7 @@ const ChatWidget: React.FC = () => {
         context,
       }).unwrap();
 
-      console.log("Received AI response:", apiResponse);
+      //console.log("Received AI response:", apiResponse);
 
       // Handle different response structures
       let response: ChatbotResponse;

@@ -33,7 +33,7 @@ export class GeminiService {
       if (response.data && response.data.isReady) {
         this.isInitialized = true;
         this.hasApiKeyOnBackend = response.data.hasApiKey;
-        console.log("Gemini AI backend service is available.");
+        //console.log("Gemini AI backend service is available.");
       } else {
         this.isInitialized = false;
         this.hasApiKeyOnBackend = false;
@@ -141,14 +141,14 @@ Hãy trả lời như một nhân viên bán hàng chuyên nghiệp và am hiể
     }
 
     try {
-      console.log("Sending request to Backend AI endpoint...");
+      //console.log("Sending request to Backend AI endpoint...");
       const response = await axios.post(this.backendApiUrl, {
         message: cleanMessage,
       });
       const { text, products, suggestions, intent, cartAction } =
         response.data.data;
 
-      console.log("Backend AI response received:", response.data.data);
+      //console.log("Backend AI response received:", response.data.data);
 
       // Tạo suggestions dựa trên nội dung phản hồi
       const finalSuggestions =

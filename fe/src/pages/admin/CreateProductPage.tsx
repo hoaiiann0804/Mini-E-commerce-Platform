@@ -172,12 +172,12 @@ const CreateProductPage: React.FC = () => {
 
   // Debug: Log attributes whenever they change
   useEffect(() => {
-    console.log("Current attributes in CreateProductPage:", attributes);
+    //console.log("Current attributes in CreateProductPage:", attributes);
   }, [attributes]);
 
   // Debug: Log variants whenever they change
   useEffect(() => {
-    console.log("Current variants in CreateProductPage:", variants);
+    //console.log("Current variants in CreateProductPage:", variants);
 
     // Tự động set price = 0 khi có variants
     if (variants.length > 0) {
@@ -231,8 +231,8 @@ const CreateProductPage: React.FC = () => {
       try {
         // Lấy tất cả giá trị từ form để đảm bảo không bị thiếu
         const allFormValues = form.getFieldsValue();
-        console.log("Form values received:", values);
-        console.log("All form values:", allFormValues);
+        //console.log("Form values received:", values);
+        //console.log("All form values:", allFormValues);
 
         const hasVariants = variants.length > 0;
 
@@ -241,7 +241,7 @@ const CreateProductPage: React.FC = () => {
           allFormValues.description || values.description || "";
 
         if (hasBase64Images(processedDescription)) {
-          console.log("Found base64 images in description, converting...");
+          //console.log("Found base64 images in description, converting...");
 
           const result = await processDescriptionImages(processedDescription, {
             productId: undefined, // Will be set after product creation
@@ -256,7 +256,7 @@ const CreateProductPage: React.FC = () => {
 
           if (result.hasChanges) {
             processedDescription = result.processedDescription;
-            console.log(
+            //console.log(
               `Converted ${result.uploadedImages.length} base64 images to uploaded files`
             );
           }
@@ -430,8 +430,8 @@ const CreateProductPage: React.FC = () => {
           })(),
         };
 
-        console.log("Sending product data to server:", productData);
-        console.log("Product data type check:", {
+        //console.log("Sending product data to server:", productData);
+        //console.log("Product data type check:", {
           searchKeywords: {
             type: typeof productData.searchKeywords,
             isArray: Array.isArray(productData.searchKeywords),

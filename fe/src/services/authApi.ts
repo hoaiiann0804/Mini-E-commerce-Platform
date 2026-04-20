@@ -15,7 +15,7 @@ export const authApi = api.injectEndpoints({
         body: { email, password },
       }),
       transformResponse: (response: any) => {
-        console.log("Login response:", response);
+        //console.log("Login response:", response);
 
         // Xử lý response từ API theo format thật từ backend
         if (response?.status === "success") {
@@ -30,7 +30,7 @@ export const authApi = api.injectEndpoints({
         return response;
       },
       transformErrorResponse: (response: any) => {
-        console.log("Login error:", response);
+        //console.log("Login error:", response);
 
         // Xử lý error response
         if (response?.data?.message) {
@@ -44,13 +44,13 @@ export const authApi = api.injectEndpoints({
     verifyEmail: builder.mutation<{ message: string }, string>({
       queryFn: async (token, { signal }) => {
         try {
-          console.log("🚀 Starting verifyEmail with token:", token);
+          //console.log("🚀 Starting verifyEmail with token:", token);
 
           const baseUrl =
             import.meta.env.VITE_API_URL || "http://localhost:3000/api";
           const url = `${baseUrl}/auth/verify-email/${token}`;
 
-          console.log("🔗 Making request to:", url);
+          //console.log("🔗 Making request to:", url);
 
           const response = await fetch(url, {
             method: "GET",
@@ -62,14 +62,14 @@ export const authApi = api.injectEndpoints({
           });
 
           const data = await response.json();
-          console.log("📨 Raw response:", {
+          //console.log("📨 Raw response:", {
             status: response.status,
             ok: response.ok,
             data,
           });
 
           if (!response.ok) {
-            console.log("❌ Response not OK:", response.status, data);
+            //console.log("❌ Response not OK:", response.status, data);
 
             // Nếu lỗi là token đã được sử dụng, có thể coi như đã verify thành công
             if (
@@ -78,7 +78,7 @@ export const authApi = api.injectEndpoints({
                 data?.message?.includes("already verified") ||
                 data?.message?.includes("đã được sử dụng"))
             ) {
-              console.log("🔄 Token already used, treating as success");
+              //console.log("🔄 Token already used, treating as success");
               return {
                 data: {
                   message: "Email đã được xác thực thành công trước đó",
@@ -96,7 +96,7 @@ export const authApi = api.injectEndpoints({
 
           // Kiểm tra nếu response có status: 'success'
           if (data?.status === "success") {
-            console.log("✅ Success response detected");
+            //console.log("✅ Success response detected");
             return {
               data: {
                 message: data.message || "Email verified successfully",
@@ -104,14 +104,14 @@ export const authApi = api.injectEndpoints({
             };
           }
 
-          console.log("🤔 Unexpected response format:", data);
+          //console.log("🤔 Unexpected response format:", data);
           return {
             data: {
               message: data?.message || "Email verified successfully",
             },
           };
         } catch (error) {
-          console.log("💥 Fetch error:", error);
+          //console.log("💥 Fetch error:", error);
           return {
             error: {
               status: "FETCH_ERROR",
@@ -129,7 +129,7 @@ export const authApi = api.injectEndpoints({
         body: userData,
       }),
       transformResponse: (response: any) => {
-        console.log("Register response:", response);
+        //console.log("Register response:", response);
 
         // Xử lý response từ API theo format thật từ backend
         if (response?.status === "success") {
@@ -144,7 +144,7 @@ export const authApi = api.injectEndpoints({
         return response;
       },
       transformErrorResponse: (response: any) => {
-        console.log("Register error:", response);
+        //console.log("Register error:", response);
 
         // Xử lý error response
         if (response?.data?.message) {
@@ -165,7 +165,7 @@ export const authApi = api.injectEndpoints({
         body: { refreshToken: localStorage.getItem("refreshToken") },
       }),
       transformResponse: (response: any) => {
-        console.log("Refresh token response:", response);
+        //console.log("Refresh token response:", response);
 
         if (response?.status === "success") {
           return {
@@ -177,7 +177,7 @@ export const authApi = api.injectEndpoints({
         return response;
       },
       transformErrorResponse: (response: any) => {
-        console.log("Refresh token error:", response);
+        //console.log("Refresh token error:", response);
 
         // Clear tokens nếu refresh token expired
         localStorage.removeItem("token");
@@ -208,11 +208,11 @@ export const authApi = api.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response: any) => {
-        console.log("Get current user response:", response);
+        //console.log("Get current user response:", response);
 
         // Xử lý response từ API theo format thật từ backend
         if (response?.status === "success") {
-          console.log("✅ Returning user data:", response.data);
+          //console.log("✅ Returning user data:", response.data);
           return response.data; // API trả về user trong response.data
         }
 
@@ -220,7 +220,7 @@ export const authApi = api.injectEndpoints({
         return response;
       },
       transformErrorResponse: (response: any) => {
-        console.log("Get current user error:", response);
+        //console.log("Get current user error:", response);
         // Let the global interceptor handle 401 errors
         return response?.data || "Failed to fetch user";
       },

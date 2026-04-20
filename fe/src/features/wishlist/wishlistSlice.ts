@@ -44,7 +44,7 @@ const wishlistSlice = createSlice({
       // Nếu chưa có (index === -1 ) thì thêm mới
       if (existingItemIndex === -1) {
         state.items.push(action.payload);
-        console.log("Wishlist Updated", state.items);
+        //console.log("Wishlist Updated", state.items);
       }
       localStorage.setItem("wishlistItems", JSON.stringify(state.items));
     },

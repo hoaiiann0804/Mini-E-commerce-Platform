@@ -4,10 +4,10 @@ require("dotenv").config({ path: path.resolve(__dirname, "..", ".env") });
 const jwt = require("jsonwebtoken");
 
 // 1. Lấy Secret Key thật trong file .env của fen
-const JWT_SECRET = process.env.JWT_SECRET
-if(! JWT_SECRET){
-    throw new Error('JWT_SECRET is missing. Check be/.env');
-};
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing. Check be/.env");
+}
 // 2. Dán 10 cái ID fen vừa lấy ở Bước 1 vào đây
 const userIds = [
   "e5c64f27-fcaf-4c6b-a76a-718946d1a957",
@@ -22,10 +22,10 @@ const userIds = [
   "9d622427-09e1-47e0-a63f-e0b0281b178c",
 ];
 
-console.log("--- COPY DANH SÁCH TOKEN DƯỚI ĐÂY DÁN VÀO K6 ---");
+//console.log("--- COPY DANH SÁCH TOKEN DƯỚI ĐÂY DÁN VÀO K6 ---");
 const tokens = userIds.map((id) => {
   // Tạo token y hệt logic login thật
   return jwt.sign({ id: id }, JWT_SECRET, { expiresIn: "1d" });
 });
 
-console.log(JSON.stringify(tokens, null, 2));
+//console.log(JSON.stringify(tokens, null, 2));

@@ -39,12 +39,12 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
   );
   const form = Form.useFormInstance();
 
-  console.log(initialSpecifications);
+  //console.log(initialSpecifications);
 
   // Load initial specifications when prop changes
   useEffect(() => {
     if (initialSpecifications && initialSpecifications.length > 0) {
-      console.log(
+      //console.log(
         'ProductSpecificationsForm - Loading initial specifications:',
         initialSpecifications
       );
@@ -53,7 +53,7 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
         ...spec,
         id: spec.id || `spec-${Date.now()}-${index}`,
       }));
-      console.log('ProductSpecificationsForm - Specs with IDs:', specsWithIds);
+      //console.log('ProductSpecificationsForm - Specs with IDs:', specsWithIds);
       setSpecifications(specsWithIds);
     }
   }, [initialSpecifications]);
@@ -91,7 +91,7 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
         currentSpecs.length > 0
       ) {
         if (JSON.stringify(currentSpecs) !== JSON.stringify(specifications)) {
-          console.log(
+          //console.log(
             'ProductSpecificationsForm - Interval check found specifications:',
             currentSpecs
           );
@@ -127,14 +127,14 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
     field: keyof Specification,
     value: string
   ) => {
-    console.log(
+    //console.log(
       `Updating specification ${id}, field: ${field}, value: ${value}`
     );
     setSpecifications((specs) => {
       const updated = specs.map((spec) =>
         spec.id === id ? { ...spec, [field]: value } : spec
       );
-      console.log('Updated specifications:', updated);
+      //console.log('Updated specifications:', updated);
       return updated;
     });
   };

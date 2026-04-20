@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { useAuth } from './useAuth';
-import { useGetCartQuery, useSyncCartMutation } from '@/services/cartApi';
-import { setServerCart, clearCart } from '@/features/cart/cartSlice';
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { useAuth } from "./useAuth";
+import { useGetCartQuery, useSyncCartMutation } from "@/services/cartApi";
+import { setServerCart, clearCart } from "@/features/cart/cartSlice";
 
 /**
  * Hook to sync cart data between local storage and server
@@ -50,9 +50,9 @@ export const useCartSync = () => {
           // Update Redux store with server response
           dispatch(setServerCart(syncedCart));
 
-          console.log('✅ Cart synced to server successfully');
+          //console.log('✅ Cart synced to server successfully');
         } catch (error) {
-          console.error('❌ Failed to sync cart to server:', error);
+          console.error("❌ Failed to sync cart to server:", error);
         }
       }
     };

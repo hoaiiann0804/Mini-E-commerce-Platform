@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -17,9 +17,9 @@ module.exports = {
         ALTER COLUMN price TYPE DECIMAL(12,2);
       `);
 
-      console.log('Successfully updated price precision to DECIMAL(12,2)');
+      //console.log('Successfully updated price precision to DECIMAL(12,2)');
     } catch (error) {
-      console.error('Error updating price precision:', error);
+      console.error("Error updating price precision:", error);
       throw error;
     }
   },
@@ -38,7 +38,7 @@ module.exports = {
         ALTER COLUMN price TYPE DECIMAL(10,2);
       `);
     } catch (error) {
-      console.error('Error reverting price precision:', error);
+      console.error("Error reverting price precision:", error);
       throw error;
     }
   },

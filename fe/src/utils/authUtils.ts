@@ -1,6 +1,6 @@
-import { store } from '@/store';
-import { logout } from '@/features/auth/authSlice';
-import { toast } from '@/utils/toast';
+import { store } from "@/store";
+import { logout } from "@/features/auth/authSlice";
+import { toast } from "@/utils/toast";
 
 // Navigation function - will be set by App component
 let navigateToLogin: (() => void) | null = null;
@@ -38,18 +38,18 @@ const logoutManager = LogoutManager.getInstance();
  * @param redirectDelay - Delay before redirecting to login page (in milliseconds)
  */
 export const handleAutoLogout = (
-  errorMessage: string = 'Phiên đăng nhập đã hết hạn',
+  errorMessage: string = "Phiên đăng nhập đã hết hạn",
   redirectDelay: number = 1000
 ) => {
-  console.log('🚪 handleAutoLogout called with:', errorMessage);
+  //console.log('🚪 handleAutoLogout called with:', errorMessage);
 
   // Prevent duplicate logout
   if (logoutManager.isLoggingOut) {
-    console.log('⏸️ Already logging out, skipping');
+    //console.log('⏸️ Already logging out, skipping');
     return;
   }
 
-  console.log('🔄 Starting logout process');
+  //console.log('🔄 Starting logout process');
   logoutManager.setLoggingOut(true);
 
   // Show notification to user
@@ -68,7 +68,7 @@ export const handleAutoLogout = (
     logoutManager.setLoggingOut(false);
 
     // Force page reload to login to avoid React Router state issues
-    window.location.href = '/login';
+    window.location.href = "/login";
   }, 100); // Reduced delay to 100ms
 };
 
@@ -81,19 +81,19 @@ export { logoutManager };
  * @returns boolean - true if 401 error was handled
  */
 export const handleUnauthorizedError = (error: any): boolean => {
-  console.log('🔍 handleUnauthorizedError called with:', error);
+  //console.log('🔍 handleUnauthorizedError called with:', error);
 
   if (error?.status === 401) {
-    console.log('✅ 401 confirmed, calling handleAutoLogout');
+    //console.log('✅ 401 confirmed, calling handleAutoLogout');
     const errorMessage =
       error?.data?.message ||
-      'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên';
+      "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên";
 
     handleAutoLogout(errorMessage);
     return true;
   }
 
-  console.log('❌ Not 401, status:', error?.status);
+  //console.log('❌ Not 401, status:', error?.status);
   return false;
 };
 
@@ -103,7 +103,7 @@ export const handleUnauthorizedError = (error: any): boolean => {
  * @returns string - Formatted error message
  */
 export const getErrorMessage = (error: any): string => {
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
 
@@ -115,6 +115,5 @@ export const getErrorMessage = (error: any): string => {
     return error.message;
   }
 
-  return 'Đã xảy ra lỗi không xác định';
+  return "Đã xảy ra lỗi không xác định";
 };
-

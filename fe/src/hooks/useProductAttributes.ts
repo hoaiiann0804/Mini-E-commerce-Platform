@@ -46,7 +46,7 @@ export const useProductAttributes = (
 
   // Attribute handlers
   const handleAddAttribute = (attribute: Attribute) => {
-    console.log('handleAddAttribute called with:', attribute);
+    //console.log('handleAddAttribute called with:', attribute);
 
     // Convert Attribute to ProductAttribute
     const productAttr = convertToProductAttribute(attribute);
@@ -58,7 +58,7 @@ export const useProductAttributes = (
           ? { ...productAttr, id: editingAttribute.id }
           : attr
       );
-      console.log(
+      //console.log(
         'Updating existing attribute. New attributes array:',
         updatedAttributes
       );
@@ -70,7 +70,7 @@ export const useProductAttributes = (
         ...attributes,
         { ...productAttr, id: productAttr.id || newId },
       ];
-      console.log('Adding new attribute. New attributes array:', newAttributes);
+      //console.log('Adding new attribute. New attributes array:', newAttributes);
       setAttributes(newAttributes);
     }
 

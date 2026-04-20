@@ -13,7 +13,7 @@ const createPaymentIntent = async (req, res, next) => {
     }
 
     // Create payment intent with metadata
-    console.log('Creating payment intent with metadata:', {
+    //console.log('Creating payment intent with metadata:', {
       userId,
       orderId: orderId || '',
     });
@@ -27,7 +27,7 @@ const createPaymentIntent = async (req, res, next) => {
       },
     });
 
-    console.log('Payment intent created:', {
+    //console.log('Payment intent created:', {
       id: paymentIntent.paymentIntentId,
       metadata: paymentIntent.metadata,
     });
@@ -53,7 +53,7 @@ const confirmPayment = async (req, res, next) => {
     const paymentIntent =
       await stripeService.confirmPaymentIntent(paymentIntentId);
 
-    console.log('Payment Intent Retrieved:', {
+    //console.log('Payment Intent Retrieved:', {
       id: paymentIntent.id,
       status: paymentIntent.status,
       metadata: paymentIntent.metadata,
@@ -61,14 +61,14 @@ const confirmPayment = async (req, res, next) => {
 
     // Update order payment status if orderId exists in metadata
     if (paymentIntent.metadata.orderId) {
-      console.log('Updating order:', paymentIntent.metadata.orderId);
-      console.log('Payment Intent Status:', paymentIntent.status);
+      //console.log('Updating order:', paymentIntent.metadata.orderId);
+      //console.log('Payment Intent Status:', paymentIntent.status);
 
       // First check if order exists
       const existingOrder = await Order.findByPk(
         paymentIntent.metadata.orderId
       );
-      console.log(
+      //console.log(
         'Existing order found:',
         existingOrder
           ? {
@@ -92,13 +92,13 @@ const confirmPayment = async (req, res, next) => {
             where: { id: paymentIntent.metadata.orderId },
           }
         );
-        console.log('Order update result:', updateResult);
+        //console.log('Order update result:', updateResult);
 
         // Verify the update
         const updatedOrder = await Order.findByPk(
           paymentIntent.metadata.orderId
         );
-        console.log(
+        //console.log(
           'Order after update:',
           updatedOrder
             ? {
@@ -111,12 +111,12 @@ const confirmPayment = async (req, res, next) => {
             : 'Order not found after update'
         );
       } else if (!existingOrder) {
-        console.log('Order not found for ID:', paymentIntent.metadata.orderId);
+        //console.log('Order not found for ID:', paymentIntent.metadata.orderId);
       } else {
-        console.log('Payment not succeeded, status:', paymentIntent.status);
+        //console.log('Payment not succeeded, status:', paymentIntent.status);
       }
     } else {
-      console.log('No orderId found in payment intent metadata');
+      //console.log('No orderId found in payment intent metadata');
     }
 
     res.status(200).json({
@@ -241,7 +241,7 @@ const createSetupIntent = async (req, res, next) => {
 const handleWebhook = async (req, res, next) => {
   try {
     // For sandbox/development, temporarily skip webhook verification
-    console.log('Webhook received in sandbox mode');
+    //console.log('Webhook received in sandbox mode');
     return res.status(200).json({ received: true });
 
     // Uncomment below when you have real webhook secret
@@ -258,10 +258,10 @@ const handleWebhook = async (req, res, next) => {
         await handlePaymentFailed(event.data.object);
         break;
       case 'customer.created':
-        console.log('Customer created:', event.data.object.id);
+        //console.log('Customer created:', event.data.object.id);
         break;
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        //console.log(`Unhandled event type: ${event.type}`);
     }
 
     res.status(200).json({ received: true });
@@ -285,7 +285,7 @@ const handlePaymentSucceeded = async (paymentIntent) => {
           where: { id: paymentIntent.metadata.orderId },
         }
       );
-      console.log(
+      //console.log(
         `Payment succeeded for order: ${paymentIntent.metadata.orderId}`
       );
     }
@@ -308,7 +308,7 @@ const handlePaymentFailed = async (paymentIntent) => {
           where: { id: paymentIntent.metadata.orderId },
         }
       );
-      console.log(
+      //console.log(
         `Payment failed for order: ${paymentIntent.metadata.orderId}`
       );
     }

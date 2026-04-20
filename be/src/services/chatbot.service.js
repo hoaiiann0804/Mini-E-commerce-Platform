@@ -465,7 +465,7 @@ class ChatbotService {
   async trackConversation(data) {
     try {
       // In a real implementation, this would save to a conversation tracking table
-      console.log('Tracking conversation:', {
+      //console.log('Tracking conversation:', {
         userId: data.userId,
         message: data.message,
         intent: data.intent,
@@ -485,7 +485,7 @@ class ChatbotService {
   async trackAnalytics(data) {
     try {
       // In a real implementation, this would save to an analytics table
-      console.log('Tracking analytics:', data);
+      //console.log('Tracking analytics:', data);
 
       // You could save this to a ChatbotAnalytics model
     } catch (error) {

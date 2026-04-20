@@ -116,7 +116,7 @@ const CheckoutPage: React.FC = () => {
 
     // Kiểm tra xem người dùng đang thanh toán lại đơn hàng hay không
     if (repayOrderId && repayAmount) {
-      console.log("Repaying order:", repayOrderId, "amount:", repayAmount);
+      //console.log("Repaying order:", repayOrderId, "amount:", repayAmount);
 
       // Đặt thông tin đơn hàng hiện tại để thanh toán
       setCurrentOrder({
@@ -240,8 +240,8 @@ const CheckoutPage: React.FC = () => {
   const [currentOrder, setCurrentOrder] = useState<any>(null);
 
   // Debug log
-  console.log("CheckoutPage render - currentOrder:", currentOrder);
-  console.log("CheckoutPage render - paymentMethod:", formData.paymentMethod);
+  //console.log("CheckoutPage render - currentOrder:", currentOrder);
+  //console.log("CheckoutPage render - paymentMethod:", formData.paymentMethod);
 
   // Countries list
   const countries = [
@@ -467,12 +467,12 @@ const CheckoutPage: React.FC = () => {
 
   // Handle creating order for Stripe payment
   const handleStripeOrderCreation = async () => {
-    console.log("Creating order for Stripe payment...");
+    //console.log("Creating order for Stripe payment...");
     const order = await handleCreateOrder();
-    console.log("Order created:", order);
+    //console.log("Order created:", order);
     if (order) {
       setCurrentOrder(order);
-      console.log("Current order set:", order);
+      //console.log("Current order set:", order);
     }
   };
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Button, Space } from 'antd';
-import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from "react";
+import { Modal, Form, Input, InputNumber, Select, Button, Space } from "antd";
+import { SaveOutlined, CloseOutlined } from "@ant-design/icons";
 
 interface Attribute {
   id: string;
@@ -41,10 +41,10 @@ const VariantModal: React.FC<VariantModalProps> = ({
   useEffect(() => {
     if (variant) {
       form.setFieldsValue({
-        name: variant.name || '',
+        name: variant.name || "",
         price: variant.price || 0,
         stock: variant.stock || 0,
-        sku: variant.sku || '',
+        sku: variant.sku || "",
         ...variant.attributes,
       });
     } else {
@@ -61,7 +61,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
       if (
         attributeValues[key] !== undefined &&
         attributeValues[key] !== null &&
-        attributeValues[key] !== ''
+        attributeValues[key] !== ""
       ) {
         filteredAttributes[key] = attributeValues[key];
       }
@@ -77,7 +77,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
       attributes: filteredAttributes,
     };
 
-    console.log('Saving variant:', variantData);
+    //console.log('Saving variant:', variantData);
     onSave(variantData);
     handleClose();
   };
@@ -89,7 +89,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
 
   return (
     <Modal
-      title={variant ? '🎭 Chỉnh sửa biến thể' : '🎭 Thêm biến thể mới'}
+      title={variant ? "🎭 Chỉnh sửa biến thể" : "🎭 Thêm biến thể mới"}
       open={visible}
       onCancel={handleClose}
       footer={null}
@@ -101,23 +101,23 @@ const VariantModal: React.FC<VariantModalProps> = ({
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{
-          name: '',
+          name: "",
           price: 0,
           stock: 0,
-          sku: '',
+          sku: "",
         }}
       >
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '16px',
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "16px",
           }}
         >
           <Form.Item
             label="🏷️ Tên biến thể"
             name="name"
-            rules={[{ required: true, message: 'Vui lòng nhập tên biến thể' }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên biến thể" }]}
           >
             <Input placeholder="VD: Size M - Màu Đỏ" />
           </Form.Item>
@@ -133,29 +133,29 @@ const VariantModal: React.FC<VariantModalProps> = ({
 
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '16px',
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "16px",
           }}
         >
           <Form.Item
             label="💰 Giá (VNĐ)"
             name="price"
             rules={[
-              { required: true, message: 'Vui lòng nhập giá' },
-              { type: 'number', min: 0, message: 'Giá phải lớn hơn 0' },
+              { required: true, message: "Vui lòng nhập giá" },
+              { type: "number", min: 0, message: "Giá phải lớn hơn 0" },
             ]}
           >
             <InputNumber<number>
               placeholder="1,000,000"
               min={0}
               step={1000}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
               parser={(value) =>
-                Number((value ?? '').replace(/\$\s?|(,*)/g, '')) || 0
+                Number((value ?? "").replace(/\$\s?|(,*)/g, "")) || 0
               }
               addonAfter="₫"
             />
@@ -165,14 +165,14 @@ const VariantModal: React.FC<VariantModalProps> = ({
             label="📦 Số lượng tồn kho"
             name="stock"
             rules={[
-              { required: true, message: 'Vui lòng nhập số lượng' },
-              { type: 'number', min: 0, message: 'Số lượng không được âm' },
+              { required: true, message: "Vui lòng nhập số lượng" },
+              { type: "number", min: 0, message: "Số lượng không được âm" },
             ]}
           >
             <InputNumber
               placeholder="50"
               min={0}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               addonAfter="sp"
             />
           </Form.Item>
@@ -182,24 +182,24 @@ const VariantModal: React.FC<VariantModalProps> = ({
         {attributes.length > 0 && (
           <div
             style={{
-              borderTop: '1px solid #f0f0f0',
-              paddingTop: '16px',
-              marginTop: '16px',
+              borderTop: "1px solid #f0f0f0",
+              paddingTop: "16px",
+              marginTop: "16px",
             }}
           >
-            <h3 style={{ marginBottom: '16px' }}>🎨 Thuộc tính biến thể</h3>
+            <h3 style={{ marginBottom: "16px" }}>🎨 Thuộc tính biến thể</h3>
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px',
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "16px",
               }}
             >
               {attributes.map((attr) => {
                 // Kiểm tra attr.value có tồn tại không trước khi gọi split
                 const values = attr.value
                   ? attr.value
-                      .split(',')
+                      .split(",")
                       .map((v) => v.trim())
                       .filter((v) => v)
                   : [];
@@ -220,13 +220,13 @@ const VariantModal: React.FC<VariantModalProps> = ({
         )}
 
         {/* Submit buttons */}
-        <div style={{ textAlign: 'right', marginTop: '24px' }}>
+        <div style={{ textAlign: "right", marginTop: "24px" }}>
           <Space>
             <Button onClick={handleClose} icon={<CloseOutlined />}>
               Hủy
             </Button>
             <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-              {variant ? 'Cập nhật biến thể' : 'Thêm biến thể'}
+              {variant ? "Cập nhật biến thể" : "Thêm biến thể"}
             </Button>
           </Space>
         </div>

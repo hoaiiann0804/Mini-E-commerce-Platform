@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Alert, Divider } from 'antd';
+import React, { useEffect } from "react";
+import { Modal, Form, Input, Button, Space, Alert, Divider } from "antd";
 import {
   SaveOutlined,
   CloseOutlined,
   InfoCircleOutlined,
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 
 const { TextArea } = Input;
 
@@ -32,8 +32,8 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
   useEffect(() => {
     if (attribute) {
       form.setFieldsValue({
-        name: attribute.name || '',
-        value: attribute.value || '',
+        name: attribute.name || "",
+        value: attribute.value || "",
       });
     } else {
       form.resetFields();
@@ -52,12 +52,12 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
 
     // Lưu vào localStorage để debug
     const savedAttributes = JSON.parse(
-      localStorage.getItem('debug_attributes') || '[]'
+      localStorage.getItem("debug_attributes") || "[]"
     );
     savedAttributes.push(attributeData);
-    localStorage.setItem('debug_attributes', JSON.stringify(savedAttributes));
+    localStorage.setItem("debug_attributes", JSON.stringify(savedAttributes));
 
-    console.log('Saving attribute:', attributeData);
+    //console.log('Saving attribute:', attributeData);
     onSave(attributeData);
     handleClose();
   };
@@ -69,7 +69,7 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
 
   return (
     <Modal
-      title={attribute ? '🏷️ Chỉnh sửa thuộc tính' : '🏷️ Thêm thuộc tính mới'}
+      title={attribute ? "🏷️ Chỉnh sửa thuộc tính" : "🏷️ Thêm thuộc tính mới"}
       open={visible}
       onCancel={handleClose}
       footer={null}
@@ -81,14 +81,14 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{
-          name: '',
-          value: '',
+          name: "",
+          value: "",
         }}
       >
         <Form.Item
           label="🏷️ Tên thuộc tính"
           name="name"
-          rules={[{ required: true, message: 'Vui lòng nhập tên thuộc tính' }]}
+          rules={[{ required: true, message: "Vui lòng nhập tên thuộc tính" }]}
           tooltip="Tên mô tả loại thuộc tính (VD: Màu sắc, Size, Chất liệu)"
         >
           <Input placeholder="VD: Màu sắc, Chất liệu, Kích thước" />
@@ -98,7 +98,7 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
           label="📝 Giá trị thuộc tính"
           name="value"
           rules={[
-            { required: true, message: 'Vui lòng nhập giá trị thuộc tính' },
+            { required: true, message: "Vui lòng nhập giá trị thuộc tính" },
           ]}
           tooltip="Nhập các giá trị có thể có, cách nhau bởi dấu phẩy"
         >
@@ -145,11 +145,11 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
                 Xanh dương, Đen, Trắng"
               </div>
               <div>
-                <strong>Tên:</strong> "Kích thước" → <strong>Giá trị:</strong>{' '}
+                <strong>Tên:</strong> "Kích thước" → <strong>Giá trị:</strong>{" "}
                 "S, M, L, XL, XXL"
               </div>
               <div>
-                <strong>Tên:</strong> "Chất liệu" → <strong>Giá trị:</strong>{' '}
+                <strong>Tên:</strong> "Chất liệu" → <strong>Giá trị:</strong>{" "}
                 "Cotton, Polyester, Linen"
               </div>
             </div>
@@ -160,13 +160,13 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
         />
 
         {/* Submit buttons */}
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: "right" }}>
           <Space>
             <Button onClick={handleClose} icon={<CloseOutlined />}>
               Hủy
             </Button>
             <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-              {attribute ? 'Cập nhật thuộc tính' : 'Thêm thuộc tính'}
+              {attribute ? "Cập nhật thuộc tính" : "Thêm thuộc tính"}
             </Button>
           </Space>
         </div>

@@ -35,7 +35,7 @@ const CartPage: React.FC = () => {
   } = useGetCartQuery(isAuthenticated ? undefined : skipToken);
 
   // Debug logging
-  console.log('🛒 CartPage Debug:', {
+  //console.log('🛒 CartPage Debug:', {
     serverCart,
     cartError,
     cartLoading,

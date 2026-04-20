@@ -87,7 +87,7 @@ const DynamicProductTestPage: React.FC = () => {
     affectingNameOnly: Record<string, string>
   ) => {
     setSelectedAttributes(attributeValues);
-    console.log('🔄 Attributes changed:', {
+    //console.log('🔄 Attributes changed:', {
       all: attributeValues,
       nameAffecting: affectingNameOnly,
     });
@@ -95,7 +95,7 @@ const DynamicProductTestPage: React.FC = () => {
 
   const handleNameGenerated = (name: string, details: any) => {
     setDynamicName(name);
-    console.log('🎯 Name generated:', { name, details });
+    //console.log('🎯 Name generated:', { name, details });
   };
 
   const testScenarios = [
@@ -123,7 +123,7 @@ const DynamicProductTestPage: React.FC = () => {
   const runTestScenario = (scenario: (typeof testScenarios)[0]) => {
     setBaseName(scenario.baseName);
     // Simulate attribute selection for demo
-    console.log(`🧪 Testing scenario: ${scenario.name}`, scenario);
+    //console.log(`🧪 Testing scenario: ${scenario.name}`, scenario);
   };
 
   return (

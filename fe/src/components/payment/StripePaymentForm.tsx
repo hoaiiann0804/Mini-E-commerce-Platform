@@ -69,7 +69,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
         console.error("Payment confirmation error:", error);
         onError?.(error.message || t("payment.errors.paymentFailed"));
       } else if (paymentIntent) {
-        console.log(
+        //console.log(
           "Payment succeeded on Stripe, confirming with backend...",
           paymentIntent.id
         );
@@ -80,7 +80,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
             paymentIntentId: paymentIntent.id,
           }).unwrap();
 
-          console.log("Backend confirmation successful:", confirmResponse);
+          //console.log("Backend confirmation successful:", confirmResponse);
           onSuccess?.(confirmResponse.data.paymentIntent);
         } catch (backendError) {
           console.error("Backend confirmation error:", backendError);

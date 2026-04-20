@@ -23,7 +23,7 @@ export const useAuth = () => {
    */
   const logout = async () => {
     try {
-      console.log('🔐 Logging out...');
+      //console.log('🔐 Logging out...');
 
       // Gọi API logout (optional, có thể skip nếu server không cần)
       await logoutMutation().unwrap();
@@ -31,7 +31,7 @@ export const useAuth = () => {
       // Clear Redux state
       dispatch(logoutAction());
 
-      console.log('✅ Logout successful');
+      //console.log('✅ Logout successful');
     } catch (error) {
       console.error('❌ Logout error:', error);
 
@@ -52,7 +52,7 @@ export const useAuth = () => {
    */
   const isAdmin = (): boolean => {
     const result = hasRole('admin');
-    console.log('🔍 isAdmin check:', {
+    //console.log('🔍 isAdmin check:', {
       user: authState.user,
       userRole: authState.user?.role,
       isAdmin: result,

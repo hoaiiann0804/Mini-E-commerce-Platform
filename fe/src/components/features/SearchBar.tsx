@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useDispatch } from 'react-redux';
-import { toggleSearch } from '@/features/ui/uiSlice';
-import { useSearchProductsQuery } from '@/services/productApi';
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useDispatch } from "react-redux";
+import { toggleSearch } from "@/features/ui/uiSlice";
+import { useSearchProductsQuery } from "@/services/productApi";
 
 interface SearchBarProps {
   className?: string;
@@ -23,13 +23,13 @@ interface SearchSuggestion {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-  className = '',
+  className = "",
   placeholder,
   onClose,
   isExpanded = false,
 }) => {
   const { t, i18n } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isActive, setIsActive] = useState(isExpanded);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -44,17 +44,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
       // localStorage.removeItem('recentSearches');
       // localStorage.setItem('recentSearches', JSON.stringify(['Test search 1', 'Test search 2']));
 
-      const storedSearches = localStorage.getItem('recentSearches');
+      const storedSearches = localStorage.getItem("recentSearches");
       if (storedSearches) {
         const parsedSearches = JSON.parse(storedSearches);
-        console.log('Initial load of recent searches:', parsedSearches);
+        //console.log('Initial load of recent searches:', parsedSearches);
         setRecentSearches(parsedSearches);
       } else {
         // Initialize with empty array if not exists
-        localStorage.setItem('recentSearches', JSON.stringify([]));
+        localStorage.setItem("recentSearches", JSON.stringify([]));
       }
     } catch (error) {
-      console.error('Error loading recent searches:', error);
+      console.error("Error loading recent searches:", error);
     }
   }, []);
 
@@ -62,20 +62,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
   useEffect(() => {
     if (isActive) {
       try {
-        const storedSearches = localStorage.getItem('recentSearches');
+        const storedSearches = localStorage.getItem("recentSearches");
         if (storedSearches) {
           const parsedSearches = JSON.parse(storedSearches);
-          console.log('Reloading recent searches when active:', parsedSearches);
+          //console.log('Reloading recent searches when active:', parsedSearches);
           setRecentSearches(parsedSearches);
         }
       } catch (error) {
-        console.error('Error reloading recent searches:', error);
+        console.error("Error reloading recent searches:", error);
       }
     }
   }, [isActive]);
 
   const searchPlaceholder =
-    placeholder || t('header.actions.searchPlaceholder');
+    placeholder || t("header.actions.searchPlaceholder");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -108,9 +108,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
     };
 
     if (isActive) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
       return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener("mousedown", handleClickOutside);
     }
     return undefined;
   }, [onClose, isActive]);
@@ -152,11 +152,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // Clear all recent searches
   const clearRecentSearches = () => {
     try {
-      localStorage.setItem('recentSearches', JSON.stringify([]));
+      localStorage.setItem("recentSearches", JSON.stringify([]));
       setRecentSearches([]);
-      console.log('Cleared all recent searches');
+      //console.log('Cleared all recent searches');
     } catch (error) {
-      console.error('Error clearing recent searches:', error);
+      console.error("Error clearing recent searches:", error);
     }
   };
 
@@ -166,23 +166,23 @@ const SearchBar: React.FC<SearchBarProps> = ({
       const updatedSearches = recentSearches.filter(
         (term) => term !== termToRemove
       );
-      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
       setRecentSearches(updatedSearches);
-      console.log('Removed search term:', termToRemove);
+      //console.log('Removed search term:', termToRemove);
     } catch (error) {
-      console.error('Error removing search term:', error);
+      console.error("Error removing search term:", error);
     }
   };
 
   // Get recent searches from localStorage
   const getRecentSearches = (): string[] => {
     try {
-      const recentSearches = localStorage.getItem('recentSearches');
+      const recentSearches = localStorage.getItem("recentSearches");
       const parsedSearches = recentSearches ? JSON.parse(recentSearches) : [];
-      console.log('Retrieved recent searches:', parsedSearches);
+      //console.log('Retrieved recent searches:', parsedSearches);
       return parsedSearches;
     } catch (error) {
-      console.error('Error getting recent searches:', error);
+      console.error("Error getting recent searches:", error);
       return [];
     }
   };
@@ -196,17 +196,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
         term,
         ...storedSearches.filter((s) => s !== term),
       ].slice(0, 5);
-      console.log('Saving updated searches:', updatedSearches);
-      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      //console.log('Saving updated searches:', updatedSearches);
+      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
 
       // Update state to reflect changes
       setRecentSearches(updatedSearches);
 
       // Verify it was saved correctly
-      const verifySearches = localStorage.getItem('recentSearches');
-      console.log('Verification - saved searches:', verifySearches);
+      const verifySearches = localStorage.getItem("recentSearches");
+      //console.log('Verification - saved searches:', verifySearches);
     } catch (error) {
-      console.error('Error saving search term:', error);
+      console.error("Error saving search term:", error);
     }
   };
 
@@ -230,7 +230,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <button
           onClick={toggleSearchBar}
           className="p-2 rounded-full text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-          aria-label={t('header.actions.search')}
+          aria-label={t("header.actions.search")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -283,9 +283,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 {searchTerm && (
                   <button
                     type="button"
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                     className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
-                    aria-label={t('common.clear')}
+                    aria-label={t("common.clear")}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -310,7 +310,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     dispatch(toggleSearch());
                   }}
                   className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
-                  aria-label={t('common.close')}
+                  aria-label={t("common.close")}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -338,20 +338,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 {isFetching ? (
                   <div className="p-4 text-center text-neutral-500 dark:text-neutral-400">
                     <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-r-2 border-neutral-500 dark:border-neutral-400 mr-2"></div>
-                    {i18n.language === 'vi' ? 'Đang tải...' : 'Loading...'}
+                    {i18n.language === "vi" ? "Đang tải..." : "Loading..."}
                   </div>
                 ) : isError ? (
                   <div className="p-4 text-center text-red-500">
-                    {i18n.language === 'vi'
-                      ? 'Đã xảy ra lỗi'
-                      : 'An error occurred'}
+                    {i18n.language === "vi"
+                      ? "Đã xảy ra lỗi"
+                      : "An error occurred"}
                   </div>
                 ) : suggestions.length === 0 &&
                   debouncedSearchTerm.length > 1 ? (
                   <div className="p-4 text-center text-neutral-500 dark:text-neutral-400">
-                    {i18n.language === 'vi'
-                      ? 'Không tìm thấy kết quả'
-                      : 'No results found'}
+                    {i18n.language === "vi"
+                      ? "Không tìm thấy kết quả"
+                      : "No results found"}
                   </div>
                 ) : (
                   <ul>
@@ -383,9 +383,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                                   product.categories?.[0]?.name}
                               </p>
                               <p className="text-primary-600 dark:text-primary-400 font-medium">
-                                {new Intl.NumberFormat('vi-VN', {
-                                  style: 'currency',
-                                  currency: 'VND',
+                                {new Intl.NumberFormat("vi-VN", {
+                                  style: "currency",
+                                  currency: "VND",
                                   maximumFractionDigits: 0,
                                 }).format(product.price)}
                               </p>
@@ -416,9 +416,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                           onClick={handleSearchSubmit}
                           className="w-full text-center px-4 py-3 text-primary-600 dark:text-primary-400 font-medium hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                         >
-                          {i18n.language === 'vi'
-                            ? 'Xem tất cả kết quả'
-                            : 'View all results'}
+                          {i18n.language === "vi"
+                            ? "Xem tất cả kết quả"
+                            : "View all results"}
                         </button>
                       </li>
                     )}
@@ -432,16 +432,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                  {i18n.language === 'vi'
-                    ? 'Tìm kiếm gần đây'
-                    : 'Recent searches'}
+                  {i18n.language === "vi"
+                    ? "Tìm kiếm gần đây"
+                    : "Recent searches"}
                 </h3>
                 {recentSearches.length > 0 && (
                   <button
                     onClick={clearRecentSearches}
                     className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   >
-                    {i18n.language === 'vi' ? 'Xóa tất cả' : 'Clear all'}
+                    {i18n.language === "vi" ? "Xóa tất cả" : "Clear all"}
                   </button>
                 )}
               </div>
@@ -460,7 +460,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         removeSearchTerm(term);
                       }}
                       className="p-1 bg-neutral-200 dark:bg-neutral-600 rounded-r-full text-neutral-500 dark:text-neutral-400 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors"
-                      aria-label={i18n.language === 'vi' ? 'Xóa' : 'Remove'}
+                      aria-label={i18n.language === "vi" ? "Xóa" : "Remove"}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -479,9 +479,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 ))}
                 {recentSearches.length === 0 && (
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    {i18n.language === 'vi'
-                      ? 'Không có tìm kiếm gần đây'
-                      : 'No recent searches'}
+                    {i18n.language === "vi"
+                      ? "Không có tìm kiếm gần đây"
+                      : "No recent searches"}
                   </p>
                 )}
               </div>
