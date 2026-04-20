@@ -323,11 +323,11 @@ const OrdersPage: React.FC = () => {
   const pagination = ordersData?.data?.pagination;
 
   //console.log('OrdersPage: Render state', {
-    isLoading,
-    error,
-    orders,
-    pagination,
-  });
+  //   isLoading,
+  //   error,
+  //   orders,
+  //   pagination,
+  // });
 
   // Loading component
   if (isLoading) {

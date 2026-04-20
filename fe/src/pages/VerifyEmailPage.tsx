@@ -21,14 +21,14 @@ const VerifyEmailPage: React.FC = () => {
 
   // Debug logging
   useEffect(() => {
-    //console.log('VerifyEmailPage state:', {
-      isLoading,
-      isSuccess,
-      isError,
-      error,
-      token,
-      hasVerified: hasVerified.current,
-    });
+    // console.log('VerifyEmailPage state:', {
+    //   isLoading,
+    //   isSuccess,
+    //   isError,
+    //   error,
+    //   token,
+    //   hasVerified: hasVerified.current,
+    // });
   }, [isLoading, isSuccess, isError, error, token]);
 
   const handleGoToLogin = () => {

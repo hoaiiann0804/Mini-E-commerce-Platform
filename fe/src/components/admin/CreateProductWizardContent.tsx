@@ -98,7 +98,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
     // Cập nhật form với dữ liệu đã lưu trong formState
     form.setFieldsValue(formState);
-  }, [currentStep]);
+  }, [currentStep]);;
 
   // Effect để lưu lại giá trị form khi có thay đổi
   React.useEffect(() => {
@@ -108,7 +108,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       const values = form.getFieldsValue(true);
       setFormState((prev) => ({ ...prev, ...values }));
     };
-  }, []);
+  }, []);;
 
   const steps = [
     {
@@ -267,22 +267,21 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             }
           }
 
-          // Nếu không có lỗi, tiếp tục validate thông qua Ant Design Form
-          await form.validateFields(fieldsToValidate);
+      // Nếu không có lỗi, tiếp tục validate thông qua Ant Design Form
+      await form.validateFields(fieldsToValidate);
 
-          // Lưu lại giá trị của form hiện tại
-          const currentFormData = form.getFieldsValue();
-          //console.log("Form data after validation:", currentFormData);
+      // Lưu lại giá trị của form hiện tại
+      const currentFormData = form.getFieldsValue();
+      //console.log("Form data after validation:", currentFormData);
 
-          // Cập nhật formState với dữ liệu mới
-          setFormState((prevState) => ({
-            ...prevState,
-            ...currentFormData,
-          }));
-          //console.log("Updated form state:", {
-            ...formState,
-            ...currentFormData,
-          });
+      // Cập nhật formState với dữ liệu mới
+      setFormState((prevState) => ({
+        ...prevState,
+        ...currentFormData,
+      }));
+      //console.log("Updated form state:", {
+        // ...formState,
+        // ...currentFormData,
 
           // Nếu validation thành công, chuyển sang bước tiếp theo
           setCurrentStep(currentStep + 1);
@@ -381,9 +380,9 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       //console.log("Form values before validation:", formState);
       //console.log("Current form values:", currentFormValues);
       //console.log("Combined form values:", {
-        ...formState,
-        ...currentFormValues,
-      });
+      //   ...formState,
+      //   ...currentFormValues,
+      // });
 
       // Kết hợp dữ liệu từ tất cả các bước
       const combinedValues = {

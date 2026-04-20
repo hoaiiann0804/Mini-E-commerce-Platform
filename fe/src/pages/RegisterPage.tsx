@@ -82,11 +82,11 @@ const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      //console.log('🚀 Attempting registration with:', {
-        email,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-      });
+      // //console.log('🚀 Attempting registration with:', {
+      //   email,
+      //   firstName: firstName.trim(),
+      //   lastName: lastName.trim(),
+      // });
 
       const result = await register({
         email,

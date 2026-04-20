@@ -88,9 +88,9 @@ const DynamicProductTestPage: React.FC = () => {
   ) => {
     setSelectedAttributes(attributeValues);
     //console.log('🔄 Attributes changed:', {
-      all: attributeValues,
-      nameAffecting: affectingNameOnly,
-    });
+    //   all: attributeValues,
+    //   nameAffecting: affectingNameOnly,
+    // });
   };
 
   const handleNameGenerated = (name: string, details: any) => {
