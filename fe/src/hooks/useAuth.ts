@@ -52,12 +52,12 @@ export const useAuth = () => {
    */
   const isAdmin = (): boolean => {
     const result = hasRole('admin');
-    //console.log('🔍 isAdmin check:', {
-      user: authState.user,
-      userRole: authState.user?.role,
-      isAdmin: result,
-      isAuthenticated: authState.isAuthenticated,
-    });
+    // //console.log('🔍 isAdmin check:', {
+    //   user: authState.user,
+    //   userRole: authState.user?.role,
+    //   isAdmin: result,
+    //   isAuthenticated: authState.isAuthenticated,
+    // });
     return result;
   };
 

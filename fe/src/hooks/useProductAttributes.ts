@@ -59,9 +59,9 @@ export const useProductAttributes = (
           : attr
       );
       //console.log(
-        'Updating existing attribute. New attributes array:',
-        updatedAttributes
-      );
+      //   'Updating existing attribute. New attributes array:',
+      //   updatedAttributes
+      // );
       setAttributes(updatedAttributes);
     } else {
       // Thêm thuộc tính mới

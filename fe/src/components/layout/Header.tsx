@@ -40,11 +40,11 @@ const Header: React.FC = () => {
 
   // Debug logging for admin panel visibility
   //console.log("🔍 Header render:", {
-    isAuthenticated,
-    user,
-    userRole: user?.role,
-    isAdminResult: isAdmin(),
-  });
+  //   isAuthenticated,
+  //   user,
+  //   userRole: user?.role,
+  //   isAdminResult: isAdmin(),
+  // });
 
   // Get UI state from Redux store
   const isMobileMenuOpen = useSelector(
@@ -73,11 +73,11 @@ const Header: React.FC = () => {
 
   // Debug logging for cart count
   //console.log("🛒 Cart count debug:", {
-    isAuthenticated,
-    serverCartCount,
-    localCartCount,
-    cartItemsCount,
-  });
+  //   isAuthenticated,
+  //   serverCartCount,
+  //   localCartCount,
+  //   cartItemsCount,
+  // });
 
   // Xóa localStorage khi server trả về count = 0 và cập nhật state Redux (chỉ cho authenticated users)
   useEffect(() => {
@@ -427,10 +427,10 @@ const Header: React.FC = () => {
                         "recentSearches",
                         JSON.stringify(updatedSearches)
                       );
-                      //console.log(
-                        "Mobile search - saved searches:",
-                        updatedSearches
-                      );
+                      // //console.log(
+                      //   "Mobile search - saved searches:",
+                      //   updatedSearches
+                      // );
                     } catch (error) {
                       console.error("Error saving search term:", error);
                     }

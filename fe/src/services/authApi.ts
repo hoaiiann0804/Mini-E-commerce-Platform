@@ -62,11 +62,11 @@ export const authApi = api.injectEndpoints({
           });
 
           const data = await response.json();
-          //console.log("📨 Raw response:", {
-            status: response.status,
-            ok: response.ok,
-            data,
-          });
+          // console.log("📨 Raw response:", {
+          //   status: response.status,
+          //   ok: response.ok,
+          //   data,
+          // });
 
           if (!response.ok) {
             //console.log("❌ Response not OK:", response.status, data);

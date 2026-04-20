@@ -44,10 +44,10 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
   // Load initial specifications when prop changes
   useEffect(() => {
     if (initialSpecifications && initialSpecifications.length > 0) {
-      //console.log(
-        'ProductSpecificationsForm - Loading initial specifications:',
-        initialSpecifications
-      );
+      // //console.log(
+      //   'ProductSpecificationsForm - Loading initial specifications:',
+      //   initialSpecifications
+      // );
       // Ensure each spec has a unique ID
       const specsWithIds = initialSpecifications.map((spec, index) => ({
         ...spec,
@@ -91,10 +91,10 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
         currentSpecs.length > 0
       ) {
         if (JSON.stringify(currentSpecs) !== JSON.stringify(specifications)) {
-          //console.log(
-            'ProductSpecificationsForm - Interval check found specifications:',
-            currentSpecs
-          );
+          // //console.log(
+          //   'ProductSpecificationsForm - Interval check found specifications:',
+          //   currentSpecs
+          // );
           setSpecifications(currentSpecs);
           clearInterval(interval); // Stop checking once found
         }
@@ -127,9 +127,9 @@ const ProductSpecificationsForm: React.FC<ProductSpecificationsFormProps> = ({
     field: keyof Specification,
     value: string
   ) => {
-    //console.log(
-      `Updating specification ${id}, field: ${field}, value: ${value}`
-    );
+    // //console.log(
+    //   `Updating specification ${id}, field: ${field}, value: ${value}`
+    // );
     setSpecifications((specs) => {
       const updated = specs.map((spec) =>
         spec.id === id ? { ...spec, [field]: value } : spec

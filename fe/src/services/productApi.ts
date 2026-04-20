@@ -176,10 +176,10 @@ export const productApi = api.injectEndpoints({
         if (params.categoryId)
           queryParams.append('categoryId', params.categoryId);
 
-        //console.log(
-          'Fetching product filters with params:',
-          queryParams.toString()
-        );
+        // //console.log(
+        //   'Fetching product filters with params:',
+        //   queryParams.toString()
+        // );
         return {
           url: `/products/filters?${queryParams.toString()}`,
           method: 'GET',

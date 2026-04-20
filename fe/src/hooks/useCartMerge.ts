@@ -80,9 +80,9 @@ export const useCartMerge = (
                 // Fallback to current serverCart if refetch doesn't return new data
                 dispatch(setServerCart(serverCart));
                 //console.log(
-                  '✅ Cart merge successful (using current data):',
-                  serverCart
-                );
+                //   '✅ Cart merge successful (using current data):',
+                //   serverCart
+                // );
               }
             } catch (refetchError) {
               console.error('❌ Failed to refetch cart:', refetchError);
@@ -105,8 +105,8 @@ export const useCartMerge = (
           } else {
             // If no local items, just merge any session cart on the server
             //console.log(
-              '🔄 No local items, checking for session cart on server...'
-            );
+            //   '🔄 No local items, checking for session cart on server...'
+            // );
             const mergedCart = await mergeCart().unwrap();
 
             // Update Redux store with merged cart

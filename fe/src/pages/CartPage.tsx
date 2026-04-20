@@ -36,12 +36,12 @@ const CartPage: React.FC = () => {
 
   // Debug logging
   //console.log('🛒 CartPage Debug:', {
-    serverCart,
-    cartError,
-    cartLoading,
-    isAuthenticated,
-    localItems: items,
-  });
+  //   serverCart,
+  //   cartError,
+  //   cartLoading,
+  //   isAuthenticated,
+  //   localItems: items,
+  // });
   const [clearServerCart, { isLoading: clearingCart }] = useClearCartMutation();
 
   // Initialize cart on mount
