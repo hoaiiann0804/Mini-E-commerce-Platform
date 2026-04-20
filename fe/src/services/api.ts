@@ -35,9 +35,9 @@ const logApiConfig = (): void => {
     console.group("🔧 API Configuration");
     //console.log("Base URL:", getBaseUrl());
     //console.log(
-      "Environment:",
-      import.meta.env.DEV ? "Development" : "Production"
-    );
+    //   "Environment:",
+    //   import.meta.env.DEV ? "Development" : "Production"
+    // );
     //console.log("VITE_API_URL:", import.meta.env.VITE_API_URL || "Not set");
     console.groupEnd();
   }

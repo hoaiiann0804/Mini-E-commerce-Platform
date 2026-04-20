@@ -257,8 +257,8 @@ const CreateProductPage: React.FC = () => {
           if (result.hasChanges) {
             processedDescription = result.processedDescription;
             //console.log(
-              `Converted ${result.uploadedImages.length} base64 images to uploaded files`
-            );
+            //   `Converted ${result.uploadedImages.length} base64 images to uploaded files`
+            // );
           }
         }
 
@@ -331,7 +331,7 @@ const CreateProductPage: React.FC = () => {
             }
             return [];
           })(),
-          thumbnail: (
+            thumbnail: (
             allFormValues.thumbnail ||
             values.thumbnail ||
             ""
@@ -432,43 +432,43 @@ const CreateProductPage: React.FC = () => {
 
         //console.log("Sending product data to server:", productData);
         //console.log("Product data type check:", {
-          searchKeywords: {
-            type: typeof productData.searchKeywords,
-            isArray: Array.isArray(productData.searchKeywords),
-          },
-          seoKeywords: {
-            type: typeof productData.seoKeywords,
-            isArray: Array.isArray(productData.seoKeywords),
-          },
-          specifications: {
-            type: typeof productData.specifications,
-            isArray: Array.isArray(productData.specifications),
-          },
-          categoryIds: {
-            type: typeof productData.categoryIds,
-            isArray: Array.isArray(productData.categoryIds),
-          },
-          warrantyPackageIds: {
-            type: typeof productData.warrantyPackageIds,
-            isArray: Array.isArray(productData.warrantyPackageIds),
-          },
-          attributes: {
-            type: typeof productData.attributes,
-            isArray: Array.isArray(productData.attributes),
-          },
-          variants: {
-            type: typeof productData.variants,
-            isArray: Array.isArray(productData.variants),
-          },
-          images: {
-            type: typeof productData.images,
-            isArray: Array.isArray(productData.images),
-          },
-          thumbnail: {
-            type: typeof productData.thumbnail,
-            value: productData.thumbnail,
-          },
-        });
+          // searchKeywords: {
+          //   type: typeof productData.searchKeywords,
+          //   isArray: Array.isArray(productData.searchKeywords),
+          // },
+          // seoKeywords: {
+          //   type: typeof productData.seoKeywords,
+          //   isArray: Array.isArray(productData.seoKeywords),
+          // },
+          // specifications: {
+          //   type: typeof productData.specifications,
+          //   isArray: Array.isArray(productData.specifications),
+          // },
+          // categoryIds: {
+          //   type: typeof productData.categoryIds,
+          //   isArray: Array.isArray(productData.categoryIds),
+          // },
+          // warrantyPackageIds: {
+          //   type: typeof productData.warrantyPackageIds,
+          //   isArray: Array.isArray(productData.warrantyPackageIds),
+          // },
+          // attributes: {
+          //   type: typeof productData.attributes,
+          //   isArray: Array.isArray(productData.attributes),
+          // },
+          // variants: {
+          //   type: typeof productData.variants,
+          //   isArray: Array.isArray(productData.variants),
+          // },
+          // images: {
+          //   type: typeof productData.images,
+          //   isArray: Array.isArray(productData.images),
+          // },
+          // thumbnail: {
+          //   type: typeof productData.thumbnail,
+          //   value: productData.thumbnail,
+          // },
+        // });
         await createProduct(productData).unwrap();
         message.success("Tạo sản phẩm thành công!");
         navigate("/admin/products");

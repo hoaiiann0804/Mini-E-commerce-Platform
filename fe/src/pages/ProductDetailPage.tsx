@@ -362,9 +362,9 @@ const ProductDetailPage: React.FC = () => {
 
       // Debug: Check if localStorage was updated
       //console.log(
-        "🔍 localStorage after add:",
-        localStorage.getItem("cartItems")
-      );
+      //   "🔍 localStorage after add:",
+      //   localStorage.getItem("cartItems")
+      // );
 
       dispatch(
         addNotification({

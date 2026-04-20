@@ -111,8 +111,8 @@ export const processDescriptionImages = async (
           });
 
           //console.log(
-            `Successfully converted image ${i + 1}: ${result.data.fileName}`
-          );
+          //   `Successfully converted image ${i + 1}: ${result.data.fileName}`
+          // );
         } else {
           console.error(
             `Failed to convert image ${i + 1}: No data in response`

@@ -1,75 +1,87 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
-// https://vitejs.dev/config/
+// Fix __dirname cho ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 export default defineConfig({
   plugins: [react()],
-  build: {
-    // Disable sourcemaps for production to reduce bundle size
-    sourcemap: false,
-    // Enable chunk splitting
-    rollupOptions: {
-      output: {},
-    },
-    // Additional optimizations
-    chunkSizeWarningLimit: 600,
-    minify: 'esbuild',
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-  },
+
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@assets': path.resolve(__dirname, './src/assets'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@config': path.resolve(__dirname, './src/config'),
-      '@constants': path.resolve(__dirname, './src/constants'),
-      '@contexts': path.resolve(__dirname, './src/contexts'),
-      '@features': path.resolve(__dirname, './src/features'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@lib': path.resolve(__dirname, './src/lib'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@routes': path.resolve(__dirname, './src/routes'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@store': path.resolve(__dirname, './src/store'),
-      '@styles': path.resolve(__dirname, './src/styles'),
-      '@types': path.resolve(__dirname, './src/types'),
-      '@utils': path.resolve(__dirname, './src/utils'),
+      '@': resolve(__dirname, './src'),
+      '@assets': resolve(__dirname, './src/assets'),
+      '@components': resolve(__dirname, './src/components'),
+      '@config': resolve(__dirname, './src/config'),
+      '@constants': resolve(__dirname, './src/constants'),
+      '@contexts': resolve(__dirname, './src/contexts'),
+      '@features': resolve(__dirname, './src/features'),
+      '@hooks': resolve(__dirname, './src/hooks'),
+      '@lib': resolve(__dirname, './src/lib'),
+      '@pages': resolve(__dirname, './src/pages'),
+      '@routes': resolve(__dirname, './src/routes'),
+      '@services': resolve(__dirname, './src/services'),
+      '@store': resolve(__dirname, './src/store'),
+      '@styles': resolve(__dirname, './src/styles'),
+      '@types': resolve(__dirname, './src/types'),
+      '@utils': resolve(__dirname, './src/utils'),
     },
   },
+
   server: {
-    port: 5175, // Sử dụng cổng 5175 mặc định
-    strictPort: false, // Cho phép tìm cổng khác nếu 5175 đã được sử dụng
+    port: 5175,
+    strictPort: false,
+
     proxy: {
-      // Proxy API requests to avoid CORS issues
       '/api': {
         target: 'http://localhost:8888',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'), // Giữ /api trong đường dẫn
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            //console.log('proxy error', err);
+
+        // giữ nguyên path /api (không cần rewrite)
+        rewrite: (path) => path,
+
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.log('❌ Proxy error:', err.message);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            //console.log('Sending Request to the Target:', req.method, req.url);
+
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('➡️ Request:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            //console.log(
-              'Received Response from the Target:',
-              proxyRes.statusCode,
-              req.url
-            );
+
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('⬅️ Response:', proxyRes.statusCode, req.url);
           });
         },
       },
     },
+
     fs: {
-      // Allow serving files from one level up to the project root
       allow: ['..'],
     },
   },
-});
 
+  build: {
+    sourcemap: false,
+
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+        },
+      },
+    },
+
+    chunkSizeWarningLimit: 600,
+    minify: 'esbuild',
+  },
+
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
+});
