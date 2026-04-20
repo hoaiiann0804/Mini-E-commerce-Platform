@@ -17,7 +17,7 @@ async function generateProducts() {
   const BATCH_SIZE = 5000;
   const totalBatches = TOTAL_TO_INSERT / BATCH_SIZE;
 
-  console.log(`🚀 Bắt đầu quá trình bơm ${TOTAL_TO_INSERT} sản phẩm...`);
+  //console.log(`🚀 Bắt đầu quá trình bơm ${TOTAL_TO_INSERT} sản phẩm...`);
 
   for (let b = 0; b < totalBatches; b++) {
     const clones = [];
@@ -44,12 +44,12 @@ async function generateProducts() {
 
     await Product.bulkCreate(clones, { logging: false });
 
-    console.log(
+    //console.log(
       `✅ Đã chèn thành công: ${(b + 1) * BATCH_SIZE} / ${TOTAL_TO_INSERT}`
     );
   }
 
-  console.log("✨ Hoàn tất bơm dữ liệu!");
+  //console.log("✨ Hoàn tất bơm dữ liệu!");
   process.exit(0);
 }
 

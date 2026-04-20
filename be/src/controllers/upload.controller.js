@@ -124,7 +124,7 @@ const deleteFile = async (req, res, next) => {
 
     // Delete from Cloudinary
     const result = await cloudinary.uploader.destroy(publicId);
-    console.log("Cloudinary deletion result:", result);
+    //console.log("Cloudinary deletion result:", result);
 
     if (result.result !== "ok") {
       throw new AppError(

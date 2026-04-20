@@ -1,24 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import type { RootState } from '@/store';
-import { Message } from '../types/Message';
-import { useSendChatbotMessageMutation } from '../services/chatbotApi';
-import type { ChatbotApiResponse } from '../services/chatbotApi';
-import { useGetCartQuery } from '@/services/cartApi';
-import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '@/store';
-import { setServerCart } from '@/features/cart/cartSlice';
-import type { BackendCart, BackendCartItem } from '@/services/cartApi';
-import type { ServerCart } from '@/types/cart.types';
-import { geminiService } from '../services/geminiService';
-import ChatHeader from './ChatHeader';
-import ChatMessages from './ChatMessages';
-import ChatInput from './ChatInput';
+import React, { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import type { RootState } from "@/store";
+import { Message } from "../types/Message";
+import { useSendChatbotMessageMutation } from "../services/chatbotApi";
+import type { ChatbotApiResponse } from "../services/chatbotApi";
+import { useGetCartQuery } from "@/services/cartApi";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/store";
+import { setServerCart } from "@/features/cart/cartSlice";
+import type { BackendCart, BackendCartItem } from "@/services/cartApi";
+import type { ServerCart } from "@/types/cart.types";
+import { geminiService } from "../services/geminiService";
+import ChatHeader from "./ChatHeader";
+import ChatMessages from "./ChatMessages";
+import ChatInput from "./ChatInput";
 // Import trực tiếp từ file icon
-import ChatIcon from './icons/ChatIcon';
-import CloseIcon from './icons/CloseIcon';
-import './ChatWidget.css';
+import ChatIcon from "./icons/ChatIcon";
+import CloseIcon from "./icons/CloseIcon";
+import "./ChatWidget.css";
 
 /**
  * Component ChatWidget không sử dụng Portal để tránh các vấn đề về vị trí
@@ -51,20 +51,20 @@ const ChatWidgetPortal: React.FC = () => {
     if (isOpen && messages.length === 0) {
       const greetingText =
         isAuthenticated && user
-          ? t('chat.greetingWithName', { name: user.name }) ||
-          `Chào ${user.name}! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?`
-          : t('chat.greeting') ||
-          'Chào bạn! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?';
+          ? t("chat.greetingWithName", { name: user.name }) ||
+            `Chào ${user.name}! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?`
+          : t("chat.greeting") ||
+            "Chào bạn! Tôi là trợ lý AI của Shopmini! 😊 Tôi có thể giúp bạn tìm sản phẩm, xem khuyến mãi và hỗ trợ mua hàng. Bạn cần gì nhỉ?";
 
       const greeting = {
         id: Date.now().toString(),
         text: greetingText,
-        sender: 'ai' as const,
+        sender: "ai" as const,
         suggestions: [
-          t('chat.suggestions.findProducts') || 'Tìm sản phẩm hot 🔥',
-          t('chat.suggestions.viewPromotions') || 'Xem khuyến mãi 🎉',
-          t('chat.suggestions.howToOrder') || 'Hướng dẫn mua hàng',
-          t('chat.suggestions.returnPolicy') || 'Chính sách đổi trả',
+          t("chat.suggestions.findProducts") || "Tìm sản phẩm hot 🔥",
+          t("chat.suggestions.viewPromotions") || "Xem khuyến mãi 🎉",
+          t("chat.suggestions.howToOrder") || "Hướng dẫn mua hàng",
+          t("chat.suggestions.returnPolicy") || "Chính sách đổi trả",
         ],
       };
       setMessages([greeting]);
@@ -74,20 +74,20 @@ const ChatWidgetPortal: React.FC = () => {
   // Cuộn xuống tin nhắn mới nhất
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen]);
 
   // Thêm class vào body khi chatbot mở
   useEffect(() => {
     if (isOpen) {
-      document.body.classList.add('chat-widget-open');
+      document.body.classList.add("chat-widget-open");
     } else {
-      document.body.classList.remove('chat-widget-open');
+      document.body.classList.remove("chat-widget-open");
     }
 
     return () => {
-      document.body.classList.remove('chat-widget-open');
+      document.body.classList.remove("chat-widget-open");
     };
   }, [isOpen]);
 
@@ -99,7 +99,7 @@ const ChatWidgetPortal: React.FC = () => {
     const userMessage: Message = {
       id: Date.now().toString(),
       text,
-      sender: 'user',
+      sender: "user",
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -110,18 +110,18 @@ const ChatWidgetPortal: React.FC = () => {
       ...prev,
       {
         id: loadingId,
-        text: '',
-        sender: 'ai',
+        text: "",
+        sender: "ai",
         isLoading: true,
       },
     ]);
 
     try {
-      console.log('Sending message to AI:', text);
+      //console.log('Sending message to AI:', text);
 
       // Thêm timeout để tránh treo UI nếu API quá chậm
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000);
+        setTimeout(() => reject(new Error("Request timeout")), 10000);
       });
 
       // Call API với timeout và xử lý lỗi
@@ -142,40 +142,42 @@ const ChatWidgetPortal: React.FC = () => {
 
       const response = apiResponse as ChatbotApiResponse;
 
-      console.log('Received AI response:', response);
+      //console.log('Received AI response:', response);
 
       // Xóa tin nhắn "đang nhập" và thêm phản hồi từ API
-      if (response.status === 'success' && response.data) {
+      if (response.status === "success" && response.data) {
         // Nếu có dữ liệu giỏ hàng mới (khi thêm sản phẩm thành công)
-        if ('cart' in response.data && response.data.cart) {
+        if ("cart" in response.data && response.data.cart) {
           const cartData = response.data.cart as BackendCart;
           const { items, totalItems, subtotal } = cartData;
 
           // Tạo cấu trúc dữ liệu giỏ hàng phù hợp với Redux store
           const serverCart: ServerCart = {
-            id: cartData.id || 'guest-cart',
+            id: cartData.id || "guest-cart",
             items: items.map((item: BackendCartItem) => ({
               id: item.id,
-              cartId: cartData.id || 'guest-cart',
+              cartId: cartData.id || "guest-cart",
               productId: item.productId,
               variantId: item.variantId || undefined,
               quantity: item.quantity,
               price: item.ProductVariant?.price || item.Product?.price || 0,
               Product: {
                 id: item.productId,
-                name: item.Product?.name || 'Unknown Product',
-                slug: item.Product?.slug || '',
+                name: item.Product?.name || "Unknown Product",
+                slug: item.Product?.slug || "",
                 price: item.Product?.price || 0,
-                thumbnail: item.Product?.thumbnail || '',
+                thumbnail: item.Product?.thumbnail || "",
                 inStock: item.Product?.inStock || false,
                 stockQuantity: item.Product?.stockQuantity || 0,
               },
-              ProductVariant: item.ProductVariant ? {
-                id: item.ProductVariant.id,
-                name: item.ProductVariant.name,
-                price: item.ProductVariant.price,
-                stockQuantity: item.ProductVariant.stockQuantity,
-              } : undefined,
+              ProductVariant: item.ProductVariant
+                ? {
+                    id: item.ProductVariant.id,
+                    name: item.ProductVariant.name,
+                    price: item.ProductVariant.price,
+                    stockQuantity: item.ProductVariant.stockQuantity,
+                  }
+                : undefined,
             })),
             totalItems,
             subtotal,
@@ -196,12 +198,12 @@ const ChatWidgetPortal: React.FC = () => {
             ...filtered,
             {
               id: (Date.now() + 2).toString(),
-              text: response.data?.response || '',
-              sender: 'ai' as const,
+              text: response.data?.response || "",
+              sender: "ai" as const,
               suggestions: response.data?.suggestions || [
-                t('chat.suggestions.findProducts') || 'Tìm thêm sản phẩm',
-                t('chat.suggestions.viewCart') || 'Xem giỏ hàng',
-                t('chat.suggestions.askMore') || 'Hỏi thêm',
+                t("chat.suggestions.findProducts") || "Tìm thêm sản phẩm",
+                t("chat.suggestions.viewCart") || "Xem giỏ hàng",
+                t("chat.suggestions.askMore") || "Hỏi thêm",
               ],
               products: response.data?.products,
               actions: response.data?.actions,
@@ -209,34 +211,34 @@ const ChatWidgetPortal: React.FC = () => {
           ];
         });
       } else {
-        throw new Error(response.message || 'Lỗi không xác định');
+        throw new Error(response.message || "Lỗi không xác định");
       }
     } catch (error: unknown) {
-      console.error('Error generating AI response:', error);
+      console.error("Error generating AI response:", error);
 
       // Xác định thông báo lỗi phù hợp
       let errorMessage =
-        t('chat.errors.general') ||
-        'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.';
+        t("chat.errors.general") ||
+        "Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.";
 
       // Type guard for error handling
       const err = error as { message?: string; status?: number };
-      
-      if (err.message === 'Request timeout') {
+
+      if (err.message === "Request timeout") {
         errorMessage =
-          t('chat.errors.timeout') ||
-          'Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.';
+          t("chat.errors.timeout") ||
+          "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.";
       } else if (err.status === 404) {
         errorMessage =
-          t('chat.errors.notFound') ||
-          'Không tìm thấy dịch vụ AI. Vui lòng thử lại sau.';
+          t("chat.errors.notFound") ||
+          "Không tìm thấy dịch vụ AI. Vui lòng thử lại sau.";
       } else if (err.status === 429) {
         errorMessage =
-          t('chat.errors.tooManyRequests') ||
-          'Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.';
+          t("chat.errors.tooManyRequests") ||
+          "Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.";
       } else if (err.status && err.status >= 500) {
         errorMessage =
-          t('chat.errors.serverError') || 'Lỗi máy chủ. Vui lòng thử lại sau.';
+          t("chat.errors.serverError") || "Lỗi máy chủ. Vui lòng thử lại sau.";
       }
 
       // Xóa tin nhắn "đang nhập" và thêm thông báo lỗi
@@ -247,11 +249,11 @@ const ChatWidgetPortal: React.FC = () => {
           {
             id: (Date.now() + 2).toString(),
             text: errorMessage,
-            sender: 'ai',
+            sender: "ai",
             suggestions: [
-              t('chat.suggestions.tryAgain') || 'Thử lại',
-              t('chat.suggestions.findProducts') || 'Tìm sản phẩm',
-              t('chat.suggestions.contactSupport') || 'Liên hệ hỗ trợ',
+              t("chat.suggestions.tryAgain") || "Thử lại",
+              t("chat.suggestions.findProducts") || "Tìm sản phẩm",
+              t("chat.suggestions.contactSupport") || "Liên hệ hỗ trợ",
             ],
           },
         ];
@@ -280,35 +282,37 @@ const ChatWidgetPortal: React.FC = () => {
       <button
         onClick={toggleChat}
         className="group relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 hover:from-primary-600 hover:via-primary-700 hover:to-primary-800 text-white rounded-full p-4 shadow-[0_8px_25px_rgba(59,130,246,0.35)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.45)] transform hover:scale-110 transition-all duration-300 flex items-center justify-center ring-4 ring-primary-500/20 hover:ring-primary-500/40"
-        aria-label={isOpen ? t('chat.closeChat') : t('chat.openChat')}
+        aria-label={isOpen ? t("chat.closeChat") : t("chat.openChat")}
       >
         {/* Pulse animation when closed - Hiệu ứng mượt mà hơn */}
         {!isOpen && (
           <>
             <div
               className="absolute inset-0 rounded-full bg-primary-400 animate-ping opacity-25"
-              style={{ animationDuration: '2s' }}
+              style={{ animationDuration: "2s" }}
             ></div>
             <div
               className="absolute inset-0 rounded-full bg-primary-300 animate-ping opacity-15 animation-delay-75"
-              style={{ animationDuration: '2.5s' }}
+              style={{ animationDuration: "2.5s" }}
             ></div>
           </>
         )}
 
         {/* AI Status indicator - Thiết kế đẹp hơn */}
         <div
-          className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-lg ${geminiService.isReady()
-              ? 'bg-gradient-to-r from-green-400 to-green-500'
-              : 'bg-gradient-to-r from-yellow-400 to-orange-500'
-            }`}
+          className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-lg ${
+            geminiService.isReady()
+              ? "bg-gradient-to-r from-green-400 to-green-500"
+              : "bg-gradient-to-r from-yellow-400 to-orange-500"
+          }`}
         >
           <div
-            className={`absolute inset-0.5 rounded-full ${geminiService.isReady()
-                ? 'bg-green-300 animate-pulse'
-                : 'bg-yellow-300 animate-pulse'
-              }`}
-            style={{ animationDuration: '1.5s' }}
+            className={`absolute inset-0.5 rounded-full ${
+              geminiService.isReady()
+                ? "bg-green-300 animate-pulse"
+                : "bg-yellow-300 animate-pulse"
+            }`}
+            style={{ animationDuration: "1.5s" }}
           ></div>
         </div>
 

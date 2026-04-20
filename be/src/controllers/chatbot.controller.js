@@ -7,20 +7,20 @@ const {
   Cart,
   CartItem,
   sequelize,
-} = require('../models');
-const { Op } = require('sequelize');
-const chatbotService = require('../services/chatbot.service');
-const geminiChatbotService = require('../services/geminiChatbot.service');
+} = require("../models");
+const { Op } = require("sequelize");
+const chatbotService = require("../services/chatbot.service");
+const geminiChatbotService = require("../services/geminiChatbot.service");
 
 // Initialize Gemini AI only if API key is available
 let genAI = null;
 try {
-  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'demo-key') {
-    const { GoogleGenerativeAI } = require('@google/generative-ai');
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "demo-key") {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
 } catch (error) {
-  console.log('Google Generative AI not available, using fallback responses');
+  //console.log('Google Generative AI not available, using fallback responses');
 }
 
 class ChatbotController {
@@ -30,12 +30,12 @@ class ChatbotController {
   async handleMessage(req, res) {
     try {
       const { message, userId, sessionId, context = {} } = req.body;
-      console.log('Received chatbot message:', { message, userId, sessionId });
+      //console.log('Received chatbot message:', { message, userId, sessionId });
 
       if (!message?.trim()) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Message is required',
+          status: "error",
+          message: "Message is required",
         });
       }
 
@@ -47,7 +47,7 @@ class ChatbotController {
       });
 
       // Xử lý cartAction nếu có
-      if (response.cartAction && response.cartAction.action === 'add_to_cart') {
+      if (response.cartAction && response.cartAction.action === "add_to_cart") {
         try {
           // Thêm sản phẩm vào giỏ hàng
           const cartResult = await this.addToCartDirectly({
@@ -58,29 +58,32 @@ class ChatbotController {
           });
 
           // Cập nhật response với thông báo thành công
-          response.response = response.cartAction.message || '✅ Đã thêm sản phẩm vào giỏ hàng thành công!';
+          response.response =
+            response.cartAction.message ||
+            "✅ Đã thêm sản phẩm vào giỏ hàng thành công!";
           response.cartAction.result = cartResult;
         } catch (cartError) {
-          console.error('Failed to add to cart:', cartError);
-          response.response = '❌ Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.';
+          console.error("Failed to add to cart:", cartError);
+          response.response =
+            "❌ Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.";
           response.cartAction = null;
         }
       }
 
       res.json({
-        status: 'success',
+        status: "success",
         data: response,
       });
     } catch (error) {
-      console.error('Chatbot error:', error);
-      console.error('Error stack:', error.stack);
+      console.error("Chatbot error:", error);
+      console.error("Error stack:", error.stack);
       res.status(500).json({
-        status: 'error',
-        message: 'Failed to process message',
+        status: "error",
+        message: "Failed to process message",
         data: {
           response:
-            'Xin lỗi, tôi đang gặp một chút vấn đề. Vui lòng thử lại sau ít phút nhé! 😅',
-          suggestions: ['Xem sản phẩm hot', 'Tìm khuyến mãi', 'Liên hệ hỗ trợ'],
+            "Xin lỗi, tôi đang gặp một chút vấn đề. Vui lòng thử lại sau ít phút nhé! 😅",
+          suggestions: ["Xem sản phẩm hot", "Tìm khuyến mãi", "Liên hệ hỗ trợ"],
         },
       });
     }
@@ -114,10 +117,10 @@ class ChatbotController {
         rating: product.rating || 4.5,
         discount: product.compareAtPrice
           ? Math.round(
-            ((product.compareAtPrice - product.price) /
-              product.compareAtPrice) *
-            100
-          )
+              ((product.compareAtPrice - product.price) /
+                product.compareAtPrice) *
+                100
+            )
           : 0,
       }));
 
@@ -125,24 +128,24 @@ class ChatbotController {
         response: aiResponse,
         products: productCards,
         suggestions: [
-          'Xem thêm sản phẩm tương tự',
-          'So sánh giá',
-          'Xem khuyến mãi',
-          'Thêm vào giỏ hàng',
+          "Xem thêm sản phẩm tương tự",
+          "So sánh giá",
+          "Xem khuyến mãi",
+          "Thêm vào giỏ hàng",
         ],
         actions:
           products.length > 0
             ? [
-              {
-                type: 'view_products',
-                label: `Xem tất cả ${products.length} sản phẩm`,
-                url: `/products?search=${encodeURIComponent(message)}`,
-              },
-            ]
+                {
+                  type: "view_products",
+                  label: `Xem tất cả ${products.length} sản phẩm`,
+                  url: `/products?search=${encodeURIComponent(message)}`,
+                },
+              ]
             : [],
       };
     } catch (error) {
-      console.error('Product search error:', error);
+      console.error("Product search error:", error);
       throw error;
     }
   }
@@ -167,14 +170,14 @@ class ChatbotController {
         response: aiResponse,
         products: recommendations,
         suggestions: [
-          'Xem chi tiết sản phẩm',
-          'So sánh các sản phẩm',
-          'Tìm sản phẩm tương tự',
-          'Thêm vào giỏ hàng',
+          "Xem chi tiết sản phẩm",
+          "So sánh các sản phẩm",
+          "Tìm sản phẩm tương tự",
+          "Thêm vào giỏ hàng",
         ],
       };
     } catch (error) {
-      console.error('Product recommendation error:', error);
+      console.error("Product recommendation error:", error);
       throw error;
     }
   }
@@ -201,26 +204,26 @@ class ChatbotController {
         response: personalizedPitch.text,
         products: personalizedPitch.products,
         suggestions: [
-          '💳 Mua ngay - Ưu đãi có hạn!',
-          '🛒 Thêm vào giỏ hàng',
-          '💝 Xem thêm khuyến mãi',
-          '📱 Liên hệ tư vấn',
+          "💳 Mua ngay - Ưu đãi có hạn!",
+          "🛒 Thêm vào giỏ hàng",
+          "💝 Xem thêm khuyến mãi",
+          "📱 Liên hệ tư vấn",
         ],
         actions: [
           {
-            type: 'urgent_deals',
-            label: '🔥 Ưu đai sắp hết hạn - Mua ngay!',
-            url: '/deals',
+            type: "urgent_deals",
+            label: "🔥 Ưu đai sắp hết hạn - Mua ngay!",
+            url: "/deals",
           },
           {
-            type: 'bestsellers',
-            label: '⭐ Sản phẩm bán chạy nhất',
-            url: '/bestsellers',
+            type: "bestsellers",
+            label: "⭐ Sản phẩm bán chạy nhất",
+            url: "/bestsellers",
           },
         ],
       };
     } catch (error) {
-      console.error('Sales pitch error:', error);
+      console.error("Sales pitch error:", error);
       throw error;
     }
   }
@@ -238,14 +241,14 @@ class ChatbotController {
       return {
         response: aiResponse,
         suggestions: [
-          'Kiểm tra trạng thái đơn hàng',
-          'Thông tin giao hàng',
-          'Hủy đơn hàng',
-          'Liên hệ hỗ trợ',
+          "Kiểm tra trạng thái đơn hàng",
+          "Thông tin giao hàng",
+          "Hủy đơn hàng",
+          "Liên hệ hỗ trợ",
         ],
       };
     } catch (error) {
-      console.error('Order inquiry error:', error);
+      console.error("Order inquiry error:", error);
       throw error;
     }
   }
@@ -263,14 +266,14 @@ class ChatbotController {
       return {
         response: aiResponse,
         suggestions: [
-          'Chính sách đổi trả',
-          'Hướng dẫn mua hàng',
-          'Thông tin bảo hành',
-          'Liên hệ hotline',
+          "Chính sách đổi trả",
+          "Hướng dẫn mua hàng",
+          "Thông tin bảo hành",
+          "Liên hệ hotline",
         ],
       };
     } catch (error) {
-      console.error('Support error:', error);
+      console.error("Support error:", error);
       throw error;
     }
   }
@@ -301,17 +304,17 @@ class ChatbotController {
         response = {
           response: aiResponse,
           suggestions: [
-            'Tìm sản phẩm hot 🔥',
-            'Xem khuyến mãi 🎉',
-            'Sản phẩm bán chạy ⭐',
-            'Hỗ trợ mua hàng 💬',
+            "Tìm sản phẩm hot 🔥",
+            "Xem khuyến mãi 🎉",
+            "Sản phẩm bán chạy ⭐",
+            "Hỗ trợ mua hàng 💬",
           ],
         };
       }
 
       return response;
     } catch (error) {
-      console.error('General conversation error:', error);
+      console.error("General conversation error:", error);
       throw error;
     }
   }
@@ -325,8 +328,8 @@ class ChatbotController {
 
       if (!query?.trim()) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Search query is required',
+          status: "error",
+          message: "Search query is required",
         });
       }
 
@@ -334,7 +337,7 @@ class ChatbotController {
       const products = await this.searchProducts({ ...searchParams, limit });
 
       res.json({
-        status: 'success',
+        status: "success",
         data: {
           query,
           results: products,
@@ -342,10 +345,10 @@ class ChatbotController {
         },
       });
     } catch (error) {
-      console.error('AI product search error:', error);
+      console.error("AI product search error:", error);
       res.status(500).json({
-        status: 'error',
-        message: 'Search failed',
+        status: "error",
+        message: "Search failed",
       });
     }
   }
@@ -355,7 +358,7 @@ class ChatbotController {
    */
   async getRecommendations(req, res) {
     try {
-      const { userId, limit = 5, type = 'personal' } = req.query;
+      const { userId, limit = 5, type = "personal" } = req.query;
 
       const recommendations =
         await chatbotService.getPersonalizedRecommendations(userId, {
@@ -364,17 +367,17 @@ class ChatbotController {
         });
 
       res.json({
-        status: 'success',
+        status: "success",
         data: {
           recommendations,
           type,
         },
       });
     } catch (error) {
-      console.error('Recommendations error:', error);
+      console.error("Recommendations error:", error);
       res.status(500).json({
-        status: 'error',
-        message: 'Failed to get recommendations',
+        status: "error",
+        message: "Failed to get recommendations",
       });
     }
   }
@@ -397,14 +400,14 @@ class ChatbotController {
       });
 
       res.json({
-        status: 'success',
-        message: 'Analytics tracked successfully',
+        status: "success",
+        message: "Analytics tracked successfully",
       });
     } catch (error) {
-      console.error('Analytics tracking error:', error);
+      console.error("Analytics tracking error:", error);
       res.status(500).json({
-        status: 'error',
-        message: 'Failed to track analytics',
+        status: "error",
+        message: "Failed to track analytics",
       });
     }
   }
@@ -417,18 +420,28 @@ class ChatbotController {
    * @param {string} [userId] - User ID if logged in
    * @param {string} [sessionId] - Session ID for guest users
    */
-  async addToCartDirectly({ productId: productIdentifier, variantId, quantity = 1, userId, sessionId }) {
+  async addToCartDirectly({
+    productId: productIdentifier,
+    variantId,
+    quantity = 1,
+    userId,
+    sessionId,
+  }) {
     const transaction = await sequelize.transaction();
 
     try {
       let product;
 
       // If productIdentifier is an object (already looked up product)
-      if (typeof productIdentifier === 'object' && productIdentifier !== null) {
+      if (typeof productIdentifier === "object" && productIdentifier !== null) {
         product = productIdentifier;
       }
       // If it's a valid UUID
-      else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(productIdentifier)) {
+      else if (
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          productIdentifier
+        )
+      ) {
         product = await Product.findByPk(productIdentifier, { transaction });
       }
       // If it's a product name or other identifier
@@ -438,10 +451,15 @@ class ChatbotController {
           where: {
             [Op.or]: [
               { name: productIdentifier },
-              { slug: productIdentifier.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') }
-            ]
+              {
+                slug: productIdentifier
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/(^-|-$)/g, ""),
+              },
+            ],
           },
-          transaction
+          transaction,
         });
       }
 
@@ -450,7 +468,7 @@ class ChatbotController {
       }
 
       if (!product.inStock) {
-        throw new Error('Sản phẩm đã hết hàng');
+        throw new Error("Sản phẩm đã hết hàng");
       }
 
       // Get or create cart
@@ -458,29 +476,32 @@ class ChatbotController {
       if (userId) {
         // For logged-in users
         [cart] = await Cart.findOrCreate({
-          where: { userId, status: 'active' },
+          where: { userId, status: "active" },
           defaults: { userId },
-          transaction
+          transaction,
         });
       } else if (sessionId) {
         // For guest users
         [cart] = await Cart.findOrCreate({
-          where: { sessionId, status: 'active' },
+          where: { sessionId, status: "active" },
           defaults: { sessionId },
-          transaction
+          transaction,
         });
       } else {
-        throw new Error('Thiếu thông tin người dùng hoặc phiên');
+        throw new Error("Thiếu thông tin người dùng hoặc phiên");
       }
 
       // Check if item already exists in cart
       const whereCondition = {
         cartId: cart.id,
-        productId: product.id,  // Use the found product's ID
-        variantId: variantId || null
+        productId: product.id, // Use the found product's ID
+        variantId: variantId || null,
       };
 
-      let cartItem = await CartItem.findOne({ where: whereCondition, transaction });
+      let cartItem = await CartItem.findOne({
+        where: whereCondition,
+        transaction,
+      });
 
       if (cartItem) {
         // Update quantity if item exists
@@ -488,27 +509,30 @@ class ChatbotController {
         await cartItem.save({ transaction });
       } else {
         // Add new item to cart
-        cartItem = await CartItem.create({
-          cartId: cart.id,
-          productId: product.id,  // Use the found product's ID
-          variantId: variantId || null,
-          quantity,
-          price: product.price // Store the price at time of adding
-        }, { transaction });
+        cartItem = await CartItem.create(
+          {
+            cartId: cart.id,
+            productId: product.id, // Use the found product's ID
+            variantId: variantId || null,
+            quantity,
+            price: product.price, // Store the price at time of adding
+          },
+          { transaction }
+        );
       }
 
       // Track analytics
       await chatbotService.trackAnalytics({
-        event: 'product_added_to_cart',
+        event: "product_added_to_cart",
         userId: userId || `guest_${sessionId}`,
         sessionId,
-        productId: product.id,  // Use the found product's ID
+        productId: product.id, // Use the found product's ID
         metadata: {
           quantity,
           variantId,
-          source: 'chatbot_auto',
+          source: "chatbot_auto",
           productName: product.name,
-          originalInput: productIdentifier  // Keep track of what the user originally entered
+          originalInput: productIdentifier, // Keep track of what the user originally entered
         },
         timestamp: new Date(),
       });
@@ -519,23 +543,33 @@ class ChatbotController {
         include: [
           {
             model: CartItem,
-            as: 'items',
+            as: "items",
             include: [
               {
                 model: Product,
-                attributes: ['id', 'name', 'price', 'thumbnail', 'inStock', 'stockQuantity']
-              }
-            ]
-          }
+                attributes: [
+                  "id",
+                  "name",
+                  "price",
+                  "thumbnail",
+                  "inStock",
+                  "stockQuantity",
+                ],
+              },
+            ],
+          },
         ],
-        transaction
+        transaction,
       });
 
       await transaction.commit();
 
       // Calculate cart totals
       const cartItems = updatedCart.CartItems || [];
-      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalItems = cartItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
       const subtotal = cartItems.reduce((sum, item) => {
         return sum + (item.price || item.Product?.price || 0) * item.quantity;
       }, 0);
@@ -543,27 +577,27 @@ class ChatbotController {
       // Return success response with full cart data
       return {
         success: true,
-        message: 'Đã thêm sản phẩm vào giỏ hàng thành công!',
+        message: "Đã thêm sản phẩm vào giỏ hàng thành công!",
         cart: {
           id: updatedCart.id,
-          items: cartItems.map(item => ({
+          items: cartItems.map((item) => ({
             id: item.id,
             productId: item.productId,
-            name: item.Product?.name || 'Unknown Product',
+            name: item.Product?.name || "Unknown Product",
             price: item.price || item.Product?.price || 0,
             quantity: item.quantity,
             image: item.Product?.thumbnail,
             inStock: item.Product?.inStock,
             stockQuantity: item.Product?.stockQuantity,
-            variantId: item.variantId || null
+            variantId: item.variantId || null,
           })),
           totalItems,
-          subtotal
-        }
+          subtotal,
+        },
       };
     } catch (error) {
       await transaction.rollback();
-      console.error('Add to cart error:', error);
+      console.error("Add to cart error:", error);
       throw error;
     }
   }
@@ -592,24 +626,24 @@ class ChatbotController {
 
       // Track analytics
       await chatbotService.trackAnalytics({
-        event: 'product_added_to_cart',
+        event: "product_added_to_cart",
         userId,
         sessionId,
         productId,
-        metadata: { quantity, source: 'chatbot' },
+        metadata: { quantity, source: "chatbot" },
         timestamp: new Date(),
       });
 
       res.json({
-        status: 'success',
-        message: 'Product added to cart successfully',
+        status: "success",
+        message: "Product added to cart successfully",
         data: { cartItem },
       });
     } catch (error) {
-      console.error('Add to cart error:', error);
+      console.error("Add to cart error:", error);
       res.status(500).json({
-        status: 'error',
-        message: 'Failed to add product to cart',
+        status: "error",
+        message: "Failed to add product to cart",
       });
     }
   }
@@ -617,7 +651,7 @@ class ChatbotController {
   // Helper methods
   async searchProducts(searchParams) {
     const where = {
-      status: 'active',
+      status: "active",
       inStock: true,
     };
 
@@ -625,24 +659,24 @@ class ChatbotController {
     if (searchParams.keyword) {
       // Vietnamese to English keyword mapping
       const keywordMapping = {
-        giày: ['shoes', 'shoe', 'sneaker', 'nike', 'adidas'],
-        'giày thể thao': [
-          'shoes',
-          'sneaker',
-          'running shoes',
-          'nike',
-          'adidas',
+        giày: ["shoes", "shoe", "sneaker", "nike", "adidas"],
+        "giày thể thao": [
+          "shoes",
+          "sneaker",
+          "running shoes",
+          "nike",
+          "adidas",
         ],
-        'thể thao': ['sport', 'sports', 'running', 'nike', 'adidas'],
-        áo: ['shirt', 'tshirt', 't-shirt'],
-        'áo thun': ['tshirt', 't-shirt', 'shirt'],
-        quần: ['pants', 'jeans', 'trousers'],
-        túi: ['bag', 'backpack'],
-        balo: ['backpack', 'bag'],
-        'phụ kiện': ['accessories', 'accessory'],
-        'đồng hồ': ['watch', 'watches'],
-        kính: ['glasses', 'sunglasses'],
-        mũ: ['hat', 'cap'],
+        "thể thao": ["sport", "sports", "running", "nike", "adidas"],
+        áo: ["shirt", "tshirt", "t-shirt"],
+        "áo thun": ["tshirt", "t-shirt", "shirt"],
+        quần: ["pants", "jeans", "trousers"],
+        túi: ["bag", "backpack"],
+        balo: ["backpack", "bag"],
+        "phụ kiện": ["accessories", "accessory"],
+        "đồng hồ": ["watch", "watches"],
+        kính: ["glasses", "sunglasses"],
+        mũ: ["hat", "cap"],
       };
 
       const originalKeyword = searchParams.keyword.toLowerCase();
@@ -684,12 +718,12 @@ class ChatbotController {
       include: [
         {
           model: Category,
-          as: 'categories',
+          as: "categories",
           through: { attributes: [] },
         },
       ],
       limit: searchParams.limit || 20,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     return products;
@@ -698,7 +732,7 @@ class ChatbotController {
   async getBestDeals() {
     return await Product.findAll({
       where: {
-        status: 'active',
+        status: "active",
         inStock: true,
         compareAtPrice: { [Op.gt]: 0 },
       },
@@ -706,7 +740,7 @@ class ChatbotController {
         [
           // Order by discount percentage
           sequelize.literal(
-            '((compare_at_price - price) / compare_at_price) DESC'
+            "((compare_at_price - price) / compare_at_price) DESC"
           ),
         ],
       ],
@@ -718,12 +752,12 @@ class ChatbotController {
     // This could be based on order frequency, views, etc.
     return await Product.findAll({
       where: {
-        status: 'active',
+        status: "active",
         inStock: true,
         featured: true,
       },
       limit: 10,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
   }
 
@@ -734,7 +768,7 @@ class ChatbotController {
         return this.getTemplateResponse(prompt, context);
       }
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const enhancedPrompt = `
         Bạn là trợ lý bán hàng thông minh của Shopmini - một cửa hàng thời trang trực tuyến.
@@ -757,16 +791,16 @@ class ChatbotController {
       const response = result.response;
       return response.text();
     } catch (error) {
-      console.error('AI response generation error:', error.message || error);
+      console.error("AI response generation error:", error.message || error);
       return this.getTemplateResponse(prompt, context);
     }
   }
 
   getTemplateResponse(prompt, context) {
     const templates = [
-      'Tôi hiểu bạn đang tìm kiếm sản phẩm phù hợp! 😊 Để giúp bạn tốt nhất, hãy cho tôi biết thêm chi tiết về sở thích của bạn nhé.',
-      'Chào bạn! 👋 Shopmini có rất nhiều sản phẩm tuyệt vời. Bạn quan tâm đến loại sản phẩm nào nhất?',
-      'Cảm ơn bạn đã quan tâm! 🌟 Tôi sẽ giúp bạn tìm những sản phẩm tốt nhất với giá ưu đãi.',
+      "Tôi hiểu bạn đang tìm kiếm sản phẩm phù hợp! 😊 Để giúp bạn tốt nhất, hãy cho tôi biết thêm chi tiết về sở thích của bạn nhé.",
+      "Chào bạn! 👋 Shopmini có rất nhiều sản phẩm tuyệt vời. Bạn quan tâm đến loại sản phẩm nào nhất?",
+      "Cảm ơn bạn đã quan tâm! 🌟 Tôi sẽ giúp bạn tìm những sản phẩm tốt nhất với giá ưu đãi.",
     ];
     return templates[Math.floor(Math.random() * templates.length)];
   }
@@ -777,14 +811,14 @@ class ChatbotController {
   async handleSimpleMessage(req, res) {
     try {
       const { message, userId, sessionId, context = {} } = req.body;
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Received simple message:', { message, userId, sessionId });
+      if (process.env.NODE_ENV !== "production") {
+        //console.log('Received simple message:', { message, userId, sessionId });
       }
 
       if (!message?.trim()) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Message is required',
+          status: "error",
+          message: "Message is required",
         });
       }
 
@@ -792,22 +826,22 @@ class ChatbotController {
       const response = {
         response: `Chào bạn! Bạn vừa nói: "${message}". Tôi là trợ lý AI của Shopmini! 😊`,
         suggestions: [
-          'Tìm sản phẩm hot 🔥',
-          'Xem khuyến mãi 🎉',
-          'Sản phẩm bán chạy ⭐',
-          'Hỗ trợ mua hàng 💬',
+          "Tìm sản phẩm hot 🔥",
+          "Xem khuyến mãi 🎉",
+          "Sản phẩm bán chạy ⭐",
+          "Hỗ trợ mua hàng 💬",
         ],
       };
 
       res.json({
-        status: 'success',
+        status: "success",
         data: response,
       });
     } catch (error) {
-      console.error('Simple message error:', error.message || error);
+      console.error("Simple message error:", error.message || error);
       res.status(500).json({
-        status: 'error',
-        message: 'Failed to process simple message',
+        status: "error",
+        message: "Failed to process simple message",
       });
     }
   }

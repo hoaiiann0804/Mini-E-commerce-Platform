@@ -119,14 +119,14 @@ const ProfilePage: React.FC = () => {
         phone: formData.phone,
       };
 
-      console.log("Submitting profile data:", profileData);
+      //console.log("Submitting profile data:", profileData);
 
       // Check if we have a token
       const token = localStorage.getItem("token");
-      console.log("Current token:", token ? "exists" : "missing");
+      //console.log("Current token:", token ? "exists" : "missing");
 
       const updatedUser = await updateProfile(profileData).unwrap();
-      console.log("Profile update response:", updatedUser);
+      //console.log("Profile update response:", updatedUser);
 
       // Update user in Redux store
       dispatch(

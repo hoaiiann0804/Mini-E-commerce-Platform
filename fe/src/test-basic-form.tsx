@@ -11,7 +11,7 @@ const TestBasicForm: React.FC = () => {
 
       <Form form={form}>
         <ProductBasicInfoForm
-          fillExampleData={() => console.log('Fill example data')}
+          fillExampleData={() => //console.log('Fill example data')}
           productId="test-id"
         />
       </Form>

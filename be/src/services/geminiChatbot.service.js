@@ -41,7 +41,7 @@ class GeminiChatbotService {
       // Step 1: Get all available products from database
       const allProducts = await this.getAllProducts();
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`📦 Found ${allProducts.length} products in database`);
+        //console.log(`📦 Found ${allProducts.length} products in database`);
       }
 
       // Step 2: Use Gemini AI to understand user intent and find matching products
@@ -70,7 +70,7 @@ class GeminiChatbotService {
       // Create a comprehensive prompt for Gemini
       const prompt = this.createPrompt(userMessage, products, context);
       if (process.env.NODE_ENV !== 'production') {
-        console.log('🤖 Sending request to Gemini API...');
+        //console.log('🤖 Sending request to Gemini API...');
       }
 
       const result = await this.model.generateContent(prompt);
@@ -78,8 +78,8 @@ class GeminiChatbotService {
       const aiText = response.text();
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log('✅ Received response from Gemini API');
-        console.log('📝 AI Response length:', aiText.length);
+        //console.log('✅ Received response from Gemini API');
+        //console.log('📝 AI Response length:', aiText.length);
       }
 
       // Parse AI response to extract product recommendations
@@ -245,7 +245,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
     const lowerMessage = userMessage.toLowerCase().trim();
     let matchedProducts = [];
     if (process.env.NODE_ENV !== 'production') {
-      console.log(
+      //console.log(
         `🔍 Searching for: "${lowerMessage}" in ${products.length} products`
       );
     }
@@ -275,7 +275,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
     });
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`🔍 Expanded search terms:`, expandedTerms);
+      //console.log(`🔍 Expanded search terms:`, expandedTerms);
     }
 
     // Search through products using their dynamic keywords
@@ -290,7 +290,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
         if (productName.includes(term.toLowerCase())) {
           matchScore += 10;
           if (process.env.NODE_ENV !== 'production') {
-            console.log(`✅ Name match: "${product.name}" contains "${term}"`);
+            //console.log(`✅ Name match: "${product.name}" contains "${term}"`);
           }
         }
       });
@@ -300,7 +300,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
         if (productDesc.includes(term.toLowerCase())) {
           matchScore += 8;
           if (process.env.NODE_ENV !== 'production') {
-            console.log(
+            //console.log(
               `✅ Description match: "${product.name}" desc contains "${term}"`
             );
           }
@@ -317,7 +317,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
           );
           if (keywordMatches.length > 0) {
             if (process.env.NODE_ENV !== 'production') {
-              console.log(
+              //console.log(
                 `✅ Keyword matches for "${product.name}":`,
                 keywordMatches
               );
@@ -338,7 +338,7 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
       // Add product if it has any matches
       if (matchScore > 0) {
         if (process.env.NODE_ENV !== 'production') {
-          console.log(
+          //console.log(
             `✅ Product "${product.name}" matched with score: ${matchScore}`
           );
         }

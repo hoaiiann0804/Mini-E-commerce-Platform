@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   Form,
   Card,
@@ -9,14 +9,14 @@ import {
   Alert,
   Space,
   Spin,
-} from 'antd';
+} from "antd";
 import {
   SafetyOutlined,
   CheckCircleOutlined,
   DollarOutlined,
-} from '@ant-design/icons';
-import { useGetWarrantyPackagesQuery } from '@/services/warrantyApi';
-import { WarrantyPackage } from '@/types/product.types';
+} from "@ant-design/icons";
+import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
+import { WarrantyPackage } from "@/types/product.types";
 
 const { Title, Text } = Typography;
 
@@ -40,7 +40,7 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
   // Auto-select free warranty packages
   useEffect(() => {
     if (warrantyPackages.length > 0 && parentForm) {
-      const currentValue = parentForm.getFieldValue('warrantyPackageIds') || [];
+      const currentValue = parentForm.getFieldValue("warrantyPackageIds") || [];
       const freePackageIds = warrantyPackages
         .filter((pkg) => pkg.price === 0)
         .map((pkg) => pkg.id);
@@ -53,30 +53,30 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
         const newValue = Array.from(
           new Set([...currentValue, ...freePackageIds])
         );
-        parentForm.setFieldValue('warrantyPackageIds', newValue);
-        console.log('Auto-selected free warranty packages:', freePackageIds);
+        parentForm.setFieldValue("warrantyPackageIds", newValue);
+        //console.log('Auto-selected free warranty packages:', freePackageIds);
       }
     }
   }, [warrantyPackages, parentForm]);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(price);
   };
 
   const formatDuration = (months: number) => {
-    if (months === 0) return 'Theo sản phẩm';
+    if (months === 0) return "Theo sản phẩm";
     if (months < 12) return `${months} tháng`;
-    if (months === 12) return '1 năm';
-    return `${Math.floor(months / 12)} năm ${months % 12 > 0 ? `${months % 12} tháng` : ''}`;
+    if (months === 12) return "1 năm";
+    return `${Math.floor(months / 12)} năm ${months % 12 > 0 ? `${months % 12} tháng` : ""}`;
   };
 
   if (isLoading) {
     return (
       <Card>
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
           <Spin size="large" />
           <div style={{ marginTop: 16 }}>Đang tải gói bảo hành...</div>
         </div>
@@ -120,7 +120,7 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
         />
       ) : (
         <Form.Item name="warrantyPackageIds" label="Chọn gói bảo hành">
-          <Checkbox.Group style={{ width: '100%' }}>
+          <Checkbox.Group style={{ width: "100%" }}>
             <Row gutter={[16, 16]}>
               {warrantyPackages.map((pkg: WarrantyPackage) => (
                 <Col span={12} key={pkg.id}>
@@ -130,15 +130,15 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
                     style={{
                       border:
                         pkg.price === 0
-                          ? '2px solid #1890ff'
-                          : '1px solid #d9d9d9',
-                      backgroundColor: pkg.price === 0 ? '#f0f9ff' : 'white',
+                          ? "2px solid #1890ff"
+                          : "1px solid #d9d9d9",
+                      backgroundColor: pkg.price === 0 ? "#f0f9ff" : "white",
                     }}
                   >
                     <div
                       style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
+                        display: "flex",
+                        alignItems: "flex-start",
                         gap: 8,
                       }}
                     >
@@ -146,15 +146,15 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
                       <div style={{ flex: 1 }}>
                         <div
                           style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                           }}
                         >
                           <Text strong>{pkg.name}</Text>
                           <Text type="success" strong>
                             {pkg.price === 0
-                              ? 'Miễn phí'
+                              ? "Miễn phí"
                               : formatPrice(pkg.price)}
                           </Text>
                         </div>
@@ -168,7 +168,7 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
                         {pkg.description && (
                           <Text
                             type="secondary"
-                            style={{ display: 'block', marginBottom: 8 }}
+                            style={{ display: "block", marginBottom: 8 }}
                           >
                             {pkg.description}
                           </Text>
@@ -180,13 +180,13 @@ const ProductWarrantyForm: React.FC<ProductWarrantyFormProps> = ({
                               <div
                                 key={index}
                                 style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
+                                  display: "flex",
+                                  alignItems: "center",
                                   gap: 4,
                                 }}
                               >
                                 <CheckCircleOutlined
-                                  style={{ color: '#52c41a', fontSize: 12 }}
+                                  style={{ color: "#52c41a", fontSize: 12 }}
                                 />
                                 <Text style={{ fontSize: 12 }}>{coverage}</Text>
                               </div>

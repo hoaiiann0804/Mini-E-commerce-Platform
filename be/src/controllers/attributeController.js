@@ -3,8 +3,8 @@ const {
   AttributeValue,
   ProductAttributeGroup,
   Product,
-} = require('../models');
-const productNameGeneratorService = require('../services/productNameGenerator.service');
+} = require("../models");
+const productNameGeneratorService = require("../services/productNameGenerator.service");
 
 // Get all attribute groups with their values
 const getAttributeGroups = async (req, res) => {
@@ -13,19 +13,19 @@ const getAttributeGroups = async (req, res) => {
       include: [
         {
           model: AttributeValue,
-          as: 'values',
+          as: "values",
           where: { isActive: true },
           required: false,
           order: [
-            ['sortOrder', 'ASC'],
-            ['name', 'ASC'],
+            ["sortOrder", "ASC"],
+            ["name", "ASC"],
           ],
         },
       ],
       where: { isActive: true },
       order: [
-        ['sortOrder', 'ASC'],
-        ['name', 'ASC'],
+        ["sortOrder", "ASC"],
+        ["name", "ASC"],
       ],
     });
 
@@ -34,10 +34,10 @@ const getAttributeGroups = async (req, res) => {
       data: attributeGroups,
     });
   } catch (error) {
-    console.error('Error fetching attribute groups:', error);
+    console.error("Error fetching attribute groups:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch attribute groups',
+      message: "Failed to fetch attribute groups",
       error: error.message,
     });
   }
@@ -52,19 +52,19 @@ const getProductAttributeGroups = async (req, res) => {
       include: [
         {
           model: AttributeGroup,
-          as: 'attributeGroups',
+          as: "attributeGroups",
           through: {
-            attributes: ['isRequired', 'sortOrder'],
+            attributes: ["isRequired", "sortOrder"],
           },
           include: [
             {
               model: AttributeValue,
-              as: 'values',
+              as: "values",
               where: { isActive: true },
               required: false,
               order: [
-                ['sortOrder', 'ASC'],
-                ['name', 'ASC'],
+                ["sortOrder", "ASC"],
+                ["name", "ASC"],
               ],
             },
           ],
@@ -77,7 +77,7 @@ const getProductAttributeGroups = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found',
+        message: "Product not found",
       });
     }
 
@@ -86,10 +86,10 @@ const getProductAttributeGroups = async (req, res) => {
       data: product.attributeGroups,
     });
   } catch (error) {
-    console.error('Error fetching product attribute groups:', error);
+    console.error("Error fetching product attribute groups:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch product attribute groups',
+      message: "Failed to fetch product attribute groups",
       error: error.message,
     });
   }
@@ -111,13 +111,13 @@ const createAttributeGroup = async (req, res) => {
     res.status(201).json({
       success: true,
       data: attributeGroup,
-      message: 'Attribute group created successfully',
+      message: "Attribute group created successfully",
     });
   } catch (error) {
-    console.error('Error creating attribute group:', error);
+    console.error("Error creating attribute group:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create attribute group',
+      message: "Failed to create attribute group",
       error: error.message,
     });
   }
@@ -153,13 +153,13 @@ const addAttributeValue = async (req, res) => {
     res.status(201).json({
       success: true,
       data: attributeValue,
-      message: 'Attribute value added successfully',
+      message: "Attribute value added successfully",
     });
   } catch (error) {
-    console.error('Error adding attribute value:', error);
+    console.error("Error adding attribute value:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to add attribute value',
+      message: "Failed to add attribute value",
       error: error.message,
     });
   }
@@ -181,13 +181,13 @@ const assignAttributeGroupToProduct = async (req, res) => {
     res.status(201).json({
       success: true,
       data: assignment,
-      message: 'Attribute group assigned to product successfully',
+      message: "Attribute group assigned to product successfully",
     });
   } catch (error) {
-    console.error('Error assigning attribute group to product:', error);
+    console.error("Error assigning attribute group to product:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to assign attribute group to product',
+      message: "Failed to assign attribute group to product",
       error: error.message,
     });
   }
@@ -204,7 +204,7 @@ const updateAttributeGroup = async (req, res) => {
     if (!attributeGroup) {
       return res.status(404).json({
         success: false,
-        message: 'Attribute group not found',
+        message: "Attribute group not found",
       });
     }
 
@@ -220,13 +220,13 @@ const updateAttributeGroup = async (req, res) => {
     res.json({
       success: true,
       data: attributeGroup,
-      message: 'Attribute group updated successfully',
+      message: "Attribute group updated successfully",
     });
   } catch (error) {
-    console.error('Error updating attribute group:', error);
+    console.error("Error updating attribute group:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update attribute group',
+      message: "Failed to update attribute group",
       error: error.message,
     });
   }
@@ -252,7 +252,7 @@ const updateAttributeValue = async (req, res) => {
     if (!attributeValue) {
       return res.status(404).json({
         success: false,
-        message: 'Attribute value not found',
+        message: "Attribute value not found",
       });
     }
 
@@ -271,13 +271,13 @@ const updateAttributeValue = async (req, res) => {
     res.json({
       success: true,
       data: attributeValue,
-      message: 'Attribute value updated successfully',
+      message: "Attribute value updated successfully",
     });
   } catch (error) {
-    console.error('Error updating attribute value:', error);
+    console.error("Error updating attribute value:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update attribute value',
+      message: "Failed to update attribute value",
       error: error.message,
     });
   }
@@ -292,7 +292,7 @@ const deleteAttributeGroup = async (req, res) => {
     if (!attributeGroup) {
       return res.status(404).json({
         success: false,
-        message: 'Attribute group not found',
+        message: "Attribute group not found",
       });
     }
 
@@ -300,13 +300,13 @@ const deleteAttributeGroup = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Attribute group deleted successfully',
+      message: "Attribute group deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting attribute group:', error);
+    console.error("Error deleting attribute group:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete attribute group',
+      message: "Failed to delete attribute group",
       error: error.message,
     });
   }
@@ -321,7 +321,7 @@ const deleteAttributeValue = async (req, res) => {
     if (!attributeValue) {
       return res.status(404).json({
         success: false,
-        message: 'Attribute value not found',
+        message: "Attribute value not found",
       });
     }
 
@@ -329,13 +329,13 @@ const deleteAttributeValue = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Attribute value deleted successfully',
+      message: "Attribute value deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting attribute value:', error);
+    console.error("Error deleting attribute value:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete attribute value',
+      message: "Failed to delete attribute value",
       error: error.message,
     });
   }
@@ -350,7 +350,7 @@ const previewProductName = async (req, res) => {
     if (!baseName) {
       return res.status(400).json({
         success: false,
-        message: 'Base name is required',
+        message: "Base name is required",
       });
     }
 
@@ -358,7 +358,7 @@ const previewProductName = async (req, res) => {
       baseName,
       selectedAttributes || [],
       {
-        separator: separator || ' ',
+        separator: separator || " ",
         includeDetails: includeDetails || false,
       }
     );
@@ -366,13 +366,13 @@ const previewProductName = async (req, res) => {
     res.json({
       success: true,
       data: preview,
-      message: 'Product name preview generated successfully',
+      message: "Product name preview generated successfully",
     });
   } catch (error) {
-    console.error('Error previewing product name:', error);
+    console.error("Error previewing product name:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to preview product name',
+      message: "Failed to preview product name",
       error: error.message,
     });
   }
@@ -389,13 +389,13 @@ const getNameAffectingAttributes = async (req, res) => {
     res.json({
       success: true,
       data: attributes,
-      message: 'Name affecting attributes retrieved successfully',
+      message: "Name affecting attributes retrieved successfully",
     });
   } catch (error) {
-    console.error('Error getting name affecting attributes:', error);
+    console.error("Error getting name affecting attributes:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get name affecting attributes',
+      message: "Failed to get name affecting attributes",
       error: error.message,
     });
   }
@@ -409,25 +409,25 @@ const batchGenerateProductNames = async (req, res) => {
     if (!Array.isArray(items)) {
       return res.status(400).json({
         success: false,
-        message: 'Items must be an array',
+        message: "Items must be an array",
       });
     }
 
     const results = await productNameGeneratorService.batchGenerateNames(
       items,
-      separator || ' '
+      separator || " "
     );
 
     res.json({
       success: true,
       data: results,
-      message: 'Product names generated successfully',
+      message: "Product names generated successfully",
     });
   } catch (error) {
-    console.error('Error batch generating product names:', error);
+    console.error("Error batch generating product names:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate product names',
+      message: "Failed to generate product names",
       error: error.message,
     });
   }
@@ -441,7 +441,7 @@ const generateNameRealTime = async (req, res) => {
     if (!baseName) {
       return res.status(400).json({
         success: false,
-        message: 'Base name is required',
+        message: "Base name is required",
       });
     }
 
@@ -454,7 +454,7 @@ const generateNameRealTime = async (req, res) => {
       baseName,
       selectedAttributes,
       {
-        separator: ' ',
+        separator: " ",
         includeDetails: true,
       }
     );
@@ -473,13 +473,13 @@ const generateNameRealTime = async (req, res) => {
         suggestions,
         timestamp: new Date().toISOString(),
       },
-      message: 'Real-time name generated successfully',
+      message: "Real-time name generated successfully",
     });
   } catch (error) {
-    console.error('Error generating real-time name:', error);
+    console.error("Error generating real-time name:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate real-time name',
+      message: "Failed to generate real-time name",
       error: error.message,
     });
   }
@@ -488,14 +488,14 @@ const generateNameRealTime = async (req, res) => {
 // Helper function to get popular attribute combinations
 async function getPopularAttributeCombinations(productId) {
   try {
-    const { ProductVariant } = require('../models');
+    const { ProductVariant } = require("../models");
 
     // Get existing variants for this product to suggest popular combinations
     const existingVariants = await ProductVariant.findAll({
       where: { productId },
-      attributes: ['attributeValues', 'displayName', 'name'],
+      attributes: ["attributeValues", "displayName", "name"],
       limit: 10,
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     return existingVariants.map((variant) => ({
@@ -504,7 +504,7 @@ async function getPopularAttributeCombinations(productId) {
       fullName: variant.name,
     }));
   } catch (error) {
-    console.log('Could not get popular combinations:', error.message);
+    //console.log('Could not get popular combinations:', error.message);
     return [];
   }
 }

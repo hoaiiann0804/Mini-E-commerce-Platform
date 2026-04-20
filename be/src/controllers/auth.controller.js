@@ -115,12 +115,12 @@ const verifyEmail = async (req, res, next) => {
   try {
     const { token } = req.params;
 
-    console.log(token);
+    //console.log(token);
 
     // Find user with token
     const user = await User.findOne({ where: { verificationToken: token } });
 
-    console.log(user);
+    //console.log(user);
 
     if (!user) {
       throw new AppError("Token không hợp lệ hoặc đã hết hạn", 400);
@@ -264,7 +264,7 @@ const forgotPassword = async (req, res, next) => {
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
     // Trong forgotPassword
-    console.log("Generated reset token:", resetToken);
+    //console.log("Generated reset token:", resetToken);
 
     const resetTokenExpires = Date.now() + 3600000; // 1 hour
 
@@ -290,7 +290,7 @@ const forgotPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
-    console.log(token);
+    //console.log(token);
     // Find user with token
     const user = await User.findOne({
       where: {

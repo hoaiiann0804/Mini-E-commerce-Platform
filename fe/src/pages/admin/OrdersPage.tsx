@@ -63,7 +63,7 @@ const PAYMENT_STATUS_CONFIG = {
 };
 
 const OrdersPage: React.FC = () => {
-  console.log('OrdersPage: Component rendering');
+  //console.log('OrdersPage: Component rendering');
   const { t } = useTranslation();
   const [form] = Form.useForm();
 
@@ -322,7 +322,7 @@ const OrdersPage: React.FC = () => {
   const orders = ordersData?.data?.orders || [];
   const pagination = ordersData?.data?.pagination;
 
-  console.log('OrdersPage: Render state', {
+  //console.log('OrdersPage: Render state', {
     isLoading,
     error,
     orders,

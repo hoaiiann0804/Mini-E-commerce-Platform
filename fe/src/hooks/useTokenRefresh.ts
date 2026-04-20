@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { refreshTokenIfNeeded, isTokenExpired } from '@/utils/tokenManager';
-import { logout } from '@/features/auth/authSlice';
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { refreshTokenIfNeeded, isTokenExpired } from "@/utils/tokenManager";
+import { logout } from "@/features/auth/authSlice";
 
 export const useTokenRefresh = () => {
   const dispatch = useDispatch();
@@ -18,11 +18,11 @@ export const useTokenRefresh = () => {
     // Check token validity every 5 minutes
     const checkTokenValidity = async () => {
       if (isTokenExpired(token)) {
-        console.log('🔄 Token expired, attempting refresh...');
+        //console.log('🔄 Token expired, attempting refresh...');
         const newToken = await refreshTokenIfNeeded();
 
         if (!newToken) {
-          console.log('❌ Token refresh failed, logging out...');
+          //console.log('❌ Token refresh failed, logging out...');
           dispatch(logout());
         }
       }
@@ -40,15 +40,15 @@ export const useTokenRefresh = () => {
   // Also check when the page becomes visible again
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && isAuthenticated && token) {
+      if (document.visibilityState === "visible" && isAuthenticated && token) {
         if (isTokenExpired(token)) {
           await refreshTokenIfNeeded();
         }
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [token, isAuthenticated]);
 };

@@ -55,23 +55,23 @@ class KeywordGeneratorService {
       .toLowerCase()
       .replace(
         /[^\w\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g,
-        ' '
+        " "
       )
       .split(/\s+/)
       .filter((word) => word.length > 2);
 
     // Remove common stop words
     const stopWords = [
-      'của',
-      'với',
-      'cho',
-      'và',
-      'hoặc',
-      'the',
-      'for',
-      'with',
-      'and',
-      'or',
+      "của",
+      "với",
+      "cho",
+      "và",
+      "hoặc",
+      "the",
+      "for",
+      "with",
+      "and",
+      "or",
     ];
     return words.filter((word) => !stopWords.includes(word));
   }
@@ -84,28 +84,28 @@ class KeywordGeneratorService {
 
     const brandMappings = {
       // Giày thể thao
-      nike: ['nike', 'swoosh', 'just do it'],
-      adidas: ['adidas', '3-stripes', 'three stripes'],
-      converse: ['converse', 'chuck taylor', 'all star'],
-      vans: ['vans', 'off the wall'],
-      puma: ['puma', 'suede'],
+      nike: ["nike", "swoosh", "just do it"],
+      adidas: ["adidas", "3-stripes", "three stripes"],
+      converse: ["converse", "chuck taylor", "all star"],
+      vans: ["vans", "off the wall"],
+      puma: ["puma", "suede"],
 
       // Áo thun
-      uniqlo: ['uniqlo', 'ut', 'heattech'],
-      champion: ['champion', 'reverse weave'],
+      uniqlo: ["uniqlo", "ut", "heattech"],
+      champion: ["champion", "reverse weave"],
 
       // Túi xách
-      'louis vuitton': ['lv', 'louis vuitton', 'neverfull', 'monogram'],
-      gucci: ['gucci', 'gg', 'marmont'],
-      'michael kors': ['mk', 'michael kors', 'jet set'],
+      "louis vuitton": ["lv", "louis vuitton", "neverfull", "monogram"],
+      gucci: ["gucci", "gg", "marmont"],
+      "michael kors": ["mk", "michael kors", "jet set"],
 
       // Đồng hồ
-      rolex: ['rolex', 'submariner', 'datejust', 'oyster'],
-      casio: ['casio', 'g-shock', 'edifice'],
+      rolex: ["rolex", "submariner", "datejust", "oyster"],
+      casio: ["casio", "g-shock", "edifice"],
 
       // Kính mắt
-      'ray-ban': ['ray-ban', 'rayban', 'aviator', 'wayfarer'],
-      oakley: ['oakley', 'holbrook', 'frogskins'],
+      "ray-ban": ["ray-ban", "rayban", "aviator", "wayfarer"],
+      oakley: ["oakley", "holbrook", "frogskins"],
     };
 
     const keywords = [];
@@ -125,78 +125,78 @@ class KeywordGeneratorService {
    */
   getCategoryKeywords(productData) {
     const keywords = [];
-    const name = (productData.name || '').toLowerCase();
-    const category = (productData.category || '').toLowerCase();
-    const description = (productData.shortDescription || '').toLowerCase();
+    const name = (productData.name || "").toLowerCase();
+    const category = (productData.category || "").toLowerCase();
+    const description = (productData.shortDescription || "").toLowerCase();
 
     // Giày thể thao
     if (
-      name.includes('giày') ||
-      name.includes('shoe') ||
-      name.includes('sneaker') ||
-      category.includes('giày') ||
-      description.includes('giày')
+      name.includes("giày") ||
+      name.includes("shoe") ||
+      name.includes("sneaker") ||
+      category.includes("giày") ||
+      description.includes("giày")
     ) {
       keywords.push(
-        'giày',
-        'shoes',
-        'sneaker',
-        'footwear',
-        'thể thao',
-        'sport'
+        "giày",
+        "shoes",
+        "sneaker",
+        "footwear",
+        "thể thao",
+        "sport"
       );
     }
 
     // Áo thun
     if (
-      name.includes('áo') ||
-      name.includes('shirt') ||
-      name.includes('tshirt') ||
-      category.includes('áo') ||
-      description.includes('áo')
+      name.includes("áo") ||
+      name.includes("shirt") ||
+      name.includes("tshirt") ||
+      category.includes("áo") ||
+      description.includes("áo")
     ) {
-      keywords.push('áo', 'shirt', 'tshirt', 'top', 'clothing', 'fashion');
+      keywords.push("áo", "shirt", "tshirt", "top", "clothing", "fashion");
     }
 
     // Túi xách
     if (
-      name.includes('túi') ||
-      name.includes('bag') ||
-      category.includes('túi') ||
-      description.includes('túi')
+      name.includes("túi") ||
+      name.includes("bag") ||
+      category.includes("túi") ||
+      description.includes("túi")
     ) {
-      keywords.push('túi', 'bag', 'handbag', 'purse', 'accessory');
+      keywords.push("túi", "bag", "handbag", "purse", "accessory");
     }
 
     // Balo
     if (
-      name.includes('balo') ||
-      name.includes('backpack') ||
-      category.includes('balo') ||
-      description.includes('balo')
+      name.includes("balo") ||
+      name.includes("backpack") ||
+      category.includes("balo") ||
+      description.includes("balo")
     ) {
-      keywords.push('balo', 'backpack', 'bag', 'school', 'travel');
+      keywords.push("balo", "backpack", "bag", "school", "travel");
     }
 
     // Đồng hồ
     if (
-      name.includes('đồng hồ') ||
-      name.includes('watch') ||
-      category.includes('đồng hồ') ||
-      description.includes('đồng hồ')
+      name.includes("đồng hồ") ||
+      name.includes("watch") ||
+      category.includes("đồng hồ") ||
+      description.includes("đồng hồ")
     ) {
-      keywords.push('đồng hồ', 'watch', 'timepiece', 'accessory');
+      keywords.push("đồng hồ", "watch", "timepiece", "accessory");
     }
 
     // Kính mắt
     if (
-      name.includes('kính') ||
-      name.includes('glasses') ||
-      name.includes('sunglasses') ||
-      category.includes('kính') ||
-      description.includes('kính')
+      name.includes("kính") ||
+      name.includes("glasses") ||
+      name.includes("sunglasses") ||
+      category.includes("kính") ||
+      description.includes("kính")
     ) {
-      keywords.push('kính', 'glasses', 'sunglasses', 'eyewear', 'accessory');
+      keywords.push("kính", "glasses", "sunglasses", "eyewear", "accessory");
     }
 
     return keywords;
@@ -221,14 +221,14 @@ class KeywordGeneratorService {
    * Bulk update keywords for all products
    */
   async updateAllProductKeywords() {
-    const { Product } = require('../models');
+    const { Product } = require("../models");
 
     try {
       const products = await Product.findAll({
-        where: { status: 'active' },
+        where: { status: "active" },
       });
 
-      console.log(`🔄 Updating keywords for ${products.length} products...`);
+      //console.log(`🔄 Updating keywords for ${products.length} products...`);
 
       for (const product of products) {
         const keywords = this.generateKeywords({
@@ -239,13 +239,13 @@ class KeywordGeneratorService {
         });
 
         await product.update({ searchKeywords: keywords });
-        console.log(`✅ Updated keywords for: ${product.name}`);
+        //console.log(`✅ Updated keywords for: ${product.name}`);
       }
 
-      console.log('🎉 All product keywords updated successfully!');
+      //console.log('🎉 All product keywords updated successfully!');
       return true;
     } catch (error) {
-      console.error('❌ Error updating product keywords:', error);
+      console.error("❌ Error updating product keywords:", error);
       throw error;
     }
   }

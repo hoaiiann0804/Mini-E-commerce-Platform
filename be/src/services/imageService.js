@@ -155,7 +155,7 @@ class ImageService {
   // Upload and process single image
   async uploadImage(file, options = {}) {
     try {
-      console.log("📤 Starting image upload:", {
+      //console.log("📤 Starting image upload:", {
         originalname: file.originalname,
         mimetype: file.mimetype,
         size: file.size,
@@ -325,7 +325,7 @@ class ImageService {
 
       // Delete from Cloudinary using its public_id (stored in image.fileName)
       await cloudinary.uploader.destroy(image.fileName);
-      console.log(`🗑️ Deleted image from Cloudinary: ${image.fileName}`);
+      //console.log(`🗑️ Deleted image from Cloudinary: ${image.fileName}`);
 
       // Sync Product.images/thumbnail (Product stores urls in its `images` field)
       if (image.productId) {

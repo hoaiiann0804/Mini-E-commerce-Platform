@@ -920,7 +920,7 @@ const updateProduct = async (req, res, next) => {
     } = req.body;
 
     // Debug request body
-    // console.log("UpdateProduct request body:", {
+    // //console.log("UpdateProduct request body:", {
     //   compareAtPrice,
     //   hasCompareAtPrice: req.body.hasOwnProperty("compareAtPrice"),
     //   // Note: comparePrice is not a valid field in the Product model
@@ -1015,7 +1015,7 @@ const updateProduct = async (req, res, next) => {
 
     // Update warranty packages - chỉ khi warrantyPackageIds được gửi trong request
     if (req.body.hasOwnProperty("warrantyPackageIds")) {
-      // console.log("🛡️ Processing warranty packages:", warrantyPackageIds);
+      // //console.log("🛡️ Processing warranty packages:", warrantyPackageIds);
 
       if (warrantyPackageIds && warrantyPackageIds.length > 0) {
         // Verify warranty packages exist
@@ -1024,11 +1024,11 @@ const updateProduct = async (req, res, next) => {
           where: { id: { [Op.in]: warrantyPackageIds } },
         });
 
-        // console.log(
+        // //console.log(
         //   "✅ Found warranties:",
         //   warranties.map((w) => ({ id: w.id, name: w.name }))
         // );
-        // console.log(
+        // //console.log(
         //   "📊 Expected:",
         //   warrantyPackageIds.length,
         //   "Found:",
@@ -1036,19 +1036,19 @@ const updateProduct = async (req, res, next) => {
         // );
 
         if (warranties.length !== warrantyPackageIds.length) {
-          // console.log("❌ Warranty package count mismatch!");
+          // //console.log("❌ Warranty package count mismatch!");
           throw new AppError("Một hoặc nhiều gói bảo hành không tồn tại", 400);
         }
 
         await product.setWarrantyPackages(warranties, { transaction });
-        // console.log("💾 Warranty packages updated successfully");
+        // //console.log("💾 Warranty packages updated successfully");
       } else {
         // Remove all warranty packages if empty array is sent
-        // console.log("🗑️ Removing all warranty packages");
+        // //console.log("🗑️ Removing all warranty packages");
         await product.setWarrantyPackages([], { transaction });
       }
     } else {
-      // console.log(
+      // //console.log(
       //   "⏭️ No warrantyPackageIds in request, skipping warranty update"
       // );
     }
@@ -1241,7 +1241,7 @@ const getRelatedProducts = async (req, res, next) => {
     // Nếu không tìm thấy sản phẩm liên quan theo danh mục hoặc sản phẩm không có danh mục
     // Trả về các sản phẩm mới nhất hoặc sản phẩm nổi bật
     if (relatedProductsRaw.length === 0) {
-      // console.log(
+      // //console.log(
       //   `No related products found for product ${id}. Returning recent products instead.`
       // );
 
@@ -1668,7 +1668,7 @@ const getProductFilters = async (req, res, next) => {
   try {
     const { categoryId } = req.query;
 
-    // console.log("Getting product filters with categoryId:", categoryId);
+    // //console.log("Getting product filters with categoryId:", categoryId);
 
     // Build where condition
     const whereCondition = {};

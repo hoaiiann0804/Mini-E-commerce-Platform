@@ -14,14 +14,14 @@ const VerifyEmailPage: React.FC = () => {
   useEffect(() => {
     if (token && !hasVerified.current) {
       hasVerified.current = true;
-      console.log('Attempting to verify email with token:', token);
+      //console.log('Attempting to verify email with token:', token);
       verifyEmail(token);
     }
   }, [token, verifyEmail]);
 
   // Debug logging
   useEffect(() => {
-    console.log('VerifyEmailPage state:', {
+    //console.log('VerifyEmailPage state:', {
       isLoading,
       isSuccess,
       isError,

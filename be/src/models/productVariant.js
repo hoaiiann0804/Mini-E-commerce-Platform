@@ -115,7 +115,7 @@ const ProductVariant = sequelize.define(
               }
             }
           } catch (error) {
-            console.log("Could not auto-generate variant name:", error.message);
+            //console.log("Could not auto-generate variant name:", error.message);
           }
         }
       },
@@ -144,7 +144,7 @@ const ProductVariant = sequelize.define(
               }
             }
           } catch (error) {
-            console.log(
+            //console.log(
               "Could not auto-regenerate variant name:",
               error.message
             );
@@ -173,11 +173,11 @@ const ProductVariant = sequelize.define(
               transaction: options.transaction,
             }
           );
-          console.log(
+          //console.log(
             `>>> Auto-updated minPrice for Product ${variant.productId}: ${minPrice}`
           );
         } catch (error) {
-          console.log("Hook afterSave (Price) error", error.message);
+          //console.log("Hook afterSave (Price) error", error.message);
         }
 
         try {

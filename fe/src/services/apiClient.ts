@@ -37,9 +37,9 @@ apiClient.interceptors.response.use(
     // Log error in development
     if (import.meta.env.DEV) {
       console.group("🚨 API Client Error");
-      console.log("URL:", error.config?.url);
-      console.log("Status:", error.response?.status);
-      console.log("Data:", error.response?.data);
+      //console.log("URL:", error.config?.url);
+      //console.log("Status:", error.response?.status);
+      //console.log("Data:", error.response?.data);
       console.groupEnd();
     }
 

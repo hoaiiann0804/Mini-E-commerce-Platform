@@ -290,7 +290,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         stockQuantity: Number(values.stockQuantity) || 0,
       };
 
-      console.log("Submitting product:", productData);
+      //console.log("Submitting product:", productData);
 
       // Create the product
       const response = await createProduct(productData).unwrap();

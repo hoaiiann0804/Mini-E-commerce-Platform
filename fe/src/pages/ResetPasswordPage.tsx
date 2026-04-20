@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useSearchParams,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
@@ -23,7 +28,7 @@ const ResetPasswordPage: React.FC = () => {
   }>({});
 
   const token = tokenFromParams || searchParams.get("token");
-  console.log(token);
+  //console.log(token);
 
   useEffect(() => {
     // Check if token exists, if not redirect to forgot password
@@ -68,7 +73,11 @@ const ResetPasswordPage: React.FC = () => {
     if (!validateForm()) return;
     setError("");
     try {
-      await reserPassword({ token: token as string, password, confirmPassword });
+      await reserPassword({
+        token: token as string,
+        password,
+        confirmPassword,
+      });
       // Mock success - in real app, call your API here with token and new password
       setIsSuccess(true);
       // Redirect to login after 3 seconds
@@ -76,10 +85,14 @@ const ResetPasswordPage: React.FC = () => {
         navigate("/login");
       }, 3000);
     } catch (err: unknown) {
-      const errorMessage = err && typeof err === 'object' && 'data' in err 
-        ? (err as { data?: string }).data 
-        : "Đặt lại mật khẩu thất bại";
-      const finalErrorMessage = typeof err === "string" ? err : (errorMessage || "Đặt lại mật khẩu thất bại");
+      const errorMessage =
+        err && typeof err === "object" && "data" in err
+          ? (err as { data?: string }).data
+          : "Đặt lại mật khẩu thất bại";
+      const finalErrorMessage =
+        typeof err === "string"
+          ? err
+          : errorMessage || "Đặt lại mật khẩu thất bại";
       setError(t(finalErrorMessage));
     }
   };

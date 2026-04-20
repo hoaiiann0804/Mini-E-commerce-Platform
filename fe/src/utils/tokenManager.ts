@@ -1,6 +1,6 @@
-import { store } from '@/store';
-import { updateTokens, logout } from '@/features/auth/authSlice';
-import { handleAutoLogout, logoutManager } from '@/utils/authUtils';
+import { store } from "@/store";
+import { updateTokens, logout } from "@/features/auth/authSlice";
+import { handleAutoLogout, logoutManager } from "@/utils/authUtils";
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -39,15 +39,15 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
 
   try {
     // Determine the correct API URL
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8888/api';
-    const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-    console.log('Refreshing token using URL:', `${apiUrl}/auth/refresh`);
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8888/api";
+    const apiUrl = baseUrl.endsWith("/api") ? baseUrl : `${baseUrl}/api`;
+    //console.log('Refreshing token using URL:', `${apiUrl}/auth/refresh`);
 
     const response = await fetch(`${apiUrl}/auth/refresh`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({ refreshToken }),
     });
@@ -58,7 +58,7 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage =
           errorData?.message ||
-          'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên';
+          "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên";
 
         // Use centralized auto logout handler
         handleAutoLogout(errorMessage);
@@ -66,12 +66,12 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
         throw new Error(errorMessage);
       }
 
-      throw new Error('Token refresh failed');
+      throw new Error("Token refresh failed");
     }
 
     const data = await response.json();
 
-    if (data.status === 'success') {
+    if (data.status === "success") {
       const { token, refreshToken: newRefreshToken } = data;
 
       store.dispatch(
@@ -84,10 +84,10 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
       processQueue(null, token);
       return token;
     } else {
-      throw new Error('Token refresh failed');
+      throw new Error("Token refresh failed");
     }
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    console.error("Token refresh failed:", error);
     processQueue(error, null);
 
     // Only dispatch logout if not already handled by auto logout
@@ -103,7 +103,7 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
 
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const currentTime = Date.now() / 1000;
     return payload.exp < currentTime;
   } catch (error) {
@@ -120,7 +120,7 @@ export const getValidToken = async (): Promise<string | null> => {
   }
 
   if (isTokenExpired(token)) {
-    console.log('🔄 Access token expired, refreshing...');
+    //console.log('🔄 Access token expired, refreshing...');
     return await refreshTokenIfNeeded();
   }
 

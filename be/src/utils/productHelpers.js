@@ -71,7 +71,7 @@ const validateVariantAttributes = (productAttributes, variantAttributes) => {
     if (productAttr.values && Array.isArray(productAttr.values)) {
       // Kiểm tra nếu giá trị biến thể không nằm trong danh sách giá trị cho phép
       if (!productAttr.values.includes(variantValue)) {
-        console.log(
+        //console.log(
           `Giá trị biến thể không hợp lệ: ${variantValue} không nằm trong ${productAttr.values.join(", ")}`
         );
         return false;

@@ -33,12 +33,12 @@ const getBaseUrl = (): string => {
 const logApiConfig = (): void => {
   if (import.meta.env.DEV) {
     console.group("🔧 API Configuration");
-    console.log("Base URL:", getBaseUrl());
-    console.log(
+    //console.log("Base URL:", getBaseUrl());
+    //console.log(
       "Environment:",
       import.meta.env.DEV ? "Development" : "Production"
     );
-    console.log("VITE_API_URL:", import.meta.env.VITE_API_URL || "Not set");
+    //console.log("VITE_API_URL:", import.meta.env.VITE_API_URL || "Not set");
     console.groupEnd();
   }
 };
@@ -101,9 +101,9 @@ const isUnauthorizedError = (error: any): boolean => {
 const logApiError = (args: string | FetchArgs, error: any): void => {
   if (import.meta.env.DEV) {
     console.group("🚨 API Error");
-    console.log("Endpoint:", typeof args === "string" ? args : args.url);
-    console.log("Status:", error.status);
-    console.log("Data:", error.data);
+    //console.log("Endpoint:", typeof args === "string" ? args : args.url);
+    //console.log("Status:", error.status);
+    //console.log("Data:", error.data);
     console.groupEnd();
   }
 };

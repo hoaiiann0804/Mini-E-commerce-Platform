@@ -82,7 +82,7 @@ const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      console.log('🚀 Attempting registration with:', {
+      //console.log('🚀 Attempting registration with:', {
         email,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -96,7 +96,7 @@ const RegisterPage: React.FC = () => {
         phone: phone.trim() || '', // Phone is optional
       }).unwrap();
 
-      console.log('✅ Registration successful:', result);
+      //console.log('✅ Registration successful:', result);
 
       // Show success message to user
       setSuccessMessage(
@@ -117,7 +117,7 @@ const RegisterPage: React.FC = () => {
         navigate('/login', { replace: true });
       }, 3000);
     } catch (err: any) {
-      console.log('❌ Registration failed:', err);
+      //console.log('❌ Registration failed:', err);
       // Clear any previous success message
       setSuccessMessage('');
       // Error is already handled by RTK Query and displayed in UI

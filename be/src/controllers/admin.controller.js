@@ -438,7 +438,7 @@ const getProductById = catchAsync(async (req, res) => {
  * Quản lý Products - Tạo sản phẩm mới
  */
 const createProduct = catchAsync(async (req, res) => {
-  console.log(
+  //console.log(
     "Create product request body:",
     JSON.stringify(req.body, null, 2)
   );
@@ -522,7 +522,7 @@ const createProduct = catchAsync(async (req, res) => {
   });
 
   // Cập nhật compareAtPrice riêng bằng truy vấn SQL trực tiếp nếu có
-  console.log(
+  //console.log(
     "compareAtPrice normalized from request:",
     normalizedCompareAtPrice
   );
@@ -586,7 +586,7 @@ const createProduct = catchAsync(async (req, res) => {
   // Xử lý attributes
   if (attributes && attributes.length > 0) {
     try {
-      console.log("Processing attributes:", attributes);
+      //console.log("Processing attributes:", attributes);
       const attributePromises = attributes.map(async (attr) => {
         // Xử lý giá trị thuộc tính: nếu là chuỗi có dấu phẩy, tách thành mảng
         let attrValues = [];
@@ -603,7 +603,7 @@ const createProduct = catchAsync(async (req, res) => {
           attrValues = [String(attr.value)];
         }
 
-        console.log(
+        //console.log(
           `Creating attribute: ${attr.name} with values:`,
           attrValues
         );
@@ -625,7 +625,7 @@ const createProduct = catchAsync(async (req, res) => {
   let createdVariants = [];
   if (variants && variants.length > 0) {
     try {
-      console.log("Processing variants:", variants);
+      //console.log("Processing variants:", variants);
 
       // Lấy attributes để validate
       const productAttributes = await ProductAttribute.findAll({
@@ -636,7 +636,7 @@ const createProduct = catchAsync(async (req, res) => {
         // Đảm bảo variant.attributes luôn là một object
         const variantAttributes = variant.attributes || {};
 
-        console.log(`Processing variant: ${variant.name}`, {
+        //console.log(`Processing variant: ${variant.name}`, {
           price: variant.price,
           stock: variant.stock,
           sku: variant.sku,
@@ -669,7 +669,7 @@ const createProduct = catchAsync(async (req, res) => {
         const variantSku =
           variant.sku || generateVariantSku(uniqueSku, variantAttributes);
 
-        console.log(`Creating variant with SKU: ${variantSku}`);
+        //console.log(`Creating variant with SKU: ${variantSku}`);
 
         // Generate display name for variant
         const displayName =
@@ -738,7 +738,7 @@ const createProduct = catchAsync(async (req, res) => {
       }));
 
       await ProductSpecification.bulkCreate(specificationData);
-      console.log(
+      //console.log(
         `Created ${specifications.length} specifications for product ${product.id}`
       );
     } catch (error) {
@@ -754,18 +754,18 @@ const createProduct = catchAsync(async (req, res) => {
     warrantyPackageIds.length > 0
   ) {
     try {
-      console.log("Creating warranty packages:", warrantyPackageIds);
+      //console.log("Creating warranty packages:", warrantyPackageIds);
       const { ProductWarranty, WarrantyPackage } = require("../models");
 
       // Kiểm tra xem các warranty packages có tồn tại không
-      console.log(
+      //console.log(
         "Looking for warranty packages with IDs:",
         warrantyPackageIds
       );
       const existingWarrantyPackages = await WarrantyPackage.findAll({
         where: { id: warrantyPackageIds, isActive: true },
       });
-      console.log("Found warranty packages:", existingWarrantyPackages.length);
+      //console.log("Found warranty packages:", existingWarrantyPackages.length);
 
       if (existingWarrantyPackages.length > 0) {
         const warrantyPromises = existingWarrantyPackages.map(
@@ -779,7 +779,7 @@ const createProduct = catchAsync(async (req, res) => {
         );
 
         await Promise.all(warrantyPromises);
-        console.log(
+        //console.log(
           `Created ${existingWarrantyPackages.length} warranty package associations for product ${product.id}`
         );
       }
@@ -823,7 +823,7 @@ const createProduct = catchAsync(async (req, res) => {
   });
 
   // Log audit
-  console.log("req.user in createProduct:", req.user); // Debug log
+  //console.log("req.user in createProduct:", req.user); // Debug log
   AdminAuditService.logProductAction(
     req.user,
     "CREATE",
@@ -867,19 +867,19 @@ const updateProduct = catchAsync(async (req, res) => {
     warrantyPackageIds = [],
   } = req.body;
 
-  console.log("updateProduct - Request body keys:", Object.keys(req.body));
-  console.log("updateProduct - specifications:", specifications);
-  console.log("updateProduct - specifications type:", typeof specifications);
-  console.log(
+  //console.log("updateProduct - Request body keys:", Object.keys(req.body));
+  //console.log("updateProduct - specifications:", specifications);
+  //console.log("updateProduct - specifications type:", typeof specifications);
+  //console.log(
     "updateProduct - specifications isArray:",
     Array.isArray(specifications)
   );
-  console.log(
+  //console.log(
     "updateProduct - hasOwnProperty specifications:",
     req.body.hasOwnProperty("specifications")
   );
-  console.log("updateProduct - warrantyPackageIds:", warrantyPackageIds);
-  console.log(
+  //console.log("updateProduct - warrantyPackageIds:", warrantyPackageIds);
+  //console.log(
     "updateProduct - hasOwnProperty warrantyPackageIds:",
     req.body.hasOwnProperty("warrantyPackageIds")
   );
@@ -930,7 +930,7 @@ const updateProduct = catchAsync(async (req, res) => {
   if (req.body.hasOwnProperty("status")) updateData.status = status;
   if (req.body.hasOwnProperty("featured")) updateData.featured = featured;
   if (req.body.hasOwnProperty("searchKeywords")) {
-    console.log("Updating searchKeywords:", searchKeywords);
+    //console.log("Updating searchKeywords:", searchKeywords);
     updateData.searchKeywords = searchKeywords;
   }
   if (req.body.hasOwnProperty("seoTitle")) updateData.seoTitle = seoTitle;
@@ -940,7 +940,7 @@ const updateProduct = catchAsync(async (req, res) => {
     updateData.seoKeywords = seoKeywords;
 
   // Cập nhật sản phẩm với dữ liệu mới
-  console.log("UpdateData before update:", updateData);
+  //console.log("UpdateData before update:", updateData);
   const updatedProduct = await product.update(updateData);
 
   // Cập nhật compareAtPrice riêng bằng truy vấn SQL trực tiếp nếu có trong request
@@ -971,7 +971,7 @@ const updateProduct = catchAsync(async (req, res) => {
     updatedProduct.compareAtPrice = priceToCompare;
 
     // Log thông tin để debug
-    console.log(
+    //console.log(
       `Updated compareAtPrice to ${priceToCompare} for product ${product.id}`
     );
   }
@@ -1020,7 +1020,7 @@ const updateProduct = catchAsync(async (req, res) => {
   // Xử lý attributes - chỉ khi request có chứa field 'attributes'
   if (req.body.hasOwnProperty("attributes") && Array.isArray(attributes)) {
     try {
-      console.log("Updating attributes:", attributes);
+      //console.log("Updating attributes:", attributes);
 
       // Xóa tất cả attributes cũ
       await ProductAttribute.destroy({ where: { productId: id } });
@@ -1043,7 +1043,7 @@ const updateProduct = catchAsync(async (req, res) => {
             attrValues = [String(attr.value)];
           }
 
-          console.log(
+          //console.log(
             `Creating attribute: ${attr.name} with values:`,
             attrValues
           );
@@ -1081,7 +1081,7 @@ const updateProduct = catchAsync(async (req, res) => {
           // Đảm bảo variant.attributes luôn là một object
           const variantAttributes = variant.attributes || {};
 
-          console.log(`Processing variant: ${variant.name}`, {
+          //console.log(`Processing variant: ${variant.name}`, {
             price: variant.price,
             stock: variant.stock,
             sku: variant.sku,
@@ -1115,7 +1115,7 @@ const updateProduct = catchAsync(async (req, res) => {
             variant.sku ||
             generateVariantSku(updatedProduct.sku, variantAttributes);
 
-          console.log(`Creating variant with SKU: ${variantSku}`);
+          //console.log(`Creating variant with SKU: ${variantSku}`);
 
           return await ProductVariant.create({
             productId: id,
@@ -1180,7 +1180,7 @@ const updateProduct = catchAsync(async (req, res) => {
     Array.isArray(specifications)
   ) {
     try {
-      console.log("Updating specifications:", specifications);
+      //console.log("Updating specifications:", specifications);
       const { ProductSpecification } = require("../models");
 
       // Xóa tất cả specifications cũ
@@ -1197,7 +1197,7 @@ const updateProduct = catchAsync(async (req, res) => {
         }));
 
         await ProductSpecification.bulkCreate(specificationData);
-        console.log(
+        //console.log(
           `Updated ${specifications.length} specifications for product ${id}`
         );
         changes.specifications = specifications.length;
@@ -1214,7 +1214,7 @@ const updateProduct = catchAsync(async (req, res) => {
     Array.isArray(warrantyPackageIds)
   ) {
     try {
-      console.log("Updating warranty packages:", warrantyPackageIds);
+      //console.log("Updating warranty packages:", warrantyPackageIds);
       const { ProductWarranty, WarrantyPackage } = require("../models");
 
       // Xóa tất cả warranty packages cũ
@@ -1223,14 +1223,14 @@ const updateProduct = catchAsync(async (req, res) => {
       // Tạo warranty packages mới
       if (warrantyPackageIds.length > 0) {
         // Kiểm tra xem các warranty packages có tồn tại không
-        console.log(
+        //console.log(
           "Looking for warranty packages with IDs:",
           warrantyPackageIds
         );
         const existingWarrantyPackages = await WarrantyPackage.findAll({
           where: { id: warrantyPackageIds, isActive: true },
         });
-        console.log(
+        //console.log(
           "Found warranty packages:",
           existingWarrantyPackages.length
         );
@@ -1247,7 +1247,7 @@ const updateProduct = catchAsync(async (req, res) => {
           );
 
           await Promise.all(warrantyPromises);
-          console.log(
+          //console.log(
             `Created ${existingWarrantyPackages.length} warranty package associations for product ${id}`
           );
         }

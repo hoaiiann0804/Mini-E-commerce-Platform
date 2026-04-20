@@ -113,8 +113,8 @@ const ProductDetailPage: React.FC = () => {
 
   // Auto-select first variant when product loads
   useEffect(() => {
-    // console.log("Product: ", product);
-    // console.log("Selected", selectedAttributes);
+    // //console.log("Product: ", product);
+    // //console.log("Selected", selectedAttributes);
     if (product && product.attributes && product.attributes.length > 0) {
       const firstAttribute = product.attributes[0];
       if (firstAttribute.values && firstAttribute.values.length > 0) {
@@ -125,7 +125,7 @@ const ProductDetailPage: React.FC = () => {
           const initialAttributes = { [firstAttribute.name]: firstValue };
           setSelectedAttributes(initialAttributes);
           setMappedAttributes(initialAttributes);
-          // console.log("MappedAttributes", initialAttributes);
+          // //console.log("MappedAttributes", initialAttributes);
         }
       }
     }
@@ -140,7 +140,7 @@ const ProductDetailPage: React.FC = () => {
   // Handle quantity change
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock || 99)) {
-      // console.log("Qantity", newQuantity);
+      // //console.log("Qantity", newQuantity);
       setQuantity(newQuantity);
     }
   };
@@ -165,8 +165,8 @@ const ProductDetailPage: React.FC = () => {
 
   // Handle attribute selection with toggle functionality
   const handleAttributeChange = (name: string, value: string) => {
-    // console.log("handleAttributeChange, name:", name, "value:", value); // name: CPU value: AMD Ryzen 5 PRO 6650U
-    // console.log("mappedAttributes trước:", mappedAttributes); // {CPU: 'AMD Ryzen 5 PRO 6650U'}
+    // //console.log("handleAttributeChange, name:", name, "value:", value); // name: CPU value: AMD Ryzen 5 PRO 6650U
+    // //console.log("mappedAttributes trước:", mappedAttributes); // {CPU: 'AMD Ryzen 5 PRO 6650U'}
     //
     setSelectedAttributes((prev) => {
       const newAttributes = { ...prev };
@@ -188,7 +188,7 @@ const ProductDetailPage: React.FC = () => {
 
     // Reset quantity to 1 when changing attributes
     setQuantity(1);
-    // console.log(quantity);
+    // //console.log(quantity);
   };
 
   // Handle warranty selection
@@ -277,12 +277,12 @@ const ProductDetailPage: React.FC = () => {
       return;
     }
 
-    console.log("🔐 isAuthenticated trong handleAddToCart:", isAuthenticated);
+    //console.log("🔐 isAuthenticated trong handleAddToCart:", isAuthenticated);
 
     if (isAuthenticated) {
       // Nếu đã đăng nhập, sử dụng API
       try {
-        // console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
+        // //console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
         //   productId: product.id,
         //   variantId,
         //   quantity,
@@ -295,7 +295,7 @@ const ProductDetailPage: React.FC = () => {
           warrantyPackageIds: selectedWarranties,
         }).unwrap();
 
-        console.log("✅ API success, server cart:", serverCart);
+        //console.log("✅ API success, server cart:", serverCart);
 
         // Update Redux store with server response
         dispatch(setServerCart(serverCart));
@@ -340,7 +340,7 @@ const ProductDetailPage: React.FC = () => {
       }
     } else {
       // Nếu chưa đăng nhập, KHÔNG gọi API, chỉ lưu vào localStorage
-      console.log("🔐 Chưa đăng nhập, chỉ lưu vào localStorage");
+      //console.log("🔐 Chưa đăng nhập, chỉ lưu vào localStorage");
 
       const newItem = {
         id: uuidv4(),
@@ -361,7 +361,7 @@ const ProductDetailPage: React.FC = () => {
       dispatch(addItem(newItem));
 
       // Debug: Check if localStorage was updated
-      console.log(
+      //console.log(
         "🔍 localStorage after add:",
         localStorage.getItem("cartItems")
       );
@@ -384,7 +384,7 @@ const ProductDetailPage: React.FC = () => {
         const response = await addtoWishList({
           productId: product.id,
         }).unwrap();
-        console.log("✅ API success, server wishlist:", response);
+        //console.log("✅ API success, server wishlist:", response);
         // Transform BackendWishlist to ServerWishlist format
         const transformedWishlist: ServerWishlist = {
           id: response.id as string || '',

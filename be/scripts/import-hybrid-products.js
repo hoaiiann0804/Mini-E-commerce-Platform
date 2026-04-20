@@ -1111,7 +1111,7 @@ Laptop MSI Modern 14 C12MO-660VN đã có mặt tại cửa hàng CellphoneS, đ
 
 async function importProducts() {
   try {
-    console.log('🚀 Bắt đầu import sản phẩm...');
+    //console.log('🚀 Bắt đầu import sản phẩm...');
 
     // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
     await OrderItem.destroy({ where: {} });
@@ -1122,7 +1122,7 @@ async function importProducts() {
     await Product.destroy({ where: {} });
     await Category.destroy({ where: {} });
 
-    console.log('🗑️ Đã xóa dữ liệu cũ');
+    //console.log('🗑️ Đã xóa dữ liệu cũ');
 
     // Tạo categories
     const categories = [
@@ -1152,7 +1152,7 @@ async function importProducts() {
     ];
 
     const createdCategories = await Category.bulkCreate(categories);
-    console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
+    //console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
 
     // Tạo products với attributes và variants
     for (const productData of sampleProducts) {
@@ -1251,16 +1251,16 @@ async function importProducts() {
         inStock: totalStock > 0,
       });
 
-      console.log(
+      //console.log(
         `✅ Đã tạo sản phẩm: ${product.name} (${createdSpecifications.length} specs, ${createdAttributes.length} attributes, ${createdVariants.length} variants, ${totalStock} stock)`
       );
     }
 
-    console.log('🎉 Import thành công!');
-    console.log(`📊 Tổng kết:`);
-    console.log(`   - ${sampleProducts.length} sản phẩm`);
-    console.log(`   - ${createdCategories.length} danh mục`);
-    console.log(
+    //console.log('🎉 Import thành công!');
+    //console.log(`📊 Tổng kết:`);
+    //console.log(`   - ${sampleProducts.length} sản phẩm`);
+    //console.log(`   - ${createdCategories.length} danh mục`);
+    //console.log(
       `   - Tổng variants: ${sampleProducts.reduce((sum, p) => sum + p.variants.length, 0)}`
     );
   } catch (error) {
@@ -1270,6 +1270,6 @@ async function importProducts() {
 
 // Chạy import
 importProducts().then(() => {
-  console.log('🏁 Hoàn tất import');
+  //console.log('🏁 Hoàn tất import');
   process.exit(0);
 });
