@@ -8,6 +8,7 @@ import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 // Add address related imports and types
 import { useGetAddressesQuery } from "@/services/userApi";
 import type { Address } from "@/types/user.types";
+import { formatAddressForDisplay } from "@/utils/addressFormatter";
 import PremiumButton from "@/components/common/PremiumButton";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
@@ -59,8 +60,8 @@ const CheckoutPage: React.FC = () => {
       lastName: lastNameParts.join(" ") || "",
       phone: address.phone || "",
       address: address.address1 || "",
-      city: address.city || "",
-      state: address.state || "",
+      city: (address as any).ward || address.city || "",
+      state: (address as any).province || address.state || "",
       zipCode: address.zip || "",
       country: address.country || "VN",
     }));
@@ -644,8 +645,7 @@ const CheckoutPage: React.FC = () => {
                                 )}
                               </div>
                               <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                                {address.address1}, {address.city},{" "}
-                                {address.state}, {address.country}
+                                {formatAddressForDisplay(address)}
                               </div>
                               <div className="text-sm text-neutral-600 dark:text-neutral-400">
                                 {address.phone}

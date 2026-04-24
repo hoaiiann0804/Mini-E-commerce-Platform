@@ -37,6 +37,8 @@ import {
   useSetDefaultAddressMutation,
   type Address,
 } from "@/services/userApi";
+import { formatAddressForDisplay } from "@/utils/addressFormatter";
+import type { LocationValue } from "@/components/address/LocationSelectors";
 
 // 🔹 Validation Schema
 const useAddressSchema = () =>
@@ -48,10 +50,10 @@ const useAddressSchema = () =>
         phone: yup.string().required("Vui lòng nhập số điện thoại"),
         address1: yup.string().required("Vui lòng nhập địa chỉ"),
         address2: yup.string().optional(),
-        city: yup.string().required("Vui lòng chọn thành phố"),
-        state: yup.string().required("Vui lòng chọn tỉnh/thành phố"),
-        country: yup.string().required("Vui lòng chọn quốc gia"),
-        zip: yup.string().required("Vui lòng nhập mã bưu điện"),
+        province: yup.string().required("Vui lòng chọn tỉnh/thành phố"),
+        ward: yup.string().required("Vui lòng chọn phường/xã"),
+        country: yup.string().required(),
+        zip: yup.string().required(),
         isDefault: yup.boolean().default(false),
         addressType: yup
           .string()
@@ -88,13 +90,7 @@ const AddressPage = () => {
   const [mapPosition, setMapPosition] = useState<
     { lat: number; lng: number } | undefined
   >(undefined);
-  const [location, setLocation] = useState<LocationValues>({
-    country: "",
-    state: "",
-    city: "",
-    countryCode: "",
-    stateCode: "",
-  });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -126,57 +122,72 @@ const AddressPage = () => {
       phone: "",
       address1: "",
       address2: "",
-      city: "",
-      state: "",
-      country: "",
+      province: "",
+      ward: "",
+      country: "Vietnam",
       zip: "",
       addressType: "home",
       isDefault: false,
     },
   });
 
-  const handleLocationChange = useCallback(
-    (newLoc: LocationValues) => {
-      setLocation(newLoc);
-      setValue("country", newLoc.country || "", { shouldValidate: true });
-      setValue("state", newLoc.state || "", { shouldValidate: true });
-      setValue("city", newLoc.city || "", { shouldValidate: true });
-    },
-    [setValue]
-  );
+  const handleLocationChange = useCallback((newLoc: LocationValue) => {
+    setValue("province", newLoc.province || "", { shouldValidate: true });
+    setValue("ward", newLoc.ward || "", { shouldValidate: true });
+    setValue("country", newLoc.country || "", { shouldValidate: true });
+  }, [setValue]);
 
-  const handleLocationSelect = useCallback(
-    (lat: number, lng: number, address: string) => {
-      setMapPosition({ lat, lng });
-      setValue("address1", address, { shouldValidate: true });
+  // const handleLocationSelect = useCallback(
+  //   (lat: number, lng: number, address: string) => {
+  //     setMapPosition({ lat, lng });
+  //     setValue("address1", address, { shouldValidate: true });
 
-      // Also update the location fields if we can extract them from the address
-      const addressParts = address.split(",").map((part) => part.trim());
-      if (addressParts.length >= 3) {
-        const city = addressParts[addressParts.length - 2];
-        const country = addressParts[addressParts.length - 1];
+  //     // Also update the location fields if we can extract them from the address
+  //     const addressParts = address.split(",").map((part) => part.trim());
+  //     if (addressParts.length >= 3) {
+  //       const city = addressParts[addressParts.length - 2];
+  //       const paresd = normalizeAddress(data)
+  //       setValue("city", city, { shouldValidate: true });
+  //       setValue("country", country, { shouldValidate: true });
 
-        setValue("city", city, { shouldValidate: true });
-        setValue("country", country, { shouldValidate: true });
+  //       // Update location state
+  //       setLocation((prev) => ({
+  //         ...prev,
+  //         city,
+  //         country,
+  //       }));
+  //     }
+  //   },
+  //   [setValue, setLocation]
+  // );
+  const handleLocationSelect = (
+    lat: number,
+    lng: number,
+    address: string,
+    normalized?: { province?: string; ward?: string; country?: string; zip?: string }
+  ) => {
+    setMapPosition({ lat, lng });
+    setValue("address1", address, { shouldValidate: true });
 
-        // Update location state
-        setLocation((prev) => ({
-          ...prev,
-          city,
-          country,
-        }));
-      }
-    },
-    [setValue, setLocation]
-  );
+    if (!normalized) return;
 
+    setValue("province", normalized.province || "", { shouldValidate: true });
+    setValue("ward", normalized.ward || "", { shouldValidate: true });
+    setValue("country", normalized.country || "Vietnam", {
+      shouldValidate: true,
+    });
+    setValue("zip", normalized.zip || "", { shouldValidate: true });
+  };
   const onSubmit = async (data: any) => {
     try {
       const addressData = {
         ...data,
-        name: `${data.firstName} ${data.lastName}`.trim(),
-        countryCode: location.countryCode,
-        stateCode: location.stateCode,
+        name: `${data.firstName} ${data.lastName}`,
+        province: data.province,
+        ward: data.ward,
+        country: data.country,
+        lat: mapPosition?.lat,
+        lng: mapPosition?.lng,
       };
 
       if (editingAddress) {
@@ -199,27 +210,24 @@ const AddressPage = () => {
 
   const handleEdit = (address: Address) => {
     setEditingAddress(address);
+  
     const [firstName, ...lastNameParts] = address.name?.split(" ") || [];
+  
     reset({
       firstName,
       lastName: lastNameParts.join(" "),
       phone: address.phone,
+
       address1: address.address1,
       address2: address.address2,
-      city: address.city,
-      state: address.state,
+
+      province: (address as any).province || address.state || "",
+      ward: (address as any).ward || address.city || "",
+
       country: address.country,
       zip: address.zip,
-      addressType: address.addressType,
-      isDefault: address.isDefault,
     });
-    setLocation({
-      country: address.country,
-      state: address.state,
-      city: address.city,
-      countryCode: address.countryCode,
-      stateCode: address.stateCode,
-    });
+  
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -251,13 +259,8 @@ const AddressPage = () => {
   const resetForm = () => {
     reset();
     setEditingAddress(null);
-    setLocation({
-      country: "",
-      state: "",
-      city: "",
-      countryCode: "",
-      stateCode: "",
-    });
+    setShowMap(false);
+    setMapPosition(undefined);
   };
 
   const isSubmitting = isAdding || isUpdating;
@@ -316,12 +319,12 @@ const AddressPage = () => {
                   }
                 >
                   <LocationSelectors
-                    onLocationChange={handleLocationChange}
-                    initialValues={{
-                      country: location.country || undefined,
-                      state: location.state || undefined,
-                      city: location.city || undefined,
+                    value={{
+                      country: watch("country") || "Vietnam",
+                      province: watch("province") || "",
+                      ward: watch("ward") || "",
                     }}
+                    onChange={handleLocationChange}
                   />
                 </Suspense>
 
@@ -514,7 +517,7 @@ const AddressPage = () => {
                       </Typography>
                     )}
                     <Typography variant="body2" mt={1}>
-                      {`${address.address1}, ${address.city}, ${address.state}, ${address.country}`}
+                      {formatAddressForDisplay(address)}
                     </Typography>
                     <Typography variant="body2">
                       Điện thoại: {address.phone}
