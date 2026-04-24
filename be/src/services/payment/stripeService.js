@@ -61,11 +61,11 @@ class StripeService {
         currency === 'vnd' ? Math.round(amount) : Math.round(amount * 100);
 
       //console.log('Creating Stripe payment intent with params:', {
-        amount: stripeAmount,
-        currency,
-        metadata,
-        originalAmount: amount,
-      });
+      //   amount: stripeAmount,
+      //   currency,
+      //   metadata,
+      //   originalAmount: amount,
+      // });
 
       const paymentIntent = await withDnsLookupOverride(() =>
         stripe.paymentIntents.create({

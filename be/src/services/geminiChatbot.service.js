@@ -246,8 +246,8 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
     let matchedProducts = [];
     if (process.env.NODE_ENV !== 'production') {
       //console.log(
-        `🔍 Searching for: "${lowerMessage}" in ${products.length} products`
-      );
+      //   `🔍 Searching for: "${lowerMessage}" in ${products.length} products`
+      // );
     }
 
     // Extract search terms from user message
@@ -300,9 +300,9 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
         if (productDesc.includes(term.toLowerCase())) {
           matchScore += 8;
           if (process.env.NODE_ENV !== 'production') {
-            //console.log(
-              `✅ Description match: "${product.name}" desc contains "${term}"`
-            );
+            // //console.log(
+            //   `✅ Description match: "${product.name}" desc contains "${term}"`
+            // );
           }
         }
       });
@@ -318,9 +318,9 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
           if (keywordMatches.length > 0) {
             if (process.env.NODE_ENV !== 'production') {
               //console.log(
-                `✅ Keyword matches for "${product.name}":`,
-                keywordMatches
-              );
+              //   `✅ Keyword matches for "${product.name}":`,
+              //   keywordMatches
+              // );
             }
             matchScore += keywordMatches.length * 5;
           }
@@ -338,9 +338,9 @@ CÁCH XỬ LÝ YÊU CẦU THÊM VÀO GIỎ HÀNG:
       // Add product if it has any matches
       if (matchScore > 0) {
         if (process.env.NODE_ENV !== 'production') {
-          //console.log(
-            `✅ Product "${product.name}" matched with score: ${matchScore}`
-          );
+          // //console.log(
+          //   `✅ Product "${product.name}" matched with score: ${matchScore}`
+          // );
         }
         matchedProducts.push({ ...product, matchScore });
       }

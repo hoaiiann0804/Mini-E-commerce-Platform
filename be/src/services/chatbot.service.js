@@ -465,13 +465,13 @@ class ChatbotService {
   async trackConversation(data) {
     try {
       // In a real implementation, this would save to a conversation tracking table
-      //console.log('Tracking conversation:', {
-        userId: data.userId,
-        message: data.message,
-        intent: data.intent,
-        products: data.products?.length || 0,
-        timestamp: data.timestamp,
-      });
+      // //console.log('Tracking conversation:', {
+      //   userId: data.userId,
+      //   message: data.message,
+      //   intent: data.intent,
+      //   products: data.products?.length || 0,
+      //   timestamp: data.timestamp,
+      // });
 
       // You could save this to a ChatbotConversation model
     } catch (error) {

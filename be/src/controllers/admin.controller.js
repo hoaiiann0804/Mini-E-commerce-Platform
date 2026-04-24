@@ -439,9 +439,9 @@ const getProductById = catchAsync(async (req, res) => {
  */
 const createProduct = catchAsync(async (req, res) => {
   //console.log(
-    "Create product request body:",
-    JSON.stringify(req.body, null, 2)
-  );
+  //   "Create product request body:",
+  //   JSON.stringify(req.body, null, 2)
+  // );
   const {
     name,
     baseName,
@@ -523,9 +523,9 @@ const createProduct = catchAsync(async (req, res) => {
 
   // Cập nhật compareAtPrice riêng bằng truy vấn SQL trực tiếp nếu có
   //console.log(
-    "compareAtPrice normalized from request:",
-    normalizedCompareAtPrice
-  );
+  //   "compareAtPrice normalized from request:",
+  //   normalizedCompareAtPrice
+  // );
   if (normalizedCompareAtPrice !== null) {
     const { sequelize } = require("../models");
     await sequelize.query(
@@ -603,10 +603,10 @@ const createProduct = catchAsync(async (req, res) => {
           attrValues = [String(attr.value)];
         }
 
-        //console.log(
-          `Creating attribute: ${attr.name} with values:`,
-          attrValues
-        );
+        // //console.log(
+        //   `Creating attribute: ${attr.name} with values:`,
+        //   attrValues
+        // );
 
         return await ProductAttribute.create({
           productId: product.id,
@@ -636,12 +636,12 @@ const createProduct = catchAsync(async (req, res) => {
         // Đảm bảo variant.attributes luôn là một object
         const variantAttributes = variant.attributes || {};
 
-        //console.log(`Processing variant: ${variant.name}`, {
-          price: variant.price,
-          stock: variant.stock,
-          sku: variant.sku,
-          attributes: variantAttributes,
-        });
+        // //console.log(`Processing variant: ${variant.name}`, {
+        //   price: variant.price,
+        //   stock: variant.stock,
+        //   sku: variant.sku,
+        //   attributes: variantAttributes,
+        // });
 
         // Validate variant attributes - bỏ qua validation nếu không có thuộc tính
         if (
@@ -739,8 +739,8 @@ const createProduct = catchAsync(async (req, res) => {
 
       await ProductSpecification.bulkCreate(specificationData);
       //console.log(
-        `Created ${specifications.length} specifications for product ${product.id}`
-      );
+      //   `Created ${specifications.length} specifications for product ${product.id}`
+      // );
     } catch (error) {
       console.error("Error creating specifications:", error);
       // Không throw error để không làm fail toàn bộ quá trình tạo product
@@ -759,9 +759,9 @@ const createProduct = catchAsync(async (req, res) => {
 
       // Kiểm tra xem các warranty packages có tồn tại không
       //console.log(
-        "Looking for warranty packages with IDs:",
-        warrantyPackageIds
-      );
+      //   "Looking for warranty packages with IDs:",
+      //   warrantyPackageIds
+      // );
       const existingWarrantyPackages = await WarrantyPackage.findAll({
         where: { id: warrantyPackageIds, isActive: true },
       });
@@ -780,8 +780,8 @@ const createProduct = catchAsync(async (req, res) => {
 
         await Promise.all(warrantyPromises);
         //console.log(
-          `Created ${existingWarrantyPackages.length} warranty package associations for product ${product.id}`
-        );
+        //   `Created ${existingWarrantyPackages.length} warranty package associations for product ${product.id}`
+        // );
       }
     } catch (error) {
       console.error("Error creating warranty packages:", error);
@@ -871,18 +871,18 @@ const updateProduct = catchAsync(async (req, res) => {
   //console.log("updateProduct - specifications:", specifications);
   //console.log("updateProduct - specifications type:", typeof specifications);
   //console.log(
-    "updateProduct - specifications isArray:",
-    Array.isArray(specifications)
-  );
-  //console.log(
-    "updateProduct - hasOwnProperty specifications:",
-    req.body.hasOwnProperty("specifications")
-  );
+  //   "updateProduct - specifications isArray:",
+  //   Array.isArray(specifications)
+  // );
+  // //console.log(
+  //   "updateProduct - hasOwnProperty specifications:",
+  //   req.body.hasOwnProperty("specifications")
+  // );
   //console.log("updateProduct - warrantyPackageIds:", warrantyPackageIds);
   //console.log(
-    "updateProduct - hasOwnProperty warrantyPackageIds:",
-    req.body.hasOwnProperty("warrantyPackageIds")
-  );
+  //   "updateProduct - hasOwnProperty warrantyPackageIds:",
+  //   req.body.hasOwnProperty("warrantyPackageIds")
+  // );
 
   const product = await Product.findByPk(id);
   if (!product) {
@@ -972,8 +972,8 @@ const updateProduct = catchAsync(async (req, res) => {
 
     // Log thông tin để debug
     //console.log(
-      `Updated compareAtPrice to ${priceToCompare} for product ${product.id}`
-    );
+    //   `Updated compareAtPrice to ${priceToCompare} for product ${product.id}`
+    // );
   }
 
   // Cập nhật categories nếu có
@@ -1044,9 +1044,9 @@ const updateProduct = catchAsync(async (req, res) => {
           }
 
           //console.log(
-            `Creating attribute: ${attr.name} with values:`,
-            attrValues
-          );
+          //   `Creating attribute: ${attr.name} with values:`,
+          //   attrValues
+          // );
 
           return await ProductAttribute.create({
             productId: id,
@@ -1082,11 +1082,11 @@ const updateProduct = catchAsync(async (req, res) => {
           const variantAttributes = variant.attributes || {};
 
           //console.log(`Processing variant: ${variant.name}`, {
-            price: variant.price,
-            stock: variant.stock,
-            sku: variant.sku,
-            attributes: variantAttributes,
-          });
+          //   price: variant.price,
+          //   stock: variant.stock,
+          //   sku: variant.sku,
+          //   attributes: variantAttributes,
+          // });
 
           // Validate variant attributes - bỏ qua validation nếu không có thuộc tính
           if (
@@ -1198,8 +1198,8 @@ const updateProduct = catchAsync(async (req, res) => {
 
         await ProductSpecification.bulkCreate(specificationData);
         //console.log(
-          `Updated ${specifications.length} specifications for product ${id}`
-        );
+        //   `Updated ${specifications.length} specifications for product ${id}`
+        // );
         changes.specifications = specifications.length;
       }
     } catch (error) {
@@ -1224,16 +1224,16 @@ const updateProduct = catchAsync(async (req, res) => {
       if (warrantyPackageIds.length > 0) {
         // Kiểm tra xem các warranty packages có tồn tại không
         //console.log(
-          "Looking for warranty packages with IDs:",
-          warrantyPackageIds
-        );
+        //   "Looking for warranty packages with IDs:",
+        //   warrantyPackageIds
+        // );
         const existingWarrantyPackages = await WarrantyPackage.findAll({
           where: { id: warrantyPackageIds, isActive: true },
         });
         //console.log(
-          "Found warranty packages:",
-          existingWarrantyPackages.length
-        );
+        //   "Found warranty packages:",
+        //   existingWarrantyPackages.length
+        // );
 
         if (existingWarrantyPackages.length > 0) {
           const warrantyPromises = existingWarrantyPackages.map(
@@ -1247,9 +1247,9 @@ const updateProduct = catchAsync(async (req, res) => {
           );
 
           await Promise.all(warrantyPromises);
-          //console.log(
-            `Created ${existingWarrantyPackages.length} warranty package associations for product ${id}`
-          );
+          // //console.log(
+          //   `Created ${existingWarrantyPackages.length} warranty package associations for product ${id}`
+          // );
         }
       }
     } catch (error) {

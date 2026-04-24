@@ -14,9 +14,9 @@ const createPaymentIntent = async (req, res, next) => {
 
     // Create payment intent with metadata
     //console.log('Creating payment intent with metadata:', {
-      userId,
-      orderId: orderId || '',
-    });
+    //   userId,
+    //   orderId: orderId || '',
+    // });
 
     const paymentIntent = await stripeService.createPaymentIntent({
       amount,
@@ -28,9 +28,9 @@ const createPaymentIntent = async (req, res, next) => {
     });
 
     //console.log('Payment intent created:', {
-      id: paymentIntent.paymentIntentId,
-      metadata: paymentIntent.metadata,
-    });
+    //   id: paymentIntent.paymentIntentId,
+    //   metadata: paymentIntent.metadata,
+    // });
 
     res.status(200).json({
       status: 'success',
@@ -54,10 +54,10 @@ const confirmPayment = async (req, res, next) => {
       await stripeService.confirmPaymentIntent(paymentIntentId);
 
     //console.log('Payment Intent Retrieved:', {
-      id: paymentIntent.id,
-      status: paymentIntent.status,
-      metadata: paymentIntent.metadata,
-    });
+    //   id: paymentIntent.id,
+    //   status: paymentIntent.status,
+    //   metadata: paymentIntent.metadata,
+    // });
 
     // Update order payment status if orderId exists in metadata
     if (paymentIntent.metadata.orderId) {
@@ -68,16 +68,16 @@ const confirmPayment = async (req, res, next) => {
       const existingOrder = await Order.findByPk(
         paymentIntent.metadata.orderId
       );
-      //console.log(
-        'Existing order found:',
-        existingOrder
-          ? {
-              id: existingOrder.id,
-              number: existingOrder.number,
-              currentPaymentStatus: existingOrder.paymentStatus,
-            }
-          : 'Order not found'
-      );
+      // //console.log(
+      //   'Existing order found:',
+      //   existingOrder
+      //     ? {
+      //         id: existingOrder.id,
+      //         number: existingOrder.number,
+      //         currentPaymentStatus: existingOrder.paymentStatus,
+      //       }
+      //     : 'Order not found'
+      // );
 
       if (existingOrder && paymentIntent.status === 'succeeded') {
         const updateResult = await Order.update(
@@ -98,18 +98,18 @@ const confirmPayment = async (req, res, next) => {
         const updatedOrder = await Order.findByPk(
           paymentIntent.metadata.orderId
         );
-        //console.log(
-          'Order after update:',
-          updatedOrder
-            ? {
-                id: updatedOrder.id,
-                number: updatedOrder.number,
-                status: updatedOrder.status, // Trạng thái đơn hàng
-                paymentStatus: updatedOrder.paymentStatus, // Trạng thái thanh toán
-                paymentTransactionId: updatedOrder.paymentTransactionId,
-              }
-            : 'Order not found after update'
-        );
+        // //console.log(
+        //   'Order after update:',
+        //   updatedOrder
+        //     ? {
+        //         id: updatedOrder.id,
+        //         number: updatedOrder.number,
+        //         status: updatedOrder.status, // Trạng thái đơn hàng
+        //         paymentStatus: updatedOrder.paymentStatus, // Trạng thái thanh toán
+        //         paymentTransactionId: updatedOrder.paymentTransactionId,
+        //       }
+        //     : 'Order not found after update'
+        // );
       } else if (!existingOrder) {
         //console.log('Order not found for ID:', paymentIntent.metadata.orderId);
       } else {
@@ -285,9 +285,9 @@ const handlePaymentSucceeded = async (paymentIntent) => {
           where: { id: paymentIntent.metadata.orderId },
         }
       );
-      //console.log(
-        `Payment succeeded for order: ${paymentIntent.metadata.orderId}`
-      );
+      // //console.log(
+      //   `Payment succeeded for order: ${paymentIntent.metadata.orderId}`
+      // );
     }
   } catch (error) {
     console.error('Error handling payment succeeded:', error);
@@ -309,8 +309,8 @@ const handlePaymentFailed = async (paymentIntent) => {
         }
       );
       //console.log(
-        `Payment failed for order: ${paymentIntent.metadata.orderId}`
-      );
+    //     `Payment failed for order: ${paymentIntent.metadata.orderId}`
+    //   );
     }
   } catch (error) {
     console.error('Error handling payment failed:', error);
