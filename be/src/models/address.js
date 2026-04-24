@@ -1,71 +1,104 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/sequelize');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/sequelize");
 
 const Address = sequelize.define(
-  'Address',
+  "Address",
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+      primaryKey: true,
     },
     userId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     firstName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     lastName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     company: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     address1: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     address2: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
+    },
+    province: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    // district: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
+    ward: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    provinceCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    // districtCode: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true,
+    // },
+
+    wardCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    lat: {
+      type: DataTypes.DECIMAL(10, 8),
+      allowNull: true,
+    },
+    lng: {
+      type: DataTypes.DECIMAL(10, 8),
+      allowNull: true,
     },
     city: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true,
     },
     state: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true,
     },
     zip: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     country: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     isDefault: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
     },
   },
   {
-    tableName: 'addresses',
+    tableName: "addresses",
     timestamps: true,
   }
 );
-
 module.exports = Address;

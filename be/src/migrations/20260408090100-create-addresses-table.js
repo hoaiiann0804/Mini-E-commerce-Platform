@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
       },
       user_id: {
-        type: Sequelize.UUID,
+        type: Sequelize.UUID, 
         allowNull: false,
         references: {
           model: 'users',
@@ -35,6 +35,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      
       address1: {
         type: Sequelize.STRING,
         allowNull: false,
