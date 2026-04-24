@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Box, TextField, CircularProgress } from '@mui/material';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { normalizeAddress, renderAddress } from '@/utils/addressFormatter';
 
 // Fix for default marker icons
 const DefaultIcon = L.icon({
@@ -23,12 +24,27 @@ interface MapPosition {
 }
 
 interface AddressMapPickerProps {
-  onLocationSelect: (lat: number, lng: number, address: string) => void;
+  onLocationSelect: (
+    lat: number,
+    lng: number,
+    address: string,
+    normalized?: NormalizedAddress
+  ) => void;
   initialPosition?: MapPosition;
   address?: string;
   onAddressChange?: (address: string) => void;
   disabled?: boolean;
 }
+
+type NormalizedAddress = {
+  address1: string;
+  ward: string;
+  province: string;
+  country: string;
+  zip: string;
+  lat: number;
+  lng: number;
+};
 
 const DEFAULT_POSITION: [number, number] = [10.762622, 106.660172]; // Ho Chi Minh City
 
@@ -117,12 +133,13 @@ const AddressMapPicker: React.FC<AddressMapPickerProps> = ({
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
       );
       const data = await response.json();
-
-      if (data.display_name) {
-        const newAddress = data.display_name;
-        setAddress(newAddress);
-        if (onAddressChange) onAddressChange(newAddress);
-        onLocationSelect(lat, lng, newAddress);
+      console.log(data.address)
+      if (data.address) {
+        const normalized = normalizeAddress(data) as NormalizedAddress;
+        const formattedAddress = renderAddress(normalized);
+        setAddress(formattedAddress);
+        if (onAddressChange) onAddressChange(formattedAddress);
+        onLocationSelect(lat, lng, formattedAddress, normalized);
       }
     } catch (error) {
       console.error('Error reverse geocoding:', error);
