@@ -156,12 +156,12 @@ class ImageService {
   async uploadImage(file, options = {}) {
     try {
       //console.log("📤 Starting image upload:", {
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        path: file.path,
-        options,
-      });
+      //   originalname: file.originalname,
+      //   mimetype: file.mimetype,
+      //   size: file.size,
+      //   path: file.path,
+      //   options,
+      // });
 
       const {
         category = "product",
