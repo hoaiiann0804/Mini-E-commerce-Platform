@@ -305,7 +305,7 @@
   "checkout": {
     "title": "Thanh Toán",
     "selectAddress": "Chọn địa chỉ",
-    "useCustomAddress": "Chọn đỉa chỉ có sẵn",
+    "useCustomAddress": "Tùy chọn địa chỉ",
     "manageAddresses": "Quản lý địa chỉ",
     "emptyCart": {
       "title": "Giỏ hàng của bạn đang trống",
