@@ -37,6 +37,12 @@ const getFrontendBaseUrl = () => {
 if (!process.env.RESEND_API_KEY) {
   throw new Error("Missing RESEND_API_KEY");
 }
+const missingEmailEnv = ["EMAIL_FROM", "EMAIL_FROM_NAME"].filter(
+  (key) => !process.env[key]
+);
+if (missingEmailEnv.length > 0) {
+  throw new Error(`Missing ${missingEmailEnv.join(", ")}`);
+}
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send email
@@ -52,14 +58,26 @@ const sendEmail = async (options) => {
   // };
 
   try {
-    const send = await resend.emails.send({
+    const result = await resend.emails.send({
       from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
     });
-    //console.log("Email sent", send);
-    return send;
+
+    const error = result?.error;
+    if (error) {
+      const message =
+        typeof error === "string"
+          ? error
+          : error.message || JSON.stringify(error);
+      const err = new Error(`Resend email failed: ${message}`);
+      err.cause = error;
+      throw err;
+    }
+
+    // Success shape can be { data, error } or just a data-like object depending on SDK/version
+    return result?.data ?? result;
   } catch (error) {
     // //console.log("Send email error", error);
     throw error;

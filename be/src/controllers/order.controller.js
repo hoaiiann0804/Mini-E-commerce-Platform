@@ -218,32 +218,41 @@ const createOrder = async (req, res, next) => {
     await transaction.commit();
 
     // Send order confirmation email
-    await emailService.sendOrderConfirmationEmail(req.user.email, {
-      orderNumber: order.number,
-      orderDate: order.createdAt,
-      total: order.total,
-      items: orderItemsToCreate.map((item) => {
-        const variantName = item.attributes?.variant;
-        const displayName = variantName
-          ? `${item.name} (${variantName})`
-          : item.name;
-        return {
-          name: displayName,
-          quantity: item.quantity,
-          price: item.price,
-          subtotal: item.subtotal,
-        };
-      }),
-      shippingAddress: {
-        name: `${order.shippingFirstName} ${order.shippingLastName}`,
-        address1: order.shippingAddress1,
-        address2: order.shippingAddress2,
-        city: order.shippingCity,
-        state: order.shippingState,
-        zip: order.shippingZip,
-        country: order.shippingCountry,
-      },
-    });
+    try {
+      await emailService.sendOrderConfirmationEmail(req.user.email, {
+        orderNumber: order.number,
+        orderDate: order.createdAt,
+        total: order.total,
+        items: orderItemsToCreate.map((item) => {
+          const variantName = item.attributes?.variant;
+          const displayName = variantName
+            ? `${item.name} (${variantName})`
+            : item.name;
+          return {
+            name: displayName,
+            quantity: item.quantity,
+            price: item.price,
+            subtotal: item.subtotal,
+          };
+        }),
+        shippingAddress: {
+          name: `${order.shippingFirstName} ${order.shippingLastName}`,
+          address1: order.shippingAddress1,
+          address2: order.shippingAddress2,
+          city: order.shippingCity,
+          state: order.shippingState,
+          zip: order.shippingZip,
+          country: order.shippingCountry,
+        },
+      });
+    } catch (error) {
+      console.error("[email] order confirmation failed", {
+        orderId: order.id,
+        orderNumber: order.number,
+        email: req.user?.email,
+        message: error?.message,
+      });
+    }
 
     res.status(201).json({
       status: "success",
@@ -469,10 +478,19 @@ const cancelOrder = async (req, res, next) => {
     await transaction.commit();
 
     // Send cancellation email
-    await emailService.sendOrderCancellationEmail(req.user.email, {
-      orderNumber: order.number,
-      orderDate: order.createdAt,
-    });
+    try {
+      await emailService.sendOrderCancellationEmail(req.user.email, {
+        orderNumber: order.number,
+        orderDate: order.createdAt,
+      });
+    } catch (error) {
+      console.error("[email] order cancellation failed", {
+        orderId: order.id,
+        orderNumber: order.number,
+        email: req.user?.email,
+        message: error?.message,
+      });
+    }
 
     res.status(200).json({
       status: "success",
@@ -549,11 +567,21 @@ const updateOrderStatus = async (req, res, next) => {
     await order.update({ status });
 
     // Send status update email
-    await emailService.sendOrderStatusUpdateEmail(order.user.email, {
-      orderNumber: order.number,
-      orderDate: order.createdAt,
-      status,
-    });
+    try {
+      await emailService.sendOrderStatusUpdateEmail(order.user.email, {
+        orderNumber: order.number,
+        orderDate: order.createdAt,
+        status,
+      });
+    } catch (error) {
+      console.error("[email] order status update failed", {
+        orderId: order.id,
+        orderNumber: order.number,
+        email: order.user?.email,
+        status,
+        message: error?.message,
+      });
+    }
 
     res.status(200).json({
       status: "success",
