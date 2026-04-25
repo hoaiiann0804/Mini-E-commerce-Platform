@@ -35,9 +35,9 @@ const validateExpressValidator = (req, res, next) => {
 
     // Log chi tiết để debug
     //console.log(
-      '🔍 Validation Errors:',
-      JSON.stringify(formattedErrors, null, 2)
-    );
+    //   '🔍 Validation Errors:',
+    //   JSON.stringify(formattedErrors, null, 2)
+    // );
     //console.log('📝 Request Body:', JSON.stringify(req.body, null, 2));
     //console.log('🔗 Request Params:', JSON.stringify(req.params, null, 2));
 
