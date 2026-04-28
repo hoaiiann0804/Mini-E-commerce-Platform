@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { Product, Category, sequelize } = require('../models');
+const { Product, Category, sequelize } = require('../../models');
 const { Op } = require('sequelize');
 
 class GeminiChatbotService {

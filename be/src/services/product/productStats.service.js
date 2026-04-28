@@ -7,7 +7,7 @@
 const updateProductReviewStats = async (productId, transaction) => {
   if (!productId) return;
 
-  const { Product, Review, sequelize } = require("../models");
+  const { Product, Review, sequelize } = require("../../models");
 
   const stats = await Review.findOne({
     where: { productId },
@@ -39,7 +39,7 @@ const updateProductReviewStats = async (productId, transaction) => {
 const updateProductVariantStats = async (productId, transaction) => {
   if (!productId) return;
 
-  const { Product, ProductVariant, sequelize } = require("../models");
+  const { Product, ProductVariant, sequelize } = require("../../models");
 
   const stats = await ProductVariant.findOne({
     where: { productId },

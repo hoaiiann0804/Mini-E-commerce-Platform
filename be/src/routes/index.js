@@ -14,8 +14,8 @@ const adminRoutes = require('./admin.routes');
 const uploadRoutes = require('./upload.routes');
 const paymentRoutes = require('./payment.routes');
 const chatbotRoutes = require('./chatbot.routes');
-const warrantyPackageRoutes = require('./warrantyPackages');
-const attributeRoutes = require('./attributeRoutes');
+const warrantyPackageRoutes = require('./warrantyPackages.route');
+const attributeRoutes = require('./attribute.routes');
 const imageRoutes = require('./image.routes');
 
 // API routes

@@ -1,17 +1,17 @@
-const { AttributeValue, AttributeGroup } = require('../models');
+const { AttributeValue, AttributeGroup } = require("../../models");
 
 // Define associations if they don't exist
 if (!AttributeValue.associations.attributeGroup) {
   AttributeValue.belongsTo(AttributeGroup, {
-    foreignKey: 'attributeGroupId',
-    as: 'attributeGroup',
+    foreignKey: "attributeGroupId",
+    as: "attributeGroup",
   });
 }
 
 if (!AttributeGroup.associations.values) {
   AttributeGroup.hasMany(AttributeValue, {
-    foreignKey: 'attributeGroupId',
-    as: 'values',
+    foreignKey: "attributeGroupId",
+    as: "values",
   });
 }
 
@@ -29,11 +29,11 @@ class ProductNameGeneratorService {
   async generateProductName(
     baseName,
     selectedAttributes = [],
-    separator = ' '
+    separator = " "
   ) {
     try {
       if (!baseName) {
-        throw new Error('Base name is required');
+        throw new Error("Base name is required");
       }
 
       if (!selectedAttributes.length) {
@@ -50,13 +50,13 @@ class ProductNameGeneratorService {
         include: [
           {
             model: AttributeGroup,
-            as: 'attributeGroup',
-            attributes: ['name', 'type', 'sortOrder'],
+            as: "attributeGroup",
+            attributes: ["name", "type", "sortOrder"],
           },
         ],
         order: [
-          [{ model: AttributeGroup, as: 'attributeGroup' }, 'sortOrder', 'ASC'],
-          ['sortOrder', 'ASC'],
+          [{ model: AttributeGroup, as: "attributeGroup" }, "sortOrder", "ASC"],
+          ["sortOrder", "ASC"],
         ],
       });
 
@@ -76,7 +76,7 @@ class ProductNameGeneratorService {
 
       return nameParts.join(separator);
     } catch (error) {
-      console.error('Error generating product name:', error);
+      console.error("Error generating product name:", error);
       throw error;
     }
   }
@@ -91,7 +91,7 @@ class ProductNameGeneratorService {
   async generateVariantName(
     baseName,
     attributesCombination = {},
-    separator = ' '
+    separator = " "
   ) {
     try {
       const selectedAttributeIds = Object.values(attributesCombination).filter(
@@ -103,7 +103,7 @@ class ProductNameGeneratorService {
         separator
       );
     } catch (error) {
-      console.error('Error generating variant name:', error);
+      console.error("Error generating variant name:", error);
       throw error;
     }
   }
@@ -117,7 +117,7 @@ class ProductNameGeneratorService {
    */
   async previewProductName(baseName, selectedAttributes = [], options = {}) {
     try {
-      const { separator = ' ', includeDetails = false } = options;
+      const { separator = " ", includeDetails = false } = options;
 
       const generatedName = await this.generateProductName(
         baseName,
@@ -143,8 +143,8 @@ class ProductNameGeneratorService {
           include: [
             {
               model: AttributeGroup,
-              as: 'attributeGroup',
-              attributes: ['id', 'name', 'type'],
+              as: "attributeGroup",
+              attributes: ["id", "name", "type"],
             },
           ],
         });
@@ -160,7 +160,7 @@ class ProductNameGeneratorService {
 
       return result;
     } catch (error) {
-      console.error('Error previewing product name:', error);
+      console.error("Error previewing product name:", error);
       throw error;
     }
   }
@@ -182,20 +182,20 @@ class ProductNameGeneratorService {
         include: [
           {
             model: AttributeGroup,
-            as: 'attributeGroup',
-            attributes: ['id', 'name', 'type', 'description'],
+            as: "attributeGroup",
+            attributes: ["id", "name", "type", "description"],
             where: { isActive: true },
           },
         ],
         order: [
-          [{ model: AttributeGroup, as: 'attributeGroup' }, 'sortOrder', 'ASC'],
-          ['sortOrder', 'ASC'],
+          [{ model: AttributeGroup, as: "attributeGroup" }, "sortOrder", "ASC"],
+          ["sortOrder", "ASC"],
         ],
       });
 
       return attributeValues;
     } catch (error) {
-      console.error('Error getting name affecting attributes:', error);
+      console.error("Error getting name affecting attributes:", error);
       throw error;
     }
   }
@@ -206,7 +206,7 @@ class ProductNameGeneratorService {
    * @param {string} separator - Separator between name parts
    * @returns {Promise<Array>} Array of generated names
    */
-  async batchGenerateNames(items = [], separator = ' ') {
+  async batchGenerateNames(items = [], separator = " ") {
     try {
       const results = [];
 
@@ -228,7 +228,7 @@ class ProductNameGeneratorService {
 
       return results;
     } catch (error) {
-      console.error('Error batch generating names:', error);
+      console.error("Error batch generating names:", error);
       throw error;
     }
   }

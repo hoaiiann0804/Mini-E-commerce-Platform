@@ -1,4 +1,4 @@
-const imageService = require("../services/imageService");
+const imageService = require("../services/images/image.service");
 const { AppError } = require("../middlewares/errorHandler");
 const uploadCloudinary = require("../middlewares/cloudinaryUploadMiddleware");
 const multer = require("multer");

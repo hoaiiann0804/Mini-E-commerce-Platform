@@ -213,7 +213,7 @@ const Product = sequelize.define(
       beforeCreate: async (product) => {
         // Auto-generate search keywords when creating new product
         if (!product.searchKeywords || product.searchKeywords.length === 0) {
-          const keywordGeneratorService = require("../services/keywordGenerator.service");
+          const keywordGeneratorService = require("../services/chatbot/keywordGenerator.service");
           product.searchKeywords = keywordGeneratorService.generateKeywords({
             name: product.name,
             shortDescription: product.shortDescription,
@@ -230,7 +230,7 @@ const Product = sequelize.define(
           product.changed("description") ||
           product.changed("category")
         ) {
-          const keywordGeneratorService = require("../services/keywordGenerator.service");
+          const keywordGeneratorService = require("../services/chatbot/keywordGenerator.service");
           product.searchKeywords = keywordGeneratorService.generateKeywords({
             name: product.name,
             shortDescription: product.shortDescription,

@@ -7,7 +7,7 @@ const adminController = require("../controllers/admin.controller");
 // Import middlewares
 const { adminAuthenticate } = require("../middlewares/adminAuth");
 const { validate } = require("../middlewares/validateRequest");
-const { auditMiddleware } = require("../services/adminAuditService");
+const { auditMiddleware } = require("../services/admin/adminAuditService");
 
 // Import validators
 const {

@@ -11,13 +11,13 @@ const {
 const { Op, Sequelize } = require("sequelize");
 const { catchAsync } = require("../utils/catchAsync");
 const { AppError } = require("../middlewares/errorHandler");
-const { AdminAuditService } = require("../services/adminAuditService");
+const { AdminAuditService } = require("../services/admin/adminAuditService");
 const {
   calculateTotalStock,
   updateProductTotalStock,
   validateVariantAttributes,
   generateVariantSku,
-} = require("../utils/productHelpers");
+} = require("../services/product/product.helpers");
 
 /**
  * Dashboard - Thống kê tổng quan

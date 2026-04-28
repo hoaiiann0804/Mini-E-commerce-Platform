@@ -1,5 +1,5 @@
 const express = require("express");
-const geminiChatbotService = require("../services/geminiChatbot.service");
+const geminiChatbotService = require("../services/chatbot/geminiChatbot.service");
 const { catchAsync } = require("../utils/catchAsync");
 
 const router = express.Router();
