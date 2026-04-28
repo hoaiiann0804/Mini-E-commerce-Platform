@@ -3,7 +3,7 @@
  * Utilities for managing product stock and variants
  */
 
-const { ProductVariant } = require("../models");
+const { ProductVariant } = require("../../models");
 
 /**
  * Calculate total stock from variants

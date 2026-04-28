@@ -9,8 +9,8 @@ const {
   sequelize,
 } = require("../models");
 const { Op } = require("sequelize");
-const chatbotService = require("../services/chatbot.service");
-const geminiChatbotService = require("../services/geminiChatbot.service");
+const chatbotService = require("../services/chatbot/chatbot.service");
+const geminiChatbotService = require("../services/chatbot/geminiChatbot.service");
 
 // Initialize Gemini AI only if API key is available
 let genAI = null;

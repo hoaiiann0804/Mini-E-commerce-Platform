@@ -1,6 +1,8 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/sequelize");
-const { updateProductReviewStats } = require("../utils/productHooks");
+const {
+  updateProductReviewStats,
+} = require("../services/product/productStats.service");
 
 class Review extends Model {
   static associate(models) {}

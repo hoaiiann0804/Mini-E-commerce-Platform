@@ -2,9 +2,9 @@ const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs").promises;
 const { v4: uuidv4 } = require("uuid");
-const Image = require("../models/image");
-const Product = require("../models/product");
-const { AppError } = require("../middlewares/errorHandler");
+const Image = require("../../models/image");
+const Product = require("../../models/product");
+const { AppError } = require("../../middlewares/errorHandler");
 const cloudinary = require("cloudinary").v2;
 
 // Configure Cloudinary (uploads are handled via multer-storage-cloudinary middleware)

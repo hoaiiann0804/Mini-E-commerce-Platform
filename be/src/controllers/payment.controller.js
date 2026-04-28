@@ -1,4 +1,4 @@
-const stripeService = require('../services/payment/stripeService');
+const stripeService = require('../services/payment/stripe.service');
 const { Order, User } = require('../models');
 const { AppError } = require('../middlewares/errorHandler');
 

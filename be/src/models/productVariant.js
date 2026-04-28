@@ -93,7 +93,7 @@ const ProductVariant = sequelize.define(
       beforeCreate: async (variant) => {
         // Auto-generate display name based on attributes
         if (!variant.displayName && variant.attributeValues) {
-          const productNameService = require("../services/productNameGenerator.service");
+          const productNameService = require("../services/product/productNameGenerator.service");
           const Product = require("./product");
 
           try {
@@ -115,14 +115,17 @@ const ProductVariant = sequelize.define(
               }
             }
           } catch (error) {
-            console.error("Could not auto-generate variant name:", error.message);
+            console.error(
+              "Could not auto-generate variant name:",
+              error.message
+            );
           }
         }
       },
       beforeUpdate: async (variant) => {
         // Auto-regenerate display name if attributes changed
         if (variant.changed("attributeValues") && variant.attributeValues) {
-          const productNameService = require("../services/productNameGenerator.service");
+          const productNameService = require("../services/product/productNameGenerator.service");
           const Product = require("./product");
 
           try {
@@ -148,7 +151,6 @@ const ProductVariant = sequelize.define(
               "Could not auto-regenerate variant name:",
               error.message
             );
-           
           }
         }
       },
@@ -179,7 +181,7 @@ const ProductVariant = sequelize.define(
           // );
         } catch (error) {
           console.error("Hook afterSave (Price) error", error.message);
-          throw error 
+          throw error;
         }
 
         try {

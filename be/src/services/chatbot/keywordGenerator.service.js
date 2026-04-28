@@ -221,7 +221,7 @@ class KeywordGeneratorService {
    * Bulk update keywords for all products
    */
   async updateAllProductKeywords() {
-    const { Product } = require("../models");
+    const { Product } = require("../../models");
 
     try {
       const products = await Product.findAll({

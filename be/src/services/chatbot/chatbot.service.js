@@ -1,4 +1,4 @@
-const { Product, Category, Order, OrderItem, User } = require('../models');
+const { Product, Category, Order, OrderItem, User } = require('../../models');
 const { Op } = require('sequelize');
 
 class ChatbotService {

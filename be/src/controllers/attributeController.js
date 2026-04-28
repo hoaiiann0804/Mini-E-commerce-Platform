@@ -4,7 +4,7 @@ const {
   ProductAttributeGroup,
   Product,
 } = require("../models");
-const productNameGeneratorService = require("../services/productNameGenerator.service");
+const productNameGeneratorService = require("../services/product/productNameGenerator.service");
 
 // Get all attribute groups with their values
 const getAttributeGroups = async (req, res) => {
