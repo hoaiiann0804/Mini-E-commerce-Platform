@@ -215,21 +215,19 @@ export const createProductFiltersParams = (
 
   // Sorting
   if (filters.sort) {
-    const sortMap: Record<string, string> = {
-      price_asc: 'price',
-      price_desc: 'price',
-      newest: 'createdAt',
+    // Backend expects sort keys (not `sort=price&order=...`).
+    // Supported by backend: newest, oldest, price_asc, price_desc, rating
+    const backendSortMap: Record<string, string> = {
+      price_asc: 'price_asc',
+      price_desc: 'price_desc',
+      newest: 'newest',
+      oldest: 'oldest',
+      // FE uses `popular`; backend uses `rating`
       popular: 'rating',
+      rating: 'rating',
     };
 
-    const orderMap: Record<string, string> = {
-      price_desc: 'DESC',
-      newest: 'DESC',
-      popular: 'DESC',
-    };
-
-    params.append('sort', sortMap[filters.sort] || 'createdAt');
-    params.append('order', orderMap[filters.sort] || 'ASC');
+    params.append('sort', backendSortMap[filters.sort] || 'newest');
   }
 
   return params;
