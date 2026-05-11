@@ -9,7 +9,13 @@ const {
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 const { Op } = require("sequelize");
-
+const SORT_OPTIONS = {
+  newest: { field: "createdAt", order: "DESC" },
+  oldest: { field: "createdAt", order: "ASC" },
+  price_asc: { field: "price", order: "ASC" },
+  price_desc: { field: "price", order: "DESC" },
+  rating: { field: "avgRating", order: "DESC" },
+};
 const getAllProducts = async (req, res, next) => {
   try {
     const {
@@ -21,27 +27,84 @@ const getAllProducts = async (req, res, next) => {
       featured,
       status,
       minPrice,
-      maxPrice
+      maxPrice,
+      sort = "newest",
     } = req.query;
 
     const limitInt = Math.min(100, parseInt(limit) || 10);
-    const sortField = "createdAt";
-    const sortOrder = "DESC";
+    const { field: sortField, order: sortOrder } =
+      SORT_OPTIONS[sort] ?? SORT_OPTIONS.newest;
 
     const whereConditions = {};
+    const andConditions = [];
+    const effectivePriceExpr = sequelize.literal(
+      'COALESCE(NULLIF("Product"."min_variant_price", 0), "Product"."price")'
+    );
+    const ratingExpr = sequelize.literal('COALESCE("Product"."avg_rating", 0)');
 
     if (cursor) {
       try {
         const decodedCursor = JSON.parse(
           Buffer.from(cursor, "base64").toString("ascii")
         );
-        whereConditions[Op.or] = [
-          { [sortField]: { [Op.lt]: new Date(decodedCursor.lastValue) } },
-          {
-            [sortField]: new Date(decodedCursor.lastValue),
-            id: { [Op.lt]: decodedCursor.lastId },
-          },
-        ];
+        let cursorValue = decodedCursor.lastValue;
+        if (sortField === "createdAt") {
+          cursorValue = new Date(cursorValue);
+        } else {
+          cursorValue = parseFloat(cursorValue);
+        }
+
+        const compareisonOp = sortOrder === "ASC" ? Op.gt : Op.lt;
+        if (sortField === "price") {
+          andConditions.push({
+            [Op.or]: [
+              sequelize.where(effectivePriceExpr, {
+                [compareisonOp]: cursorValue,
+              }),
+              {
+                [Op.and]: [
+                  sequelize.where(effectivePriceExpr, cursorValue),
+                  { id: { [compareisonOp]: decodedCursor.lastId } },
+                ],
+              },
+            ],
+          });
+        } else if (sortField === "avgRating") {
+          andConditions.push({
+            [Op.or]: [
+              sequelize.where(ratingExpr, {
+                [compareisonOp]: cursorValue,
+              }),
+
+              {
+                [Op.and]: [
+                  sequelize.where(ratingExpr, cursorValue),
+                  {
+                    id: {
+                      [compareisonOp]: decodedCursor.lastId,
+                    },
+                  },
+                ],
+              },
+            ],
+          });
+        } else {
+          andConditions.push({
+            [Op.or]: [
+              {
+                [sortField]: {
+                  [compareisonOp]: cursorValue,
+                },
+              },
+              {
+                [sortField]: cursorValue,
+                id: {
+                  [compareisonOp]: decodedCursor.lastId,
+                },
+              },
+            ],
+          });
+        }
       } catch (err) {
         return next(new AppError("Invalid cursor", 400));
       }
@@ -51,18 +114,62 @@ const getAllProducts = async (req, res, next) => {
     if (featured !== undefined) whereConditions.featured = featured === "true";
     whereConditions.status = status || "active";
     if (search) whereConditions.name = { [Op.iLike]: `%${search}%` };
-    if(minPrice || maxPrice)
-    {
-      whereConditions.price={}
 
-      if(minPrice)
-      {
-        whereConditions.price[Op.gte]=Number(minPrice)
-      }
-      if (maxPrice) {
-        whereConditions.price[Op.lte]=Number(maxPrice)
-      }
+    const parsePriceParam = (value) => {
+      if (value === undefined || value === null || value === "") return null;
+      const numeric = Number(String(value).replace(/,/g, ""));
+      return Number.isFinite(numeric) ? numeric : NaN;
+    };
+
+    const minPriceNumber = parsePriceParam(minPrice);
+    const maxPriceNumber = parsePriceParam(maxPrice);
+
+    if (Number.isNaN(minPriceNumber))
+      return next(new AppError("Số tiền tối thiểu không hợp lệ", 400));
+    if (Number.isNaN(maxPriceNumber))
+      return next(new AppError("Số tiền tối đa không hợp lệ", 400));
+
+    if (minPriceNumber !== null && minPriceNumber < 0)
+      return next(new AppError("Số tiền tối thiểu không thể là số âm"));
+    if (maxPriceNumber !== null && maxPriceNumber < 0)
+      return next(new AppError("Số tiền tối đa không thể là số âm"));
+    if (
+      minPriceNumber !== null &&
+      maxPriceNumber !== null &&
+      minPriceNumber > maxPriceNumber
+    )
+      return next(
+        new AppError("Số tiền tối thiểu không được lớn hơn số tiền tối đa")
+      );
+    let order;
+    if (sortField === "price") {
+      order = [
+        [effectivePriceExpr, sortOrder],
+        ["id", sortOrder],
+      ];
+    } else if (sortField === "avgRating") {
+      order = [
+        [ratingExpr, sortOrder],
+        ["id", sortOrder],
+      ];
+    } else {
+      order = [
+        [sortField, sortOrder],
+        ["id", sortOrder],
+      ];
     }
+    if (minPriceNumber !== null) {
+      andConditions.push(
+        sequelize.where(effectivePriceExpr, { [Op.gte]: minPriceNumber })
+      );
+    }
+    if (maxPriceNumber !== null) {
+      andConditions.push(
+        sequelize.where(effectivePriceExpr, { [Op.lte]: maxPriceNumber })
+      );
+    }
+
+    if (andConditions.length) whereConditions[Op.and] = andConditions;
     const include = [];
     if (category) {
       const isUUID =
@@ -97,10 +204,7 @@ const getAllProducts = async (req, res, next) => {
       where: whereConditions,
       include: include,
       limit: limitInt,
-      order: [
-        [sortField, sortOrder],
-        ["id", sortOrder],
-      ],
+      order,
       subQuery: false,
     });
 
@@ -123,11 +227,22 @@ const getAllProducts = async (req, res, next) => {
     });
 
     let nextCursor = null;
-    if (products.length === limitInt) {
-      const lastProduct = products[products.length - 1];
+    if (productsRaw.length === limitInt) {
+      const lastRaw = productsRaw[productsRaw.length - 1].get({ plain: true });
+      const cursorLastValue =
+        sortField === "price"
+          ? Number(
+              lastRaw.minVariantPrice && parseFloat(lastRaw.minVariantPrice) > 0
+                ? lastRaw.minVariantPrice
+                : lastRaw.price
+            ) || 0
+          : sortField === "avgRating"
+            ? Number(lastRaw.avgRating || 0)
+            : lastRaw[sortField];
+
       const cursorPayload = {
-        lastValue: lastProduct[sortField],
-        lastId: lastProduct.id,
+        lastValue: cursorLastValue,
+        lastId: lastRaw.id,
       };
       nextCursor = Buffer.from(JSON.stringify(cursorPayload)).toString(
         "base64"
@@ -1364,7 +1479,7 @@ const getProductFilters = async (req, res, next) => {
   try {
     const { categoryId } = req.query;
 
-    // //console.log("Getting product filters with categoryId:", categoryId);
+    // console.log("Getting product filters with categoryId:", categoryId);
 
     // Build where condition
     const whereCondition = {};
@@ -1381,11 +1496,11 @@ const getProductFilters = async (req, res, next) => {
         includeCondition.push({
           association: "categories",
           where: { id: categoryId },
+          attributes: [],
           through: { attributes: [] },
-          required: false, // Đặt required: false để tránh lỗi khi không tìm thấy danh mục
+          required: false,
         });
       } else {
-        // Nếu không phải UUID, có thể là slug
         const category = await Category.findOne({
           where: { slug: categoryId },
         });
@@ -1393,6 +1508,7 @@ const getProductFilters = async (req, res, next) => {
           includeCondition.push({
             association: "categories",
             where: { id: category.id },
+            attributes: [],
             through: { attributes: [] },
             required: false,
           });
@@ -1410,6 +1526,7 @@ const getProductFilters = async (req, res, next) => {
       include: includeCondition,
       raw: true,
     });
+    // console.log("price Range: ", priceRange);
 
     // Lấy category ID thực tế nếu có
     let actualCategoryId = null;
