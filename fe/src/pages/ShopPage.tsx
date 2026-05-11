@@ -1,38 +1,38 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import ProductCard from '@/components/features/ProductCard';
-import ProductListCard from '@/components/features/ProductListCard';
-import FilterPanel from '@/components/features/FilterPanel';
-import Select from '@/components/common/Select';
-import { PremiumButton } from '@/components/common';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Product, ProductFilters } from '@/types/product.types';
-import { useLazyGetProductsQuery } from '@/services/productApi';
-import { useGetCategoriesQuery } from '@/services/categoryApi';
-import { ProductCardSkeleton } from '@/components/common/LoadingState';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import ProductCard from "@/components/features/ProductCard";
+import ProductListCard from "@/components/features/ProductListCard";
+import FilterPanel from "@/components/features/FilterPanel";
+import Select from "@/components/common/Select";
+import { PremiumButton } from "@/components/common";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { Product, ProductFilters } from "@/types/product.types";
+import { useLazyGetProductsQuery } from "@/services/productApi";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
+import { ProductCardSkeleton } from "@/components/common/LoadingState";
 
 const sortOptions = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'popular', label: 'Popularity' },
+  { value: "newest", label: "Newest" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "popular", label: "Popularity" },
 ];
 
 const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Get filter values from URL
-  const categoryId = searchParams.get('category') || undefined;
-  const search = searchParams.get('search') || undefined;
-  const minPrice = searchParams.get('minPrice')
-    ? Number(searchParams.get('minPrice'))
+  const categoryId = searchParams.get("category") || undefined;
+  const search = searchParams.get("search") || undefined;
+  const minPrice = searchParams.get("minPrice")
+    ? Number(searchParams.get("minPrice"))
     : undefined;
-  const maxPrice = searchParams.get('maxPrice')
-    ? Number(searchParams.get('maxPrice'))
+  const maxPrice = searchParams.get("maxPrice")
+    ? Number(searchParams.get("maxPrice"))
     : undefined;
-  const sort = (searchParams.get('sort') as ProductFilters['sort']) || 'newest';
+  const sort = (searchParams.get("sort") as ProductFilters["sort"]) || "newest";
   const limit = 12;
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,7 +52,7 @@ const ShopPage: React.FC = () => {
   // Price range for filter panel
   const [priceRange, setPriceRange] = useState({
     min: minPrice || 0,
-    max: maxPrice || 10000000, // 10 triệu VND
+    max: maxPrice || 500000000,
   });
 
   const [triggerGetProducts, getProductsState] = useLazyGetProductsQuery();
@@ -68,7 +68,7 @@ const ShopPage: React.FC = () => {
 
     setPriceRange({
       min: minPrice || 0,
-      max: maxPrice || 10000000, // 10 triệu VND
+      max: maxPrice || 500000000, 
     });
   }, [categoryId, minPrice, maxPrice, searchParams]);
 
@@ -78,7 +78,7 @@ const ShopPage: React.FC = () => {
       search,
       minPrice,
       maxPrice,
-      sort: sort as ProductFilters['sort'],
+      sort: sort as ProductFilters["sort"],
       limit,
     } satisfies ProductFilters;
   }, [categoryId, search, minPrice, maxPrice, sort, limit]);
@@ -130,7 +130,7 @@ const ShopPage: React.FC = () => {
     setNextCursor(null);
     setInitialLoadDone(false);
     await fetchProductsPage(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [fetchProductsPage]);
 
   // Initial fetch + refetch when filters change
@@ -148,9 +148,13 @@ const ShopPage: React.FC = () => {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [nextCursor, isLoadingMore, getProductsState.isFetching, fetchProductsPage]);
+  }, [
+    nextCursor,
+    isLoadingMore,
+    getProductsState.isFetching,
+    fetchProductsPage,
+  ]);
 
-  // Infinite scroll: observe sentinel at bottom
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -163,41 +167,36 @@ const ShopPage: React.FC = () => {
         if (isLoadingMore || getProductsState.isFetching) return;
         handleLoadMore();
       },
-      { root: null, rootMargin: '300px', threshold: 0.01 }
+      { root: null, rootMargin: "300px", threshold: 0.01 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
   }, [nextCursor, isLoadingMore, getProductsState.isFetching, handleLoadMore]);
 
-  // Update URL when filters change
   const updateFilters = (newFilters: Partial<ProductFilters>) => {
     const updatedParams = new URLSearchParams(searchParams);
 
     // Update or remove each filter parameter
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value === undefined || value === '') {
+      if (value === undefined || value === "") {
         updatedParams.delete(key);
       } else {
         updatedParams.set(key, String(value));
       }
     });
 
-    // Cursor/page should not be in URL for ShopPage
-    updatedParams.delete('page');
-    updatedParams.delete('cursor');
+    updatedParams.delete("page");
+    updatedParams.delete("cursor");
 
     setSearchParams(updatedParams);
   };
 
   // Handle sort change
   const handleSortChange = (value: string) => {
-    updateFilters({ sort: value as ProductFilters['sort'] });
+    updateFilters({ sort: value as ProductFilters["sort"] });
   };
 
-  // Cursor-based infinite loading (no page param)
-
-  // Handle price range change
   const handlePriceRangeChange = (range: { min: number; max: number }) => {
     updateFilters({ minPrice: range.min, maxPrice: range.max });
   };
@@ -210,29 +209,27 @@ const ShopPage: React.FC = () => {
   ) => {
     const updatedParams = new URLSearchParams(searchParams);
 
-    if (groupId === 'categories') {
+    if (groupId === "categories") {
       if (isSelected) {
-        updatedParams.set('category', optionId);
+        updatedParams.set("category", optionId);
       } else {
-        updatedParams.delete('category');
+        updatedParams.delete("category");
       }
     }
 
-    updatedParams.delete('page');
-    updatedParams.delete('cursor');
+    updatedParams.delete("page");
+    updatedParams.delete("cursor");
 
     setSearchParams(updatedParams);
   };
 
-  // Handle clear filters
   const handleClearFilters = () => {
     const updatedParams = new URLSearchParams();
-    if (search) updatedParams.set('search', search);
-    updatedParams.set('sort', 'newest');
+    if (search) updatedParams.set("search", search);
+    updatedParams.set("sort", "newest");
     setSearchParams(updatedParams);
   };
 
-  // Determine if we're loading
   const isInitialLoading =
     !initialLoadDone &&
     (getProductsState.isFetching || getProductsState.isLoading);
@@ -241,8 +238,8 @@ const ShopPage: React.FC = () => {
   // Prepare filter groups for filter panel
   const filterGroups = [
     {
-      id: 'categories',
-      name: 'Danh mục',
+      id: "categories",
+      name: "Danh mục",
       options:
         categoriesData?.map((category) => ({
           id: category.id,
@@ -262,7 +259,7 @@ const ShopPage: React.FC = () => {
           <p className="text-neutral-600 dark:text-neutral-400 text-lg">
             {products.length > 0
               ? `Hiển thị ${products.length} sản phẩm`
-              : 'Khám phá bộ sưu tập sản phẩm của chúng tôi'}
+              : "Khám phá bộ sưu tập sản phẩm của chúng tôi"}
           </p>
         </div>
 
@@ -288,11 +285,11 @@ const ShopPage: React.FC = () => {
             </span>
             <div className="flex items-center bg-white dark:bg-neutral-800 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-neutral-600 dark:text-neutral-400'
+                  viewMode === "grid"
+                    ? "bg-primary-500 text-white"
+                    : "text-neutral-600 dark:text-neutral-400"
                 }`}
                 aria-label="Grid view"
               >
@@ -311,11 +308,11 @@ const ShopPage: React.FC = () => {
                 </svg>
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-neutral-600 dark:text-neutral-400'
+                  viewMode === "list"
+                    ? "bg-primary-500 text-white"
+                    : "text-neutral-600 dark:text-neutral-400"
                 }`}
                 aria-label="List view"
               >
@@ -338,7 +335,7 @@ const ShopPage: React.FC = () => {
 
           <Select
             options={sortOptions}
-            value={sort || 'newest'}
+            value={sort || "newest"}
             onChange={handleSortChange}
             label="Sắp xếp theo"
           />
@@ -380,18 +377,18 @@ const ShopPage: React.FC = () => {
               <p className="text-neutral-600 dark:text-neutral-400">
                 {products.length > 0
                   ? `Hiển thị ${products.length} sản phẩm`
-                  : 'Khám phá bộ sưu tập sản phẩm của chúng tôi'}
+                  : "Khám phá bộ sưu tập sản phẩm của chúng tôi"}
               </p>
 
               <div className="flex items-center gap-4">
                 {/* View Mode Toggle */}
                 <div className="flex items-center bg-white dark:bg-neutral-800 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700">
                   <button
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                     className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'grid'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                      viewMode === "grid"
+                        ? "bg-primary-500 text-white"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                     }`}
                     aria-label="Grid view"
                   >
@@ -410,11 +407,11 @@ const ShopPage: React.FC = () => {
                     </svg>
                   </button>
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                     className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'list'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                      viewMode === "list"
+                        ? "bg-primary-500 text-white"
+                        : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
                     }`}
                     aria-label="List view"
                   >
@@ -437,7 +434,7 @@ const ShopPage: React.FC = () => {
                 <div className="w-48">
                   <Select
                     options={sortOptions}
-                    value={sort || 'newest'}
+                    value={sort || "newest"}
                     onChange={handleSortChange}
                     placeholder="Sắp xếp"
                   />
@@ -449,9 +446,9 @@ const ShopPage: React.FC = () => {
             {isLoading ? (
               <div
                 className={
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr'
-                    : 'space-y-8'
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr"
+                    : "space-y-8"
                 }
               >
                 {Array.from({ length: limit }).map((_, index) => (
@@ -508,13 +505,13 @@ const ShopPage: React.FC = () => {
               <>
                 <div
                   className={
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr'
-                      : 'space-y-8'
+                    viewMode === "grid"
+                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr"
+                      : "space-y-8"
                   }
                 >
                   {products.map((product: Product) =>
-                    viewMode === 'grid' ? (
+                    viewMode === "grid" ? (
                       <ProductCard key={product.id} {...product} />
                     ) : (
                       <ProductListCard key={product.id} {...product} />
@@ -532,7 +529,7 @@ const ShopPage: React.FC = () => {
                         onClick={handleLoadMore}
                         disabled={isLoadingMore || getProductsState.isFetching}
                       >
-                        {isLoadingMore ? 'Loading...' : 'Load more'}
+                        {isLoadingMore ? "Loading..." : "Load more"}
                       </PremiumButton>
                       <div ref={sentinelRef} className="h-1 w-full" />
                       {(isLoadingMore || getProductsState.isFetching) && (
