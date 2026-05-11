@@ -5,10 +5,8 @@ const {
   Order,
   OrderItem,
   ReviewFeedback,
-  sequelize,
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
-const { Op } = require("sequelize");
 
 // Create review
 const createReview = async (req, res, next) => {
@@ -62,17 +60,6 @@ const createReview = async (req, res, next) => {
       isVerified: true, // Auto-verify since we checked purchase
     });
 
-    // Get review with user info
-    const createdReview = await Review.findByPk(review.id, {
-      include: [
-        {
-          model: User,
-          as: "user",
-          attributes: ["id", "firstName", "lastName", "avatar"],
-        },
-      ],
-    });
-
     res.status(201).json({
       status: "success",
     });
@@ -105,18 +92,6 @@ const updateReview = async (req, res, next) => {
       images: images !== undefined ? images : review.images,
       isVerified: true,
     });
-
-    // Get updated review with user info
-    const updatedReview = await Review.findByPk(review.id, {
-      include: [
-        {
-          model: User,
-          as: "user",
-          attributes: ["id", "firstName", "lastName", "avatar"],
-        },
-      ],
-    });
-
     res.status(200).json({
       status: "success",
     });
