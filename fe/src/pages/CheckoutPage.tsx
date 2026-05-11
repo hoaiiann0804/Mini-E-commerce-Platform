@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Button, Radio, Space } from "antd";
@@ -668,15 +668,15 @@ const CheckoutPage: React.FC = () => {
                         </Radio>
                       </Space>
                     </Radio.Group>
-
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      onClick={() => navigate("/account/addresses")}
-                      className="p-0 text-sm"
-                    >
-                      {t("checkout.manageAddresses")}
-                    </Button>
+                    <Link to="/user/address">
+                      <Button
+                        type="link"
+                        icon={<PlusOutlined />}
+                        className="p-0 text-sm"
+                      >
+                        {t("checkout.manageAddresses")}
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </div>
