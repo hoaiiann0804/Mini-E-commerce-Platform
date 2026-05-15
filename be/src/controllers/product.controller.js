@@ -1284,12 +1284,20 @@ const getBestSellers = async (req, res, next) => {
     const productIds = bestSellers.map((product) => product.id);
 
     // Get full product details
-    const products = await Product.findAll({
+    const productsRaw = await Product.findAll({
       where: { id: { [Op.in]: productIds } },
       include: [
         {
           association: "categories",
           through: { attributes: [] },
+        },
+        {
+          association: "reviews",
+          attributes: ["rating"],
+        },
+        {
+          association: "variants",
+          attributes: ["id", "name", "price", "stockQuantity", "sku"],
         },
       ],
       order: [
@@ -1301,6 +1309,47 @@ const getBestSellers = async (req, res, next) => {
           ),
         ],
       ],
+    });
+
+    // Process products to add ratings (same shape as featured/new-arrivals)
+    const products = productsRaw.map((product) => {
+      const productJson = product.toJSON();
+
+      const ratings = {
+        average: 0,
+        count: 0,
+      };
+
+      if (productJson.reviews && productJson.reviews.length > 0) {
+        const totalRating = productJson.reviews.reduce(
+          (sum, review) => sum + review.rating,
+          0
+        );
+        ratings.average = parseFloat(
+          (totalRating / productJson.reviews.length).toFixed(1)
+        );
+        ratings.count = productJson.reviews.length;
+      }
+
+      // Use variant price if available, otherwise use product price
+      let displayPrice = parseFloat(productJson.price) || 0;
+      let compareAtPrice = parseFloat(productJson.compareAtPrice) || null;
+
+      if (productJson.variants && productJson.variants.length > 0) {
+        const sortedVariants = productJson.variants.sort(
+          (a, b) => parseFloat(a.price) - parseFloat(b.price)
+        );
+        displayPrice = parseFloat(sortedVariants[0].price) || displayPrice;
+      }
+
+      delete productJson.reviews;
+
+      return {
+        ...productJson,
+        price: displayPrice,
+        compareAtPrice,
+        ratings,
+      };
     });
 
     res.status(200).json({
