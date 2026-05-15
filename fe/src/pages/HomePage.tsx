@@ -38,8 +38,6 @@ import {
 } from "@/utils/imageUtils";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { count } from "console";
-
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
 
