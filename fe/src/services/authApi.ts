@@ -46,8 +46,9 @@ export const authApi = api.injectEndpoints({
         try {
           //console.log("🚀 Starting verifyEmail with token:", token);
 
-          const baseUrl =
-            import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+          const rawBase =
+            import.meta.env.VITE_API_URL || "http://localhost:8888";
+          const baseUrl = rawBase.endsWith("/api") ? rawBase : `${rawBase}/api`;
           const url = `${baseUrl}/auth/verify-email/${token}`;
 
           //console.log("🔗 Making request to:", url);
