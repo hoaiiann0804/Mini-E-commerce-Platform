@@ -7,8 +7,9 @@ module.exports = {
       `UPDATE products p
     SET min_variant_price = sub.min_price
     FROM(
-      SELECT product_id, MIN(price) as min_price
+      SELECT product_id, MIN(pv.price) as min_price
       FROM product_variants
+      pv
       WHERE is_available = true
       GROUP BY product_id
     )sub
