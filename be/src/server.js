@@ -55,6 +55,7 @@ process.on('uncaughtException', (err) => {
 // Test database connection and sync models
 const connectDB = async () => {
   try {
+    logger.info('DB connection mode: %s', process.env.DATABASE_URL ? 'DATABASE_URL' : 'DB_HOST/DB_PORT');
     await sequelize.authenticate();
     logger.info('Database connection has been established successfully.');
 
@@ -76,9 +77,8 @@ const connectDB = async () => {
       );
     }
   } catch (error) {
-    logger.error('Unable to connect to the database:', error);
-    logger.error('Error details:', error.message);
-    logger.error('Stack trace:', error.stack);
+    logger.error('Unable to connect to the database: %s', error?.message || '(no message)');
+    if (error?.stack) logger.error(error.stack);
     process.exit(1);
   }
 };
