@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const getApiBaseUrl = (): string => {
+  const raw = import.meta.env.VITE_API_URL || 'http://localhost:8888';
+  return raw.endsWith('/api') ? raw : `${raw}/api`;
+};
+
+const API_URL = getApiBaseUrl();
 
 export interface AttributeValue {
   id: string;
@@ -44,7 +49,7 @@ export interface CreateAttributeValueRequest {
 export const attributeApi = createApi({
   reducerPath: 'attributeApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/api/attributes`,
+    baseUrl: `${API_URL}/attributes`,
     credentials: 'include',
   }),
   tagTypes: ['AttributeGroup', 'AttributeValue'],
