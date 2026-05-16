@@ -16,6 +16,11 @@ const path = require("path");
 // Initialize app
 const app = express();
 
+// Render/Reverse proxy (needed for secure cookies, correct req.ip, etc.)
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 // Set security HTTP headers
 app.use(
   helmet({
@@ -29,7 +34,8 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL ||
+        ? process.env.CORS_ORIGIN ||
+          process.env.FRONTEND_URL ||
           "https://mini-e-commerce-platform-eight.vercel.app"
         : [
             "http://localhost:3000",
