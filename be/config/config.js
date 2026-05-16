@@ -4,8 +4,14 @@ require('dotenv').config();
 
 const toBool = (value) => String(value).toLowerCase() === 'true';
 
+const withOptionalDatabaseUrl = (base) => {
+  if (!process.env.DATABASE_URL) return base;
+  const { username, password, database, host, port, ...rest } = base;
+  return { use_env_variable: 'DATABASE_URL', ...rest };
+};
+
 module.exports = {
-  development: {
+  development: withOptionalDatabaseUrl({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
@@ -13,8 +19,8 @@ module.exports = {
     port: Number(process.env.DB_PORT) || 5432,
     dialect: 'postgres',
     logging: false,
-  },
-  test: {
+  }),
+  test: withOptionalDatabaseUrl({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME_TEST || 'ecommerce_test',
@@ -22,8 +28,8 @@ module.exports = {
     port: Number(process.env.DB_PORT) || 5432,
     dialect: 'postgres',
     logging: false,
-  },
-  production: {
+  }),
+  production: withOptionalDatabaseUrl({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
@@ -36,5 +42,47 @@ module.exports = {
         ? { require: true, rejectUnauthorized: false }
         : false,
     },
-  },
+  }),
 };
+
+
+// 'use strict';
+
+// require('dotenv').config();
+
+// const toBool = (value) => String(value).toLowerCase() === 'true';
+
+// module.exports = {
+//   development: {
+//     username: process.env.DB_USER,
+//     password: process.env.DB_PASSWORD,
+//     database: process.env.DB_NAME,
+//     host: process.env.DB_HOST,
+//     port: Number(process.env.DB_PORT) || 5432,
+//     dialect: 'postgres',
+//     logging: false,
+//   },
+//   test: {
+//     username: process.env.DB_USER,
+//     password: process.env.DB_PASSWORD,
+//     database: process.env.DB_NAME_TEST || 'ecommerce_test',
+//     host: process.env.DB_HOST,
+//     port: Number(process.env.DB_PORT) || 5432,
+//     dialect: 'postgres',
+//     logging: false,
+//   },
+//   production: {
+//     username: process.env.DB_USER,
+//     password: process.env.DB_PASSWORD,
+//     database: process.env.DB_NAME,
+//     host: process.env.DB_HOST,
+//     port: Number(process.env.DB_PORT) || 5432,
+//     dialect: 'postgres',
+//     logging: false,
+//     dialectOptions: {
+//       ssl: toBool(process.env.DB_SSL || 'true')
+//         ? { require: true, rejectUnauthorized: false }
+//         : false,
+//     },
+//   },
+// };
