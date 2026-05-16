@@ -1,12 +1,14 @@
 require("dotenv").config();
 
+const toBool = (value) => String(value).toLowerCase() === "true";
+
 module.exports = {
   development: {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    port: Number(process.env.DB_PORT) || 5432,
     dialect: "postgres",
     logging: false,
     define: {
@@ -19,7 +21,7 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME_TEST || "ecommerce_test",
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    port: Number(process.env.DB_PORT) || 5432,
     dialect: "postgres",
     logging: false,
     define: {
@@ -32,7 +34,7 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    port: Number(process.env.DB_PORT) || 5432,
     dialect: "postgres",
     logging: false,
     define: {
@@ -40,16 +42,16 @@ module.exports = {
       underscored: true,
     },
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: toBool(process.env.DB_SSL || "true")
+        ? { require: true, rejectUnauthorized: false }
+        : false,
     },
     pool: {
-      max: 500,
-      min: 50,
+      // Neon has limited concurrent connections; keep pool small in production
+      max: Number(process.env.DB_POOL_MAX) || 10,
+      min: Number(process.env.DB_POOL_MIN) || 0,
       acquire: 30000,
-      idle: 20000,
+      idle: 10000,
     },
   },
 };
