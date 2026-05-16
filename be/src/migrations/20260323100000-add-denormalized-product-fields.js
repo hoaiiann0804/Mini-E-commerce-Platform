@@ -23,10 +23,16 @@ module.exports = {
       }, { transaction });
 
       // Optional: Add an index to find products that need updating
-      await queryInterface.addIndex('reviews', ['product_id'], {
-        name: 'idx_reviews_product_id_for_recalc',
-        transaction,
-      });
+      // (Reviews table may be created by later migrations in a fresh DB)
+      try {
+        await queryInterface.describeTable('reviews', { transaction });
+        await queryInterface.addIndex('reviews', ['product_id'], {
+          name: 'idx_reviews_product_id_for_recalc',
+          transaction,
+        });
+      } catch (_) {
+        // skip when table doesn't exist yet
+      }
 
       await transaction.commit();
     } catch (err) {
@@ -42,7 +48,12 @@ module.exports = {
       await queryInterface.removeColumn('products', 'min_variant_price', { transaction });
       await queryInterface.removeColumn('products', 'avg_rating', { transaction });
       await queryInterface.removeColumn('products', 'review_count', { transaction });
-      await queryInterface.removeIndex('reviews', 'idx_reviews_product_id_for_recalc', { transaction });
+      try {
+        await queryInterface.describeTable('reviews', { transaction });
+        await queryInterface.removeIndex('reviews', 'idx_reviews_product_id_for_recalc', { transaction });
+      } catch (_) {
+        // table/index doesn't exist
+      }
       await transaction.commit();
     } catch (err) {
       await transaction.rollback();
