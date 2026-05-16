@@ -39,8 +39,8 @@ export const refreshTokenIfNeeded = async (): Promise<string | null> => {
 
   try {
     // Determine the correct API URL
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8888/api";
-    const apiUrl = baseUrl.endsWith("/api") ? baseUrl : `${baseUrl}/api`;
+    const rawBase = import.meta.env.VITE_API_URL || "http://localhost:8888";
+    const apiUrl = rawBase.endsWith("/api") ? rawBase : `${rawBase}/api`;
     //console.log('Refreshing token using URL:', `${apiUrl}/auth/refresh`);
 
     const response = await fetch(`${apiUrl}/auth/refresh`, {
