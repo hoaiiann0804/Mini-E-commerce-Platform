@@ -39,38 +39,24 @@ const defaultDevOrigins = [
   "http://localhost:5175",
 ];
 
-const configuredOrigins = [
+const configuredOrigins = new Set([
  ...parseList(process.env.CORS_ORIGIN),
- ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL ]: []) 
-];
-
-// Always allow local dev origins in non-production.
-// This prevents accidental CORS blocks like http://localhost:5175.
-if(process.env.NODE_ENV !== "production") {
-  configuredOrigins.push(...defaultDevOrigins);
-}
+ ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL ]: []) ,
+ ...defaultDevOrigins
+]);
 
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-
-    if (
-      process.env.NODE_ENV !== "production" &&
-      defaultDevOrigins.includes(origin)
-    ) {
+    if (configuredOrigins.has(origin)) {
       return callback(null, true);
     }
-
-    if (configuredOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error(`Not allowed by CORS: ${origin}`));
-  },
+  console.log("❌ Blocked by CORS:", origin);
+  return callback(null, false);  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  exposedHeaders: ["Set-Cookie"],
+  // exposedHeaders: ["Set-Cookie"],
 };
 
 
