@@ -1,36 +1,36 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import Button from '@/components/common/Button';
-import { PremiumButton } from '@/components/common';
-import Badge, { BadgeVariant } from '@/components/common/Badge';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Button from "@/components/common/Button";
+import { PremiumButton } from "@/components/common";
+import Badge, { BadgeVariant } from "@/components/common/Badge";
 import {
   useGetUserOrdersQuery,
   useCancelOrderMutation,
   useRepayOrderMutation,
   OrderItem,
-} from '@/services/orderApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { toast } from '@/utils/toast';
+} from "@/services/orderApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { toast } from "@/utils/toast";
 
 // Order status badge variants
 const statusVariants: Record<string, { variant: BadgeVariant; label: string }> =
   {
-    pending: { variant: 'warning', label: 'Pending' },
-    processing: { variant: 'info', label: 'Processing' },
-    shipped: { variant: 'primary', label: 'Shipped' },
-    delivered: { variant: 'success', label: 'Delivered' },
-    cancelled: { variant: 'error', label: 'Cancelled' },
+    pending: { variant: "warning", label: "Pending" },
+    processing: { variant: "info", label: "Processing" },
+    shipped: { variant: "primary", label: "Shipped" },
+    delivered: { variant: "success", label: "Delivered" },
+    cancelled: { variant: "error", label: "Cancelled" },
   };
 
 // Payment status colors
 const paymentStatusColors: Record<string, string> = {
   pending:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-  paid: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  refunded: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+  paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  failed: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  refunded: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 };
 
 const OrdersPage: React.FC = () => {
@@ -41,44 +41,37 @@ const OrdersPage: React.FC = () => {
   const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
   const [repayingOrder, setRepayingOrder] = useState<string | null>(null);
 
-  // Fetch orders
   const {
     data: ordersResponse,
     isLoading,
     isError,
     refetch,
   } = useGetUserOrdersQuery({ page: currentPage, limit: 10 }, { skip: !user });
-
-  // Cancel order mutation
   const [cancelOrder] = useCancelOrderMutation();
 
-  // Repay order mutation
   const [repayOrder] = useRepayOrderMutation();
 
-  // Toggle order details
   const toggleOrderDetails = (orderId: string) => {
     setSelectedOrder(selectedOrder === orderId ? null : orderId);
   };
 
-  // Handle cancel order
   const handleCancelOrder = async (orderId: string) => {
-    if (!confirm(t('orders.cancelConfirm'))) return;
+    if (!confirm(t("orders.cancelConfirm"))) return;
 
     setCancellingOrder(orderId);
     try {
       await cancelOrder(orderId).unwrap();
       refetch();
     } catch (error) {
-      console.error('Failed to cancel order:', error);
-      toast.error(t('common.error'));
+      console.error("Failed to cancel order:", error);
+      toast.error(t("common.error"));
     } finally {
       setCancellingOrder(null);
     }
   };
 
-  // Handle repay order
   const handleRepayOrder = async (orderId: string) => {
-    if (!confirm(t('orders.repayConfirm'))) return;
+    if (!confirm(t("orders.repayConfirm"))) return;
 
     setRepayingOrder(orderId);
     try {
@@ -88,45 +81,43 @@ const OrdersPage: React.FC = () => {
         window.location.href = response.data.paymentUrl;
       } else {
         // If no payment URL is returned, stay on orders page and show success message
-        toast.success(t('payment.initializingPayment'));
+        toast.success(t("payment.initializingPayment"));
         // Refresh orders list
         refetch();
       }
     } catch (error) {
-      console.error('Failed to repay order:', error);
-      toast.error(t('payment.errors.initializationFailed'));
+      console.error("Failed to repay order:", error);
+      toast.error(t("payment.errors.initializationFailed"));
     } finally {
       setRepayingOrder(null);
     }
   };
 
-  // Handle pagination
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     setSelectedOrder(null);
   };
 
-  // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getItemDisplayName = (item: OrderItem) => {
-    const productName = item.Product?.name || item.name || 'Unknown Product';
+    const productName = item.Product?.name || item.name || "Unknown Product";
     const variantName = item.attributes?.variant;
     return variantName ? `${productName} (${variantName})` : productName;
   };
@@ -152,19 +143,19 @@ const OrdersPage: React.FC = () => {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-4">
-            {t('orders.loginRequired')}
+            {t("orders.loginRequired")}
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-            {t('orders.loginMessage')}
+            {t("orders.loginMessage")}
           </p>
           <PremiumButton
             variant="primary"
             size="large"
             iconType="arrow-right"
-            onClick={() => (window.location.href = '/login')}
+            onClick={() => (window.location.href = "/login")}
             className="w-full"
           >
-            {t('auth.login')}
+            {t("auth.login")}
           </PremiumButton>
         </div>
       </div>
@@ -175,7 +166,7 @@ const OrdersPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100 mb-8">
-          {t('orders.title')}
+          {t("orders.title")}
         </h1>
         <div className="space-y-6">
           {[...Array(3)].map((_, index) => (
@@ -225,13 +216,13 @@ const OrdersPage: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
-            {t('orders.error.title')}
+            {t("orders.error.title")}
           </h2>
           <p className="text-neutral-500 dark:text-neutral-400 mb-6">
-            {t('orders.error.message')}
+            {t("orders.error.message")}
           </p>
           <Button variant="primary" onClick={() => refetch()}>
-            {t('orders.tryAgain')}
+            {t("orders.tryAgain")}
           </Button>
         </div>
       </div>
@@ -245,10 +236,10 @@ const OrdersPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">
-          {t('orders.title')}
+          {t("orders.title")}
         </h1>
         <div className="text-sm text-neutral-500 dark:text-neutral-400">
-          {ordersResponse?.data.total || 0} {t('orders.ordersTotal')}
+          {ordersResponse?.data.total || 0} {t("orders.ordersTotal")}
         </div>
       </div>
 
@@ -271,13 +262,13 @@ const OrdersPage: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-2xl font-semibold text-neutral-700 dark:text-neutral-300 mb-3">
-            {t('orders.empty.title')}
+            {t("orders.empty.title")}
           </h2>
           <p className="text-neutral-500 dark:text-neutral-400 mb-8 max-w-md mx-auto">
-            {t('orders.empty.message')}
+            {t("orders.empty.message")}
           </p>
           <Button variant="primary" as={Link} to="/shop" size="lg">
-            {t('orders.empty.startShopping')}
+            {t("orders.empty.startShopping")}
           </Button>
         </div>
       ) : (
@@ -295,14 +286,14 @@ const OrdersPage: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-1">
                           <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t('orders.orderNumber', { number: order.number })}
+                            {t("orders.orderNumber", { number: order.number })}
                           </h2>
                           <Badge variant={statusVariants[order.status].variant}>
                             {t(`orders.status.${order.status}`)}
                           </Badge>
                         </div>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                          {t('orders.placedOn', {
+                          {t("orders.placedOn", {
                             date: formatDate(order.createdAt),
                           })}
                         </p>
@@ -310,7 +301,7 @@ const OrdersPage: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                            {t('orders.total')}
+                            {t("orders.total")}
                           </p>
                           <p className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
                             {formatCurrency(order.total)}
@@ -335,10 +326,10 @@ const OrdersPage: React.FC = () => {
                         className="dark:text-primary-300"
                       >
                         {selectedOrder === order.id
-                          ? t('orders.hideDetails')
-                          : t('orders.viewDetails')}
+                          ? t("orders.hideDetails")
+                          : t("orders.viewDetails")}
                       </Button>
-                      {order.status === 'pending' && (
+                      {order.status === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -347,11 +338,11 @@ const OrdersPage: React.FC = () => {
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                         >
                           {cancellingOrder === order.id
-                            ? t('orders.cancelling')
-                            : t('orders.cancelOrder')}
+                            ? t("orders.cancelling")
+                            : t("orders.cancelOrder")}
                         </Button>
                       )}
-                      {order.paymentStatus === 'pending' && (
+                      {order.paymentStatus === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -360,8 +351,8 @@ const OrdersPage: React.FC = () => {
                           className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 dark:text-primary-400 dark:hover:text-primary-300 dark:hover:bg-primary-900/20"
                         >
                           {repayingOrder === order.id
-                            ? t('orders.repaying')
-                            : t('orders.repayOrder')}
+                            ? t("orders.repaying")
+                            : t("orders.repayOrder")}
                         </Button>
                       )}
                       {order.trackingNumber && (
@@ -371,7 +362,7 @@ const OrdersPage: React.FC = () => {
                           as={Link}
                           to={`/track-order/${order.number}`}
                         >
-                          {t('orders.track')}
+                          {t("orders.track")}
                         </Button>
                       )}
                     </div>
@@ -383,15 +374,16 @@ const OrdersPage: React.FC = () => {
                   {order.items && order.items.length > 0 ? (
                     <div className="flex items-center gap-4">
                       <div className="flex -space-x-2">
-                        {order.items.slice(0, 4).map((item, index) => (
-                          <div
-                            key={item.id}
-                            className="w-12 h-12 rounded-lg border-2 border-white dark:border-neutral-800 overflow-hidden bg-neutral-100 dark:bg-neutral-700 flex-shrink-0"
-                            style={{ zIndex: 10 - index }}
-                          >
-                            {(() => {
-                              const displayName = getItemDisplayName(item);
-                              return item.image ? (
+                        {order.items.slice(0, 4).map((item, index) => {
+                          const displayName = getItemDisplayName(item);
+                          return (
+                            <Link
+                              key={item.id}
+                              to={`/products/${item.productId}`}
+                              className="w-12 h-12 rounded-lg border-2 border-white dark:border-neutral-800 overflow-hidden bg-neutral-100 dark:bg-neutral-700 flex-shrink-0"
+                              style={{ zIndex: 10 - index }}
+                            >
+                              {item.image ? (
                                 <img
                                   src={item.image}
                                   alt={displayName}
@@ -399,12 +391,12 @@ const OrdersPage: React.FC = () => {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-xs font-medium text-neutral-500">
-                                  {displayName?.charAt(0) || '?'}
+                                  {displayName?.charAt(0) || "?"}
                                 </div>
-                              );
-                            })()}
-                          </div>
-                        ))}
+                              )}
+                            </Link>
+                          );
+                        })}
                         {order.items.length > 4 && (
                           <div className="w-12 h-12 rounded-lg border-2 border-white dark:border-neutral-800 bg-neutral-200 dark:bg-neutral-600 flex items-center justify-center text-xs font-medium text-neutral-600 dark:text-neutral-300">
                             +{order.items.length - 4}
@@ -413,15 +405,15 @@ const OrdersPage: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                          {order.items.length}{' '}
-                          {order.items.length === 1 ? 'item' : 'items'}
+                          {order.items.length}{" "}
+                          {order.items.length === 1 ? "item" : "items"}
                         </p>
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">
                           {order.items
                             .slice(0, 2)
                             .map((item) => getItemDisplayName(item))
-                            .join(', ')}
-                          {order.items.length > 2 && '...'}
+                            .join(", ")}
+                          {order.items.length > 2 && "..."}
                         </p>
                       </div>
                     </div>
@@ -440,7 +432,7 @@ const OrdersPage: React.FC = () => {
                         {order.trackingNumber && (
                           <div>
                             <span className="text-neutral-500 dark:text-neutral-400">
-                              Tracking:{' '}
+                              Tracking:{" "}
                             </span>
                             <span className="font-medium text-neutral-800 dark:text-neutral-200">
                               {order.trackingNumber}
@@ -450,7 +442,7 @@ const OrdersPage: React.FC = () => {
                         {order.estimatedDelivery && (
                           <div>
                             <span className="text-neutral-500 dark:text-neutral-400">
-                              Est. Delivery:{' '}
+                              Est. Delivery:{" "}
                             </span>
                             <span className="font-medium text-neutral-800 dark:text-neutral-200">
                               {formatDate(order.estimatedDelivery)}
@@ -491,7 +483,7 @@ const OrdersPage: React.FC = () => {
                                           />
                                         ) : (
                                           <div className="w-full h-full flex items-center justify-center text-neutral-500">
-                                            {displayName?.charAt(0) || '?'}
+                                            {displayName?.charAt(0) || "?"}
                                           </div>
                                         )}
                                       </div>
@@ -539,7 +531,7 @@ const OrdersPage: React.FC = () => {
                               <p>{order.shippingAddress2}</p>
                             )}
                             <p>
-                              {order.shippingCity}, {order.shippingState}{' '}
+                              {order.shippingCity}, {order.shippingState}{" "}
                               {order.shippingZip}
                             </p>
                             <p>{order.shippingCountry}</p>
@@ -628,7 +620,7 @@ const OrdersPage: React.FC = () => {
                         <span className="px-2 text-neutral-400">...</span>
                       )}
                       <Button
-                        variant={page === currentPage ? 'primary' : 'ghost'}
+                        variant={page === currentPage ? "primary" : "ghost"}
                         size="sm"
                         onClick={() => handlePageChange(page)}
                       >
