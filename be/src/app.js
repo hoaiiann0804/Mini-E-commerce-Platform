@@ -10,7 +10,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const routes = require("./routes");
 const aiRoutes = require("./routes/aiRoutes"); // Import AI routes
-const { errorHandler } = require("./middlewares/errorHandler");
+const { errorHandler, AppError } = require("./middlewares/errorHandler");
 const path = require("path");
 
 // Initialize app
@@ -30,28 +30,54 @@ app.use(
 );
 
 // Enable CORS
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CORS_ORIGIN ||
-          process.env.FRONTEND_URL ||
-          "https://mini-e-commerce-platform-eight.vercel.app"
-        : [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:5175",
-          ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-    exposedHeaders: ["Set-Cookie"],
-  })
-);
+
+const parseList = (val)=> (val || "").split(",").map((s)=>s.trim()).filter(Boolean)
+const defaultDevOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+];
+
+const configuredOrigins = [
+ ...parseList(process.env.CORS_ORIGIN),
+ ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL ]: []) 
+];
+
+// Always allow local dev origins in non-production.
+// This prevents accidental CORS blocks like http://localhost:5175.
+if(process.env.NODE_ENV !== "production") {
+  configuredOrigins.push(...defaultDevOrigins);
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (
+      process.env.NODE_ENV !== "production" &&
+      defaultDevOrigins.includes(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    if (configuredOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Set-Cookie"],
+};
+
+
 
 // Handle preflight requests
-app.options("*", cors());
+app.use(cors(corsOptions))
+app.options("*", cors(corsOptions));
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
