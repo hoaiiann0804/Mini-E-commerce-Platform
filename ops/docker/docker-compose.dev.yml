@@ -38,6 +38,8 @@
       NODE_OPTIONS: --dns-result-order=ipv4first
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
     volumes:
       - ../../be:/app
       - ../../uploads:/app/uploads
