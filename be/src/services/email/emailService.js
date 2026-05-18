@@ -139,7 +139,14 @@ const sendResetPasswordEmail = async (email, token) => {
 
 // Send order confirmation email
 const sendOrderConfirmationEmail = async (email, order) => {
+  console.log("CALL sendOrderConfirmationEmail");
+
+  console.log("EMAIL:", email);
+  console.log("ORDER:", JSON.stringify(order, null, 2));
+  console.log("ITEMS:", order?.items);
+  console.log("SHIPPING:", order?.shippingAddress);
   const { orderNumber, orderDate, total, items, shippingAddress } = order;
+ 
 
   // Format items HTML
   const itemsHtml = items
