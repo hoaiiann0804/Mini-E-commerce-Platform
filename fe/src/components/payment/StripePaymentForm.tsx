@@ -113,24 +113,24 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
       </div>
 
       {/* Address Element */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-          {/* {t('payment.billingAddress')} */}
-        </h3>
-        <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
-          {/* <AddressElement
+      {/* <div className="space-y-4"> */}
+        {/* <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+          {/* {t('payment.billingAddress')}
+        </h3> */}
+        {/* <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
+           <AddressElement
             options={{
               mode: 'billing',
             }}
-          /> */}
-        </div>
-      </div>
+          />
+        </div> */}
+      {/* </div> */}
 
       {/* Submit Button */}
       <Button
         type="submit"
-        variant="primary"
-        size="lg"
+        variant="success"
+        size="md"
         className="w-full"
         disabled={!stripe || !elements || isLoading}
       >
