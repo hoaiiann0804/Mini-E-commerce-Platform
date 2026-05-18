@@ -1,8 +1,14 @@
-import { ButtonHTMLAttributes, ElementType, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
+import { ButtonHTMLAttributes, ElementType, forwardRef } from "react";
+import { Link } from "react-router-dom";
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'|'danger';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "success";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -19,25 +25,48 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
-      variant = 'primary',
-      size = 'md',
+      variant = "primary",
+      size = "md",
       isLoading = false,
       leftIcon,
       rightIcon,
       fullWidth = false,
       disabled,
-      className = '',
+      className = "",
       as,
       to,
       ...props
     },
     ref
   ) => {
-    const baseClasses = 'btn inline-flex items-center justify-center';
-    const variantClasses = `btn-${variant}`;
-    const sizeClasses = `btn-${size}`;
-    const widthClasses = fullWidth ? 'w-full' : '';
-    const disabledClasses = disabled || isLoading ? 'btn-disabled' : '';
+    // ...existing code...
+    const baseClasses =
+      "inline-flex items-center justify-center rounded-md font-medium transition";
+    const variantMap: Record<ButtonVariant, string> = {
+      primary:
+        "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300",
+      secondary:
+        "bg-gray-600 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300",
+      outline:
+        "bg-transparent border border-gray-300 text-gray-800 hover:bg-gray-50",
+      ghost: "bg-transparent text-gray-800 hover:bg-gray-100",
+      danger:
+        "bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300",
+      success:
+      "bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 dark:focus:ring-emerald-700",
+    };
+    const variantClasses = variantMap[variant] || variantMap.primary;
+    const sizeClasses =
+      size === "sm"
+        ? "px-2 py-1 text-sm"
+        : size === "lg"
+          ? "px-5 py-3 text-lg"
+          : "px-4 py-2";
+    const widthClasses = fullWidth ? "w-full" : "";
+    const disabledClasses =
+      disabled || isLoading
+        ? "opacity-50 cursor-not-allowed pointer-events-none"
+        : "";
     const allClasses = `${baseClasses} ${variantClasses} ${sizeClasses} ${widthClasses} ${disabledClasses} ${className}`;
 
     const content = (
@@ -108,6 +137,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = 'Button';
+Button.displayName = "Button";
 
 export default Button;
