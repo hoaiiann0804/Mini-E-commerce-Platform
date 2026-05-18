@@ -79,8 +79,7 @@ const sendEmail = async (options) => {
     // Success shape can be { data, error } or just a data-like object depending on SDK/version
     return result?.data ?? result;
   } catch (error) {
-    // //console.log("Send email error", error);
-    throw error;
+    console.error("SEND EMAIL ERROR:", error);    throw error;
   }
 };
 
@@ -139,15 +138,13 @@ const sendResetPasswordEmail = async (email, token) => {
 
 // Send order confirmation email
 const sendOrderConfirmationEmail = async (email, order) => {
-  console.log("CALL sendOrderConfirmationEmail");
+  // console.log("CALL sendOrderConfirmationEmail");
 
-  console.log("EMAIL:", email);
-  console.log("ORDER:", JSON.stringify(order, null, 2));
-  console.log("ITEMS:", order?.items);
-  console.log("SHIPPING:", order?.shippingAddress);
+  // console.log("EMAIL:", email);
+  // console.log("ORDER:", JSON.stringify(order, null, 2));
+  // console.log("ITEMS:", order?.items);
+  // console.log("SHIPPING:", order?.shippingAddress);
   const { orderNumber, orderDate, total, items, shippingAddress } = order;
- 
-
   // Format items HTML
   const itemsHtml = items
     .map(
