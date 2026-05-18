@@ -446,7 +446,7 @@ const Header: React.FC = () => {
                   placeholder={t("header.actions.searchPlaceholder")}
                   className="w-full py-2.5 pl-10 pr-4 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   onFocus={() => {
-                    dispatch(toggleMobileMenu());
+                    if (!isMobileMenuOpen) dispatch(toggleMobileMenu());
                     dispatch(toggleSearch());
                   }}
                 />
@@ -466,7 +466,7 @@ const Header: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <button
+                {/* <button
                   type="submit"
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
                 >
@@ -484,7 +484,7 @@ const Header: React.FC = () => {
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                </button>
+                </button> */}
               </form>
             </div>
           </div>
