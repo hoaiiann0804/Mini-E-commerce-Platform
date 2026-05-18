@@ -161,7 +161,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               <label className="text-sm text-neutral-500 dark:text-neutral-400 mb-1 block">
                 Giá tối thiểu
               </label>
-              <div className="px-3 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
+              <div className="px-1 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
                 {formatPrice(localPriceRange.min)}
               </div>
             </div>
@@ -170,7 +170,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               <label className="text-sm text-neutral-500 dark:text-neutral-400 mb-1 block">
                 Giá tối đa
               </label>
-              <div className="px-3 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
+              <div className="px-1 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
                 {formatPrice(localPriceRange.max)}
               </div>
             </div>
