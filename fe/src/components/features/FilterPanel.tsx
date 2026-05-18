@@ -161,20 +161,47 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               <label className="text-sm text-neutral-500 dark:text-neutral-400 mb-1 block">
                 Giá tối thiểu
               </label>
-              <div className="px-1 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
-                {formatPrice(localPriceRange.min)}
-              </div>
+              <input
+                type="number"
+                min={MIN_PRICE}
+                max={MAX_PRICE}
+                step={STEP}
+                value={localPriceRange.min}
+                onChange={(e) => {
+                  const v = Number(e.target.value) || 0;
+                  const newMin = Math.min(
+                    Math.max(v, MIN_PRICE),
+                    localPriceRange.max
+                  );
+                  setLocalPriceRange((prev) => ({ ...prev, min: newMin }));
+                }}
+                className="w-full px-2 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200"
+              />
             </div>
 
             <div>
               <label className="text-sm text-neutral-500 dark:text-neutral-400 mb-1 block">
                 Giá tối đa
               </label>
-              <div className="px-1 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200">
-                {formatPrice(localPriceRange.max)}
-              </div>
+              <input
+                type="number"
+                min={MIN_PRICE}
+                max={MAX_PRICE}
+                step={STEP}
+                value={localPriceRange.max}
+                onChange={(e) => {
+                  const v = Number(e.target.value) || 0;
+                  const newMax = Math.max(
+                    Math.min(v, MAX_PRICE),
+                    localPriceRange.min
+                  );
+                  setLocalPriceRange((prev) => ({ ...prev, max: newMax }));
+                }}
+                className="w-full px-2 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200"
+              />
             </div>
           </div>
+
           <Button
             variant="outline"
             size="sm"
