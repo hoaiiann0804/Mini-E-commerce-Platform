@@ -48,12 +48,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         "bg-gray-600 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300",
       outline:
-        "bg-transparent border border-gray-300 text-gray-800 hover:bg-gray-50",
+        "bg-transparent border border-gray-300 text-gray-800 hover:bg-gray-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-300/50 dark:focus:ring-blue-700/50",
       ghost: "bg-transparent text-gray-800 hover:bg-gray-100",
       danger:
         "bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300",
       success:
-      "bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 dark:focus:ring-emerald-700",
+        "bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 dark:focus:ring-emerald-700",
     };
     const variantClasses = variantMap[variant] || variantMap.primary;
     const sizeClasses =

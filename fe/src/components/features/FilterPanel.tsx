@@ -175,7 +175,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   );
                   setLocalPriceRange((prev) => ({ ...prev, min: newMin }));
                 }}
-                className="w-full px-2 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200"
+                className="w-full px-1 py-2 rounded border border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm text-neutral-800 dark:text-neutral-200"
               />
             </div>
 
