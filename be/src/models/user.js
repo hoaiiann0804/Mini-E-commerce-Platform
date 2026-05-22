@@ -71,6 +71,16 @@ const User = sequelize.define(
       allowNull: true,
       field: 'stripe_customer_id',
     },
+    failedLoginAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    
+    lockUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: 'users',

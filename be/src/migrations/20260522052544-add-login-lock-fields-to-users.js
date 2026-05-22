@@ -1,0 +1,19 @@
+'use strict';
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up (queryInterface, Sequelize) {
+ 
+     await queryInterface.createTable('users', 'failedLoginAttempts', {  type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0,});
+
+      await queryInterface.createTable('users', 'lockUntil', {  type: Sequelize.DATE,
+        allowNull: true,});
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.removeColumn("Users", "failedLoginAttempts");
+    await queryInterface.removeColumn("Users", "lockUntil");
+  },
+};
