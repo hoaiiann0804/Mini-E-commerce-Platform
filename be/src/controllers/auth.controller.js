@@ -5,6 +5,9 @@ const { User } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 const emailService = require("../services/email/emailService");
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_TIME= 15*60*1000;
+
 // Register a new user
 const register = async (req, res, next) => {
   try {
@@ -65,12 +68,37 @@ const login = async (req, res, next) => {
         401
       );
     }
+    if(user.lockUntil && user.lockUntil > new Date())
+    {
+      throw new AppError(
+        "Tài khoản đang bị khóa tạm thời. Vui lòng thử lại sau.",
+        423
+      );
+    }
+
+  
 
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       throw new AppError("Email hoặc mật khẩu không đúng", 401);
     }
+    if(!isMatch){
+      let failedLoginAttempts = user.failedLoginAttempts +1
+      let lockUntil = user.lockUntil
+      if(failedLoginAttempts >= MAX_LOGIN_ATTEMPTS)
+      {
+        lockUntil = new Date(Date.now) + LOCK_TIME
+      }
+      user.update({
+        failedLoginAttempts,
+        lockUntil
+      })
+    }
+    user.update({
+      failedLoginAttempts : 0,
+      lockUntil: null
+    })
 
     // Generate JWT token
     const token = jwt.sign(
