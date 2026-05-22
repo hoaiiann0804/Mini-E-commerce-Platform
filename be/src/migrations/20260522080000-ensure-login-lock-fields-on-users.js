@@ -6,7 +6,7 @@ module.exports = {
     const table = await queryInterface.describeTable('users');
 
     if (!table.failedLoginAttempts) {
-      await queryInterface.addColumn('users', 'failedLoginAttempts', {
+      await queryInterface.addColumn('users', 'failed_login_attempts', {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
@@ -14,7 +14,7 @@ module.exports = {
     }
 
     if (!table.lockUntil) {
-      await queryInterface.addColumn('users', 'lockUntil', {
+      await queryInterface.addColumn('users', 'lock_until', {
         type: Sequelize.DATE,
         allowNull: true,
       });
@@ -25,11 +25,11 @@ module.exports = {
     const table = await queryInterface.describeTable('users');
 
     if (table.failedLoginAttempts) {
-      await queryInterface.removeColumn('users', 'failedLoginAttempts');
+      await queryInterface.removeColumn('users', 'failed_login_attempts');
     }
 
     if (table.lockUntil) {
-      await queryInterface.removeColumn('users', 'lockUntil');
+      await queryInterface.removeColumn('users', 'lock_until');
     }
   },
 };

@@ -75,11 +75,13 @@ const User = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      field: "failed_login_attempts",
     },
     
     lockUntil: {
       type: DataTypes.DATE,
       allowNull: true,
+      field: 'lock_until'
     },
   },
   {
