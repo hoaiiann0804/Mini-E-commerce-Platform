@@ -8,7 +8,7 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     status: "error",
-    message: "Too many requests, please try again later.",
+    message: "Quá nhiều yêu cầu, vui lòng thử lại sau.",
   },
 });
 
@@ -23,7 +23,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
   message: {
     status: "error",
-    message: "Too many login attempts, please try again later.",
+    message: "Quá nhiều lần đăng nhập, vui lòng thử lại sau.",
   },
 });
 
@@ -32,7 +32,7 @@ const orderLimter = rateLimit({
   max: 5,
   message: {
     status: "fail",
-    message: "Too many login attempts, please try again later",
+    message: "Quá nhiều yêu cầu đặt hàng, vui lòng thử lại sau.",
   },
 });
 
