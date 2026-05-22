@@ -1113,14 +1113,17 @@ async function importProducts() {
   try {
     //console.log('🚀 Bắt đầu import sản phẩm...');
 
-    // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
-    await OrderItem.destroy({ where: {} });
-    await CartItem.destroy({ where: {} });
-    await ProductVariant.destroy({ where: {} });
-    await ProductAttribute.destroy({ where: {} });
-    await ProductSpecification.destroy({ where: {} });
-    await Product.destroy({ where: {} });
-    await Category.destroy({ where: {} });
+rere    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new DBs.
+    if (process.env.RESET_BEFORE_IMPORT === 'true') {
+      // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
+      await OrderItem.destroy({ where: {} });
+      await CartItem.destroy({ where: {} });
+      await ProductVariant.destroy({ where: {} });
+      await ProductAttribute.destroy({ where: {} });
+      await ProductSpecification.destroy({ where: {} });
+      await Product.destroy({ where: {} });
+      await Category.destroy({ where: {} });
+    }
 
     //console.log('🗑️ Đã xóa dữ liệu cũ');
 
@@ -1251,7 +1254,7 @@ async function importProducts() {
         inStock: totalStock > 0,
       });
 
-      //console.log(
+      console.log(
         `✅ Đã tạo sản phẩm: ${product.name} (${createdSpecifications.length} specs, ${createdAttributes.length} attributes, ${createdVariants.length} variants, ${totalStock} stock)`
       );
     }
@@ -1260,7 +1263,7 @@ async function importProducts() {
     //console.log(`📊 Tổng kết:`);
     //console.log(`   - ${sampleProducts.length} sản phẩm`);
     //console.log(`   - ${createdCategories.length} danh mục`);
-    //console.log(
+    console.log(
       `   - Tổng variants: ${sampleProducts.reduce((sum, p) => sum + p.variants.length, 0)}`
     );
   } catch (error) {
