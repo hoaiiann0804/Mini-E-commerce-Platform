@@ -1885,7 +1885,15 @@ async function importProducts() {
       { name: 'Điện tử', slug: 'dien-tu', description: 'Thiết bị điện tử' },
     ];
 
-    const createdCategories = await Category.bulkCreate(categories);
+    // Create categories idempotently (avoid unique constraint on slug)
+    const createdCategories = [];
+    for (const categoryData of categories) {
+      const [category] = await Category.findOrCreate({
+        where: { slug: categoryData.slug },
+        defaults: categoryData,
+      });
+      createdCategories.push(category);
+    }
     //console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
 
     // Tạo products với attributes và variants
@@ -1896,6 +1904,16 @@ async function importProducts() {
       );
 
       // Tạo product
+      // Skip if product already exists (safe to re-run on production)
+      const existingProduct = await Product.findOne({
+        where: { name: productData.name },
+        attributes: ['id'],
+      });
+      if (existingProduct) {
+        console.log(`â­ Bá» qua (Ä‘Ă£ tá»“n táº¡i): ${productData.name}`);
+        continue;
+      }
+
       const product = await Product.create({
         name: productData.name,
         description: productData.description,
