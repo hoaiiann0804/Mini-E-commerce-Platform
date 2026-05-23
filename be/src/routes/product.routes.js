@@ -85,7 +85,7 @@ const { authorize } = require("../middlewares/authorize");
  *         name: limit
  *         schema:
  *           type: integer
- *           default: 10
+ *           default: 24
  *         description: Number of items per page (max 100)
  *       - in: query
  *         name: cursor
