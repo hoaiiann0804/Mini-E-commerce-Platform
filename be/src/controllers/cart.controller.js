@@ -5,9 +5,9 @@ const {
   ProductVariant,
   WarrantyPackage,
   sequelize,
-} = require('../models');
-const { AppError } = require('../middlewares/errorHandler');
-const { v4: uuidv4 } = require('uuid');
+} = require("../models");
+const { AppError } = require("../middlewares/errorHandler");
+const { v4: uuidv4 } = require("uuid");
 
 // Get cart
 const getCart = async (req, res, next) => {
@@ -19,7 +19,7 @@ const getCart = async (req, res, next) => {
       [cart] = await Cart.findOrCreate({
         where: {
           userId: req.user.id,
-          status: 'active',
+          status: "active",
         },
         defaults: {
           userId: req.user.id,
@@ -31,7 +31,7 @@ const getCart = async (req, res, next) => {
 
       if (!sessionId) {
         return res.status(200).json({
-          status: 'success',
+          status: "success",
           data: {
             id: null,
             items: [],
@@ -44,7 +44,7 @@ const getCart = async (req, res, next) => {
       [cart] = await Cart.findOrCreate({
         where: {
           sessionId,
-          status: 'active',
+          status: "active",
         },
         defaults: {
           sessionId,
@@ -59,44 +59,58 @@ const getCart = async (req, res, next) => {
         {
           model: Product,
           attributes: [
-            'id',
-            'name',
-            'slug',
-            'price',
-            'thumbnail',
-            'inStock',
-            'stockQuantity',
+            "id",
+            "name",
+            "slug",
+            "price",
+            "thumbnail",
+            "inStock",
+            "stockQuantity",
           ],
         },
         {
           model: ProductVariant,
-          attributes: ['id', 'name', 'price', 'stockQuantity'],
+          attributes: ["id", "name", "price", "stockQuantity"],
         },
       ],
     });
 
-    // Get warranty packages for cart items that have them
-    const cartItemsWithWarranties = await Promise.all(
-      cartItems.map(async (item) => {
-        const itemData = item.toJSON();
-        if (
-          itemData.warrantyPackageIds &&
-          itemData.warrantyPackageIds.length > 0
-        ) {
-          const warranties = await WarrantyPackage.findAll({
-            where: {
-              id: itemData.warrantyPackageIds,
-              isActive: true,
-            },
-            attributes: ['id', 'name', 'price', 'durationMonths'],
-          });
-          itemData.warrantyPackages = warranties;
-        } else {
-          itemData.warrantyPackages = [];
-        }
-        return itemData;
-      })
+    // Chuyển Sequelize Model sang object thường
+    const normalizedCartItems = cartItems.map((item) =>
+      typeof item.toJSON === "function" ? item.toJSON() : item,
     );
+
+    // Gom tất cả các warranty ID và loại bỏ ID trùng
+    const allWarrantyIds = [
+      ...new Set(
+        normalizedCartItems.flatMap((item) => item.warrantyPackageIds || []),
+      ),
+    ];
+
+    // Query tất cả một lần và tránh query trong vòng lặp
+    const warranties = allWarrantyIds.length
+      ? await WarrantyPackage.findAll({
+          where: {
+            id: allWarrantyIds,
+            isActive: true,
+          },
+          attributes: ["id", "name", "price", "durationMonths"],
+          raw: true,
+        })
+      : [];
+
+    // Tạo Map để tra warranty nhanh theo ID
+    const warrantyMap = new Map(
+      warranties.map((warranty) => [String(warranty.id), warranty]),
+    );
+
+    // Gắn warranty vào từng cart item trong RAM, không query DB thêm
+    const cartItemsWithWarranties = normalizedCartItems.map((item) => ({
+      ...item,
+      warrantyPackages: (item.warrantyPackageIds || [])
+        .map((id) => warrantyMap.get(String(id)))
+        .filter(Boolean),
+    }));
 
     // Calculate totals
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -108,16 +122,16 @@ const getCart = async (req, res, next) => {
       // Calculate warranty price
       const warrantyPrice = item.warrantyPackages
         ? item.warrantyPackages.reduce(
-          (warrantySum, warranty) => warrantySum + parseFloat(warranty.price),
-          0
-        )
+            (warrantySum, warranty) => warrantySum + parseFloat(warranty.price),
+            0,
+          )
         : 0;
 
       return sum + price * item.quantity + warrantyPrice * item.quantity;
     }, 0);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         id: cart.id,
         items: cartItemsWithWarranties,
@@ -145,11 +159,11 @@ const addToCart = async (req, res, next) => {
     // Validate product
     const product = await Product.findByPk(productId);
     if (!product) {
-      throw new AppError('Sản phẩm không tồn tại', 404);
+      throw new AppError("Sản phẩm không tồn tại", 404);
     }
 
     if (!product.inStock) {
-      throw new AppError('Sản phẩm đã hết hàng', 400);
+      throw new AppError("Sản phẩm đã hết hàng", 400);
     }
 
     // Validate variant if provided
@@ -160,14 +174,14 @@ const addToCart = async (req, res, next) => {
       });
 
       if (!variant) {
-        throw new AppError('Biến thể sản phẩm không tồn tại', 404);
+        throw new AppError("Biến thể sản phẩm không tồn tại", 404);
       }
 
       if (variant.stockQuantity < quantity) {
-        throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+        throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
       }
     } else if (product.stockQuantity < quantity) {
-      throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+      throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
     }
 
     // Validate warranty packages if provided
@@ -181,7 +195,7 @@ const addToCart = async (req, res, next) => {
       });
 
       if (warranties.length !== warrantyPackageIds.length) {
-        throw new AppError('Một hoặc nhiều gói bảo hành không hợp lệ', 400);
+        throw new AppError("Một hoặc nhiều gói bảo hành không hợp lệ", 400);
       }
 
       validWarrantyPackageIds = warranties.map((w) => w.id);
@@ -195,7 +209,7 @@ const addToCart = async (req, res, next) => {
       [cart] = await Cart.findOrCreate({
         where: {
           userId: req.user.id,
-          status: 'active',
+          status: "active",
         },
         defaults: {
           userId: req.user.id,
@@ -211,17 +225,17 @@ const addToCart = async (req, res, next) => {
 
       if (!sessionId) {
         sessionId = uuidv4();
-        res.cookie('sessionId', sessionId, {
+        res.cookie("sessionId", sessionId, {
           httpOnly: true,
           maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-          sameSite: 'strict',
+          sameSite: "strict",
         });
       }
 
       [cart] = await Cart.findOrCreate({
         where: {
           sessionId,
-          status: 'active',
+          status: "active",
         },
         defaults: {
           sessionId,
@@ -248,10 +262,10 @@ const addToCart = async (req, res, next) => {
       // Check stock
       if (variantId) {
         if (variant.stockQuantity < newQuantity) {
-          throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+          throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
         }
       } else if (product.stockQuantity < newQuantity) {
-        throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+        throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
       }
 
       await cartItem.update({ quantity: newQuantity }, { transaction });
@@ -266,7 +280,7 @@ const addToCart = async (req, res, next) => {
           price: variantId ? variant.price : product.price,
           warrantyPackageIds: validWarrantyPackageIds,
         },
-        { transaction }
+        { transaction },
       );
     }
 
@@ -291,42 +305,42 @@ const updateCartItem = async (req, res, next) => {
       include: [
         {
           model: Cart,
-          attributes: ['id', 'userId', 'sessionId'],
+          attributes: ["id", "userId", "sessionId"],
         },
         {
           model: Product,
-          attributes: ['id', 'inStock', 'stockQuantity'],
+          attributes: ["id", "inStock", "stockQuantity"],
         },
         {
           model: ProductVariant,
-          attributes: ['id', 'stockQuantity'],
+          attributes: ["id", "stockQuantity"],
         },
       ],
     });
 
     if (!cartItem) {
-      throw new AppError('Không tìm thấy sản phẩm trong giỏ hàng', 404);
+      throw new AppError("Không tìm thấy sản phẩm trong giỏ hàng", 404);
     }
 
     // Check cart ownership
     if (req.user) {
       if (cartItem.Cart.userId !== req.user.id) {
-        throw new AppError('Bạn không có quyền truy cập giỏ hàng này', 403);
+        throw new AppError("Bạn không có quyền truy cập giỏ hàng này", 403);
       }
     } else {
       const { sessionId } = req.cookies;
       if (!sessionId || cartItem.Cart.sessionId !== sessionId) {
-        throw new AppError('Bạn không có quyền truy cập giỏ hàng này', 403);
+        throw new AppError("Bạn không có quyền truy cập giỏ hàng này", 403);
       }
     }
 
     // Check stock
     if (cartItem.ProductVariant) {
       if (cartItem.ProductVariant.stockQuantity < quantity) {
-        throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+        throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
       }
     } else if (cartItem.Product.stockQuantity < quantity) {
-      throw new AppError('Số lượng vượt quá số lượng tồn kho', 400);
+      throw new AppError("Số lượng vượt quá số lượng tồn kho", 400);
     }
 
     // Update quantity
@@ -349,24 +363,24 @@ const removeCartItem = async (req, res, next) => {
       include: [
         {
           model: Cart,
-          attributes: ['id', 'userId', 'sessionId'],
+          attributes: ["id", "userId", "sessionId"],
         },
       ],
     });
 
     if (!cartItem) {
-      throw new AppError('Không tìm thấy sản phẩm trong giỏ hàng', 404);
+      throw new AppError("Không tìm thấy sản phẩm trong giỏ hàng", 404);
     }
 
     // Check cart ownership
     if (req.user) {
       if (cartItem.Cart.userId !== req.user.id) {
-        throw new AppError('Bạn không có quyền truy cập giỏ hàng này', 403);
+        throw new AppError("Bạn không có quyền truy cập giỏ hàng này", 403);
       }
     } else {
       const { sessionId } = req.cookies;
       if (!sessionId || cartItem.Cart.sessionId !== sessionId) {
-        throw new AppError('Bạn không có quyền truy cập giỏ hàng này', 403);
+        throw new AppError("Bạn không có quyền truy cập giỏ hàng này", 403);
       }
     }
 
@@ -390,14 +404,14 @@ const clearCart = async (req, res, next) => {
       const cart = await Cart.findOne({
         where: {
           userId: req.user.id,
-          status: 'active',
+          status: "active",
         },
       });
 
       if (!cart) {
         return res.status(200).json({
-          status: 'success',
-          message: 'Giỏ hàng đã trống',
+          status: "success",
+          message: "Giỏ hàng đã trống",
         });
       }
 
@@ -408,22 +422,22 @@ const clearCart = async (req, res, next) => {
 
       if (!sessionId) {
         return res.status(200).json({
-          status: 'success',
-          message: 'Giỏ hàng đã trống',
+          status: "success",
+          message: "Giỏ hàng đã trống",
         });
       }
 
       const cart = await Cart.findOne({
         where: {
           sessionId,
-          status: 'active',
+          status: "active",
         },
       });
 
       if (!cart) {
         return res.status(200).json({
-          status: 'success',
-          message: 'Giỏ hàng đã trống',
+          status: "success",
+          message: "Giỏ hàng đã trống",
         });
       }
 
@@ -436,8 +450,8 @@ const clearCart = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
-      message: 'Đã xóa tất cả sản phẩm trong giỏ hàng',
+      status: "success",
+      message: "Đã xóa tất cả sản phẩm trong giỏ hàng",
       data: {
         id: cartId,
         items: [],
@@ -460,7 +474,7 @@ const getCartCount = async (req, res, next) => {
       cart = await Cart.findOne({
         where: {
           userId: req.user.id,
-          status: 'active',
+          status: "active",
         },
       });
     } else {
@@ -469,7 +483,7 @@ const getCartCount = async (req, res, next) => {
 
       if (!sessionId) {
         return res.status(200).json({
-          status: 'success',
+          status: "success",
           data: {
             count: 0,
           },
@@ -479,14 +493,14 @@ const getCartCount = async (req, res, next) => {
       cart = await Cart.findOne({
         where: {
           sessionId,
-          status: 'active',
+          status: "active",
         },
       });
     }
 
     if (!cart) {
       return res.status(200).json({
-        status: 'success',
+        status: "success",
         data: {
           count: 0,
         },
@@ -494,12 +508,12 @@ const getCartCount = async (req, res, next) => {
     }
 
     // Count items
-    const count = await CartItem.sum('quantity', {
+    const count = await CartItem.sum("quantity", {
       where: { cartId: cart.id },
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         count: count || 0,
       },
@@ -517,14 +531,14 @@ const syncCart = async (req, res, next) => {
     const { items } = req.body;
 
     if (!req.user) {
-      throw new AppError('Bạn cần đăng nhập để đồng bộ giỏ hàng', 401);
+      throw new AppError("Bạn cần đăng nhập để đồng bộ giỏ hàng", 401);
     }
 
     // Get or create user cart
     const [cart] = await Cart.findOrCreate({
       where: {
         userId: req.user.id,
-        status: 'active',
+        status: "active",
       },
       defaults: {
         userId: req.user.id,
@@ -569,7 +583,7 @@ const syncCart = async (req, res, next) => {
               quantity: actualQuantity,
               price: variant.price,
             },
-            { transaction }
+            { transaction },
           );
         }
       } else {
@@ -583,7 +597,7 @@ const syncCart = async (req, res, next) => {
               quantity: actualQuantity,
               price: product.price,
             },
-            { transaction }
+            { transaction },
           );
         }
       }
@@ -605,7 +619,7 @@ const mergeCart = async (req, res, next) => {
 
   try {
     if (!req.user) {
-      throw new AppError('Bạn cần đăng nhập để thực hiện chức năng này', 401);
+      throw new AppError("Bạn cần đăng nhập để thực hiện chức năng này", 401);
     }
 
     const { sessionId } = req.cookies;
@@ -618,7 +632,7 @@ const mergeCart = async (req, res, next) => {
     const sessionCart = await Cart.findOne({
       where: {
         sessionId,
-        status: 'active',
+        status: "active",
       },
     });
 
@@ -631,7 +645,7 @@ const mergeCart = async (req, res, next) => {
     const [userCart] = await Cart.findOrCreate({
       where: {
         userId: req.user.id,
-        status: 'active',
+        status: "active",
       },
       defaults: {
         userId: req.user.id,
@@ -645,11 +659,11 @@ const mergeCart = async (req, res, next) => {
       include: [
         {
           model: Product,
-          attributes: ['id', 'inStock', 'stockQuantity'],
+          attributes: ["id", "inStock", "stockQuantity"],
         },
         {
           model: ProductVariant,
-          attributes: ['id', 'stockQuantity'],
+          attributes: ["id", "stockQuantity"],
         },
       ],
       transaction,
@@ -678,7 +692,7 @@ const mergeCart = async (req, res, next) => {
 
         await existingUserItem.update(
           { quantity: finalQuantity },
-          { transaction }
+          { transaction },
         );
 
         // Delete the session item after merging
@@ -690,12 +704,12 @@ const mergeCart = async (req, res, next) => {
     }
 
     // Mark session cart as merged
-    await sessionCart.update({ status: 'merged' }, { transaction });
+    await sessionCart.update({ status: "merged" }, { transaction });
 
     await transaction.commit();
 
     // Clear session cookie to prevent duplicate merging
-    res.clearCookie('sessionId');
+    res.clearCookie("sessionId");
 
     // Return updated user cart
     return getCart(req, res, next);

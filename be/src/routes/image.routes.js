@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const imageController = require("../controllers/imageController");
+const imageController = require("../controllers/image.controller");
 const { authenticate } = require("../middlewares/authenticate");
 const { adminAuthenticate } = require("../middlewares/adminAuth");
 

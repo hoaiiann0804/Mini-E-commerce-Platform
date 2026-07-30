@@ -1,4 +1,4 @@
-const { AttributeValue, AttributeGroup } = require("../../models");
+const { AttributeValue, AttributeGroup } = require("../../../models");
 
 // Define associations if they don't exist
 if (!AttributeValue.associations.attributeGroup) {

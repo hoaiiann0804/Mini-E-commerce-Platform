@@ -4,7 +4,7 @@ const {
   ProductAttributeGroup,
   Product,
 } = require("../models");
-const productNameGeneratorService = require("../services/product/productNameGenerator.service");
+const productNameGeneratorService = require("../shared/services/product/productNameGenerator.service");
 
 // Get all attribute groups with their values
 const getAttributeGroups = async (req, res) => {
@@ -360,7 +360,7 @@ const previewProductName = async (req, res) => {
       {
         separator: separator || " ",
         includeDetails: includeDetails || false,
-      }
+      },
     );
 
     res.json({
@@ -415,7 +415,7 @@ const batchGenerateProductNames = async (req, res) => {
 
     const results = await productNameGeneratorService.batchGenerateNames(
       items,
-      separator || " "
+      separator || " ",
     );
 
     res.json({
@@ -456,7 +456,7 @@ const generateNameRealTime = async (req, res) => {
       {
         separator: " ",
         includeDetails: true,
-      }
+      },
     );
 
     // Also get suggested attribute combinations if productId provided

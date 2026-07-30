@@ -1,4 +1,4 @@
-const logger = require('../../utils/logger');
+const logger = require("../../utils/logger");
 
 /**
  * Service để log các hoạt động của admin
@@ -10,7 +10,7 @@ class AdminAuditService {
    */
   static logUserAction(adminUser, action, targetUserId, changes = {}) {
     if (!adminUser) {
-      console.error('AdminAuditService.logUserAction: adminUser is undefined');
+      console.error("AdminAuditService.logUserAction: adminUser is undefined");
       return;
     }
 
@@ -25,7 +25,7 @@ class AdminAuditService {
       ip: null, // Sẽ được set từ req.ip
     };
 
-    logger.info('ADMIN_USER_ACTION', logData);
+    logger.info("ADMIN_USER_ACTION", logData);
   }
 
   /**
@@ -36,11 +36,11 @@ class AdminAuditService {
     action,
     productId,
     productName,
-    changes = {}
+    changes = {},
   ) {
     if (!adminUser) {
       console.error(
-        'AdminAuditService.logProductAction: adminUser is undefined'
+        "AdminAuditService.logProductAction: adminUser is undefined",
       );
       return;
     }
@@ -57,7 +57,7 @@ class AdminAuditService {
       ip: null,
     };
 
-    logger.info('ADMIN_PRODUCT_ACTION', logData);
+    logger.info("ADMIN_PRODUCT_ACTION", logData);
   }
 
   /**
@@ -76,7 +76,7 @@ class AdminAuditService {
       ip: null,
     };
 
-    logger.info('ADMIN_ORDER_ACTION', logData);
+    logger.info("ADMIN_ORDER_ACTION", logData);
   }
 
   /**
@@ -95,7 +95,7 @@ class AdminAuditService {
       ip: null,
     };
 
-    logger.info('ADMIN_REVIEW_ACTION', logData);
+    logger.info("ADMIN_REVIEW_ACTION", logData);
   }
 
   /**
@@ -106,14 +106,14 @@ class AdminAuditService {
       adminId: adminUser.id,
       adminEmail: adminUser.email,
       adminRole: adminUser.role,
-      action: 'DASHBOARD_ACCESS',
+      action: "DASHBOARD_ACCESS",
       endpoint,
       filters,
       timestamp: new Date().toISOString(),
       ip: null,
     };
 
-    logger.info('ADMIN_DASHBOARD_ACCESS', logData);
+    logger.info("ADMIN_DASHBOARD_ACCESS", logData);
   }
 
   /**
@@ -127,7 +127,7 @@ class AdminAuditService {
       ip,
     };
 
-    logger.warn('ADMIN_AUTH_FAILED', logData);
+    logger.warn("ADMIN_AUTH_FAILED", logData);
   }
 
   /**
@@ -138,12 +138,12 @@ class AdminAuditService {
       adminId: adminUser.id,
       adminEmail: adminUser.email,
       adminRole: adminUser.role,
-      action: 'LOGIN_SUCCESS',
+      action: "LOGIN_SUCCESS",
       timestamp: new Date().toISOString(),
       ip,
     };
 
-    logger.info('ADMIN_LOGIN_SUCCESS', logData);
+    logger.info("ADMIN_LOGIN_SUCCESS", logData);
   }
 }
 
@@ -162,10 +162,10 @@ const auditMiddleware = (req, res, next) => {
     adminUser,
     action,
     targetUserId,
-    changes = {}
+    changes = {},
   ) => {
     if (!adminUser) {
-      console.error('AdminAuditService.logUserAction: adminUser is undefined');
+      console.error("AdminAuditService.logUserAction: adminUser is undefined");
       return;
     }
 
@@ -179,7 +179,7 @@ const auditMiddleware = (req, res, next) => {
       timestamp: new Date().toISOString(),
       ip: req.ip || req.connection.remoteAddress,
     };
-    logger.info('ADMIN_USER_ACTION', logData);
+    logger.info("ADMIN_USER_ACTION", logData);
   };
 
   AdminAuditService.logProductAction = (
@@ -187,11 +187,11 @@ const auditMiddleware = (req, res, next) => {
     action,
     productId,
     productName,
-    changes = {}
+    changes = {},
   ) => {
     if (!adminUser) {
       console.error(
-        'AdminAuditService.logProductAction: adminUser is undefined'
+        "AdminAuditService.logProductAction: adminUser is undefined",
       );
       return;
     }
@@ -207,7 +207,7 @@ const auditMiddleware = (req, res, next) => {
       timestamp: new Date().toISOString(),
       ip: req.ip || req.connection.remoteAddress,
     };
-    logger.info('ADMIN_PRODUCT_ACTION', logData);
+    logger.info("ADMIN_PRODUCT_ACTION", logData);
   };
 
   AdminAuditService.logOrderAction = (
@@ -215,7 +215,7 @@ const auditMiddleware = (req, res, next) => {
     action,
     orderId,
     orderCode,
-    changes = {}
+    changes = {},
   ) => {
     const logData = {
       adminId: adminUser.id,
@@ -228,7 +228,7 @@ const auditMiddleware = (req, res, next) => {
       timestamp: new Date().toISOString(),
       ip: req.ip || req.connection.remoteAddress,
     };
-    logger.info('ADMIN_ORDER_ACTION', logData);
+    logger.info("ADMIN_ORDER_ACTION", logData);
   };
 
   AdminAuditService.logReviewAction = (
@@ -236,7 +236,7 @@ const auditMiddleware = (req, res, next) => {
     action,
     reviewId,
     userId,
-    productId
+    productId,
   ) => {
     const logData = {
       adminId: adminUser.id,
@@ -249,29 +249,29 @@ const auditMiddleware = (req, res, next) => {
       timestamp: new Date().toISOString(),
       ip: req.ip || req.connection.remoteAddress,
     };
-    logger.info('ADMIN_REVIEW_ACTION', logData);
+    logger.info("ADMIN_REVIEW_ACTION", logData);
   };
 
   AdminAuditService.logDashboardAccess = (
     adminUser,
     endpoint,
-    filters = {}
+    filters = {},
   ) => {
     const logData = {
       adminId: adminUser.id,
       adminEmail: adminUser.email,
       adminRole: adminUser.role,
-      action: 'DASHBOARD_ACCESS',
+      action: "DASHBOARD_ACCESS",
       endpoint,
       filters,
       timestamp: new Date().toISOString(),
       ip: req.ip || req.connection.remoteAddress,
     };
-    logger.info('ADMIN_DASHBOARD_ACCESS', logData);
+    logger.info("ADMIN_DASHBOARD_ACCESS", logData);
   };
 
   // Restore original methods after request
-  res.on('finish', () => {
+  res.on("finish", () => {
     AdminAuditService.logUserAction = originalLogUserAction;
     AdminAuditService.logProductAction = originalLogProductAction;
     AdminAuditService.logOrderAction = originalLogOrderAction;

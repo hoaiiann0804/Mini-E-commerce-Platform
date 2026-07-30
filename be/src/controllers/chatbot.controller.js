@@ -9,8 +9,8 @@ const {
   sequelize,
 } = require("../models");
 const { Op } = require("sequelize");
-const chatbotService = require("../services/chatbot/chatbot.service");
-const geminiChatbotService = require("../services/chatbot/geminiChatbot.service");
+const chatbotService = require("../shared/services/chatbot/chatbot.service");
+const geminiChatbotService = require("../shared/services/chatbot/chatbot.service");
 
 // Initialize Gemini AI only if API key is available
 let genAI = null;
@@ -103,7 +103,7 @@ class ChatbotController {
       // Generate AI response
       const aiResponse = await this.generateAIResponse(
         `Tìm sản phẩm: ${message}`,
-        { products, userProfile, searchParams }
+        { products, userProfile, searchParams },
       );
 
       // Create product recommendations
@@ -119,7 +119,7 @@ class ChatbotController {
           ? Math.round(
               ((product.compareAtPrice - product.price) /
                 product.compareAtPrice) *
-                100
+                100,
             )
           : 0,
       }));
@@ -158,12 +158,12 @@ class ChatbotController {
       const recommendations =
         await chatbotService.getPersonalizedRecommendations(
           userProfile?.id,
-          intent.params
+          intent.params,
         );
 
       const aiResponse = await this.generateAIResponse(
         `Gợi ý sản phẩm: ${message}`,
-        { recommendations, userProfile }
+        { recommendations, userProfile },
       );
 
       return {
@@ -235,7 +235,7 @@ class ChatbotController {
     try {
       const aiResponse = await this.generateAIResponse(
         `Hỗ trợ đơn hàng: ${message}`,
-        { userProfile }
+        { userProfile },
       );
 
       return {
@@ -260,7 +260,7 @@ class ChatbotController {
     try {
       const aiResponse = await this.generateAIResponse(
         `Hỗ trợ khách hàng: ${message}`,
-        { userProfile }
+        { userProfile },
       );
 
       return {
@@ -286,7 +286,7 @@ class ChatbotController {
       // Always try to steer conversation toward sales
       const salesOpportunity = await chatbotService.findSalesOpportunity(
         message,
-        userProfile
+        userProfile,
       );
 
       let response;
@@ -295,7 +295,7 @@ class ChatbotController {
           message,
           salesOpportunity.intent,
           userProfile,
-          context
+          context,
         );
       } else {
         const aiResponse = await this.generateAIResponse(message, {
@@ -439,7 +439,7 @@ class ChatbotController {
       // If it's a valid UUID
       else if (
         /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-          productIdentifier
+          productIdentifier,
         )
       ) {
         product = await Product.findByPk(productIdentifier, { transaction });
@@ -517,7 +517,7 @@ class ChatbotController {
             quantity,
             price: product.price, // Store the price at time of adding
           },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -568,7 +568,7 @@ class ChatbotController {
       const cartItems = updatedCart.CartItems || [];
       const totalItems = cartItems.reduce(
         (sum, item) => sum + item.quantity,
-        0
+        0,
       );
       const subtotal = cartItems.reduce((sum, item) => {
         return sum + (item.price || item.Product?.price || 0) * item.quantity;
@@ -694,7 +694,7 @@ class ChatbotController {
       searchTerms.forEach((term) => {
         searchConditions.push(
           { name: { [Op.iLike]: `%${term}%` } },
-          { description: { [Op.iLike]: `%${term}%` } }
+          { description: { [Op.iLike]: `%${term}%` } },
         );
       });
 
@@ -740,7 +740,7 @@ class ChatbotController {
         [
           // Order by discount percentage
           sequelize.literal(
-            "((compare_at_price - price) / compare_at_price) DESC"
+            "((compare_at_price - price) / compare_at_price) DESC",
           ),
         ],
       ],

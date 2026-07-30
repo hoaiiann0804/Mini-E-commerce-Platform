@@ -6,7 +6,7 @@ const path = require('path');
 const logFormat = winston.format.printf(({ level, message, timestamp, stack }) => {
   const base = `${timestamp} ${level}: ${message}`;
   return stack ? `${base}\n${stack}` : base;
-});
+}); 
 
 const logsDir = path.resolve(__dirname, '../../logs');
 try {

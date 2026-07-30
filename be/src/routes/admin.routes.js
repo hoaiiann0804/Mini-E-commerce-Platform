@@ -7,7 +7,9 @@ const adminController = require("../controllers/admin.controller");
 // Import middlewares
 const { adminAuthenticate } = require("../middlewares/adminAuth");
 const { validate } = require("../middlewares/validateRequest");
-const { auditMiddleware } = require("../services/admin/adminAuditService");
+const {
+  auditMiddleware,
+} = require("../shared/services/admin/adminAuditService");
 
 // Import validators
 const {
@@ -35,7 +37,7 @@ router.get("/dashboard", adminController.getDashboardStats);
 router.get(
   "/stats",
   validate(statsValidation),
-  adminController.getDetailedStats
+  adminController.getDetailedStats,
 );
 
 /**
@@ -45,21 +47,21 @@ router.get(
 router.get(
   "/users",
   validate(paginationValidation),
-  adminController.getAllUsers
+  adminController.getAllUsers,
 );
 
 // PUT /api/admin/users/:id - Cập nhật thông tin user
 router.put(
   "/users/:id",
   validate(updateUserValidation),
-  adminController.updateUser
+  adminController.updateUser,
 );
 
 // DELETE /api/admin/users/:id - Xóa user
 router.delete(
   "/users/:id",
   validate(deleteValidation),
-  adminController.deleteUser
+  adminController.deleteUser,
 );
 
 /**
@@ -69,35 +71,35 @@ router.delete(
 router.get(
   "/products",
   validate(paginationValidation),
-  adminController.getAllProducts
+  adminController.getAllProducts,
 );
 
 // GET /api/admin/products/:id - Lấy chi tiết sản phẩm
 router.get(
   "/products/:id",
   validate(getByIdValidation),
-  adminController.getProductById
+  adminController.getProductById,
 );
 
 // POST /api/admin/products - Tạo sản phẩm mới
 router.post(
   "/products",
   validate(createProductValidation),
-  adminController.createProduct
+  adminController.createProduct,
 );
 
 // PUT /api/admin/products/:id - Cập nhật sản phẩm
 router.put(
   "/products/:id",
   validate(updateProductValidation),
-  adminController.updateProduct
+  adminController.updateProduct,
 );
 
 // DELETE /api/admin/products/:id - Xóa sản phẩm
 router.delete(
   "/products/:id",
   validate(deleteValidation),
-  adminController.deleteProduct
+  adminController.deleteProduct,
 );
 
 /**
@@ -107,14 +109,14 @@ router.delete(
 router.get(
   "/reviews",
   validate(paginationValidation),
-  adminController.getAllReviews
+  adminController.getAllReviews,
 );
 
 // DELETE /api/admin/reviews/:id - Xóa review
 router.delete(
   "/reviews/:id",
   validate(deleteValidation),
-  adminController.deleteReview
+  adminController.deleteReview,
 );
 
 /**
@@ -124,14 +126,14 @@ router.delete(
 router.get(
   "/orders",
   validate(paginationValidation),
-  adminController.getAllOrders
+  adminController.getAllOrders,
 );
 
 // PUT /api/admin/orders/:id/status - Cập nhật trạng thái đơn hàng
 router.put(
   "/orders/:id/status",
   validate(updateOrderStatusValidation),
-  adminController.updateOrderStatus
+  adminController.updateOrderStatus,
 );
 
 module.exports = router;

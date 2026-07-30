@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
-const { validateRequest } = require('../middlewares/validateRequest');
+const authController = require("../auth/auth.controller");
+const { validateRequest } = require("../../middlewares/validateRequest");
 const {
   registerSchema,
   loginSchema,
@@ -9,9 +9,13 @@ const {
   resetPasswordSchema,
   emailSchema,
   verifyEmailSchema,
-} = require('../validators/user.validator');
-const { authLimiter } = require('../middlewares/rateLimiter');
-const { authenticate } = require('../middlewares/authenticate');
+} = require("../user/user.validator");
+const {
+  authLimiter,
+  resendVerificationLimiter,
+  forgotPasswordLimiter,
+} = require("../../middlewares/rateLimiter");
+const { authenticate } = require("../../middlewares/authenticate");
 
 /**
  * @swagger
@@ -59,10 +63,10 @@ const { authenticate } = require('../middlewares/authenticate');
  *         description: Email already exists
  */
 router.post(
-  '/register',
+  "/register",
   authLimiter,
   validateRequest(registerSchema),
-  authController.register
+  authController.register,
 );
 
 /**
@@ -93,10 +97,10 @@ router.post(
  *         description: Invalid credentials
  */
 router.post(
-  '/login',
+  "/login",
   authLimiter,
   validateRequest(loginSchema),
-  authController.login
+  authController.login,
 );
 
 /**
@@ -113,7 +117,7 @@ router.post(
  *       401:
  *         description: Not authenticated
  */
-router.post('/logout', authenticate, authController.logout);
+router.post("/logout", authenticate, authController.logout);
 
 /**
  * @swagger
@@ -133,7 +137,7 @@ router.post('/logout', authenticate, authController.logout);
  *       400:
  *         description: Invalid or expired token
  */
-router.get('/verify-email/:token', authController.verifyEmail);
+router.get("/verify-email/:token", authController.verifyEmail);
 
 /**
  * @swagger
@@ -159,9 +163,9 @@ router.get('/verify-email/:token', authController.verifyEmail);
  *         description: Invalid or expired token
  */
 router.post(
-  '/verify-email',
+  "/verify-email",
   validateRequest(verifyEmailSchema),
-  authController.verifyEmailWithToken
+  authController.verifyEmailWithToken,
 );
 
 /**
@@ -189,10 +193,10 @@ router.post(
  *         description: User not found
  */
 router.post(
-  '/resend-verification',
-  authLimiter,
+  "/resend-verification",
+  resendVerificationLimiter,
   validateRequest(emailSchema),
-  authController.resendVerification
+  authController.resendVerification,
 );
 
 /**
@@ -218,7 +222,7 @@ router.post(
  *       401:
  *         description: Invalid or expired refresh token
  */
-router.post('/refresh-token', authLimiter, authController.refreshToken);
+router.post("/refresh-token", authLimiter, authController.refreshAccessToken); // Đảm bảo không viết nhầm thành .refreshToken
 
 /**
  * @swagger
@@ -245,10 +249,10 @@ router.post('/refresh-token', authLimiter, authController.refreshToken);
  *         description: User not found
  */
 router.post(
-  '/forgot-password',
-  authLimiter,
+  "/forgot-password",
+  forgotPasswordLimiter,
   validateRequest(forgotPasswordSchema),
-  authController.forgotPassword
+  authController.forgotPassword,
 );
 
 /**
@@ -279,10 +283,10 @@ router.post(
  *         description: Invalid or expired token
  */
 router.post(
-  '/reset-password',
+  "/reset-password",
   authLimiter,
   validateRequest(resetPasswordSchema),
-  authController.resetPassword
+  authController.resetPassword,
 );
 
 /**
@@ -299,6 +303,6 @@ router.post(
  *       401:
  *         description: Not authenticated
  */
-router.get('/me', authenticate, authController.getCurrentUser);
+router.get("/me", authenticate, authController.getCurrentUser);
 
 module.exports = router;

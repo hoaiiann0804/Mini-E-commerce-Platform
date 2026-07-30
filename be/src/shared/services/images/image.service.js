@@ -2,9 +2,9 @@ const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs").promises;
 const { v4: uuidv4 } = require("uuid");
-const Image = require("../../models/image");
-const Product = require("../../models/product");
-const { AppError } = require("../../middlewares/errorHandler");
+const Image = require("../../../models/image");
+const Product = require("../../../models/product");
+const { AppError } = require("../../../middlewares/errorHandler");
 const cloudinary = require("cloudinary").v2;
 
 // Configure Cloudinary (uploads are handled via multer-storage-cloudinary middleware)
@@ -178,7 +178,7 @@ class ImageService {
       if (!cloudinaryPublicId || !cloudinaryUrl) {
         throw new AppError(
           "Cloudinary upload did not return public_id or url",
-          500
+          500,
         );
       }
 
@@ -229,7 +229,7 @@ class ImageService {
             });
 
             const nextImages = Array.from(
-              new Set([...cleanedImages, cloudinaryUrl])
+              new Set([...cleanedImages, cloudinaryUrl]),
             );
 
             product.images = nextImages;
@@ -251,7 +251,7 @@ class ImageService {
         } catch (err) {
           console.warn(
             "Failed to sync Product images/thumbnail:",
-            err?.message || err
+            err?.message || err,
           );
         }
       }
@@ -336,7 +336,7 @@ class ImageService {
               ? product.images
               : [];
             const nextImages = existingImages.filter(
-              (url) => typeof url === "string" && url !== image.filePath
+              (url) => typeof url === "string" && url !== image.filePath,
             );
 
             product.images = nextImages;
@@ -349,7 +349,7 @@ class ImageService {
         } catch (err) {
           console.warn(
             "Failed to sync Product after image delete:",
-            err?.message || err
+            err?.message || err,
           );
         }
       }
@@ -387,11 +387,7 @@ class ImageService {
         throw new AppError("base64Data is required", 400);
       }
 
-      const {
-        category = "product",
-        productId = null,
-        userId = null,
-      } = options;
+      const { category = "product", productId = null, userId = null } = options;
 
       const trimmed = base64Data.trim();
       const isDataUrl = trimmed.startsWith("data:image/");
@@ -453,7 +449,9 @@ class ImageService {
               return true;
             });
 
-            product.images = Array.from(new Set([...cleanedImages, cloudinaryUrl]));
+            product.images = Array.from(
+              new Set([...cleanedImages, cloudinaryUrl]),
+            );
 
             const thumb =
               typeof product.thumbnail === "string" ? product.thumbnail : "";
@@ -472,7 +470,7 @@ class ImageService {
         } catch (err) {
           console.warn(
             "Failed to sync Product images/thumbnail after base64 upload:",
-            err?.message || err
+            err?.message || err,
           );
         }
       }
@@ -484,7 +482,10 @@ class ImageService {
         url: cloudinaryUrl,
         originalName: imageRecord.originalName,
         size: uploadResult.bytes || 0,
-        dimensions: { width: uploadResult.width || null, height: uploadResult.height || null },
+        dimensions: {
+          width: uploadResult.width || null,
+          height: uploadResult.height || null,
+        },
         thumbnails: [],
         category,
       };
@@ -498,7 +499,7 @@ class ImageService {
   async cleanupOrphanedFiles() {
     throw new AppError(
       "Orphaned file cleanup not implemented for Cloudinary",
-      501
+      501,
     );
   }
 

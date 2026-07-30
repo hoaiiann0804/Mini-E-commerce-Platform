@@ -3,7 +3,7 @@
  * Utilities for managing product stock and variants
  */
 
-const { ProductVariant } = require("../../models");
+const { ProductVariant } = require("../../../models");
 
 /**
  * Calculate total stock from variants
@@ -14,7 +14,7 @@ const calculateTotalStock = (variants) => {
   if (!variants || variants.length === 0) return 0;
   return variants.reduce(
     (total, variant) => total + (variant.stockQuantity || 0),
-    0
+    0,
   );
 };
 
@@ -38,7 +38,7 @@ const updateProductTotalStock = async (productId, Product) => {
         stockQuantity: totalStock,
         inStock: totalStock > 0,
       },
-      { where: { id: productId } }
+      { where: { id: productId } },
     );
 
     return totalStock;
@@ -116,7 +116,7 @@ const getVariantStock = (variants, selectedAttributes) => {
 
   const matchingVariant = variants.find((variant) => {
     return Object.entries(selectedAttributes).every(
-      ([key, value]) => variant.attributes[key] === value
+      ([key, value]) => variant.attributes[key] === value,
     );
   });
 
@@ -134,7 +134,7 @@ const findVariantByAttributes = (variants, selectedAttributes) => {
 
   return variants.find((variant) => {
     return Object.entries(selectedAttributes).every(
-      ([key, value]) => variant.attributes[key] === value
+      ([key, value]) => variant.attributes[key] === value,
     );
   });
 };

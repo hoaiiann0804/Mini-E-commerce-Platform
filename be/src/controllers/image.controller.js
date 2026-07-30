@@ -1,4 +1,4 @@
-const imageService = require("../services/images/image.service");
+const imageService = require("../shared/services/images/image.service");
 const { AppError } = require("../middlewares/errorHandler");
 const uploadCloudinary = require("../middlewares/cloudinaryUploadMiddleware");
 const multer = require("multer");
@@ -16,8 +16,8 @@ class ImageController {
               return next(
                 new AppError(
                   `File too large. Maximum size is ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
-                  400
-                )
+                  400,
+                ),
               );
             }
             return next(new AppError(`Upload error: ${err.message}`, 400));
@@ -67,8 +67,8 @@ class ImageController {
               return next(
                 new AppError(
                   `File too large. Maximum size is ${process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024) : 5}MB`,
-                  400
-                )
+                  400,
+                ),
               );
             }
             if (err.code === "LIMIT_FILE_COUNT") {
@@ -94,7 +94,7 @@ class ImageController {
 
           const result = await imageService.uploadMultipleImages(
             req.files,
-            options
+            options,
           );
 
           res.status(200).json({
@@ -182,7 +182,10 @@ class ImageController {
         userId: req.user?.id || null,
       };
 
-      const result = await imageService.convertBase64ToFile(base64Data, options);
+      const result = await imageService.convertBase64ToFile(
+        base64Data,
+        options,
+      );
 
       res.status(200).json({
         status: "success",

@@ -1,11 +1,11 @@
-const Stripe = require('stripe');
-const https = require('https');
-const dns = require('dns');
-const { AppError } = require('../../middlewares/errorHandler');
+const Stripe = require("stripe");
+const https = require("https");
+const dns = require("dns");
+const { AppError } = require("../../../middlewares/errorHandler");
 
 // Force IPv4 DNS resolution via resolve4 to bypass getaddrinfo/DNS issues in some Docker setups
 const ipv4Lookup = (hostname, options, callback) => {
-  if (typeof options === 'function') {
+  if (typeof options === "function") {
     callback = options;
     options = {};
   }
@@ -55,10 +55,10 @@ class StripeService {
    * @param {Object} params.metadata - Additional metadata
    * @returns {Object} Payment intent object
    */
-  async createPaymentIntent({ amount, currency = 'usd', metadata = {} }) {
+  async createPaymentIntent({ amount, currency = "usd", metadata = {} }) {
     try {
       const stripeAmount =
-        currency === 'vnd' ? Math.round(amount) : Math.round(amount * 100);
+        currency === "vnd" ? Math.round(amount) : Math.round(amount * 100);
 
       //console.log('Creating Stripe payment intent with params:', {
       //   amount: stripeAmount,
@@ -75,7 +75,7 @@ class StripeService {
           automatic_payment_methods: {
             enabled: true,
           },
-        })
+        }),
       );
 
       return {
@@ -83,8 +83,8 @@ class StripeService {
         paymentIntentId: paymentIntent.id,
       };
     } catch (error) {
-      console.error('Stripe createPaymentIntent error:', error);
-      console.error('Error details:', {
+      console.error("Stripe createPaymentIntent error:", error);
+      console.error("Error details:", {
         message: error.message,
         type: error.type,
         code: error.code,
@@ -93,7 +93,7 @@ class StripeService {
       });
       throw new AppError(
         `Failed to create payment intent: ${error.message}`,
-        500
+        500,
       );
     }
   }
@@ -106,12 +106,12 @@ class StripeService {
   async confirmPaymentIntent(paymentIntentId) {
     try {
       const paymentIntent = await withDnsLookupOverride(() =>
-        stripe.paymentIntents.retrieve(paymentIntentId)
+        stripe.paymentIntents.retrieve(paymentIntentId),
       );
       return paymentIntent;
     } catch (error) {
-      console.error('Stripe confirmPaymentIntent error:', error);
-      throw new AppError('Failed to confirm payment intent', 500);
+      console.error("Stripe confirmPaymentIntent error:", error);
+      throw new AppError("Failed to confirm payment intent", 500);
     }
   }
 
@@ -130,13 +130,13 @@ class StripeService {
           email,
           name,
           metadata,
-        })
+        }),
       );
 
       return customer;
     } catch (error) {
-      console.error('Stripe createCustomer error:', error);
-      throw new AppError('Failed to create customer', 500);
+      console.error("Stripe createCustomer error:", error);
+      throw new AppError("Failed to create customer", 500);
     }
   }
 
@@ -148,12 +148,12 @@ class StripeService {
   async getCustomer(customerId) {
     try {
       const customer = await withDnsLookupOverride(() =>
-        stripe.customers.retrieve(customerId)
+        stripe.customers.retrieve(customerId),
       );
       return customer;
     } catch (error) {
-      console.error('Stripe getCustomer error:', error);
-      throw new AppError('Failed to retrieve customer', 500);
+      console.error("Stripe getCustomer error:", error);
+      throw new AppError("Failed to retrieve customer", 500);
     }
   }
 
@@ -168,7 +168,7 @@ class StripeService {
   async createRefund({
     paymentIntentId,
     amount,
-    reason = 'requested_by_customer',
+    reason = "requested_by_customer",
   }) {
     try {
       const refundData = {
@@ -181,12 +181,12 @@ class StripeService {
       }
 
       const refund = await withDnsLookupOverride(() =>
-        stripe.refunds.create(refundData)
+        stripe.refunds.create(refundData),
       );
       return refund;
     } catch (error) {
-      console.error('Stripe createRefund error:', error);
-      throw new AppError('Failed to create refund', 500);
+      console.error("Stripe createRefund error:", error);
+      throw new AppError("Failed to create refund", 500);
     }
   }
 
@@ -201,13 +201,13 @@ class StripeService {
       const event = stripe.webhooks.constructEvent(
         payload,
         signature,
-        process.env.STRIPE_WEBHOOK_SECRET
+        process.env.STRIPE_WEBHOOK_SECRET,
       );
 
       return event;
     } catch (error) {
-      console.error('Stripe webhook error:', error);
-      throw new AppError('Invalid webhook signature', 400);
+      console.error("Stripe webhook error:", error);
+      throw new AppError("Invalid webhook signature", 400);
     }
   }
 
@@ -221,14 +221,14 @@ class StripeService {
       const paymentMethods = await withDnsLookupOverride(() =>
         stripe.paymentMethods.list({
           customer: customerId,
-          type: 'card',
-        })
+          type: "card",
+        }),
       );
 
       return paymentMethods.data;
     } catch (error) {
-      console.error('Stripe getPaymentMethods error:', error);
-      throw new AppError('Failed to retrieve payment methods', 500);
+      console.error("Stripe getPaymentMethods error:", error);
+      throw new AppError("Failed to retrieve payment methods", 500);
     }
   }
 
@@ -242,8 +242,8 @@ class StripeService {
       const setupIntent = await withDnsLookupOverride(() =>
         stripe.setupIntents.create({
           customer: customerId,
-          payment_method_types: ['card'],
-        })
+          payment_method_types: ["card"],
+        }),
       );
 
       return {
@@ -251,8 +251,8 @@ class StripeService {
         setupIntentId: setupIntent.id,
       };
     } catch (error) {
-      console.error('Stripe createSetupIntent error:', error);
-      throw new AppError('Failed to create setup intent', 500);
+      console.error("Stripe createSetupIntent error:", error);
+      throw new AppError("Failed to create setup intent", 500);
     }
   }
 }
