@@ -20,7 +20,7 @@ const getAllProducts = async (req, res, next) => {
   try {
     const {
       cursor,
-      limit = 10,
+      limit = 24,
       category,
       search,
       inStock,
@@ -31,7 +31,7 @@ const getAllProducts = async (req, res, next) => {
       sort = "newest",
     } = req.query;
 
-    const limitInt = Math.min(100, parseInt(limit) || 10);
+    const limitInt = Math.min(100, parseInt(limit) || 24);
     const { field: sortField, order: sortOrder } =
       SORT_OPTIONS[sort] ?? SORT_OPTIONS.newest;
 

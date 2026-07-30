@@ -1,0 +1,4 @@
+- [ ] Understand current Button styles (light/dark) for variant="outline"
+- [ ] Update Button component so outline variant has correct dark-mode text color
+- [ ] Add/adjust dark:focus/hover classes for outline variant for contrast
+- [ ] Build/test (run lint/build) if available

@@ -8,7 +8,10 @@ const {
   sequelize,
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
-const emailService = require("../services/email/emailService");
+const emailService = require("../shared/services/email/emailService");
+
+// Thời gian giữ chỗ tồn kho (phút)
+const HOLD_MINUTES = 15;
 
 // Create order from cart
 const createOrder = async (req, res, next) => {
@@ -50,25 +53,6 @@ const createOrder = async (req, res, next) => {
       include: [
         {
           association: "items",
-          // include: [
-          //   {
-          //     model: Product,
-          //     attributes: [
-          //       "id",
-          //       "name",
-          //       "slug",
-          //       "price",
-          //       "thumbnail",
-          //       "inStock",
-          //       "stockQuantity",
-          //       "sku",
-          //     ],
-          //   },
-          //   {
-          //     model: ProductVariant,
-          //     attributes: ["id", "name", "price", "stockQuantity", "sku"],
-          //   },
-          // ],
         },
       ],
       transaction,
@@ -89,13 +73,13 @@ const createOrder = async (req, res, next) => {
       let variantProduct = null;
       targetModel = item.variantId
         ? await ProductVariant.findByPk(item.variantId, {
-            lock: transaction.LOCK.UPDATE,
-            transaction,
-          })
+          lock: transaction.LOCK.UPDATE,
+          transaction,
+        })
         : await Product.findByPk(item.productId, {
-            lock: transaction.LOCK.UPDATE,
-            transaction,
-          });
+          lock: transaction.LOCK.UPDATE,
+          transaction,
+        });
       if (item.variantId) variant = targetModel;
       if (variant) {
         variantProduct = await Product.findByPk(variant.productId, {
@@ -107,7 +91,7 @@ const createOrder = async (req, res, next) => {
       if (targetModel.stockQuantity < item.quantity)
         throw new AppError(
           `Sản phẩm ${targetModel.name} không đủ tồn kho (Còn: ${targetModel.stockQuantity})`,
-          400
+          400,
         );
 
       const itemPrice = targetModel.price;
@@ -139,7 +123,7 @@ const createOrder = async (req, res, next) => {
         targetModel.decrement("stockQuantity", {
           by: item.quantity,
           transaction,
-        })
+        }),
       );
     }
     const tax = 0;
@@ -185,14 +169,19 @@ const createOrder = async (req, res, next) => {
         billingPhone,
         paymentMethod,
         paymentStatus: "pending",
+        status: "pending",
         subtotal,
         tax,
         shippingCost,
         discount,
         total,
         notes,
+        // Giữ chỗ tồn kho tạm thời: 15 phút
+        // Sau khi Stripe thanh toán thành công -> expiresAt = null (chốt vĩnh viễn)
+        // Cleanup job sẽ hoàn kho nếu quá 15 phút mà chưa thanh toán
+        expiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
       },
-      { transaction }
+      { transaction },
     );
     const orderItemsWithId = orderItemsToCreate.map((item) => ({
       ...item,
@@ -205,7 +194,7 @@ const createOrder = async (req, res, next) => {
         {
           status: "converted",
         },
-        { transaction }
+        { transaction },
       ),
 
       // Clear cart items
@@ -217,12 +206,14 @@ const createOrder = async (req, res, next) => {
 
     await transaction.commit();
 
-    // Send order confirmation email
+    // Gửi email thông báo đơn hàng chờ thanh toán (SAU khi commit transaction)
+    // Email này không ảnh hưởng đến việc tạo đơn - nếu gửi lỗi chỉ log, không rollback
     try {
-      await emailService.sendOrderConfirmationEmail(req.user.email, {
+      await emailService.sendOrderPendingPaymentEmail(req.user.email, {
         orderNumber: order.number,
         orderDate: order.createdAt,
         total: order.total,
+        expiresAt: order.expiresAt,
         items: orderItemsToCreate.map((item) => {
           const variantName = item.attributes?.variant;
           const displayName = variantName
@@ -246,7 +237,8 @@ const createOrder = async (req, res, next) => {
         },
       });
     } catch (error) {
-      console.error("[email] order confirmation failed", {
+      // Email thất bại không ảnh hưởng đến đơn hàng đã tạo thành công
+      console.error("[email] order pending payment email failed", {
         orderId: order.id,
         orderNumber: order.number,
         email: req.user?.email,
@@ -451,7 +443,7 @@ const cancelOrder = async (req, res, next) => {
       {
         status: "cancelled",
       },
-      { transaction }
+      { transaction },
     );
 
     // Restore stock
@@ -462,7 +454,7 @@ const cancelOrder = async (req, res, next) => {
           {
             stockQuantity: variant.stockQuantity + item.quantity,
           },
-          { transaction }
+          { transaction },
         );
       } else {
         const product = item.Product;
@@ -470,7 +462,7 @@ const cancelOrder = async (req, res, next) => {
           {
             stockQuantity: product.stockQuantity + item.quantity,
           },
-          { transaction }
+          { transaction },
         );
       }
     }

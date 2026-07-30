@@ -1107,13 +1107,744 @@ Laptop MSI Modern 14 C12MO-660VN đã có mặt tại cửa hàng CellphoneS, đ
       },
     ],
   },
+
+  // === PHONES (ÄIá»†N THOáº I) ===
+  {
+    name: 'iPhone 15 128GB',
+    shortDescription: 'iPhone 15 máº¡nh máº½, camera 48MP, Dynamic Island',
+    description:
+      'iPhone 15 vá»›i thiáº¿t káº¿ cao cáº¥p, camera chĂ­nh 48MP, hiá»‡u nÄƒng máº¡nh, há»— trá»£ USB-C. SÆ¡n má»›i, trÆ°ng bĂ y má»›i, thá»i lÆ°á»£ng pin cáº£i thiá»‡n.',
+    price: 22990000,
+    compareAtPrice: 25990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n thoáº¡i',
+    tags: ['apple', 'iphone', '15', 'smartphone'],
+    status: 'active',
+    featured: true,
+    brand: 'Apple',
+    model: 'iPhone 15',
+    condition: 'new',
+    specifications: {
+      display: '6.1 inch OLED',
+      camera: '48MP main',
+      connectivity: '5G, Wi-Fi 6, Bluetooth',
+      ports: 'USB-C',
+    },
+    attributes: [
+      { name: 'Bá»˜ NHá»', values: ['128GB', '256GB', '512GB'] },
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'Blue', 'Green', 'Pink'] },
+    ],
+    variants: [
+      {
+        name: '128GB - Black',
+        displayName: '128GB - Äen',
+        attributes: { 'Bá»˜ NHá»': '128GB', 'MĂ€U Sáº®C': 'Black' },
+        price: 22990000,
+        stock: 12,
+        isDefault: true,
+      },
+      {
+        name: '256GB - Blue',
+        displayName: '256GB - Xanh',
+        attributes: { 'Bá»˜ NHá»': '256GB', 'MĂ€U Sáº®C': 'Blue' },
+        price: 25990000,
+        stock: 8,
+      },
+      {
+        name: '512GB - Green',
+        displayName: '512GB - Xanh lĂ¡',
+        attributes: { 'Bá»˜ NHá»': '512GB', 'MĂ€U Sáº®C': 'Green' },
+        price: 30990000,
+        stock: 4,
+      },
+    ],
+  },
+  {
+    name: 'Samsung Galaxy S24 Ultra 256GB',
+    shortDescription: 'Flagship camera zoom, mĂ n hĂ¬nh lá»›n, bĂºt S-Pen',
+    description:
+      'Galaxy S24 Ultra táº­p trung vĂ o camera zoom, hiá»‡u nÄƒng cao vá»›i thiáº¿t káº¿ cao cáº¥p, há»— trá»£ bĂºt S-Pen vĂ  mĂ n hĂ¬nh sĂ¡ng rá»±c.',
+    price: 30990000,
+    compareAtPrice: 34990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n thoáº¡i',
+    tags: ['samsung', 'galaxy', 's24', 'ultra'],
+    status: 'active',
+    featured: true,
+    brand: 'Samsung',
+    model: 'Galaxy S24 Ultra',
+    condition: 'new',
+    specifications: {
+      display: '6.8 inch AMOLED',
+      battery: '5000mAh',
+      connectivity: '5G, Wi-Fi, Bluetooth',
+    },
+    attributes: [
+      { name: 'Bá»˜ NHá»', values: ['256GB', '512GB', '1TB'] },
+      { name: 'MĂ€U Sáº®C', values: ['Titanium Black', 'Titanium Gray'] },
+    ],
+    variants: [
+      {
+        name: '256GB - Titanium Black',
+        displayName: '256GB - Äen Titan',
+        attributes: { 'Bá»˜ NHá»': '256GB', 'MĂ€U Sáº®C': 'Titanium Black' },
+        price: 30990000,
+        stock: 10,
+        isDefault: true,
+      },
+      {
+        name: '512GB - Titanium Gray',
+        displayName: '512GB - XĂ¡m Titan',
+        attributes: { 'Bá»˜ NHá»': '512GB', 'MĂ€U Sáº®C': 'Titanium Gray' },
+        price: 34990000,
+        stock: 6,
+      },
+    ],
+  },
+  {
+    name: 'Xiaomi 14 12GB/256GB',
+    shortDescription: 'Hiá»‡u nÄƒng cao, sạc nhanh, camera nĂ©t',
+    description:
+      'Xiaomi 14 mang láº¡i tráº£i nghiá»‡m mÆ°á»£t mĂ  vĂ  mĂ n hĂ¬nh sĂ¡ng; sạc nhanh vĂ  camera cháº¥t lÆ°á»£ng cao phĂ¹ há»£p nhu cáº§u hĂ ng ngĂ y.',
+    price: 15990000,
+    compareAtPrice: 17990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n thoáº¡i',
+    tags: ['xiaomi', 'smartphone', 'android'],
+    status: 'active',
+    featured: false,
+    brand: 'Xiaomi',
+    model: 'Xiaomi 14',
+    condition: 'new',
+    specifications: {
+      ram: '12GB',
+      storage: '256GB',
+      battery: '4600mAh',
+    },
+    attributes: [
+      { name: 'RAM', values: ['12GB', '16GB'] },
+      { name: 'á»” Cá»¨NG', values: ['256GB', '512GB'] },
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'White', 'Green'] },
+    ],
+    variants: [
+      {
+        name: '12GB - 256GB - Black',
+        displayName: '12GB - 256GB - Äen',
+        attributes: { RAM: '12GB', 'á»” Cá»¨NG': '256GB', 'MĂ€U Sáº®C': 'Black' },
+        price: 15990000,
+        stock: 14,
+        isDefault: true,
+      },
+      {
+        name: '16GB - 512GB - Green',
+        displayName: '16GB - 512GB - Xanh',
+        attributes: { RAM: '16GB', 'á»” Cá»¨NG': '512GB', 'MĂ€U Sáº®C': 'Green' },
+        price: 18990000,
+        stock: 5,
+      },
+    ],
+  },
+  {
+    name: 'OPPO Reno 11 8GB/256GB',
+    shortDescription: 'Thiáº¿t káº¿ tráº» trung, selfie Ä‘áº¹p, sạc nhanh',
+    description:
+      'OPPO Reno 11 táº­p trung vĂ o camera chĂ¢n dung vĂ  thiáº¿t káº¿ tráº» trung, sạc nhanh, mĂ n hĂ¬nh sĂ¡ng vĂ  mÆ°á»£t.',
+    price: 9990000,
+    compareAtPrice: 10990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n thoáº¡i',
+    tags: ['oppo', 'reno', 'smartphone'],
+    status: 'active',
+    featured: false,
+    brand: 'OPPO',
+    model: 'Reno 11',
+    condition: 'new',
+    specifications: {
+      ram: '8GB',
+      storage: '256GB',
+      charging: 'Fast charge',
+    },
+    attributes: [
+      { name: 'RAM', values: ['8GB', '12GB'] },
+      { name: 'á»” Cá»¨NG', values: ['256GB'] },
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'Blue'] },
+    ],
+    variants: [
+      {
+        name: '8GB - 256GB - Black',
+        displayName: '8GB - 256GB - Äen',
+        attributes: { RAM: '8GB', 'á»” Cá»¨NG': '256GB', 'MĂ€U Sáº®C': 'Black' },
+        price: 9990000,
+        stock: 20,
+        isDefault: true,
+      },
+      {
+        name: '12GB - 256GB - Blue',
+        displayName: '12GB - 256GB - Xanh',
+        attributes: { RAM: '12GB', 'á»” Cá»¨NG': '256GB', 'MĂ€U Sáº®C': 'Blue' },
+        price: 10990000,
+        stock: 9,
+      },
+    ],
+  },
+
+  // === SHOES (GIĂ€Y DĂ‰P) ===
+  {
+    name: 'GiĂ y Sneaker Classic Runner',
+    shortDescription: 'Sneaker thá»ƒ thao thá»i trang, Ä‘áº¿ Ãªm, dĂ¹ng hĂ ng ngĂ y',
+    description:
+      'MĂ£u sneaker cá»• tháº¥p dá»… phá»‘i Ä‘á»“. Cháº¥t liá»‡u da PU/káº¿t há»£p váº£i, Ä‘áº¿ cao su bĂ¡m tá»‘t.',
+    price: 690000,
+    compareAtPrice: 890000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+    ],
+    category: 'GiĂ y dĂ©p',
+    tags: ['sneaker', 'runner', 'shoes'],
+    status: 'active',
+    featured: false,
+    brand: 'UrbanStep',
+    model: 'Classic Runner',
+    condition: 'new',
+    specifications: { material: 'PU + Mesh', sole: 'Rubber', weight: 'Light' },
+    attributes: [
+      { name: 'SIZE', values: ['38', '39', '40', '41', '42', '43'] },
+      { name: 'MĂ€U Sáº®C', values: ['White', 'Black', 'Gray'] },
+    ],
+    variants: [
+      {
+        name: 'Size 40 - White',
+        displayName: '40 - Tráº¯ng',
+        attributes: { SIZE: '40', 'MĂ€U Sáº®C': 'White' },
+        price: 690000,
+        stock: 30,
+        isDefault: true,
+      },
+      {
+        name: 'Size 42 - Black',
+        displayName: '42 - Äen',
+        attributes: { SIZE: '42', 'MĂ€U Sáº®C': 'Black' },
+        price: 690000,
+        stock: 22,
+      },
+      {
+        name: 'Size 43 - Gray',
+        displayName: '43 - XĂ¡m',
+        attributes: { SIZE: '43', 'MĂ€U Sáº®C': 'Gray' },
+        price: 690000,
+        stock: 12,
+      },
+    ],
+  },
+  {
+    name: 'GiĂ y TĂ¢y Oxford Leather',
+    shortDescription: 'GiĂ y tĂ¢y da Oxford, form Ä‘áº¹p, phĂ¹ há»£p Ä‘i lĂ m',
+    description:
+      'GiĂ y tĂ¢y Oxford cháº¥t liá»‡u da bĂ², form chuáº©n, Ä‘áº¿ chá»‘ng trÆ°á»£t. PhĂ¹ há»£p Ä‘i lĂ m, dá»± tiá»‡c.',
+    price: 1250000,
+    compareAtPrice: 1490000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1542393545-10f5cde2c810?w=800&h=800&fit=crop',
+    ],
+    category: 'GiĂ y dĂ©p',
+    tags: ['oxford', 'leather', 'formal'],
+    status: 'active',
+    featured: false,
+    brand: 'LeatherWorks',
+    model: 'Oxford',
+    condition: 'new',
+    specifications: { material: 'Genuine leather', sole: 'TPR', color: 'Brown/Black' },
+    attributes: [
+      { name: 'SIZE', values: ['39', '40', '41', '42', '43'] },
+      { name: 'MĂ€U Sáº®C', values: ['Brown', 'Black'] },
+    ],
+    variants: [
+      {
+        name: 'Size 41 - Brown',
+        displayName: '41 - NĂ¢u',
+        attributes: { SIZE: '41', 'MĂ€U Sáº®C': 'Brown' },
+        price: 1250000,
+        stock: 15,
+        isDefault: true,
+      },
+      {
+        name: 'Size 42 - Black',
+        displayName: '42 - Äen',
+        attributes: { SIZE: '42', 'MĂ€U Sáº®C': 'Black' },
+        price: 1250000,
+        stock: 11,
+      },
+    ],
+  },
+  {
+    name: 'DĂ©p Sandal Cloud',
+    shortDescription: 'DĂ©p Ä‘i trong nhĂ /Ä‘i chÆ¡i, Ä‘áº¿ Äªm, nháº¹',
+    description:
+      'DĂ©p sandal Ä‘áº¿ Ãªm (cloud), nháº¹, chá»‘ng trÆ°á»£t, thá»i trang. PhĂ¹ há»£p Ä‘i chÆ¡i, Ä‘i biá»ƒn.',
+    price: 190000,
+    compareAtPrice: 290000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1484788984921-03950022c9ef?w=800&h=800&fit=crop',
+    ],
+    category: 'GiĂ y dĂ©p',
+    tags: ['sandal', 'slides', 'summer'],
+    status: 'active',
+    featured: false,
+    brand: 'Comfy',
+    model: 'Cloud Sandal',
+    condition: 'new',
+    specifications: { material: 'EVA', sole: 'Anti-slip', care: 'Easy clean' },
+    attributes: [
+      { name: 'SIZE', values: ['36', '37', '38', '39', '40', '41', '42'] },
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'Cream'] },
+    ],
+    variants: [
+      {
+        name: 'Size 38 - Cream',
+        displayName: '38 - Kem',
+        attributes: { SIZE: '38', 'MĂ€U Sáº®C': 'Cream' },
+        price: 190000,
+        stock: 40,
+        isDefault: true,
+      },
+      {
+        name: 'Size 41 - Black',
+        displayName: '41 - Äen',
+        attributes: { SIZE: '41', 'MĂ€U Sáº®C': 'Black' },
+        price: 190000,
+        stock: 27,
+      },
+    ],
+  },
+
+  // === FASHION (THá»I TRANG) ===
+  {
+    name: 'Ăo Thun NÆ°á»¯ Oversize Basic',
+    shortDescription: 'Ăo thun oversize, cotton co giĂ£n, dá»… phá»‘i',
+    description:
+      'Ăo thun nÆ°á»¯ oversize basic, cotton mÆ°á»£t, thĂ´ng thoĂ¡ng. PhĂ¹ há»£p Ä‘i chÆ¡i vĂ  Ä‘i lĂ m.',
+    price: 199000,
+    compareAtPrice: 299000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&h=800&fit=crop',
+    ],
+    category: 'Thá»i trang ná»¯',
+    tags: ['ao-thun', 'oversize', 'women'],
+    status: 'active',
+    featured: false,
+    brand: 'DailyWear',
+    model: 'Oversize Tee',
+    condition: 'new',
+    specifications: { material: 'Cotton', fit: 'Oversize', care: 'Machine wash' },
+    attributes: [
+      { name: 'SIZE', values: ['S', 'M', 'L', 'XL'] },
+      { name: 'MĂ€U Sáº®C', values: ['White', 'Black', 'Beige'] },
+    ],
+    variants: [
+      {
+        name: 'M - White',
+        displayName: 'M - Tráº¯ng',
+        attributes: { SIZE: 'M', 'MĂ€U Sáº®C': 'White' },
+        price: 199000,
+        stock: 50,
+        isDefault: true,
+      },
+      {
+        name: 'L - Black',
+        displayName: 'L - Äen',
+        attributes: { SIZE: 'L', 'MĂ€U Sáº®C': 'Black' },
+        price: 199000,
+        stock: 35,
+      },
+    ],
+  },
+  {
+    name: 'VĂ¡y Midi Hoa NhĂ­',
+    shortDescription: 'VĂ¡y midi hoa nhĂ­, dá»… thÆ°Æ¡ng, táº¡o dĂ¡ng',
+    description:
+      'VĂ¡y midi hoa nhĂ­ nháº¹ nhĂ ng, form dá»… máº·c, phĂ¹ há»£p Ä‘i chÆ¡i vĂ  dáº¡o phá»‘.',
+    price: 349000,
+    compareAtPrice: 459000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=800&fit=crop',
+    ],
+    category: 'Thá»i trang ná»¯',
+    tags: ['vay', 'midi', 'floral', 'women'],
+    status: 'active',
+    featured: false,
+    brand: 'Bloom',
+    model: 'Floral Midi',
+    condition: 'new',
+    specifications: { material: 'Chiffon', lining: 'Yes', length: 'Midi' },
+    attributes: [
+      { name: 'SIZE', values: ['S', 'M', 'L'] },
+      { name: 'MĂ€U Sáº®C', values: ['Pink', 'Blue'] },
+    ],
+    variants: [
+      {
+        name: 'S - Pink',
+        displayName: 'S - Há»“ng',
+        attributes: { SIZE: 'S', 'MĂ€U Sáº®C': 'Pink' },
+        price: 349000,
+        stock: 18,
+        isDefault: true,
+      },
+      {
+        name: 'M - Blue',
+        displayName: 'M - Xanh',
+        attributes: { SIZE: 'M', 'MĂ€U Sáº®C': 'Blue' },
+        price: 349000,
+        stock: 12,
+      },
+    ],
+  },
+  {
+    name: 'Ăo SÆ¡ Mi Nam Slimfit',
+    shortDescription: 'SÆ¡ mi nam slimfit, vải thoĂ¡ng, Ä‘i lĂ m Ä‘áº¹p',
+    description:
+      'Ăo sÆ¡ mi nam slimfit, cháº¥t liá»‡u mÆ°á»£t, thĂ´ng thoĂ¡ng, phĂ¹ há»£p Ä‘i lĂ m vĂ  dá»± tiá»‡c.',
+    price: 279000,
+    compareAtPrice: 399000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&h=800&fit=crop',
+    ],
+    category: 'Thá»i trang nam',
+    tags: ['so-mi', 'slimfit', 'men'],
+    status: 'active',
+    featured: false,
+    brand: 'OfficeMan',
+    model: 'Slimfit Shirt',
+    condition: 'new',
+    specifications: { material: 'Poly-cotton', fit: 'Slim', sleeve: 'Long' },
+    attributes: [
+      { name: 'SIZE', values: ['M', 'L', 'XL', '2XL'] },
+      { name: 'MĂ€U Sáº®C', values: ['White', 'Navy'] },
+    ],
+    variants: [
+      {
+        name: 'L - White',
+        displayName: 'L - Tráº¯ng',
+        attributes: { SIZE: 'L', 'MĂ€U Sáº®C': 'White' },
+        price: 279000,
+        stock: 25,
+        isDefault: true,
+      },
+      {
+        name: 'XL - Navy',
+        displayName: 'XL - Xanh Ä‘áº­m',
+        attributes: { SIZE: 'XL', 'MĂ€U Sáº®C': 'Navy' },
+        price: 279000,
+        stock: 16,
+      },
+    ],
+  },
+  {
+    name: 'Quáº§n Jeans Nam Straight',
+    shortDescription: 'Jeans nam form straight, co giĂ£n nháº¹',
+    description:
+      'Quáº§n jeans nam form straight, co giĂ£n nháº¹, dá»… phá»‘i Ä‘á»“. PhĂ¹ há»£p Ä‘i lĂ m vĂ  Ä‘i chÆ¡i.',
+    price: 399000,
+    compareAtPrice: 549000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=800&fit=crop',
+    ],
+    category: 'Thá»i trang nam',
+    tags: ['jeans', 'straight', 'men'],
+    status: 'active',
+    featured: false,
+    brand: 'DenimLab',
+    model: 'Straight Jeans',
+    condition: 'new',
+    specifications: { material: 'Denim', fit: 'Straight', stretch: '2%' },
+    attributes: [
+      { name: 'SIZE', values: ['29', '30', '31', '32', '33', '34'] },
+      { name: 'MĂ€U Sáº®C', values: ['Blue', 'Black'] },
+    ],
+    variants: [
+      {
+        name: 'Size 31 - Blue',
+        displayName: '31 - Xanh',
+        attributes: { SIZE: '31', 'MĂ€U Sáº®C': 'Blue' },
+        price: 399000,
+        stock: 20,
+        isDefault: true,
+      },
+      {
+        name: 'Size 32 - Black',
+        displayName: '32 - Äen',
+        attributes: { SIZE: '32', 'MĂ€U Sáº®C': 'Black' },
+        price: 399000,
+        stock: 14,
+      },
+    ],
+  },
+
+  // === ELECTRONICS (ÄIá»†N Tá»¬) ===
+  {
+    name: 'Tai nghe Bluetooth ANC Pro',
+    shortDescription: 'Tai nghe chĂ´ng á»“n (ANC), pin trĂ¢u, Ä‘eo Ãªm',
+    description:
+      'Tai nghe Bluetooth chá»‘ng á»“n ANC, Ä‘eo Ãªm, mic rõ. PhĂ¹ há»£p lĂ m viá»‡c vĂ  du lá»‹ch.',
+    price: 1290000,
+    compareAtPrice: 1690000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n tá»­',
+    tags: ['headphones', 'bluetooth', 'anc'],
+    status: 'active',
+    featured: false,
+    brand: 'SoundMax',
+    model: 'ANC Pro',
+    condition: 'new',
+    specifications: { battery: '30h', connectivity: 'Bluetooth 5.3', audio: 'Hi-Res' },
+    attributes: [
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'White'] },
+      { name: 'PHIĂŠN Báº¢N', values: ['Standard', 'Plus'] },
+    ],
+    variants: [
+      {
+        name: 'Standard - Black',
+        displayName: 'Standard - Äen',
+        attributes: { 'PHIĂŠN Báº¢N': 'Standard', 'MĂ€U Sáº®C': 'Black' },
+        price: 1290000,
+        stock: 18,
+        isDefault: true,
+      },
+      {
+        name: 'Plus - White',
+        displayName: 'Plus - Tráº¯ng',
+        attributes: { 'PHIĂŠN Báº¢N': 'Plus', 'MĂ€U Sáº®C': 'White' },
+        price: 1490000,
+        stock: 10,
+      },
+    ],
+  },
+  {
+    name: 'Smartwatch Fit 2',
+    shortDescription: 'Äá»“ng há»“ thá»ƒ thao, theo dĂµi sá»©c khoáº», pin lĂ¢u',
+    description:
+      'Smartwatch Fit 2 theo dĂµi nhá»‹p tim, giấc ngá»§, cháº¡y bá»™, thĂ´ng bĂ¡o. Pin bền cho nhu cáº§u thá»ƒ thao vĂ  cá»‘ng viá»‡c.',
+    price: 1590000,
+    compareAtPrice: 1990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n tá»­',
+    tags: ['smartwatch', 'fitness'],
+    status: 'active',
+    featured: false,
+    brand: 'FitTime',
+    model: 'Fit 2',
+    condition: 'new',
+    specifications: { battery: '10 days', water: '5ATM', sensors: 'HR, SpO2' },
+    attributes: [
+      { name: 'MĂ€U Sáº®C', values: ['Black', 'Pink', 'Blue'] },
+      { name: 'DĂ‚Y', values: ['Silicone', 'Nylon'] },
+    ],
+    variants: [
+      {
+        name: 'Silicone - Black',
+        displayName: 'Silicone - Äen',
+        attributes: { 'DĂ‚Y': 'Silicone', 'MĂ€U Sáº®C': 'Black' },
+        price: 1590000,
+        stock: 22,
+        isDefault: true,
+      },
+      {
+        name: 'Nylon - Pink',
+        displayName: 'Nylon - Há»“ng',
+        attributes: { 'DĂ‚Y': 'Nylon', 'MĂ€U Sáº®C': 'Pink' },
+        price: 1690000,
+        stock: 9,
+      },
+    ],
+  },
+  {
+    name: 'TV 4K 55 inch Smart',
+    shortDescription: 'Smart TV 4K 55", HDR, Ä‘á»™ sĂ¡ng cao',
+    description:
+      'Smart TV 4K 55 inch há»— trá»£ HDR, giao diá»‡n thĂ´ng minh, káº¿t ná»‘i Wi-Fi/Bluetooth. PhĂ¹ há»£p phĂ²ng khĂ¡ch.',
+    price: 10990000,
+    compareAtPrice: 12990000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=800&fit=crop',
+    ],
+    category: 'Äiá»‡n tá»­',
+    tags: ['tv', '4k', 'smart'],
+    status: 'active',
+    featured: false,
+    brand: 'ViewPlus',
+    model: '4K Smart TV',
+    condition: 'new',
+    specifications: { display: '4K UHD', hdr: 'HDR10', sound: '20W' },
+    attributes: [
+      { name: 'KĂCH THÆ¯á»C', values: ['43"', '55"', '65"'] },
+      { name: 'PHIĂŠN Báº¢N', values: ['Standard', 'Pro'] },
+    ],
+    variants: [
+      {
+        name: '55\" - Standard',
+        displayName: '55\" - Standard',
+        attributes: { 'KĂCH THÆ¯á»C': '55"', 'PHIĂŠN Báº¢N': 'Standard' },
+        price: 10990000,
+        stock: 7,
+        isDefault: true,
+      },
+      {
+        name: '65\" - Pro',
+        displayName: '65\" - Pro',
+        attributes: { 'KĂCH THÆ¯á»C': '65"', 'PHIĂŠN Báº¢N': 'Pro' },
+        price: 14990000,
+        stock: 3,
+      },
+    ],
+  },
+
+  // === CARS (Ă” TĂ” ) ===
+  {
+    name: 'Toyota Corolla Cross 1.8G',
+    shortDescription: 'Crossover gia Ä‘Ă¬nh tiáº¿t kiá»‡m, dá»… lái',
+    description:
+      'Corolla Cross phĂ¹ há»£p gia Ä‘Ă¬nh: khĂ´ng gian rá»™ng, tiáº¿t kiá»‡m nhiĂªn liá»‡u, trang bá»‹ an toĂ n cá»¡ báº£n.',
+    price: 820000000,
+    compareAtPrice: 850000000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+    ],
+    category: 'Ă” tĂ´',
+    tags: ['toyota', 'corolla', 'cross', 'car'],
+    status: 'active',
+    featured: false,
+    brand: 'Toyota',
+    model: 'Corolla Cross 1.8G',
+    condition: 'new',
+    specifications: { engine: '1.8L', transmission: 'CVT', fuel: 'Gasoline' },
+    attributes: [
+      { name: 'MĂ€U Sáº®C', values: ['White', 'Black', 'Red'] },
+      { name: 'PHIĂŠN Báº¢N', values: ['1.8G', '1.8V'] },
+    ],
+    variants: [
+      {
+        name: '1.8G - White',
+        displayName: '1.8G - Tráº¯ng',
+        attributes: { 'PHIĂŠN Báº¢N': '1.8G', 'MĂ€U Sáº®C': 'White' },
+        price: 820000000,
+        stock: 2,
+        isDefault: true,
+      },
+      {
+        name: '1.8V - Black',
+        displayName: '1.8V - Äen',
+        attributes: { 'PHIĂŠN Báº¢N': '1.8V', 'MĂ€U Sáº®C': 'Black' },
+        price: 880000000,
+        stock: 1,
+      },
+    ],
+  },
+  {
+    name: 'Kia Seltos 1.4 Turbo',
+    shortDescription: 'SUV Ä‘Ă´ thá»‹, Ä‘á»™ng cÆ¡ turbo, trang bá»‹ nhiá»u',
+    description:
+      'Kia Seltos 1.4 Turbo mang láº¡i cáº£m giĂ¡c lái bá»‘c, tiá»‡n nghi vĂ  nhiá»u trang bá»‹ an toĂ n.',
+    price: 730000000,
+    compareAtPrice: 760000000,
+    thumbnail:
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=400&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&h=800&fit=crop',
+    ],
+    category: 'Ă” tĂ´',
+    tags: ['kia', 'seltos', 'suv', 'car'],
+    status: 'active',
+    featured: false,
+    brand: 'Kia',
+    model: 'Seltos 1.4 Turbo',
+    condition: 'new',
+    specifications: { engine: '1.4 Turbo', transmission: 'DCT', fuel: 'Gasoline' },
+    attributes: [
+      { name: 'MĂ€U Sáº®C', values: ['Orange', 'White', 'Gray'] },
+      { name: 'DáºªN Äá»˜NG', values: ['FWD', 'AWD'] },
+    ],
+    variants: [
+      {
+        name: 'FWD - Orange',
+        displayName: 'FWD - Cam',
+        attributes: { 'DáºªN Äá»˜NG': 'FWD', 'MĂ€U Sáº®C': 'Orange' },
+        price: 730000000,
+        stock: 2,
+        isDefault: true,
+      },
+      {
+        name: 'AWD - Gray',
+        displayName: 'AWD - XĂ¡m',
+        attributes: { 'DáºªN Äá»˜NG': 'AWD', 'MĂ€U Sáº®C': 'Gray' },
+        price: 790000000,
+        stock: 1,
+      },
+    ],
+  },
 ];
 
 async function importProducts() {
   try {
     //console.log('🚀 Bắt đầu import sản phẩm...');
 
-rere    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new DBs.
+    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new DBs.
     if (process.env.RESET_BEFORE_IMPORT === 'true') {
       // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
       await OrderItem.destroy({ where: {} });
@@ -1154,7 +1885,15 @@ rere    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new D
       { name: 'Điện tử', slug: 'dien-tu', description: 'Thiết bị điện tử' },
     ];
 
-    const createdCategories = await Category.bulkCreate(categories);
+    // Create categories idempotently (avoid unique constraint on slug)
+    const createdCategories = [];
+    for (const categoryData of categories) {
+      const [category] = await Category.findOrCreate({
+        where: { slug: categoryData.slug },
+        defaults: categoryData,
+      });
+      createdCategories.push(category);
+    }
     //console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
 
     // Tạo products với attributes và variants
@@ -1165,6 +1904,16 @@ rere    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new D
       );
 
       // Tạo product
+      // Skip if product already exists (safe to re-run on production)
+      const existingProduct = await Product.findOne({
+        where: { name: productData.name },
+        attributes: ['id'],
+      });
+      if (existingProduct) {
+        console.log(`â­ Bá» qua (Ä‘Ă£ tá»“n táº¡i): ${productData.name}`);
+        continue;
+      }
+
       const product = await Product.create({
         name: productData.name,
         description: productData.description,

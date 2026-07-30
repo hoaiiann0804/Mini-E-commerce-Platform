@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:15
+    container_name: e-commerce-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+      POSTGRES_DB: ${DB_NAME:-websitebanhangmini}
+    mem_limit: 1g
+    cpus: 0.5
+    ports:
+      - "6000:5432"
+    volumes:
+      - pgdata_ecommerce:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: ../../be
+      dockerfile: Dockerfile
+    container_name: e-commerce-web
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    env_file:
+      # Keep secrets out of this file; put them in be/.env if needed.
+      - ../../ops/env/.env.prod.local
+      # Optionally load existing app secrets/config (JWT, Stripe, etc.)
+      - ../../be/.env
+    environment:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: e-commerce-pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgdata_ecommerce:
+    name: e-commrcemini_pgdata_ecommerce
+  pgadmin_data:

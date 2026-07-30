@@ -1,6 +1,6 @@
 const sequelize = require("../config/sequelize");
 
-const User = require("./user");
+const User = require("../modules/user/user.model");
 const Address = require("./address");
 const Category = require("./category");
 const Product = require("./product");
@@ -21,11 +21,15 @@ const AttributeGroup = require("./attributeGroup");
 const AttributeValue = require("./attributeValue");
 const ProductAttributeGroup = require("./productAttributeGroup");
 const Image = require("./image");
+const RefreshToken = require("./refreshToken");
 
 // User - Address relationship
 User.hasMany(Address, { foreignKey: "userId", as: "addresses" });
 Address.belongsTo(User, { foreignKey: "userId" });
 
+// User - RefreshToken relationShip
+User.hasMany(RefreshToken, { foreignKey: "userId", as: "refreshTokens" });
+RefreshToken.belongsTo(User, { foreignKey: "userId", as: "users" });
 // Category - Category (self-referencing) relationship
 Category.hasMany(Category, { foreignKey: "parentId", as: "children" });
 Category.belongsTo(Category, { foreignKey: "parentId", as: "parent" });
@@ -218,4 +222,5 @@ module.exports = {
   AttributeValue,
   ProductAttributeGroup,
   Image,
+  RefreshToken,
 };

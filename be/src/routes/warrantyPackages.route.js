@@ -6,7 +6,7 @@ const {
   deleteWarrantyPackage,
   getWarrantyPackageById,
   getWarrantyPackagesByProduct,
-} = require('../controllers/warrantyPackageController');
+} = require('../controllers/warrantyPackage.controller');
 const { authenticate } = require('../middlewares/authenticate');
 const { adminAuthenticate } = require('../middlewares/adminAuth');
 

@@ -33,11 +33,12 @@ const ShopPage: React.FC = () => {
     ? Number(searchParams.get("maxPrice"))
     : undefined;
   const sort = (searchParams.get("sort") as ProductFilters["sort"]) || "newest";
-  const limit = 12;
+  const limit = 24;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -102,6 +103,7 @@ const ShopPage: React.FC = () => {
   const fetchProductsPage = useCallback(
     async (cursor?: string | null) => {
       try {
+        setLoadMoreError(null);
         const result = await triggerGetProducts({
           ...baseFilters,
           cursor: cursor || undefined,
@@ -118,7 +120,11 @@ const ShopPage: React.FC = () => {
         return true;
       } catch {
         setInitialLoadDone(true);
-        setNextCursor(null);
+        if (cursor) {
+          setLoadMoreError("Không thể tải thêm sản phẩm. Vui lòng thử lại.");
+        } else {
+          setNextCursor(null);
+        }
         return false;
       }
     },
@@ -128,6 +134,7 @@ const ShopPage: React.FC = () => {
   const resetAndFetchFirstPage = useCallback(async () => {
     setProducts([]);
     setNextCursor(null);
+    setLoadMoreError(null);
     setInitialLoadDone(false);
     await fetchProductsPage(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -523,6 +530,9 @@ const ShopPage: React.FC = () => {
                 <div className="mt-10 flex flex-col items-center gap-4">
                   {nextCursor ? (
                     <>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Đã tải {products.length} sản phẩm
+                      </p>
                       <PremiumButton
                         variant="outline"
                         size="large"
@@ -531,6 +541,21 @@ const ShopPage: React.FC = () => {
                       >
                         {isLoadingMore ? "Loading..." : "Load more"}
                       </PremiumButton>
+                      {loadMoreError && !isLoadingMore && (
+                        <div className="text-center">
+                          <p className="text-sm text-red-600 dark:text-red-400 mb-2">
+                            {loadMoreError}
+                          </p>
+                          <PremiumButton
+                            variant="primary"
+                            size="large"
+                            onClick={handleLoadMore}
+                            disabled={getProductsState.isFetching}
+                          >
+                            Thử lại
+                          </PremiumButton>
+                        </div>
+                      )}
                       <div ref={sentinelRef} className="h-1 w-full" />
                       {(isLoadingMore || getProductsState.isFetching) && (
                         <div className="py-2">

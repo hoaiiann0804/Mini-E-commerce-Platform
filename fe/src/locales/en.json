@@ -210,24 +210,53 @@
   },
   "chat": {
     "title": "AI Shopping Assistant",
+    "subtitle": "AI Shopping Assistant",
     "greeting": "Hello! I'm your AI shopping assistant. How can I help you today?",
     "greetingWithName": "Hello {{name}}! I'm your AI shopping assistant. How can I help you today?",
     "typing": "Typing...",
     "placeholder": "Need any help?",
     "typeSomething": "Type your question...",
     "send": "Send",
+    "poweredBy": "Powered by",
+    "confirmClear": "Are you sure you want to clear this conversation?",
+    "helpPrompt": "I need help using the chatbot",
     "openChat": "Open chat",
     "closeChat": "Close chat",
     "close": "Close",
     "expand": "Expand",
     "minimize": "Minimize",
+    "actions": {
+      "clearChat": "Clear chat",
+      "help": "Help"
+    },
+    "status": {
+      "geminiAI": "Gemini AI",
+      "smartMode": "Smart Mode",
+      "demoMode": "Demo Mode",
+      "limited": "Limited"
+    },
     "suggestions": {
+      "continueDemo": "Continue in demo mode",
       "findProducts": "Find new products",
       "viewPromotions": "View promotions",
       "howToOrder": "How to order",
       "returnPolicy": "Return policy",
       "tryAgain": "Try again",
       "contactSupport": "Contact support"
+    },
+    "quickReplies": {
+      "viewTshirts": "View t-shirts",
+      "viewJeans": "View jeans",
+      "viewSneakers": "View sneakers",
+      "searchOtherProducts": "Search other products",
+      "paymentMethods": "Payment methods",
+      "shippingFee": "Shipping fee",
+      "deliveryTime": "Delivery time",
+      "discountCode": "Discount code",
+      "exchangeReturnProcess": "Exchange/return process",
+      "refundHow": "How refunds work",
+      "defectiveProduct": "Defective product",
+      "contactCustomerService": "Contact customer support"
     },
     "responses": {
       "productSearch": "I found some products matching \"{{query}}\". You might be interested in:\n\n1. Unisex cotton t-shirt - $12.99\n2. Slim fit jeans - $24.99\n3. Sports sneakers - $34.99\n\nWhich product would you like to see details for?",
@@ -240,8 +269,15 @@
       "timeout": "Request took too long. Using sample response.",
       "notFound": "Cannot connect to AI service. Using sample response.",
       "tooManyRequests": "Too many requests. Please try again in a few minutes.",
-      "serverError": "AI service is temporarily unavailable. Please try again later."
+      "serverError": "AI service is temporarily unavailable. Please try again later.",
+      "demoFallbackMessage": "⚠️ {{error}}\n\nSwitching to demo mode. You can keep chatting, but you'll receive sample responses."
     }
+  },
+  "address": {
+    "address": "Address",
+    "province": "Province / City",
+    "ward": "Ward / Commune",
+    "country": "Country"
   },
   "common": {
     "loading": "Loading...",
@@ -304,6 +340,9 @@
 
   "checkout": {
     "title": "Checkout",
+    "selectAddress": "Select address",
+    "useCustomAddress": "Use custom address",
+    "manageAddresses": "Manage addresses",
     "emptyCart": {
       "title": "Your cart is empty",
       "message": "Add some items to your cart before proceeding to checkout.",
@@ -419,6 +458,9 @@
       "cardCvcRequired": "CVC is required",
       "cardCvcInvalid": "Please enter a valid CVC"
     },
+    "errors": {
+      "orderCreationFailed": "Failed to create order. Please try again."
+    },
     "success": {
       "message": "Your order has been placed successfully!"
     }
@@ -501,6 +543,171 @@
     }
   },
   "admin": {
+    "auth": {
+      "verifyingAccess": "Verifying access..."
+    },
+    "products": {
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "draft": "Draft"
+      },
+      "variantModal": {
+        "titleEdit": "🎭 Edit variant",
+        "titleCreate": "🎭 Add new variant",
+        "sections": {
+          "attributes": "🎨 Variant attributes"
+        },
+        "fields": {
+          "name": "🏷️ Variant name",
+          "sku": "📦 SKU",
+          "price": "💰 Price (VND)",
+          "stock": "📦 Stock quantity"
+        },
+        "placeholders": {
+          "name": "e.g. Size M - Red",
+          "sku": "Leave blank to auto-generate",
+          "price": "1,000,000",
+          "stock": "50",
+          "attributeSelect": "Select {{name}}"
+        },
+        "tooltips": {
+          "sku": "Leave blank for the system to auto-generate SKU"
+        },
+        "validation": {
+          "nameRequired": "Please enter variant name",
+          "priceRequired": "Please enter price",
+          "priceMin": "Price must be at least 0",
+          "stockRequired": "Please enter stock quantity",
+          "stockMin": "Stock quantity must be at least 0"
+        },
+        "actions": {
+          "create": "Add variant",
+          "update": "Update variant"
+        }
+      },
+      "attributeModal": {
+        "titleEdit": "🏷️ Edit attribute",
+        "titleCreate": "🏷️ Add new attribute",
+        "fields": {
+          "name": "🏷️ Attribute name",
+          "value": "📝 Attribute values"
+        },
+        "placeholders": {
+          "name": "e.g. Color, Material, Size",
+          "value": "e.g. Red, Blue, Black (comma-separated)"
+        },
+        "tooltips": {
+          "name": "Attribute type name (e.g. Color, Size, Material)",
+          "value": "Enter possible values separated by commas"
+        },
+        "validation": {
+          "nameRequired": "Please enter attribute name",
+          "valueRequired": "Please enter attribute values"
+        },
+        "hints": {
+          "title": "💡 Attribute tips",
+          "bullet1": "Attribute name should be clear and easy to understand",
+          "bullet2": "List all possible options in values",
+          "bullet3": "Separate values by commas (e.g. \"Red, Blue, Black\" or \"S, M, L\")",
+          "bullet4": "This attribute will be used when creating product variants"
+        },
+        "examples": {
+          "title": "📖 Examples",
+          "line1": "Name: \"Color\" → Values: \"Red, Blue, Black, White\"",
+          "line2": "Name: \"Size\" → Values: \"S, M, L, XL, XXL\"",
+          "line3": "Name: \"Material\" → Values: \"Cotton, Polyester, Linen\""
+        },
+        "actions": {
+          "create": "Add attribute",
+          "update": "Update attribute"
+        }
+      },
+      "createWizard": {
+        "processing": "Processing...",
+        "stepCounter": "Step {{current}}/{{total}}",
+        "actions": {
+          "next": "Next",
+          "create": "Create product"
+        },
+        "steps": {
+          "basic": {
+            "title": "Basic information",
+            "description": "Enter basic product information"
+          },
+          "pricing": {
+            "title": "Pricing & Inventory",
+            "description": "Set price and stock quantity"
+          },
+          "categories": {
+            "title": "Categories",
+            "description": "Choose categories and product status"
+          },
+          "images": {
+            "title": "Images",
+            "description": "Add product images"
+          },
+          "attributes": {
+            "title": "Attributes & Variants",
+            "description": "Add custom attributes and variants"
+          },
+          "seo": {
+            "title": "SEO & Finish",
+            "description": "Optimize SEO and finish creating product"
+          }
+        }
+      },
+      "dynamicCreateForm": {
+        "title": "Create product with dynamic naming",
+        "currentName": "Current product name",
+        "actions": {
+          "preview": "Preview"
+        },
+        "messages": {
+          "sampleFilled": "Sample data has been filled!",
+          "fillRequiredFields": "Please fill all required fields!",
+          "created": "Product created successfully!",
+          "createError": "An error occurred while creating product!"
+        },
+        "navigation": {
+          "prev": "← Previous step",
+          "next": "Next step →",
+          "create": "Create product",
+          "stepCounter": "Step {{current}} / {{total}}"
+        },
+        "preview": {
+          "title": "👀 Product preview",
+          "price": "Price",
+          "stock": "Stock",
+          "selectedAttributes": "Selected attributes"
+        },
+        "steps": {
+          "basic": {
+            "title": "📝 Basic info",
+            "description": "Name, description, status"
+          },
+          "attributes": {
+            "title": "🏷️ Dynamic attributes",
+            "description": "Choose CPU, GPU, RAM, etc."
+          },
+          "pricing": {
+            "title": "💰 Pricing & Stock",
+            "description": "Set pricing and inventory"
+          },
+          "media": {
+            "title": "📸 Images",
+            "description": "Upload product images"
+          },
+          "category": {
+            "title": "📂 Category",
+            "description": "Assign product categories"
+          },
+          "seo": {
+            "description": "Optimize search visibility"
+          }
+        }
+      }
+    },
     "dashboard": {
       "title": "Admin Dashboard",
       "lastUpdated": "Last updated",
