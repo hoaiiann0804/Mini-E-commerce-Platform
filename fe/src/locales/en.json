@@ -485,7 +485,8 @@
       "processing": "Processing",
       "shipped": "Shipped",
       "delivered": "Delivered",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "expired": "Expired"
     },
     "paymentStatus": {
       "pending": "Pending",
@@ -496,6 +497,11 @@
     "viewDetails": "View Details",
     "hideDetails": "Hide Details",
     "writeReview": "Write a Review",
+    "reorder": "Buy Again",
+    "reordering": "Processing...",
+    "reorderSuccess": "Items added to cart successfully!",
+    "reorderFailed": "Failed to reorder. Please try again.",
+    "payNow": "Pay Now",
     "items": "{{count}} item",
     "items_one": "{{count}} item",
     "items_other": "{{count}} items",

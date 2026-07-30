@@ -178,7 +178,8 @@ const createOrder = async (req, res, next) => {
         notes,
         // Giữ chỗ tồn kho tạm thời: 15 phút
         // Sau khi Stripe thanh toán thành công -> expiresAt = null (chốt vĩnh viễn)
-        // Cleanup job sẽ hoàn kho nếu quá 15 phút mà chưa thanh toán
+        // Cleanup job sẽ hoàn kho nếu quá 15 phút
+        //  mà chưa thanh toán
         expiresAt: new Date(Date.now() + HOLD_MINUTES * 60 * 1000),
       },
       { transaction },
@@ -631,16 +632,79 @@ const repayOrder = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "Đơn hàng đã được cập nhật để thanh toán lại",
-      data: {
-        id: order.id,
-        number: order.number,
-        status: order.status,
-        paymentStatus: order.paymentStatus,
-        total: order.total,
-        paymentUrl: paymentUrl,
-      },
+      paymentUrl: paymentUrl,
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Mua lại đơn hàng (Re-order / Buy Again)
+ * NGHIỆP VỤ: Đơn cũ (expired/cancelled) giữ nguyên làm chứng từ lịch sử (bất biến).
+ * Hệ thống tự động copy các items của đơn cũ vào Giỏ hàng (Cart) active để khách Checkout tạo đơn MỚI.
+ */
+const reorder = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // 1. Lấy đơn hàng cũ cùng danh sách sản phẩm
+    const order = await Order.findOne({
+      where: { id, userId },
+      include: [{ association: "items" }],
+      transaction,
+    });
+
+    if (!order) {
+      throw new AppError("Không tìm thấy đơn hàng", 404);
+    }
+
+    // 2. Tìm hoặc tạo mới Giỏ hàng đang hoạt động (active cart) của người dùng
+    let [cart] = await Cart.findOrCreate({
+      where: { userId, status: "active" },
+      defaults: { userId, status: "active" },
+      transaction,
+    });
+
+    // 3. Sao chép từng sản phẩm từ đơn cũ vào giỏ hàng
+    for (const item of order.items) {
+      const [cartItem, created] = await CartItem.findOrCreate({
+        where: {
+          cartId: cart.id,
+          productId: item.productId,
+          variantId: item.variantId || null,
+        },
+        defaults: {
+          cartId: cart.id,
+          productId: item.productId,
+          variantId: item.variantId || null,
+          quantity: item.quantity,
+          price: item.price,
+        },
+        transaction,
+      });
+
+      // Nếu sản phẩm đã có sẵn trong giỏ thì cộng dồn số lượng
+      if (!created) {
+        await cartItem.increment("quantity", {
+          by: item.quantity,
+          transaction,
+        });
+      }
+    }
+
+    await transaction.commit();
+
+    res.status(200).json({
+      status: "success",
+      message: "Đã thêm sản phẩm vào giỏ hàng để mua lại",
+      data: { cartId: cart.id },
+    });
+  } catch (error) {
+    await transaction.rollback();
     next(error);
   }
 };
@@ -654,4 +718,5 @@ module.exports = {
   getAllOrders,
   updateOrderStatus,
   repayOrder,
+  reorder, // Export hàm mua lại
 };
