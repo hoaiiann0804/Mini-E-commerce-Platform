@@ -82,12 +82,18 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Body parser, reading data from body into req.body
-// Skip JSON parsing for multipart/form-data requests to avoid conflicts with multer
-//app.use(express.json({ limit: "50mb" }));
+// QUAN TRỌNG: Route /api/payments/webhook phải nhận Raw Buffer (không qua express.json())
+// vì Stripe dùng raw body để xác minh chữ ký webhook
+// express.raw() đã được khai báo trong payment.routes.js cho route /webhook
+// Ở đây dùng filter để bỏ qua việc parse JSON cho route đó
 app.use(
   express.json({
     limit: "50mb",
-    type: (req) => !req.headers["content-type"]?.startsWith("multipart/"),
+    type: (req) => {
+      // Bỏ qua JSON parsing cho Stripe webhook và multipart
+      if (req.path === "/api/payments/webhook") return false;
+      return !req.headers["content-type"]?.startsWith("multipart/");
+    },
   })
 );
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));

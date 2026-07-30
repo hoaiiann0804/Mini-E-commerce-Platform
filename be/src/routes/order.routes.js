@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const orderController = require('../controllers/order.controller');
-const { validateRequest } = require('../middlewares/validateRequest');
+const orderController = require("../controllers/order.controller");
+const { validateRequest } = require("../middlewares/validateRequest");
 const {
   createOrderSchema,
   updateOrderStatusSchema,
-} = require('../validators/order.validator');
-const { authenticate } = require('../middlewares/authenticate');
-const { authorize } = require('../middlewares/authorize');
-const { orderLimter } = require('../middlewares/rateLimiter');
+} = require("../validators/order.validator");
+const { authenticate } = require("../middlewares/authenticate");
+const { authorize } = require("../middlewares/authorize");
+const { orderLimiter } = require("../middlewares/rateLimiter");
 
 /**
  * @swagger
@@ -247,9 +247,10 @@ router.use(authenticate);
  *         description: Not authenticated
  */
 router.post(
-  '/', orderLimter,
+  "/",
+  orderLimiter,
   validateRequest(createOrderSchema),
-  orderController.createOrder
+  orderController.createOrder,
 );
 
 /**
@@ -300,7 +301,7 @@ router.post(
  *       401:
  *         description: Not authenticated
  */
-router.get('/', orderController.getUserOrders);
+router.get("/", orderController.getUserOrders);
 
 /**
  * @swagger
@@ -335,7 +336,7 @@ router.get('/', orderController.getUserOrders);
  *       404:
  *         description: Order not found
  */
-router.get('/number/:number', orderController.getOrderByNumber);
+router.get("/number/:number", orderController.getOrderByNumber);
 
 /**
  * @swagger
@@ -370,7 +371,7 @@ router.get('/number/:number', orderController.getOrderByNumber);
  *       404:
  *         description: Order not found
  */
-router.get('/:id', orderController.getOrderById);
+router.get("/:id", orderController.getOrderById);
 
 /**
  * @swagger
@@ -397,7 +398,7 @@ router.get('/:id', orderController.getOrderById);
  *       404:
  *         description: Order not found
  */
-router.post('/:id/cancel', orderController.cancelOrder);
+router.post("/:id/cancel", orderController.cancelOrder);
 
 /**
  * @swagger
@@ -447,7 +448,7 @@ router.post('/:id/cancel', orderController.cancelOrder);
  *       404:
  *         description: Order not found
  */
-router.post('/:id/repay', orderController.repayOrder);
+router.post("/:id/repay", orderController.repayOrder);
 
 // Admin routes
 
@@ -507,7 +508,7 @@ router.post('/:id/repay', orderController.repayOrder);
  *       403:
  *         description: Not authorized
  */
-router.get('/admin/all', authorize('admin'), orderController.getAllOrders);
+router.get("/admin/all", authorize("admin"), orderController.getAllOrders);
 
 /**
  * @swagger
@@ -549,10 +550,10 @@ router.get('/admin/all', authorize('admin'), orderController.getAllOrders);
  *         description: Order not found
  */
 router.patch(
-  '/admin/:id/status',
-  authorize('admin'),
+  "/admin/:id/status",
+  authorize("admin"),
   validateRequest(updateOrderStatusSchema),
-  orderController.updateOrderStatus
+  orderController.updateOrderStatus,
 );
 
 module.exports = router;

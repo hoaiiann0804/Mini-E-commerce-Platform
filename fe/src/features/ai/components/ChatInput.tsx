@@ -36,14 +36,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleClearChat = () => {
     if (
       onClearChat &&
-      window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')
+      window.confirm(t('chat.confirmClear'))
     ) {
       onClearChat();
     }
   };
 
   const handleHelpClick = () => {
-    onSendMessage('Tôi cần trợ giúp về cách sử dụng chatbot');
+    onSendMessage(t('chat.helpPrompt'));
   };
 
   return (
@@ -52,7 +52,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       {isLoading && (
         <div className="flex items-center mb-2 text-xs text-neutral-500 dark:text-neutral-400 animate-pulse">
           <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-          <span>Nhân viên đang nhập...</span>
+          <span>{t('chat.typing')}</span>
         </div>
       )}
 
@@ -62,7 +62,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={t('chat.placeholder') || 'Bạn cần hỗ trợ gì không?'}
+            placeholder={t('chat.placeholder')}
             className="w-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full pl-4 pr-16 py-2.5 text-sm focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-primary-400/30 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 transition-all duration-200"
             disabled={isLoading}
             autoComplete="off"
@@ -92,7 +92,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         <div className="flex items-center">
           <VerifiedIcon className="mr-1.5 text-primary-500" />
           <span>
-            {t('chat.poweredBy') || 'Powered by'}{' '}
+            {t('chat.poweredBy')}{' '}
             <span className="font-semibold text-primary-500 dark:text-primary-400">
               Shopmini AI
             </span>
@@ -104,7 +104,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <button
               type="button"
               className="hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
-              title="Xóa cuộc trò chuyện"
+              title={t('chat.actions.clearChat')}
               onClick={handleClearChat}
             >
               <TrashIcon />
@@ -113,7 +113,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <button
               type="button"
               className="hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
-              title="Trợ giúp"
+              title={t('chat.actions.help')}
               onClick={handleHelpClick}
             >
               <HelpIcon />

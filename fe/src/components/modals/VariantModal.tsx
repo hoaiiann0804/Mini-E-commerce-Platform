@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Input, InputNumber, Select, Button, Space } from "antd";
 import { SaveOutlined, CloseOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 interface Attribute {
   id: string;
@@ -36,6 +37,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
   onSave,
   attributes,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -89,7 +91,11 @@ const VariantModal: React.FC<VariantModalProps> = ({
 
   return (
     <Modal
-      title={variant ? "🎭 Chỉnh sửa biến thể" : "🎭 Thêm biến thể mới"}
+      title={
+        variant
+          ? t("admin.products.variantModal.titleEdit")
+          : t("admin.products.variantModal.titleCreate")
+      }
       open={visible}
       onCancel={handleClose}
       footer={null}
@@ -115,19 +121,24 @@ const VariantModal: React.FC<VariantModalProps> = ({
           }}
         >
           <Form.Item
-            label="🏷️ Tên biến thể"
+            label={t("admin.products.variantModal.fields.name")}
             name="name"
-            rules={[{ required: true, message: "Vui lòng nhập tên biến thể" }]}
+            rules={[
+              {
+                required: true,
+                message: t("admin.products.variantModal.validation.nameRequired"),
+              },
+            ]}
           >
-            <Input placeholder="VD: Size M - Màu Đỏ" />
+            <Input placeholder={t("admin.products.variantModal.placeholders.name")} />
           </Form.Item>
 
           <Form.Item
-            label="📦 Mã SKU"
+            label={t("admin.products.variantModal.fields.sku")}
             name="sku"
-            tooltip="Để trống để hệ thống tự tạo mã SKU"
+            tooltip={t("admin.products.variantModal.tooltips.sku")}
           >
-            <Input placeholder="Để trống để tự tạo" />
+            <Input placeholder={t("admin.products.variantModal.placeholders.sku")} />
           </Form.Item>
         </div>
 
@@ -139,15 +150,22 @@ const VariantModal: React.FC<VariantModalProps> = ({
           }}
         >
           <Form.Item
-            label="💰 Giá (VNĐ)"
+            label={t("admin.products.variantModal.fields.price")}
             name="price"
             rules={[
-              { required: true, message: "Vui lòng nhập giá" },
-              { type: "number", min: 0, message: "Giá phải lớn hơn 0" },
+              {
+                required: true,
+                message: t("admin.products.variantModal.validation.priceRequired"),
+              },
+              {
+                type: "number",
+                min: 0,
+                message: t("admin.products.variantModal.validation.priceMin"),
+              },
             ]}
           >
             <InputNumber<number>
-              placeholder="1,000,000"
+              placeholder={t("admin.products.variantModal.placeholders.price")}
               min={0}
               step={1000}
               style={{ width: "100%" }}
@@ -162,15 +180,22 @@ const VariantModal: React.FC<VariantModalProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="📦 Số lượng tồn kho"
+            label={t("admin.products.variantModal.fields.stock")}
             name="stock"
             rules={[
-              { required: true, message: "Vui lòng nhập số lượng" },
-              { type: "number", min: 0, message: "Số lượng không được âm" },
+              {
+                required: true,
+                message: t("admin.products.variantModal.validation.stockRequired"),
+              },
+              {
+                type: "number",
+                min: 0,
+                message: t("admin.products.variantModal.validation.stockMin"),
+              },
             ]}
           >
             <InputNumber
-              placeholder="50"
+              placeholder={t("admin.products.variantModal.placeholders.stock")}
               min={0}
               style={{ width: "100%" }}
               addonAfter="sp"
@@ -187,7 +212,9 @@ const VariantModal: React.FC<VariantModalProps> = ({
               marginTop: "16px",
             }}
           >
-            <h3 style={{ marginBottom: "16px" }}>🎨 Thuộc tính biến thể</h3>
+            <h3 style={{ marginBottom: "16px" }}>
+              {t("admin.products.variantModal.sections.attributes")}
+            </h3>
             <div
               style={{
                 display: "grid",
@@ -205,7 +232,13 @@ const VariantModal: React.FC<VariantModalProps> = ({
                   : [];
                 return (
                   <Form.Item key={attr.id} label={attr.name} name={attr.name}>
-                    <Select placeholder={`Chọn ${attr.name}`} allowClear>
+                    <Select
+                      placeholder={t(
+                        "admin.products.variantModal.placeholders.attributeSelect",
+                        { name: attr.name }
+                      )}
+                      allowClear
+                    >
                       {values.map((value) => (
                         <Select.Option key={value} value={value}>
                           {value}
@@ -223,10 +256,12 @@ const VariantModal: React.FC<VariantModalProps> = ({
         <div style={{ textAlign: "right", marginTop: "24px" }}>
           <Space>
             <Button onClick={handleClose} icon={<CloseOutlined />}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-              {variant ? "Cập nhật biến thể" : "Thêm biến thể"}
+              {variant
+                ? t("admin.products.variantModal.actions.update")
+                : t("admin.products.variantModal.actions.create")}
             </Button>
           </Space>
         </div>

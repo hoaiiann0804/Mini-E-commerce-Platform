@@ -48,12 +48,31 @@ module.exports = {
     });
 
     // Add indexes
-    await queryInterface.addIndex('product_variants', ['product_id']);
-    await queryInterface.addIndex('product_variants', ['is_default']);
-    await queryInterface.addIndex('product_variants', ['is_available']);
+    // Always name indexes explicitly to avoid cross-schema name collisions in Postgres
+    // (and to keep names stable across environments).
+    await queryInterface.addIndex('product_variants', ['product_id'], {
+      name: 'idx_product_variants_product_id',
+    });
+    await queryInterface.addIndex('product_variants', ['is_default'], {
+      name: 'idx_product_variants_is_default',
+    });
+    await queryInterface.addIndex('product_variants', ['is_available'], {
+      name: 'idx_product_variants_is_available',
+    });
   },
 
   async down(queryInterface, Sequelize) {
+    // Defensive: in some dialects dropping the table might fail if indexes are in a bad state.
+    // These calls are safe to ignore if the indexes don't exist.
+    try {
+      await queryInterface.removeIndex('product_variants', 'idx_product_variants_product_id');
+    } catch (e) {}
+    try {
+      await queryInterface.removeIndex('product_variants', 'idx_product_variants_is_default');
+    } catch (e) {}
+    try {
+      await queryInterface.removeIndex('product_variants', 'idx_product_variants_is_available');
+    } catch (e) {}
     await queryInterface.dropTable('product_variants');
   },
 };

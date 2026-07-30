@@ -1,14 +1,15 @@
-require('dotenv').config();
-const dns = require('dns');
-const app = require('./app');
-const sequelize = require('./config/sequelize');
-const logger = require('./utils/logger');
+require("dotenv").config();
+const dns = require("dns");
+const app = require("./app");
+const sequelize = require("./config/sequelize");
+const logger = require("./shared/utils/logger");
+const { startOrderCleanupJob } = require("./jobs/orderCleanup.job");
 
 // Optional: force IPv4 DNS resolution to bypass getaddrinfo/DNS issues in some environments
-if (process.env.FORCE_DNS_IPV4 === 'true') {
+if (process.env.FORCE_DNS_IPV4 === "true") {
   const originalLookup = dns.lookup.bind(dns);
   dns.lookup = (hostname, options, callback) => {
-    if (typeof options === 'function') {
+    if (typeof options === "function") {
       callback = options;
       options = {};
     }
@@ -22,31 +23,31 @@ if (process.env.FORCE_DNS_IPV4 === 'true') {
   };
   // keep a reference in case needed for debugging
   dns.lookup._original = originalLookup;
-  logger.info('FORCE_DNS_IPV4 enabled: dns.lookup patched to use resolve4');
+  logger.info("FORCE_DNS_IPV4 enabled: dns.lookup patched to use resolve4");
 }
 
 // Load all models first (without relationships)
 const models = [
-  require('./models/user'),
-  require('./models/address'),
-  require('./models/category'),
-  require('./models/product'),
-  require('./models/productCategory'),
-  require('./models/productAttribute'),
-  require('./models/productVariant'),
-  require('./models/review'),
-  require('./models/reviewFeedback'),
-  require('./models/cart'),
-  require('./models/cartItem'),
-  require('./models/order'),
-  require('./models/orderItem'),
-  require('./models/wishlist'),
-  require('./models/image'),
+  require("./modules/user/user.model"),
+  require("./models/address"),
+  require("./models/category"),
+  require("./models/product"),
+  require("./models/productCategory"),
+  require("./models/productAttribute"),
+  require("./models/productVariant"),
+  require("./models/review"),
+  require("./models/reviewFeedback"),
+  require("./models/cart"),
+  require("./models/cartItem"),
+  require("./models/order"),
+  require("./models/orderItem"),
+  require("./models/wishlist"),
+  require("./models/image"),
 ];
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  logger.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+process.on("uncaughtException", (err) => {
+  logger.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
   logger.error(err.name, err.message);
   logger.error(err.stack);
   process.exit(1);
@@ -55,29 +56,35 @@ process.on('uncaughtException', (err) => {
 // Test database connection and sync models
 const connectDB = async () => {
   try {
-    logger.info('DB connection mode: %s', process.env.DATABASE_URL ? 'DATABASE_URL' : 'DB_HOST/DB_PORT');
+    logger.info(
+      "DB connection mode: %s",
+      process.env.DATABASE_URL ? "DATABASE_URL" : "DB_HOST/DB_PORT",
+    );
     await sequelize.authenticate();
-    logger.info('Database connection has been established successfully.');
+    logger.info("Database connection has been established successfully.");
 
     // Load models and relationships
-    require('./models');
-    logger.info('Database models loaded successfully.');
+    require("./models");
+    logger.info("Database models loaded successfully.");
 
     // Sync models with database
     if (
-      process.env.NODE_ENV === 'development' &&
-      process.env.DB_SYNC === 'true'
+      process.env.NODE_ENV === "development" &&
+      process.env.DB_SYNC === "true"
     ) {
       // Use alter: true instead of force: true to preserve data
       // force: true will DROP and recreate tables (DELETES ALL DATA)
       // alter: true will modify existing tables to match models
       await sequelize.sync();
       logger.info(
-        'Database tables synchronized successfully (preserving data).'
+        "Database tables synchronized successfully (preserving data).",
       );
     }
   } catch (error) {
-    logger.error('Unable to connect to the database: %s', error?.message || '(no message)');
+    logger.error(
+      "Unable to connect to the database: %s",
+      error?.message || "(no message)",
+    );
     if (error?.stack) logger.error(error.stack);
     process.exit(1);
   }
@@ -90,9 +97,9 @@ const addStripeColumn = async () => {
       ALTER TABLE users 
       ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255);
     `);
-    logger.info('✅ stripe_customer_id column ensured');
+    logger.info("✅ stripe_customer_id column ensured");
   } catch (error) {
-    logger.error('Error adding stripe column:', error.message);
+    logger.error("Error adding stripe column:", error.message);
   }
 };
 
@@ -104,13 +111,17 @@ const startServer = async () => {
   const PORT = process.env.PORT || 8888;
   const server = app.listen(PORT, () => {
     logger.info(
-      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
     );
   });
 
+  // Khởi động Order Cleanup Job sau khi server đã bắt đầu
+  // Job này tự động hóa việc hoàn kho và hủy đơn hàng quá hạn thanh toán 15 phút
+  const cleanupIntervalId = startOrderCleanupJob();
+
   // Handle unhandled promise rejections
-  process.on('unhandledRejection', (err) => {
-    logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
+  process.on("unhandledRejection", (err) => {
+    logger.error("UNHANDLED REJECTION! 💥 Shutting down...");
     logger.error(err.name, err.message);
     server.close(() => {
       process.exit(1);
@@ -118,10 +129,12 @@ const startServer = async () => {
   });
 
   // Handle SIGTERM signal
-  process.on('SIGTERM', () => {
-    logger.info('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  process.on("SIGTERM", () => {
+    logger.info("👋 SIGTERM RECEIVED. Shutting down gracefully");
+    // Dừng cleanup job trước khi đóng server
+    if (cleanupIntervalId) clearInterval(cleanupIntervalId);
     server.close(() => {
-      logger.info('💥 Process terminated!');
+      logger.info("💥 Process terminated!");
     });
   });
 };

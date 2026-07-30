@@ -5,7 +5,7 @@ const { validateRequest } = require('../middlewares/validateRequest');
 const {
   updateUserSchema,
   changePasswordSchema,
-} = require('../validators/user.validator');
+} = require('../modules/user/user.validator');
 const { addressSchema } = require('../validators/address.validator');
 const { authenticate } = require('../middlewares/authenticate');
 

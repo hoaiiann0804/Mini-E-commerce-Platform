@@ -73,12 +73,14 @@ const enhancedChatService = {
           error.message?.includes("quota")
         ) {
           return {
-            text: `⚠️ ${error.message}\n\nTôi đang chuyển sang chế độ demo. Bạn vẫn có thể chat với tôi nhưng sẽ nhận được phản hồi mẫu.`,
+            text: i18n.t("chat.errors.demoFallbackMessage", {
+              error: error.message,
+            }),
             suggestions: [
-              "Tiếp tục với chế độ demo",
-              "Tìm sản phẩm",
-              "Hỏi về chính sách",
-              "Liên hệ hỗ trợ",
+              i18n.t("chat.suggestions.continueDemo"),
+              i18n.t("chat.suggestions.findProducts"),
+              i18n.t("chat.suggestions.returnPolicy"),
+              i18n.t("chat.suggestions.contactSupport"),
             ],
           };
         }
@@ -114,10 +116,10 @@ const enhancedChatService = {
         mockResponse = {
           text: i18n.t("chat.responses.productSearch", { query: message }),
           suggestions: [
-            "Xem áo thun",
-            "Xem quần jean",
-            "Xem giày sneaker",
-            "Tìm sản phẩm khác",
+            i18n.t("chat.quickReplies.viewTshirts"),
+            i18n.t("chat.quickReplies.viewJeans"),
+            i18n.t("chat.quickReplies.viewSneakers"),
+            i18n.t("chat.quickReplies.searchOtherProducts"),
           ],
         };
         break;
@@ -125,10 +127,10 @@ const enhancedChatService = {
         mockResponse = {
           text: i18n.t("chat.responses.orderHelp"),
           suggestions: [
-            "Phương thức thanh toán",
-            "Phí vận chuyển",
-            "Thời gian giao hàng",
-            "Mã giảm giá",
+            i18n.t("chat.quickReplies.paymentMethods"),
+            i18n.t("chat.quickReplies.shippingFee"),
+            i18n.t("chat.quickReplies.deliveryTime"),
+            i18n.t("chat.quickReplies.discountCode"),
           ],
         };
         break;
@@ -136,10 +138,10 @@ const enhancedChatService = {
         mockResponse = {
           text: i18n.t("chat.responses.returnPolicy"),
           suggestions: [
-            "Cách thức đổi trả",
-            "Hoàn tiền như thế nào",
-            "Sản phẩm lỗi",
-            "Liên hệ bộ phận CSKH",
+            i18n.t("chat.quickReplies.exchangeReturnProcess"),
+            i18n.t("chat.quickReplies.refundHow"),
+            i18n.t("chat.quickReplies.defectiveProduct"),
+            i18n.t("chat.quickReplies.contactCustomerService"),
           ],
         };
         break;
@@ -150,7 +152,7 @@ const enhancedChatService = {
             i18n.t("chat.suggestions.findProducts"),
             i18n.t("chat.suggestions.howToOrder"),
             i18n.t("chat.suggestions.returnPolicy"),
-            "Khuyến mãi hiện có",
+            i18n.t("chat.suggestions.viewPromotions"),
           ],
         };
     }

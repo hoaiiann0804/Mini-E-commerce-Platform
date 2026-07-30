@@ -11,6 +11,10 @@
     "docker:logs": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml logs -f",
     "docker:logs:api": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml logs -f api",
     "docker:ps": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml ps",
-    "docker:build:api": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml build api"
+    "docker:build:api": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml build api",
+    "docker:exec:api": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml exec api sh",
+    "docker:migrate": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml exec -T api npx sequelize-cli db:migrate --env development",
+    "docker:migration:create": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml exec -T api npx sequelize-cli migration:generate --env development --name",
+    "docker:seed": "docker compose --env-file ops/env/.env.dev -p e-commrcemini -f ops/docker/docker-compose.dev.yml exec -T api npx sequelize-cli db:seed:all --env development"
   }
 }

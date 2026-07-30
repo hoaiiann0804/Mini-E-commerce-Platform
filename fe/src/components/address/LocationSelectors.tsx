@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, TextField } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export type LocationValue = {
   country: string;
@@ -33,6 +34,7 @@ const LocationSelectors: React.FC<LocationSelectorsProps> = ({
   initialValues,
   onLocationChange,
 }) => {
+  const { t } = useTranslation();
   const [internalValue, setInternalValue] = React.useState<LocationValue>(() => ({
     country: initialValues?.country ?? "Vietnam",
     province: initialValues?.state ?? "",
@@ -56,19 +58,19 @@ const LocationSelectors: React.FC<LocationSelectorsProps> = ({
   return (
     <Box display="flex" flexDirection="column" gap={2}>
       <TextField
-        label="Tỉnh / Thành phố"
+        label={t("address.province")}
         value={safeValue.province}
         onChange={(e) => emitChange({ ...safeValue, province: e.target.value })}
       />
 
       <TextField
-        label="Phường / Xã"
+        label={t("address.ward")}
         value={safeValue.ward}
         onChange={(e) => emitChange({ ...safeValue, ward: e.target.value })}
       />
 
       <TextField
-        label="Quốc gia"
+        label={t("address.country")}
         value={safeValue.country}
         onChange={(e) => emitChange({ ...safeValue, country: e.target.value })}
       />

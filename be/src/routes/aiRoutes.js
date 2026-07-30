@@ -1,6 +1,6 @@
 const express = require("express");
-const geminiChatbotService = require("../services/chatbot/geminiChatbot.service");
-const { catchAsync } = require("../utils/catchAsync");
+const geminiChatbotService = require("../shared/services/chatbot/geminiChatbot.service");
+const { catchAsync } = require("../shared/utils/catchAsync");
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.get(
           : "AI chat service is not initialized or API key is missing.",
       },
     });
-  })
+  }),
 );
 
 // Endpoint to handle AI chat messages
@@ -39,11 +39,11 @@ router.post(
 
     const aiResponse = await geminiChatbotService.handleMessage(
       message,
-      context
+      context,
     );
 
     res.status(200).json({ status: "success", data: aiResponse });
-  })
+  }),
 );
 
 module.exports = router;

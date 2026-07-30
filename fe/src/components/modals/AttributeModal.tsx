@@ -5,6 +5,7 @@ import {
   CloseOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 const { TextArea } = Input;
 
@@ -27,6 +28,7 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
   attribute,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -69,7 +71,11 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
 
   return (
     <Modal
-      title={attribute ? "🏷️ Chỉnh sửa thuộc tính" : "🏷️ Thêm thuộc tính mới"}
+      title={
+        attribute
+          ? t("admin.products.attributeModal.titleEdit")
+          : t("admin.products.attributeModal.titleCreate")
+      }
       open={visible}
       onCancel={handleClose}
       footer={null}
@@ -86,25 +92,33 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
         }}
       >
         <Form.Item
-          label="🏷️ Tên thuộc tính"
+          label={t("admin.products.attributeModal.fields.name")}
           name="name"
-          rules={[{ required: true, message: "Vui lòng nhập tên thuộc tính" }]}
-          tooltip="Tên mô tả loại thuộc tính (VD: Màu sắc, Size, Chất liệu)"
+          rules={[
+            {
+              required: true,
+              message: t("admin.products.attributeModal.validation.nameRequired"),
+            },
+          ]}
+          tooltip={t("admin.products.attributeModal.tooltips.name")}
         >
-          <Input placeholder="VD: Màu sắc, Chất liệu, Kích thước" />
+          <Input placeholder={t("admin.products.attributeModal.placeholders.name")} />
         </Form.Item>
 
         <Form.Item
-          label="📝 Giá trị thuộc tính"
+          label={t("admin.products.attributeModal.fields.value")}
           name="value"
           rules={[
-            { required: true, message: "Vui lòng nhập giá trị thuộc tính" },
+            {
+              required: true,
+              message: t("admin.products.attributeModal.validation.valueRequired"),
+            },
           ]}
-          tooltip="Nhập các giá trị có thể có, cách nhau bởi dấu phẩy"
+          tooltip={t("admin.products.attributeModal.tooltips.value")}
         >
           <TextArea
             rows={3}
-            placeholder="VD: Đỏ, Xanh, Đen (cách nhau bởi dấu phẩy)"
+            placeholder={t("admin.products.attributeModal.placeholders.value")}
           />
         </Form.Item>
 
@@ -112,21 +126,13 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
 
         {/* Hướng dẫn */}
         <Alert
-          message="💡 Gợi ý tạo thuộc tính"
+          message={t("admin.products.attributeModal.hints.title")}
           description={
             <ul style={{ marginBottom: 0, paddingLeft: 20 }}>
-              <li>
-                <strong>Tên thuộc tính:</strong> Nên rõ ràng, dễ hiểu (VD: "Màu
-                sắc", "Kích thước")
-              </li>
-              <li>
-                <strong>Giá trị:</strong> Liệt kê tất cả các tùy chọn có thể có
-              </li>
-              <li>
-                <strong>Cách nhau bởi dấu phẩy:</strong> "Đỏ, Xanh, Đen" hoặc
-                "S, M, L, XL"
-              </li>
-              <li>Thuộc tính này sẽ được sử dụng khi tạo biến thể sản phẩm</li>
+              <li>{t("admin.products.attributeModal.hints.bullet1")}</li>
+              <li>{t("admin.products.attributeModal.hints.bullet2")}</li>
+              <li>{t("admin.products.attributeModal.hints.bullet3")}</li>
+              <li>{t("admin.products.attributeModal.hints.bullet4")}</li>
             </ul>
           }
           type="info"
@@ -137,21 +143,12 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
 
         {/* Ví dụ minh họa */}
         <Alert
-          message="📖 Ví dụ minh họa"
+          message={t("admin.products.attributeModal.examples.title")}
           description={
             <div style={{ marginBottom: 0 }}>
-              <div>
-                <strong>Tên:</strong> "Màu sắc" → <strong>Giá trị:</strong> "Đỏ,
-                Xanh dương, Đen, Trắng"
-              </div>
-              <div>
-                <strong>Tên:</strong> "Kích thước" → <strong>Giá trị:</strong>{" "}
-                "S, M, L, XL, XXL"
-              </div>
-              <div>
-                <strong>Tên:</strong> "Chất liệu" → <strong>Giá trị:</strong>{" "}
-                "Cotton, Polyester, Linen"
-              </div>
+              <div>{t("admin.products.attributeModal.examples.line1")}</div>
+              <div>{t("admin.products.attributeModal.examples.line2")}</div>
+              <div>{t("admin.products.attributeModal.examples.line3")}</div>
             </div>
           }
           type="success"
@@ -163,10 +160,12 @@ const AttributeModal: React.FC<AttributeModalProps> = ({
         <div style={{ textAlign: "right" }}>
           <Space>
             <Button onClick={handleClose} icon={<CloseOutlined />}>
-              Hủy
+              {t("common.cancel")}
             </Button>
             <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-              {attribute ? "Cập nhật thuộc tính" : "Thêm thuộc tính"}
+              {attribute
+                ? t("admin.products.attributeModal.actions.update")
+                : t("admin.products.attributeModal.actions.create")}
             </Button>
           </Space>
         </div>

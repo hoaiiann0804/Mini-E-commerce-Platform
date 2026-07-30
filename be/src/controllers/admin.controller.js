@@ -9,15 +9,17 @@ const {
   ProductVariant,
 } = require("../models");
 const { Op, Sequelize } = require("sequelize");
-const { catchAsync } = require("../utils/catchAsync");
+const { catchAsync } = require("../shared/utils/catchAsync");
 const { AppError } = require("../middlewares/errorHandler");
-const { AdminAuditService } = require("../services/admin/adminAuditService");
+const {
+  AdminAuditService,
+} = require("../shared/services/admin/adminAuditService");
 const {
   calculateTotalStock,
   updateProductTotalStock,
   validateVariantAttributes,
   generateVariantSku,
-} = require("../services/product/product.helpers");
+} = require("../shared/services/product/product.helpers");
 
 /**
  * Dashboard - Thống kê tổng quan
@@ -28,7 +30,7 @@ const getDashboardStats = catchAsync(async (req, res) => {
   const startOfLastMonth = new Date(
     today.getFullYear(),
     today.getMonth() - 1,
-    1
+    1,
   );
   const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
 
@@ -108,7 +110,7 @@ const getDashboardStats = catchAsync(async (req, res) => {
       [
         Sequelize.fn(
           "SUM",
-          Sequelize.literal('quantity * "OrderItem"."price"')
+          Sequelize.literal('quantity * "OrderItem"."price"'),
         ),
         "totalRevenue",
       ],
@@ -536,7 +538,7 @@ const createProduct = catchAsync(async (req, res) => {
           id: product.id,
         },
         type: sequelize.QueryTypes.UPDATE,
-      }
+      },
     );
 
     // Cập nhật lại giá trị trong đối tượng product
@@ -571,7 +573,7 @@ const createProduct = catchAsync(async (req, res) => {
       });
 
       const validCategoryIds = (await Promise.all(categoryPromises)).filter(
-        (id) => id !== null
+        (id) => id !== null,
       );
 
       if (validCategoryIds.length > 0) {
@@ -712,7 +714,7 @@ const createProduct = catchAsync(async (req, res) => {
           stockQuantity: totalStock,
           inStock: totalStock > 0,
         },
-        { where: { id: product.id } }
+        { where: { id: product.id } },
       );
     } catch (error) {
       console.error("Error creating variants:", error);
@@ -775,7 +777,7 @@ const createProduct = catchAsync(async (req, res) => {
               warrantyPackageId: warrantyPackage.id,
               isDefault: index === 0, // Đặt warranty package đầu tiên làm mặc định
             });
-          }
+          },
         );
 
         await Promise.all(warrantyPromises);
@@ -828,7 +830,7 @@ const createProduct = catchAsync(async (req, res) => {
     req.user,
     "CREATE",
     product.id,
-    product.name
+    product.name,
   );
 
   res.status(201).json({
@@ -964,7 +966,7 @@ const updateProduct = catchAsync(async (req, res) => {
           id: product.id,
         },
         type: sequelize.QueryTypes.UPDATE,
-      }
+      },
     );
 
     // Cập nhật lại giá trị trong đối tượng product để trả về cho client
@@ -1004,7 +1006,7 @@ const updateProduct = catchAsync(async (req, res) => {
       });
 
       const validCategoryIds = (await Promise.all(categoryPromises)).filter(
-        (id) => id !== null
+        (id) => id !== null,
       );
 
       if (validCategoryIds.length > 0) {
@@ -1149,13 +1151,13 @@ const updateProduct = catchAsync(async (req, res) => {
             stockQuantity: totalStock,
             inStock: totalStock > 0,
           },
-          { where: { id } }
+          { where: { id } },
         );
       } else {
         // If no variants, reset to product base stock
         await Product.update(
           { isVariantProduct: false, minVariantPrice: null },
-          { where: { id } }
+          { where: { id } },
         );
         // Chỉ cập nhật nếu stockQuantity đã được gửi trong request
         if (req.body.hasOwnProperty("stockQuantity")) {
@@ -1164,7 +1166,7 @@ const updateProduct = catchAsync(async (req, res) => {
               stockQuantity: stockQuantity,
               inStock: stockQuantity > 0,
             },
-            { where: { id } }
+            { where: { id } },
           );
         }
       }
@@ -1243,7 +1245,7 @@ const updateProduct = catchAsync(async (req, res) => {
                 warrantyPackageId: warrantyPackage.id,
                 isDefault: index === 0, // Đặt warranty package đầu tiên làm mặc định
               });
-            }
+            },
           );
 
           await Promise.all(warrantyPromises);
@@ -1297,7 +1299,7 @@ const updateProduct = catchAsync(async (req, res) => {
     "UPDATE",
     product.id,
     product.name,
-    changes
+    changes,
   );
 
   res.status(200).json({
