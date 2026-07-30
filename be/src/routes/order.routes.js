@@ -450,6 +450,31 @@ router.post("/:id/cancel", orderController.cancelOrder);
  */
 router.post("/:id/repay", orderController.repayOrder);
 
+/**
+ * @swagger
+ * /api/orders/{id}/reorder:
+ *   post:
+ *     summary: Re-order an expired, cancelled, or delivered order (adds items to cart)
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Items added to active cart successfully
+ *       401:
+ *         description: Not authenticated
+ *       404:
+ *         description: Order not found
+ */
+router.post("/:id/reorder", orderController.reorder);
+
 // Admin routes
 
 /**
