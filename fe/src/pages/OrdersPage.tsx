@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
 import Button from "@/components/common/Button";
 import { PremiumButton } from "@/components/common";
 import Badge, { BadgeVariant } from "@/components/common/Badge";
@@ -8,6 +9,7 @@ import {
   useGetUserOrdersQuery,
   useCancelOrderMutation,
   useRepayOrderMutation,
+  useReorderMutation,
   OrderItem,
 } from "@/services/orderApi";
 import { useSelector } from "react-redux";
@@ -16,13 +18,14 @@ import { toast } from "@/utils/toast";
 
 // Order status badge variants
 const statusVariants: Record<string, { variant: BadgeVariant; label: string }> =
-  {
-    pending: { variant: "warning", label: "Pending" },
-    processing: { variant: "info", label: "Processing" },
-    shipped: { variant: "primary", label: "Shipped" },
-    delivered: { variant: "success", label: "Delivered" },
-    cancelled: { variant: "error", label: "Cancelled" },
-  };
+{
+  pending: { variant: "warning", label: "Pending" },
+  processing: { variant: "info", label: "Processing" },
+  shipped: { variant: "primary", label: "Shipped" },
+  delivered: { variant: "success", label: "Delivered" },
+  cancelled: { variant: "error", label: "Cancelled" },
+  expired: { variant: "neutral", label: "Expired" },
+};
 
 // Payment status colors
 const paymentStatusColors: Record<string, string> = {
@@ -34,12 +37,14 @@ const paymentStatusColors: Record<string, string> = {
 };
 
 const OrdersPage: React.FC = () => {
-  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { t, i18n } = useTranslation();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
   const [repayingOrder, setRepayingOrder] = useState<string | null>(null);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
 
   const {
     data: ordersResponse,
@@ -50,9 +55,25 @@ const OrdersPage: React.FC = () => {
   const [cancelOrder] = useCancelOrderMutation();
 
   const [repayOrder] = useRepayOrderMutation();
+  const [reorder] = useReorderMutation();
 
   const toggleOrderDetails = (orderId: string) => {
     setSelectedOrder(selectedOrder === orderId ? null : orderId);
+  };
+
+  // Mua lại đơn hàng (Buy Again): Copy items sang giỏ hàng và chuyển hướng Checkout tạo đơn MỚI
+  const handleReorder = async (orderId: string) => {
+    setReorderingId(orderId);
+    try {
+      await reorder(orderId).unwrap();
+      toast.success(t("orders.reorderSuccess", "Đã thêm sản phẩm vào giỏ hàng!"));
+      navigate("/checkout");
+    } catch (error) {
+      console.error("Failed to reorder:", error);
+      toast.error(t("orders.reorderFailed", "Không thể mua lại. Vui lòng thử lại sau."));
+    } finally {
+      setReorderingId(null);
+    }
   };
 
   const handleCancelOrder = async (orderId: string) => {
@@ -288,8 +309,8 @@ const OrdersPage: React.FC = () => {
                           <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
                             {t("orders.orderNumber", { number: order.number })}
                           </h2>
-                          <Badge variant={statusVariants[order.status].variant}>
-                            {t(`orders.status.${order.status}`)}
+                          <Badge variant={statusVariants[order.status]?.variant || "neutral"}>
+                            {t(`orders.status.${order.status}`, order.status)}
                           </Badge>
                         </div>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -309,9 +330,8 @@ const OrdersPage: React.FC = () => {
                         </div>
                         {order.paymentStatus && (
                           <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              paymentStatusColors[order.paymentStatus]
-                            }`}
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${paymentStatusColors[order.paymentStatus]
+                              }`}
                           >
                             {t(`orders.paymentStatus.${order.paymentStatus}`)}
                           </span>
@@ -342,7 +362,7 @@ const OrdersPage: React.FC = () => {
                             : t("orders.cancelOrder")}
                         </Button>
                       )}
-                      {order.paymentStatus === "pending" && (
+                      {order.status === "pending" && order.paymentStatus === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -352,9 +372,23 @@ const OrdersPage: React.FC = () => {
                         >
                           {repayingOrder === order.id
                             ? t("orders.repaying")
-                            : t("orders.repayOrder")}
+                            : t("orders.payNow", "Thanh toán ngay")}
                         </Button>
                       )}
+                      {(order.status === "expired" ||
+                        order.status === "cancelled" ||
+                        order.status === "delivered") && (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleReorder(order.id)}
+                            disabled={reorderingId === order.id}
+                          >
+                            {reorderingId === order.id
+                              ? t("orders.reordering", "Đang xử lý...")
+                              : t("orders.reorder", "Mua lại")}
+                          </Button>
+                        )}
                       {order.trackingNumber && (
                         <Button
                           variant="ghost"

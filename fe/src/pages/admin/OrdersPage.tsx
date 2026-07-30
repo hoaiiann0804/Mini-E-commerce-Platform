@@ -53,6 +53,7 @@ const STATUS_CONFIG = {
   shipped: { color: 'purple', icon: '🚚' },
   delivered: { color: 'green', icon: '✅' },
   cancelled: { color: 'red', icon: '❌' },
+  expired: { color: 'default', icon: '⏰' },
 };
 
 const PAYMENT_STATUS_CONFIG = {

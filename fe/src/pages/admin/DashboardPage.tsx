@@ -16,6 +16,7 @@ const statusColors: Record<string, string> = {
   delivered:
     "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
   cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  expired: "bg-neutral-100 text-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-300",
 };
 
 const DashboardPage: React.FC = () => {
@@ -474,7 +475,7 @@ const DashboardPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            statusColors[order.status]
+                            statusColors[order.status] || "bg-neutral-100 text-neutral-800"
                           }`}
                         >
                           {t(`admin.dashboard.orderStatus.${order.status}`)}
