@@ -2,7 +2,7 @@ const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/sequelize");
 const {
   updateProductReviewStats,
-} = require("../services/product/productStats.service");
+} = require("../shared/services/product/productStats.service");
 
 class Review extends Model {
   static associate(models) {}
@@ -77,7 +77,7 @@ Review.init(
         }
       },
     },
-  }
+  },
 );
 
 module.exports = Review;

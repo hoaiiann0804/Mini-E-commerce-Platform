@@ -24,7 +24,8 @@ const Order = sequelize.define(
         'processing',
         'shipped',
         'delivered',
-        'cancelled'
+        'cancelled',
+        'expired'  // Đơn hàng hết hạn thanh toán 15 phút
       ),
       defaultValue: 'pending',
     },
@@ -160,6 +161,15 @@ const Order = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    // Thời gian hết hạn giữ chỗ tồn kho (15 phút sau khi tạo đơn pending)
+    // Sau khi Stripe thanh toán thành công, expiresAt được xóa về null
+    // Cleanup job sẽ tìm orders có expiresAt <= now() và paymentStatus = pending để hoàn kho
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'expires_at',
+    },
+
   },
   {
     tableName: 'orders',
