@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -9,45 +9,91 @@ import {
   Row,
   Tabs,
   Typography,
-} from 'antd';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+} from "antd";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Custom hooks
-import { useProductAttributes } from '@/hooks/useProductAttributes';
-import { useProductForm } from '@/hooks/useProductForm';
-import { useProductVariants } from '@/hooks/useProductVariants';
+import { useProductAttributes } from "@/hooks/useProductAttributes";
+import { useProductForm } from "@/hooks/useProductForm";
+import { useProductVariants } from "@/hooks/useProductVariants";
 
 // API hooks
-import { useCreateProductMutation } from '@/services/adminProductApi';
-import { useGetAllCategoriesQuery } from '@/services/categoryApi';
-import { useConvertBase64ToImageMutation } from '@/services/imageApi';
-import { useGetWarrantyPackagesQuery } from '@/services/warrantyApi';
+import { useCreateProductMutation } from "@/services/adminProductApi";
+import { useGetAllCategoriesQuery } from "@/services/categoryApi";
+import { useConvertBase64ToImageMutation } from "@/services/imageApi";
+import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
 
 // Components
-import AttributeModal from '@/components/modals/AttributeModal';
-import VariantModal from '@/components/modals/VariantModal';
-import ProductAttributesSection from '@/components/product/ProductAttributesSection';
-import ProductBasicInfoForm from '@/components/product/ProductBasicInfoForm';
-import ProductCategoryForm from '@/components/product/ProductCategoryForm';
-import ProductImagesForm from '@/components/product/ProductImagesForm';
-import ProductPricingForm from '@/components/product/ProductPricingForm';
-import ProductSeoForm from '@/components/product/ProductSeoForm';
-import ProductSpecificationsForm from '@/components/product/ProductSpecificationsForm';
-import ProductVariantsSection from '@/components/product/ProductVariantsSection';
-import ProductWarrantyForm from '@/components/product/ProductWarrantyForm';
-import TabNavigation from '@/components/product/TabNavigation';
-import ValidationAlerts from '@/components/product/ValidationAlerts';
+import AttributeModal from "@/components/modals/AttributeModal";
+import VariantModal from "@/components/modals/VariantModal";
+import ProductAttributesSection from "@/components/product/ProductAttributesSection";
+import ProductBasicInfoForm from "@/components/product/ProductBasicInfoForm";
+import ProductCategoryForm from "@/components/product/ProductCategoryForm";
+import ProductImagesForm from "@/components/product/ProductImagesForm";
+import ProductPricingForm from "@/components/product/ProductPricingForm";
+import ProductSeoForm from "@/components/product/ProductSeoForm";
+import ProductSpecificationsForm from "@/components/product/ProductSpecificationsForm";
+import ProductVariantsSection from "@/components/product/ProductVariantsSection";
+import ProductWarrantyForm from "@/components/product/ProductWarrantyForm";
+import TabNavigation from "@/components/product/TabNavigation";
+import ValidationAlerts from "@/components/product/ValidationAlerts";
 
 // Types
-import { AttributeGroup } from '@/services/attributeApi';
-import { ProductFormData } from '@/types';
+import { AttributeGroup } from "@/services/attributeApi";
+import { ProductFormData, ProductAttribute } from "@/types";
+
+// Types for attribute modal conversion
+interface Attribute {
+  id?: string;
+  name: string;
+  value: string;
+}
+
+// Convert ProductAttribute (from hook) to Attribute (for modal)
+const toAttribute = (
+  productAttr: ProductAttribute | null | undefined
+): Attribute | null => {
+  if (!productAttr) return null;
+  return {
+    id: productAttr.id,
+    name: productAttr.name,
+    value: productAttr.value || productAttr.values.join(", "), // Use string version if available, otherwise convert from array
+  };
+};
+
+// Convert Attribute (from modal) to ProductAttribute (for hook)
+const toProductAttribute = (attr: Attribute): ProductAttribute => {
+  return {
+    id:
+      attr.id ||
+      `attr-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    productId: "",
+    name: attr.name,
+    value: attr.value, // Store the string version for form/modal compatibility
+    values: attr.value
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v) => v),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+};
+
+// Convert ProductAttribute[] to Attribute[] for VariantModal
+const toAttributeArray = (productAttrs: ProductAttribute[]): Attribute[] => {
+  return productAttrs.map((attr) => ({
+    id: attr.id,
+    name: attr.name,
+    value: attr.value || attr.values.join(", "), // Use string version if available, otherwise convert from array
+  }));
+};
 
 // Utils
 import {
   hasBase64Images,
   processDescriptionImages,
-} from '@/utils/descriptionImageProcessor';
+} from "@/utils/descriptionImageProcessor";
 
 const { Title, Text } = Typography;
 
@@ -80,6 +126,10 @@ const CreateProductPage: React.FC = () => {
     useGetAllCategoriesQuery();
   const { isLoading: isWarrantyLoading } =
     useGetWarrantyPackagesQuery({ isActive: true });
+
+  const { isLoading: isWarrantyLoading } = useGetWarrantyPackagesQuery({
+    isActive: true,
+  });
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [convertBase64ToImage] = useConvertBase64ToImageMutation();
 
@@ -103,18 +153,38 @@ const CreateProductPage: React.FC = () => {
     closeVariantModal,
   } = useProductVariants([], form);
 
+  // Wrapper for opening attribute modal - convert ProductAttribute to Attribute
+  const openAttributeModalWrapper = (attribute?: ProductAttribute) => {
+    const converted = toAttribute(attribute);
+    openAttributeModal(converted as any);
+  };
+
+  // Wrapper for handling attribute save - convert Attribute to ProductAttribute
+  const handleAddAttributeWrapper = (attribute: Attribute) => {
+    const converted = toProductAttribute(attribute);
+    handleAddAttribute(converted);
+  };
+
+  // Wrapper for passing attributes to VariantModal - convert ProductAttribute[] to Attribute[]
+  const variantModalAttributes = toAttributeArray(attributes);
+
+  // Wrapper to convert ProductVariant to Variant for VariantModal
+  const handleEditVariant = (variant: any) => {
+    openVariantModal(variant);
+  };
+
   // Debug: Log attributes whenever they change
   useEffect(() => {
-    console.log('Current attributes in CreateProductPage:', attributes);
+    //console.log("Current attributes in CreateProductPage:", attributes);
   }, [attributes]);
 
   // Debug: Log variants whenever they change
   useEffect(() => {
-    console.log('Current variants in CreateProductPage:', variants);
+    //console.log("Current variants in CreateProductPage:", variants);
 
     // Tự động set price = 0 khi có variants
     if (variants.length > 0) {
-      form.setFieldValue('price', 0);
+      form.setFieldValue("price", 0);
     }
   }, [variants, form]);
 
@@ -123,15 +193,15 @@ const CreateProductPage: React.FC = () => {
     form.setFieldsValue({
       price: 0,
       stockQuantity: 0,
-      status: 'active',
+      status: "active",
       featured: false,
       categoryIds: [],
       specifications: [],
       warrantyPackageIds: [],
-      seoKeywords: '',
-      images: '',
-      thumbnail: '',
-      condition: 'new',
+      seoKeywords: "",
+      images: "",
+      thumbnail: "",
+      condition: "new",
     });
   }, [form]);
 
@@ -147,7 +217,7 @@ const CreateProductPage: React.FC = () => {
   } = useProductForm({
     form,
     initialValues: {
-      status: 'active',
+      status: "active",
       featured: false,
       stockQuantity: 0,
       price: 0,
@@ -164,21 +234,21 @@ const CreateProductPage: React.FC = () => {
       try {
         // Lấy tất cả giá trị từ form để đảm bảo không bị thiếu
         const allFormValues = form.getFieldsValue();
-        console.log('Form values received:', values);
-        console.log('All form values:', allFormValues);
+        //console.log("Form values received:", values);
+        //console.log("All form values:", allFormValues);
 
         const hasVariants = variants.length > 0;
 
         // Process description to convert base64 images to uploaded files
         let processedDescription =
-          allFormValues.description || values.description || '';
+          allFormValues.description || values.description || "";
 
         if (hasBase64Images(processedDescription)) {
-          console.log('Found base64 images in description, converting...');
+          //console.log("Found base64 images in description, converting...");
 
           const result = await processDescriptionImages(processedDescription, {
             productId: undefined, // Will be set after product creation
-            category: 'product',
+            category: "product",
             uploadImageFn: async ({ base64Data, options }) => {
               return await convertBase64ToImage({
                 base64Data,
@@ -189,9 +259,9 @@ const CreateProductPage: React.FC = () => {
 
           if (result.hasChanges) {
             processedDescription = result.processedDescription;
-            console.log(
-              `Converted ${result.uploadedImages.length} base64 images to uploaded files`
-            );
+            //console.log(
+            //   `Converted ${result.uploadedImages.length} base64 images to uploaded files`
+            // );
           }
         }
 
@@ -209,28 +279,22 @@ const CreateProductPage: React.FC = () => {
           price: hasVariants
             ? 0
             : parseFloat(
-                (allFormValues.price || values.price || '0').toString()
+                (allFormValues.price || values.price || "0").toString()
               ) || 0,
-          comparePrice: hasVariants
-            ? undefined
-            : (() => {
-                const compareAtPrice =
-                  allFormValues.compareAtPrice || values.compareAtPrice;
-                return compareAtPrice &&
-                  parseFloat(compareAtPrice.toString()) > 0
-                  ? parseFloat(compareAtPrice.toString())
-                  : undefined;
-              })(),
-          compareAtPrice: hasVariants
-            ? undefined
-            : (() => {
-                const compareAtPrice =
-                  allFormValues.compareAtPrice || values.compareAtPrice;
-                return compareAtPrice &&
-                  parseFloat(compareAtPrice.toString()) > 0
-                  ? parseFloat(compareAtPrice.toString())
-                  : undefined;
-              })(),
+          comparePrice: (() => {
+            const compareAtPrice =
+              allFormValues.compareAtPrice || values.compareAtPrice;
+            return compareAtPrice && parseFloat(compareAtPrice.toString()) > 0
+              ? parseFloat(compareAtPrice.toString())
+              : undefined;
+          })(),
+          compareAtPrice: (() => {
+            const compareAtPrice =
+              allFormValues.compareAtPrice || values.compareAtPrice;
+            return compareAtPrice && parseFloat(compareAtPrice.toString()) > 0
+              ? parseFloat(compareAtPrice.toString())
+              : undefined;
+          })(),
           // For variant products, set stock to 0
           stock: hasVariants
             ? 0
@@ -238,7 +302,7 @@ const CreateProductPage: React.FC = () => {
                 (
                   allFormValues.stockQuantity ||
                   values.stockQuantity ||
-                  '0'
+                  "0"
                 ).toString()
               ) || 0,
           stockQuantity: hasVariants
@@ -247,21 +311,24 @@ const CreateProductPage: React.FC = () => {
                 (
                   allFormValues.stockQuantity ||
                   values.stockQuantity ||
-                  '0'
+                  "0"
                 ).toString()
               ) || 0,
           sku: hasVariants
             ? undefined
             : allFormValues.sku || `PROD-${Date.now()}`,
           status: allFormValues.status || values.status || 'active',
+
+            : allFormValues.sku || values.sku || `PROD-${Date.now()}`,
+          status: allFormValues.status || values.status || "active",
           featured: allFormValues.featured || values.featured || false,
           categoryIds: allFormValues.categoryIds || values.categoryIds || [],
           images: (() => {
             const images = allFormValues.images || values.images;
             if (!images) return [];
-            if (typeof images === 'string') {
+            if (typeof images === "string") {
               return images
-                .split('\n')
+                .split("\n")
                 .map((img) => img.trim())
                 .filter((img) => img);
             }
@@ -270,13 +337,13 @@ const CreateProductPage: React.FC = () => {
             }
             return [];
           })(),
-          thumbnail: (
+            thumbnail: (
             allFormValues.thumbnail ||
             values.thumbnail ||
-            ''
+            ""
           ).substring(0, 1000),
           // Additional fields
-          condition: allFormValues.condition || values.condition || 'new',
+          condition: allFormValues.condition || values.condition || "new",
           inStock: hasVariants
             ? true
             : allFormValues.inStock !== undefined
@@ -289,8 +356,8 @@ const CreateProductPage: React.FC = () => {
             if (!specs) return [];
             if (Array.isArray(specs)) {
               return specs.map((spec) => ({
-                name: spec.name || '',
-                value: spec.value || '',
+                name: spec.name || "",
+                value: spec.value || "",
               }));
             }
             return [];
@@ -301,9 +368,9 @@ const CreateProductPage: React.FC = () => {
             const keywords =
               allFormValues.searchKeywords || values.searchKeywords;
             if (!keywords) return [];
-            if (typeof keywords === 'string') {
+            if (typeof keywords === "string") {
               return keywords
-                .split(',')
+                .split(",")
                 .map((kw) => kw.trim())
                 .filter((kw) => kw.length > 0);
             }
@@ -316,19 +383,20 @@ const CreateProductPage: React.FC = () => {
             attributes.length > 0
               ? attributes.map((attr) => ({
                   name: attr.name,
-                  value: attr.value,
+                  value: attr.values.join(", "), // Convert array to comma-separated string
                 }))
               : [],
           variants: hasVariants
             ? variants.map((variant, index) => ({
                 name: variant.name,
                 variantName: variant.name,
-                price: parseFloat(variant.price?.toString() || '0') || 0,
+                price: parseFloat(variant.price?.toString() || "0") || 0,
                 compareAtPrice: variant.compareAtPrice
                   ? parseFloat(variant.compareAtPrice.toString())
                   : undefined,
-                stockQuantity: parseInt(variant.stock?.toString() || '0') || 0,
-                stock: parseInt(variant.stock?.toString() || '0') || 0,
+                stockQuantity:
+                  parseInt(variant.stockQuantity?.toString() || "0") || 0,
+                stock: parseInt(variant.stockQuantity?.toString() || "0") || 0,
                 sku: variant.sku || `VAR-${Date.now()}-${index + 1}`,
                 isDefault: index === 0, // First variant is default
                 isAvailable: true,
@@ -355,9 +423,9 @@ const CreateProductPage: React.FC = () => {
           seoKeywords: (() => {
             const keywords = allFormValues.seoKeywords || values.seoKeywords;
             if (!keywords) return [];
-            if (typeof keywords === 'string') {
+            if (typeof keywords === "string") {
               return keywords
-                .split(',')
+                .split(",")
                 .map((kw) => kw.trim())
                 .filter((kw) => kw);
             }
@@ -368,50 +436,50 @@ const CreateProductPage: React.FC = () => {
           })(),
         };
 
-        console.log('Sending product data to server:', productData);
-        console.log('Product data type check:', {
-          searchKeywords: {
-            type: typeof productData.searchKeywords,
-            isArray: Array.isArray(productData.searchKeywords),
-          },
-          seoKeywords: {
-            type: typeof productData.seoKeywords,
-            isArray: Array.isArray(productData.seoKeywords),
-          },
-          specifications: {
-            type: typeof productData.specifications,
-            isArray: Array.isArray(productData.specifications),
-          },
-          categoryIds: {
-            type: typeof productData.categoryIds,
-            isArray: Array.isArray(productData.categoryIds),
-          },
-          warrantyPackageIds: {
-            type: typeof productData.warrantyPackageIds,
-            isArray: Array.isArray(productData.warrantyPackageIds),
-          },
-          attributes: {
-            type: typeof productData.attributes,
-            isArray: Array.isArray(productData.attributes),
-          },
-          variants: {
-            type: typeof productData.variants,
-            isArray: Array.isArray(productData.variants),
-          },
-          images: {
-            type: typeof productData.images,
-            isArray: Array.isArray(productData.images),
-          },
-          thumbnail: {
-            type: typeof productData.thumbnail,
-            value: productData.thumbnail,
-          },
-        });
+        //console.log("Sending product data to server:", productData);
+        //console.log("Product data type check:", {
+          // searchKeywords: {
+          //   type: typeof productData.searchKeywords,
+          //   isArray: Array.isArray(productData.searchKeywords),
+          // },
+          // seoKeywords: {
+          //   type: typeof productData.seoKeywords,
+          //   isArray: Array.isArray(productData.seoKeywords),
+          // },
+          // specifications: {
+          //   type: typeof productData.specifications,
+          //   isArray: Array.isArray(productData.specifications),
+          // },
+          // categoryIds: {
+          //   type: typeof productData.categoryIds,
+          //   isArray: Array.isArray(productData.categoryIds),
+          // },
+          // warrantyPackageIds: {
+          //   type: typeof productData.warrantyPackageIds,
+          //   isArray: Array.isArray(productData.warrantyPackageIds),
+          // },
+          // attributes: {
+          //   type: typeof productData.attributes,
+          //   isArray: Array.isArray(productData.attributes),
+          // },
+          // variants: {
+          //   type: typeof productData.variants,
+          //   isArray: Array.isArray(productData.variants),
+          // },
+          // images: {
+          //   type: typeof productData.images,
+          //   isArray: Array.isArray(productData.images),
+          // },
+          // thumbnail: {
+          //   type: typeof productData.thumbnail,
+          //   value: productData.thumbnail,
+          // },
+        // });
         await createProduct(productData).unwrap();
-        message.success('Tạo sản phẩm thành công!');
-        navigate('/admin/products');
+        message.success("Tạo sản phẩm thành công!");
+        navigate("/admin/products");
       } catch (error: any) {
-        console.error('Failed to create product:', error);
+        console.error("Failed to create product:", error);
         const errorMessage = formatErrorMessage(error);
         message.error(errorMessage);
       }
@@ -436,7 +504,7 @@ const CreateProductPage: React.FC = () => {
       // Multiple errors - format nicely
       const errorList = error.data.errors
         .map((err: any) => err.message || `${err.field}: Lỗi validation`)
-        .join('\n• ');
+        .join("\n• ");
       return `Có ${error.data.errors.length} lỗi cần khắc phục:\n• ${errorList}`;
     }
 
@@ -444,7 +512,7 @@ const CreateProductPage: React.FC = () => {
       return error.message;
     }
 
-    return 'Tạo sản phẩm thất bại. Vui lòng thử lại.';
+    return "Tạo sản phẩm thất bại. Vui lòng thử lại.";
   };
 
   const categories = Array.isArray(categoriesResponse?.data)
@@ -455,15 +523,15 @@ const CreateProductPage: React.FC = () => {
 
   // Tab order constant
   const TAB_ORDER = [
-    'basic',
-    'specifications',
-    'attributes',
-    'variants',
-    'pricing',
-    'category',
-    'images',
-    'warranty',
-    'seo',
+    "basic",
+    "specifications",
+    "attributes",
+    "variants",
+    "pricing",
+    "category",
+    "images",
+    "warranty",
+    "seo",
   ];
 
   // Hàm kiểm tra xem tab có được phép truy cập không
@@ -488,7 +556,7 @@ const CreateProductPage: React.FC = () => {
   const handleTabChange = (key: string) => {
     if (!isTabAccessible(key)) {
       // Hiển thị thông báo nếu tab chưa được phép truy cập
-      alert('Vui lòng hoàn thành các bước trước đó trước khi truy cập tab này');
+      alert("Vui lòng hoàn thành các bước trước đó trước khi truy cập tab này");
       return;
     }
     setActiveTab(key);
@@ -496,21 +564,21 @@ const CreateProductPage: React.FC = () => {
 
   const tabItems = [
     {
-      key: 'basic',
+      key: "basic",
       label: (
         <span
           style={{
             color: completedSteps.basic
-              ? '#52c41a'
-              : isTabAccessible('basic')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("basic")
+                ? "#000"
+                : "#999",
           }}
         >
-          1. Thông tin cơ bản {completedSteps.basic ? '✓' : ''}
+          1. Thông tin cơ bản {completedSteps.basic ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('basic'),
+      disabled: !isTabAccessible("basic"),
       children: (
         <>
           <ProductBasicInfoForm
@@ -527,22 +595,22 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'specifications',
+      key: "specifications",
       label: (
         <span
           style={{
             color: completedSteps.specifications
-              ? '#52c41a'
-              : isTabAccessible('specifications')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("specifications")
+                ? "#000"
+                : "#999",
           }}
         >
-          2. Thông số kỹ thuật <span style={{ color: '#ff4d4f' }}>*</span>{' '}
-          {completedSteps.specifications ? '✓' : ''}
+          2. Thông số kỹ thuật <span style={{ color: "#ff4d4f" }}>*</span>{" "}
+          {completedSteps.specifications ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('specifications'),
+      disabled: !isTabAccessible("specifications"),
       children: (
         <>
           <ProductSpecificationsForm initialSpecifications={[]} />
@@ -556,22 +624,22 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'attributes',
+      key: "attributes",
       label: (
         <span
           style={{
             color: completedSteps.attributes
-              ? '#52c41a'
-              : isTabAccessible('attributes')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("attributes")
+                ? "#000"
+                : "#999",
           }}
         >
-          3. Thuộc tính <span style={{ color: '#ff4d4f' }}>*</span>{' '}
-          {completedSteps.attributes ? '✓' : ''}
+          3. Thuộc tính <span style={{ color: "#ff4d4f" }}>*</span>{" "}
+          {completedSteps.attributes ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('attributes'),
+      disabled: !isTabAccessible("attributes"),
       children: (
         <>
           <ProductAttributesSection
@@ -590,28 +658,28 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'variants',
+      key: "variants",
       label: (
         <span
           style={{
             color: completedSteps.variants
-              ? '#52c41a'
-              : isTabAccessible('variants')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("variants")
+                ? "#000"
+                : "#999",
           }}
         >
-          4. Biến thể <span style={{ color: '#ff4d4f' }}>*</span>{' '}
-          {completedSteps.variants ? '✓' : ''}
+          4. Biến thể <span style={{ color: "#ff4d4f" }}>*</span>{" "}
+          {completedSteps.variants ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('variants'),
+      disabled: !isTabAccessible("variants"),
       children: (
         <>
           <ProductVariantsSection
             variants={variants}
             onAddVariant={() => openVariantModal()}
-            onEditVariant={(variant) => openVariantModal(variant)}
+            onEditVariant={handleEditVariant}
             onDeleteVariant={handleDeleteVariant}
           />
           <TabNavigation
@@ -624,21 +692,21 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'pricing',
+      key: "pricing",
       label: (
         <span
           style={{
             color: completedSteps.pricing
-              ? '#52c41a'
-              : isTabAccessible('pricing')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("pricing")
+                ? "#000"
+                : "#999",
           }}
         >
-          5. Giá & Kho hàng {completedSteps.pricing ? '✓' : ''}
+          5. Giá & Kho hàng {completedSteps.pricing ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('pricing'),
+      disabled: !isTabAccessible("pricing"),
       children: (
         <>
           <ProductPricingForm hasVariants={variants.length > 0} />
@@ -652,21 +720,21 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'category',
+      key: "category",
       label: (
         <span
           style={{
             color: completedSteps.category
-              ? '#52c41a'
-              : isTabAccessible('category')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("category")
+                ? "#000"
+                : "#999",
           }}
         >
-          6. Phân loại {completedSteps.category ? '✓' : ''}
+          6. Phân loại {completedSteps.category ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('category'),
+      disabled: !isTabAccessible("category"),
       children: (
         <>
           <ProductCategoryForm
@@ -683,24 +751,24 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'images',
+      key: "images",
       label: (
         <span
           style={{
             color: completedSteps.images
-              ? '#52c41a'
-              : isTabAccessible('images')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("images")
+                ? "#000"
+                : "#999",
           }}
         >
-          7. Hình ảnh {completedSteps.images ? '✓' : ''}
+          7. Hình ảnh {completedSteps.images ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('images'),
+      disabled: !isTabAccessible("images"),
       children: (
         <>
-          <ProductImagesForm />
+          <ProductImagesForm form={form} />
           <TabNavigation
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -711,21 +779,21 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'warranty',
+      key: "warranty",
       label: (
         <span
           style={{
             color: completedSteps.warranty
-              ? '#52c41a'
-              : isTabAccessible('warranty')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("warranty")
+                ? "#000"
+                : "#999",
           }}
         >
-          8. Bảo hành {completedSteps.warranty ? '✓' : ''}
+          8. Bảo hành {completedSteps.warranty ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('warranty'),
+      disabled: !isTabAccessible("warranty"),
       children: (
         <>
           <ProductWarrantyForm form={form} />
@@ -739,21 +807,21 @@ const CreateProductPage: React.FC = () => {
       ),
     },
     {
-      key: 'seo',
+      key: "seo",
       label: (
         <span
           style={{
             color: completedSteps.seo
-              ? '#52c41a'
-              : isTabAccessible('seo')
-                ? '#000'
-                : '#999',
+              ? "#52c41a"
+              : isTabAccessible("seo")
+                ? "#000"
+                : "#999",
           }}
         >
-          9. SEO {completedSteps.seo ? '✓' : ''}
+          9. SEO {completedSteps.seo ? "✓" : ""}
         </span>
       ),
-      disabled: !isTabAccessible('seo'),
+      disabled: !isTabAccessible("seo"),
       children: (
         <>
           <ProductSeoForm />
@@ -774,7 +842,7 @@ const CreateProductPage: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: "24px" }}>
       {/* Header */}
       <Card style={{ marginBottom: 24 }}>
         <Row justify="space-between" align="middle">
@@ -789,7 +857,7 @@ const CreateProductPage: React.FC = () => {
           <Col>
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/admin/products')}
+              onClick={() => navigate("/admin/products")}
               style={{ marginRight: 8 }}
             >
               Quay lại
@@ -806,7 +874,7 @@ const CreateProductPage: React.FC = () => {
           onFinish={handleSubmit}
           onFieldsChange={validateForm}
           initialValues={{
-            status: 'active',
+            status: "active",
             featured: false,
             stockQuantity: 0,
             price: 0,
@@ -835,8 +903,8 @@ const CreateProductPage: React.FC = () => {
         <AttributeModal
           visible={attributeModalVisible}
           onClose={closeAttributeModal}
-          attribute={editingAttribute}
-          onSave={handleAddAttribute}
+          attribute={toAttribute(editingAttribute)}
+          onSave={handleAddAttributeWrapper}
         />
       )}
 
@@ -846,7 +914,7 @@ const CreateProductPage: React.FC = () => {
           onClose={closeVariantModal}
           variant={editingVariant}
           onSave={handleAddVariant}
-          attributes={attributes}
+          attributes={variantModalAttributes as any}
         />
       )}
     </div>

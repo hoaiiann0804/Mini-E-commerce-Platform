@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useGetDealsQuery } from "@/services/productApi";
 import ProductCard from "@/components/features/ProductCard";
@@ -5,6 +6,14 @@ import ProductListCard from "@/components/features/ProductListCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Select from "@/components/common/Select";
 import { Product } from "@/types/product.types";
+import { useState, useMemo } from 'react';
+import { useGetDealsQuery } from '@/services/productApi';
+import ProductCard from '@/components/features/ProductCard';
+import ProductListCard from '@/components/features/ProductListCard';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import Select from '@/components/common/Select';
+import { Product } from '@/types/product.types';
+
 
 const DealsPage: React.FC = () => {
   const [sortOption, setSortOption] = useState("discount_desc");
@@ -27,7 +36,10 @@ const DealsPage: React.FC = () => {
   const formattedProducts = useMemo<Product[]>(() => {
     if (!dealsData?.data) return [];
 
+
     return dealsData.data.map((item: any) => {
+    return dealsData.data.map((item: Product) => {
+
       // Chuyển đổi chuỗi giá thành số
       const price =
         typeof item.price === "string" ? parseFloat(item.price) : item.price;
@@ -36,6 +48,13 @@ const DealsPage: React.FC = () => {
           ? parseFloat(item.compareAtPrice)
           : item.compareAtPrice;
 
+      // Tính discountPercentage từ compareAtPrice và price
+      const discountPercentage =
+        compareAtPrice && compareAtPrice > price
+          ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+          : 0;
+
+      // Tạo đối tượng ratings nếu không có
 
       const ratings = {
         average: 4.5, 
@@ -51,8 +70,12 @@ const DealsPage: React.FC = () => {
           item.createdAt &&
           new Date(item.createdAt) >
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Sản phẩm mới nếu được tạo trong 7 ngày qua
+
         categoryName: item.categories?.[0]?.name || "Uncategorized",
         stock: item.stockQuantity || 0,
+
+        // Sử dụng categoryName thay vì categories
+        stock: item.stock || 0,
       } as Product;
     });
   }, [dealsData]);
@@ -213,19 +236,29 @@ const DealsPage: React.FC = () => {
                   : "space-y-8"
               }
             >
+
               {formattedProducts.map((product) =>
                 viewMode === "grid" ? (
+              {formattedProducts.map((product: Product) =>
+                viewMode === 'grid' ? (
                   <ProductCard
                     key={product.id}
                     {...product}
-                    // Đảm bảo hiển thị đúng phần trăm giảm giá nếu API trả về
-                    discountPercentage={product.discountPercentage}
+                    // Tính discountPercentage từ compareAtPrice và price
+                    discountPercentage={
+                      product.compareAtPrice && product.compareAtPrice > product.price
+                        ? Math.round(
+                            ((product.compareAtPrice - product.price) /
+                              product.compareAtPrice) *
+                              100
+                          )
+                        : 0
+                    }
                   />
                 ) : (
                   <ProductListCard
                     key={product.id}
                     {...product}
-                    discountPercentage={product.discountPercentage}
                   />
                 )
               )}

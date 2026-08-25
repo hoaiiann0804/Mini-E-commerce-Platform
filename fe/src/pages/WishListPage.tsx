@@ -23,13 +23,12 @@ const WishListPage = () => {
   const limit = 8;
 
   const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
-  console.log("WishList: ", wishlistItems);
+  //console.log("WishList: ", wishlistItems);
 
   useEffect(() => {
     dispatch(initiaLizeWishlist());
   }, [dispatch]);
 
-  
   // Calculate pagination
   const totalPages = Math.ceil(wishlistItems.length / limit);
   const paginatedItems = useMemo(() => {
@@ -52,7 +51,6 @@ const WishListPage = () => {
 
   return (
     <section className="bg-gray-50 py-8 antialiased dark:bg-gray-900 md:py-12">
- 
       <div className="mx-auto max-w-screen-xl 2xl:px-0 mt-2">
         <WishListCard items={paginatedItems} />
       </div>

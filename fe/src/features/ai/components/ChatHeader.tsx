@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon, LightningIcon } from './icons/index';
-import { GeminiServiceType } from '../services/geminiService';
+import { GeminiService } from '../services/geminiService';
 
 interface ChatHeaderProps {
   onClose: () => void;
-  geminiService: GeminiServiceType;
+  geminiService: GeminiService;
 }
 
 /**
@@ -30,10 +30,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, geminiService }) => {
           </div>
           <div>
             <h3 className="font-bold text-xl tracking-tight">
-              {t('chat.title') || 'Trợ lý AI'}
+              {t('chat.title')}
             </h3>
             <p className="text-sm text-white/90 font-medium">
-              AI Shopping Assistant
+              {t('chat.subtitle')}
             </p>
           </div>
         </div>
@@ -42,7 +42,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, geminiService }) => {
         <button
           onClick={onClose}
           className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
-          aria-label="Đóng chat"
+          aria-label={t('chat.closeChat')}
         >
           <CloseIcon />
         </button>
@@ -55,20 +55,28 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, geminiService }) => {
             <>
               <div className="flex items-center space-x-2 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
                 <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
-                <span className="text-xs font-semibold">Gemini AI</span>
+                <span className="text-xs font-semibold">
+                  {t('chat.status.geminiAI')}
+                </span>
               </div>
               <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
-                <span className="text-xs text-white/90">Smart Mode</span>
+                <span className="text-xs text-white/90">
+                  {t('chat.status.smartMode')}
+                </span>
               </div>
             </>
           ) : (
             <>
               <div className="flex items-center space-x-2 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
                 <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse shadow-lg"></div>
-                <span className="text-xs font-semibold">Demo Mode</span>
+                <span className="text-xs font-semibold">
+                  {t('chat.status.demoMode')}
+                </span>
               </div>
               <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
-                <span className="text-xs text-white/90">Limited</span>
+                <span className="text-xs text-white/90">
+                  {t('chat.status.limited')}
+                </span>
               </div>
             </>
           )}

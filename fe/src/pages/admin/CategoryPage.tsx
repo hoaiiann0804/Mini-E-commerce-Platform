@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
+
 import {
   PencilIcon,
   TrashIcon,
@@ -37,6 +38,7 @@ interface CategoryFormData {
 
 const CategoryPage: React.FC = () => {
   // const navigate = useNavigate();
+
   const [messageApi, contextHolder] = message.useMessage();
 
   // API hooks
@@ -758,6 +760,8 @@ const CategoryPage: React.FC = () => {
               </label>
               <Textarea
                 value={formData.description ?? ''}
+
+                value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
                 }
@@ -797,7 +801,7 @@ const CategoryPage: React.FC = () => {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <label className="block font-medium mb-1 text-neutral-700 dark:text-neutral-300">
                   Thứ tự sắp xếp
@@ -805,6 +809,8 @@ const CategoryPage: React.FC = () => {
                 <Input
                   type="number"
                   value={formData.sortOrder?.toString() ?? '0'}
+
+                  value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
                       'sortOrder',
@@ -889,6 +895,8 @@ const CategoryPage: React.FC = () => {
               </label>
               <Textarea
                 value={formData.description ?? ''}
+
+                value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
                 }
@@ -936,6 +944,7 @@ const CategoryPage: React.FC = () => {
                 <Input
                   type="number"
                   value={formData.sortOrder?.toString() ?? '0'}
+                  value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
                       'sortOrder',

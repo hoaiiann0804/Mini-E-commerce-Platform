@@ -49,7 +49,7 @@ export const WishlsitApi = api.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: WishListResponse) => {
-        console.log("Raw API response:", response);
+        //console.log("Raw API response:", response);
         return {
           id: null,
           items: response.data || [],

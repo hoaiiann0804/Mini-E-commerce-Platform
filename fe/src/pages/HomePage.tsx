@@ -1,7 +1,8 @@
 import { PremiumButton } from "@/components/common";
+
 import { Product } from "@/types/product.types";
 
-// Define the product item type from the API response
+
 interface ProductItem {
   id: string;
   name: string;
@@ -15,15 +16,16 @@ interface ProductItem {
   rating?: number;
   reviewCount?: number;
   stock?: number;
+
   createdAt: string;
   updatedAt: string;
+
   [key: string]: any;
 }
 
 import ProductCard from "@/components/features/ProductCard";
 import { HeroSection } from "@/components/sections";
 import {
-  SectionLoading,
   ProductCardSkeleton,
   CategoryCardSkeleton,
 } from "@/components/common/LoadingState";
@@ -44,13 +46,14 @@ import {
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
+
 /**
  * HomePage component - Main landing page with hero, featured products, and categories
  */
+
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
 
-  // API queries with enhanced state management
   const featuredProductsQuery = useGetFeaturedProductsQuery({ limit: 4 });
   const bestSellersQuery = useGetBestSellersQuery({ limit: 4 });
   const newArrivalsQuery = useGetNewArrivalsQuery({ limit: 4 });
@@ -94,6 +97,52 @@ const HomePage: React.FC = () => {
       count: category.productCount || 0,
       slug: category.slug,
     })) || [];
+
+  const mapProductToCardProps = (product: ProductItem) => {
+    const images =
+      product.images && product.images.length > 0
+        ? product.images
+        : product.thumbnail
+          ? [product.thumbnail]
+          : [];
+
+    const rawAverage =
+      (product as any).ratings?.average ??
+      (product as any).ratings ?? // sometimes ratings is a number
+      (product as any).rating?.average ??
+      (product as any).rating ?? // sometimes rating is a number
+      0;
+
+    const rawCount =
+      (product as any).ratings?.count ??
+      (product as any).rating?.count ??
+      product.reviewCount ??
+      (product as any).reviewCount ??
+      0;
+
+    const average = Number(rawAverage) || 0;
+    const count = Number(rawCount) || 0;
+
+    return {
+      id: product.id,
+      name: product.name ?? "",
+      price: product.price ?? 0,
+      compareAtPrice: (product as any).compareAtPrice,
+      thumbnail: product.thumbnail ?? "",
+      slug: product.slug ?? "",
+      images,
+      description: product.description ?? "",
+      categoryId: product.categoryId ?? "",
+      categoryName: product.categoryName ?? "",
+      ratings: {
+        average,
+        count,
+      },
+      stock: product.stock ?? 0,
+      createdAt: (product as any).createdAt ?? new Date().toISOString(),
+      updatedAt: (product as any).updatedAt ?? new Date().toISOString(),
+    };
+  };
 
   return (
     <PageLayout
@@ -159,6 +208,7 @@ const HomePage: React.FC = () => {
             {featuredProducts.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
+
                 {...product}
                 images={product.images || []}
                 description={product.description || ""}
@@ -173,6 +223,7 @@ const HomePage: React.FC = () => {
                     : undefined
                 }
                 stock={product.stock || 0}
+                {...mapProductToCardProps(product)}
               />
             ))}
           </ProductGrid>
@@ -228,6 +279,7 @@ const HomePage: React.FC = () => {
             {bestSellers.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
+
                 {...product}
                 images={product.images || []}
                 description={product.description || ""}
@@ -242,6 +294,7 @@ const HomePage: React.FC = () => {
                     : undefined
                 }
                 stock={product.stock || 0}
+                {...mapProductToCardProps(product)}
               />
             ))}
           </ProductGrid>
@@ -311,7 +364,8 @@ const HomePage: React.FC = () => {
                     : undefined
                 }
                 stock={product.stock || 0}
-              />
+
+                {...mapProductToCardProps(product)}              />
             ))}
           </ProductGrid>
         ) : (

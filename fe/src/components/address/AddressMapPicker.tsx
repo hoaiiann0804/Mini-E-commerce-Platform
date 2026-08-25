@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Box, TextField, CircularProgress } from '@mui/material';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { normalizeAddress, renderAddress } from '@/utils/addressFormatter';
 
 // Fix for default marker icons
 const DefaultIcon = L.icon({
@@ -23,12 +24,27 @@ interface MapPosition {
 }
 
 interface AddressMapPickerProps {
-  onLocationSelect: (lat: number, lng: number, address: string) => void;
+  onLocationSelect: (
+    lat: number,
+    lng: number,
+    address: string,
+    normalized?: NormalizedAddress
+  ) => void;
   initialPosition?: MapPosition;
   address?: string;
   onAddressChange?: (address: string) => void;
   disabled?: boolean;
 }
+
+type NormalizedAddress = {
+  address1: string;
+  ward: string;
+  province: string;
+  country: string;
+  zip: string;
+  lat: number;
+  lng: number;
+};
 
 const DEFAULT_POSITION: [number, number] = [10.762622, 106.660172]; // Ho Chi Minh City
 
@@ -117,56 +133,21 @@ const AddressMapPicker: React.FC<AddressMapPickerProps> = ({
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
       );
       const data = await response.json();
-
-      if (data.display_name) {
-        const newAddress = data.display_name;
-        setAddress(newAddress);
-        if (onAddressChange) onAddressChange(newAddress);
-        onLocationSelect(lat, lng, newAddress);
+      console.log(data.address)
+      if (data.address) {
+        const normalized = normalizeAddress(data) as NormalizedAddress;
+        const formattedAddress = renderAddress(normalized);
+        setAddress(formattedAddress);
+        if (onAddressChange) onAddressChange(formattedAddress);
+        onLocationSelect(lat, lng, formattedAddress, normalized);
       }
     } catch (error) {
       console.error('Error reverse geocoding:', error);
     }
   }, [onAddressChange, onLocationSelect]);
 
-    // Search for locations
-    const searchLocation = async (query: string) => {
-        if (!query.trim()) {
-            setSearchResults([]);
-            return;
-        }
 
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
-            );
-            const results = await response.json();
-            setSearchResults(results);
-        } catch (error) {
-            console.error('Error searching location:', error);
-            setSearchResults([]);
-        }
-    };
 
-    // Handle search input change
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        searchLocation(query);
-    };
-
-    // Handle search result selection
-    const handleSelectResult = async (result: any) => {
-        const lat = parseFloat(result.lat);
-        const lng = parseFloat(result.lon);
-
-        if (map) {
-            updateMarkerPosition(map, lat, lng);
-            await reverseGeocode(lat, lng);
-            setSearchQuery('');
-            setSearchResults([]);
-        }
-    };
 
     // Handle address input blur
     const handleAddressBlur = () => {
@@ -224,6 +205,7 @@ const AddressMapPicker: React.FC<AddressMapPickerProps> = ({
             setAddress(newAddress);
             if (onAddressChange) onAddressChange(newAddress);
           }}
+          onBlur={handleAddressBlur}
           disabled={disabled}
           multiline
           rows={2}

@@ -210,24 +210,53 @@
   },
   "chat": {
     "title": "Trợ Lý Mua Sắm AI",
+    "subtitle": "Trợ lý mua sắm AI",
     "greeting": "Xin chào! Tôi là trợ lý mua sắm AI. Tôi có thể giúp gì cho bạn hôm nay?",
     "greetingWithName": "Xin chào {{name}}! Tôi là trợ lý mua sắm AI. Tôi có thể giúp gì cho bạn hôm nay?",
     "typing": "Đang nhập...",
     "placeholder": "Bạn cần hỗ trợ gì không?",
     "typeSomething": "Nhập câu hỏi của bạn...",
     "send": "Gửi",
+    "poweredBy": "Cung cấp bởi",
+    "confirmClear": "Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?",
+    "helpPrompt": "Tôi cần trợ giúp về cách sử dụng chatbot",
     "openChat": "Mở chat",
     "closeChat": "Đóng chat",
     "close": "Đóng",
     "expand": "Phóng to",
     "minimize": "Thu nhỏ",
+    "actions": {
+      "clearChat": "Xóa cuộc trò chuyện",
+      "help": "Trợ giúp"
+    },
+    "status": {
+      "geminiAI": "Gemini AI",
+      "smartMode": "Chế độ thông minh",
+      "demoMode": "Chế độ demo",
+      "limited": "Giới hạn"
+    },
     "suggestions": {
+      "continueDemo": "Tiếp tục với chế độ demo",
       "findProducts": "Tìm sản phẩm mới",
       "viewPromotions": "Xem khuyến mãi",
       "howToOrder": "Cách đặt hàng",
       "returnPolicy": "Chính sách đổi trả",
       "tryAgain": "Thử lại",
       "contactSupport": "Liên hệ hỗ trợ"
+    },
+    "quickReplies": {
+      "viewTshirts": "Xem áo thun",
+      "viewJeans": "Xem quần jean",
+      "viewSneakers": "Xem giày sneaker",
+      "searchOtherProducts": "Tìm sản phẩm khác",
+      "paymentMethods": "Phương thức thanh toán",
+      "shippingFee": "Phí vận chuyển",
+      "deliveryTime": "Thời gian giao hàng",
+      "discountCode": "Mã giảm giá",
+      "exchangeReturnProcess": "Cách thức đổi trả",
+      "refundHow": "Hoàn tiền như thế nào",
+      "defectiveProduct": "Sản phẩm lỗi",
+      "contactCustomerService": "Liên hệ bộ phận CSKH"
     },
     "responses": {
       "productSearch": "Tôi đã tìm thấy một số sản phẩm phù hợp với \"{{query}}\". Bạn có thể quan tâm đến các sản phẩm sau:\n\n1. Áo thun unisex cotton - 299.000đ\n2. Quần jean slim fit - 599.000đ\n3. Giày sneaker thể thao - 799.000đ\n\nBạn muốn xem chi tiết sản phẩm nào?",
@@ -240,8 +269,15 @@
       "timeout": "Yêu cầu mất quá nhiều thời gian. Đang sử dụng phản hồi mẫu.",
       "notFound": "Không thể kết nối đến dịch vụ AI. Đang sử dụng phản hồi mẫu.",
       "tooManyRequests": "Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.",
-      "serverError": "Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau."
+      "serverError": "Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.",
+      "demoFallbackMessage": "⚠️ {{error}}\n\nĐang chuyển sang chế độ demo. Bạn vẫn có thể chat nhưng sẽ nhận phản hồi mẫu."
     }
+  },
+  "address": {
+    "address": "Địa chỉ",
+    "province": "Tỉnh / Thành phố",
+    "ward": "Phường / Xã",
+    "country": "Quốc gia"
   },
   "common": {
     "loading": "Đang tải...",
@@ -268,7 +304,6 @@
     "goHome": "Về Trang Chủ",
     "login": "Đăng Nhập"
   },
-
   "cart": {
     "title": "Giỏ Hàng Của Bạn",
     "emptyCart": {
@@ -301,9 +336,11 @@
       "loadError": "Không thể tải giỏ hàng từ server. Đang sử dụng dữ liệu local."
     }
   },
-
   "checkout": {
     "title": "Thanh Toán",
+    "selectAddress": "Chọn địa chỉ",
+    "useCustomAddress": "Tùy chọn địa chỉ",
+    "manageAddresses": "Quản lý địa chỉ",
     "emptyCart": {
       "title": "Giỏ hàng của bạn đang trống",
       "message": "Thêm một số sản phẩm vào giỏ hàng trước khi tiến hành thanh toán.",
@@ -449,7 +486,8 @@
       "processing": "Đang xử lý",
       "shipped": "Đã gửi hàng",
       "delivered": "Đã giao hàng",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "expired": "Đã hết hạn"
     },
     "paymentStatus": {
       "pending": "Chờ thanh toán",
@@ -460,6 +498,11 @@
     "viewDetails": "Xem Chi Tiết",
     "hideDetails": "Ẩn Chi Tiết",
     "writeReview": "Viết Đánh Giá",
+    "reorder": "Mua lại",
+    "reordering": "Đang xử lý...",
+    "reorderSuccess": "Đã thêm sản phẩm vào giỏ hàng!",
+    "reorderFailed": "Không thể mua lại. Vui lòng thử lại sau.",
+    "payNow": "Thanh toán ngay",
     "items": "{{count}} sản phẩm",
     "items_one": "{{count}} sản phẩm",
     "items_other": "{{count}} sản phẩm",
@@ -507,6 +550,171 @@
     }
   },
   "admin": {
+    "auth": {
+      "verifyingAccess": "Đang xác thực quyền truy cập..."
+    },
+    "products": {
+      "status": {
+        "active": "Đang bán",
+        "inactive": "Tạm dừng",
+        "draft": "Bản nháp"
+      },
+      "variantModal": {
+        "titleEdit": "🎭 Chỉnh sửa biến thể",
+        "titleCreate": "🎭 Thêm biến thể mới",
+        "sections": {
+          "attributes": "🎨 Thuộc tính biến thể"
+        },
+        "fields": {
+          "name": "🏷️ Tên biến thể",
+          "sku": "📦 Mã SKU",
+          "price": "💰 Giá (VNĐ)",
+          "stock": "📦 Số lượng tồn kho"
+        },
+        "placeholders": {
+          "name": "VD: Size M - Màu Đỏ",
+          "sku": "Để trống để tự tạo",
+          "price": "1,000,000",
+          "stock": "50",
+          "attributeSelect": "Chọn {{name}}"
+        },
+        "tooltips": {
+          "sku": "Để trống để hệ thống tự tạo mã SKU"
+        },
+        "validation": {
+          "nameRequired": "Vui lòng nhập tên biến thể",
+          "priceRequired": "Vui lòng nhập giá",
+          "priceMin": "Giá phải lớn hơn hoặc bằng 0",
+          "stockRequired": "Vui lòng nhập số lượng",
+          "stockMin": "Số lượng không được âm"
+        },
+        "actions": {
+          "create": "Thêm biến thể",
+          "update": "Cập nhật biến thể"
+        }
+      },
+      "attributeModal": {
+        "titleEdit": "🏷️ Chỉnh sửa thuộc tính",
+        "titleCreate": "🏷️ Thêm thuộc tính mới",
+        "fields": {
+          "name": "🏷️ Tên thuộc tính",
+          "value": "📝 Giá trị thuộc tính"
+        },
+        "placeholders": {
+          "name": "VD: Màu sắc, Chất liệu, Kích thước",
+          "value": "VD: Đỏ, Xanh, Đen (cách nhau bởi dấu phẩy)"
+        },
+        "tooltips": {
+          "name": "Tên mô tả loại thuộc tính (VD: Màu sắc, Size, Chất liệu)",
+          "value": "Nhập các giá trị có thể có, cách nhau bởi dấu phẩy"
+        },
+        "validation": {
+          "nameRequired": "Vui lòng nhập tên thuộc tính",
+          "valueRequired": "Vui lòng nhập giá trị thuộc tính"
+        },
+        "hints": {
+          "title": "💡 Gợi ý tạo thuộc tính",
+          "bullet1": "Tên thuộc tính nên rõ ràng, dễ hiểu (VD: \"Màu sắc\", \"Kích thước\")",
+          "bullet2": "Giá trị: liệt kê tất cả các tùy chọn có thể có",
+          "bullet3": "Cách nhau bởi dấu phẩy: \"Đỏ, Xanh, Đen\" hoặc \"S, M, L, XL\"",
+          "bullet4": "Thuộc tính này sẽ được sử dụng khi tạo biến thể sản phẩm"
+        },
+        "examples": {
+          "title": "📖 Ví dụ minh họa",
+          "line1": "Tên: \"Màu sắc\" → Giá trị: \"Đỏ, Xanh dương, Đen, Trắng\"",
+          "line2": "Tên: \"Kích thước\" → Giá trị: \"S, M, L, XL, XXL\"",
+          "line3": "Tên: \"Chất liệu\" → Giá trị: \"Cotton, Polyester, Linen\""
+        },
+        "actions": {
+          "create": "Thêm thuộc tính",
+          "update": "Cập nhật thuộc tính"
+        }
+      },
+      "createWizard": {
+        "processing": "Đang xử lý...",
+        "stepCounter": "Bước {{current}}/{{total}}",
+        "actions": {
+          "next": "Tiếp theo",
+          "create": "Tạo sản phẩm"
+        },
+        "steps": {
+          "basic": {
+            "title": "Thông tin cơ bản",
+            "description": "Nhập thông tin cơ bản về sản phẩm"
+          },
+          "pricing": {
+            "title": "Giá & Kho hàng",
+            "description": "Thiết lập giá bán và số lượng tồn kho"
+          },
+          "categories": {
+            "title": "Phân loại",
+            "description": "Chọn danh mục và trạng thái sản phẩm"
+          },
+          "images": {
+            "title": "Hình ảnh",
+            "description": "Thêm hình ảnh sản phẩm"
+          },
+          "attributes": {
+            "title": "Thông số tuỳ chỉnh",
+            "description": "Thêm thông số tuỳ chỉnh cho sản phẩm"
+          },
+          "seo": {
+            "title": "SEO & Hoàn tất",
+            "description": "Tối ưu SEO và hoàn tất tạo sản phẩm"
+          }
+        }
+      },
+      "dynamicCreateForm": {
+        "title": "Tạo sản phẩm với tính năng tên động",
+        "currentName": "Tên sản phẩm hiện tại",
+        "actions": {
+          "preview": "Xem trước"
+        },
+        "messages": {
+          "sampleFilled": "Đã điền dữ liệu mẫu!",
+          "fillRequiredFields": "Vui lòng điền đầy đủ thông tin bắt buộc!",
+          "created": "Tạo sản phẩm thành công!",
+          "createError": "Có lỗi xảy ra khi tạo sản phẩm!"
+        },
+        "navigation": {
+          "prev": "← Bước trước",
+          "next": "Bước tiếp theo →",
+          "create": "Tạo sản phẩm",
+          "stepCounter": "Bước {{current}} / {{total}}"
+        },
+        "preview": {
+          "title": "👀 Xem trước sản phẩm",
+          "price": "Giá",
+          "stock": "Tồn kho",
+          "selectedAttributes": "Thuộc tính đã chọn"
+        },
+        "steps": {
+          "basic": {
+            "title": "📝 Thông tin cơ bản",
+            "description": "Tên, mô tả, trạng thái"
+          },
+          "attributes": {
+            "title": "🏷️ Thuộc tính động",
+            "description": "Chọn CPU, GPU, RAM, v.v."
+          },
+          "pricing": {
+            "title": "💰 Giá & Kho",
+            "description": "Định giá và quản lý kho"
+          },
+          "media": {
+            "title": "📸 Hình ảnh",
+            "description": "Upload ảnh sản phẩm"
+          },
+          "category": {
+            "title": "📂 Danh mục",
+            "description": "Phân loại sản phẩm"
+          },
+          "seo": {
+            "description": "Tối ưu tìm kiếm"
+          }
+        }
+      }
+    },
     "dashboard": {
       "title": "Bảng Điều Khiển Admin",
       "lastUpdated": "Cập nhật lần cuối",
@@ -671,6 +879,7 @@
     "next": "Tiếp",
     "loading": "Đang tải...",
     "error": "Lỗi",
-    "success": "Thành công"
+    "success": "Thành công",
+    "cancel": "Hủy"
   }
 }

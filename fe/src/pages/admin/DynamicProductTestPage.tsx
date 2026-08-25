@@ -12,9 +12,7 @@ import {
   Tag,
 } from 'antd';
 import {
-  RocketOutlined,
-  BulbOutlined,
-  TestTubeOutlined,
+  ExperimentOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
 import DynamicProductTitle from '@/components/product/DynamicProductTitle';
@@ -89,15 +87,15 @@ const DynamicProductTestPage: React.FC = () => {
     affectingNameOnly: Record<string, string>
   ) => {
     setSelectedAttributes(attributeValues);
-    console.log('🔄 Attributes changed:', {
-      all: attributeValues,
-      nameAffecting: affectingNameOnly,
-    });
+    //console.log('🔄 Attributes changed:', {
+    //   all: attributeValues,
+    //   nameAffecting: affectingNameOnly,
+    // });
   };
 
   const handleNameGenerated = (name: string, details: any) => {
     setDynamicName(name);
-    console.log('🎯 Name generated:', { name, details });
+    //console.log('🎯 Name generated:', { name, details });
   };
 
   const testScenarios = [
@@ -125,7 +123,7 @@ const DynamicProductTestPage: React.FC = () => {
   const runTestScenario = (scenario: (typeof testScenarios)[0]) => {
     setBaseName(scenario.baseName);
     // Simulate attribute selection for demo
-    console.log(`🧪 Testing scenario: ${scenario.name}`, scenario);
+    //console.log(`🧪 Testing scenario: ${scenario.name}`, scenario);
   };
 
   return (
@@ -141,9 +139,9 @@ const DynamicProductTestPage: React.FC = () => {
         <Card style={{ marginBottom: 24 }}>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div>
-              <Title level={2}>
+                <Title level={2}>
                 <Space>
-                  <TestTubeOutlined style={{ color: '#1890ff' }} />
+                  <ExperimentOutlined style={{ color: '#1890ff' }} />
                   Dynamic Product Naming - Test Lab
                 </Space>
               </Title>

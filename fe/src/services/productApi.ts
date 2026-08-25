@@ -60,7 +60,7 @@ export const productApi = api.injectEndpoints({
     getFeaturedProducts: builder.query<any, { limit?: number } | void>({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
-        if (params.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
 
         return {
           url: `/products/featured?${queryParams.toString()}`,
@@ -68,13 +68,13 @@ export const productApi = api.injectEndpoints({
         };
       },
       transformResponse: transformProductsResponse,
-      providesTags: (result) => generateProductTags(result, 'FEATURED'),
+      providesTags: (_result) => generateProductTags(_result, 'FEATURED'),
     }),
 
     getNewArrivals: builder.query<any, { limit?: number } | void>({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
-        if (params.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
 
         return {
           url: `/products/new-arrivals?${queryParams.toString()}`,
@@ -82,7 +82,7 @@ export const productApi = api.injectEndpoints({
         };
       },
       transformResponse: transformProductsResponse,
-      providesTags: (result) => generateProductTags(result, 'NEW_ARRIVALS'),
+      providesTags: (_result) => generateProductTags(_result, 'NEW_ARRIVALS'),
     }),
 
     getBestSellers: builder.query<
@@ -137,7 +137,7 @@ export const productApi = api.injectEndpoints({
         url: `/products/${productId}/variants`,
         method: 'GET',
       }),
-      providesTags: (result, error, productId) => [
+      providesTags: (_result, _error, productId) => [
         { type: 'Product', id: `${productId}_VARIANTS` },
       ],
     }),
@@ -147,7 +147,7 @@ export const productApi = api.injectEndpoints({
         url: `/products/${productId}/reviews-summary`,
         method: 'GET',
       }),
-      providesTags: (result, error, productId) => [
+      providesTags: (_result, _error, productId) => [
         { type: 'Product', id: `${productId}_REVIEWS` },
       ],
     }),
@@ -177,10 +177,10 @@ export const productApi = api.injectEndpoints({
         if (params.categoryId)
           queryParams.append('categoryId', params.categoryId);
 
-        console.log(
-          'Fetching product filters with params:',
-          queryParams.toString()
-        );
+        // //console.log(
+        //   'Fetching product filters with params:',
+        //   queryParams.toString()
+        // );
         return {
           url: `/products/filters?${queryParams.toString()}`,
           method: 'GET',
@@ -196,6 +196,7 @@ export const productApi = api.injectEndpoints({
 
 export const {
   useGetProductsQuery,
+  useLazyGetProductsQuery,
   useGetProductByIdQuery,
   useGetProductBySlugQuery,
   useGetFeaturedProductsQuery,

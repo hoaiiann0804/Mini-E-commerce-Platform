@@ -15,6 +15,7 @@ const VerifyEmailPage: React.FC = () => {
     if (token && !hasVerified.current) {
       hasVerified.current = true;
       console.log("Attempting to verify email with token:", token);
+      //console.log('Attempting to verify email with token:', token);
       verifyEmail(token);
     }
   }, [token, verifyEmail]);
@@ -29,6 +30,16 @@ const VerifyEmailPage: React.FC = () => {
       token,
       hasVerified: hasVerified.current,
     });
+
+    // console.log('VerifyEmailPage state:', {
+    //   isLoading,
+    //   isSuccess,
+    //   isError,
+    //   error,
+    //   token,
+    //   hasVerified: hasVerified.current,
+    // });
+
   }, [isLoading, isSuccess, isError, error, token]);
 
   const handleGoToLogin = () => {

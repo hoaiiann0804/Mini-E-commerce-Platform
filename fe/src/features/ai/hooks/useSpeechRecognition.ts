@@ -32,14 +32,16 @@ export const useSpeechRecognition = (): SpeechRecognitionResult => {
     recognitionInstance.interimResults = true;
     recognitionInstance.lang = 'vi-VN'; // Vietnamese language
 
-    recognitionInstance.onresult = (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognitionInstance.onresult = (event: any) => {
       const current = event.resultIndex;
       const result = event.results[current];
       const transcriptValue = result[0].transcript;
       setTranscript(transcriptValue);
     };
 
-    recognitionInstance.onerror = (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognitionInstance.onerror = (event: any) => {
       console.error('Speech recognition error', event.error);
       setIsListening(false);
     };

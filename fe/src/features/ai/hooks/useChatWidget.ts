@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { Rnd } from 'react-rnd';
 import { CHAT_WIDGET_CONFIG, GREETING_MESSAGE } from '../constants/chatWidget';
 import { Message } from '../components/ChatWidget';
 
 export const useChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState(CHAT_WIDGET_CONFIG.DEFAULT_SIZE);
+  const [size, setSize] = useState<{ width: number; height: number }>(CHAT_WIDGET_CONFIG.DEFAULT_SIZE);
   const [messages, setMessages] = useState<Message[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatWidgetRef = useRef<HTMLDivElement>(null);
+  const chatWidgetRef = useRef<Rnd | null>(null);
+  const chatWidgetDomRef = useRef<HTMLDivElement>(null); // For DOM element access
   const isOpenRef = useRef(isOpen);
 
   // Load saved size from localStorage
@@ -29,9 +31,10 @@ export const useChatWidget = () => {
   // Initialize greeting message
   useEffect(() => {
     if (messages.length === 0) {
-      const greeting = {
+      const greeting: Message = {
         ...GREETING_MESSAGE,
         id: Date.now().toString(),
+        suggestions: [...GREETING_MESSAGE.suggestions],
       };
       setMessages([greeting]);
     }
@@ -62,8 +65,8 @@ export const useChatWidget = () => {
       // Prevent outside clicks from closing
       const preventClose = (e: MouseEvent) => {
         if (
-          chatWidgetRef.current &&
-          !chatWidgetRef.current.contains(e.target as Node)
+          chatWidgetDomRef.current &&
+          !chatWidgetDomRef.current.contains(e.target as Node)
         ) {
           e.stopPropagation();
         }
@@ -177,6 +180,7 @@ export const useChatWidget = () => {
     // Refs
     messagesEndRef,
     chatWidgetRef,
+    chatWidgetDomRef,
     isOpenRef,
 
     // Actions

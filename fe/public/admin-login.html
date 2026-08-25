@@ -11,26 +11,26 @@
     <script>
       async function loginAdmin() {
         try {
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              email: 'admin@example.com',
-              password: '123456',
+              email: "admin@example.com",
+              password: "123456",
             }),
           });
 
           const data = await response.json();
-          console.log('Login response:', data);
+          //console.log('Login response:', data);
 
-          if (data.status === 'success') {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('user', JSON.stringify(data.user));
+          if (data.status === "success") {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("refreshToken", data.refreshToken);
+            localStorage.setItem("user", JSON.stringify(data.user));
 
-            document.getElementById('result').innerHTML = `
+            document.getElementById("result").innerHTML = `
                         <p>Login successful!</p>
                         <p>Token: ${data.token.substring(0, 50)}...</p>
                         <p>User: ${data.user.email}</p>
@@ -38,12 +38,12 @@
                         <a href="/admin/dashboard">Go to Admin Dashboard</a>
                     `;
           } else {
-            document.getElementById('result').innerHTML =
+            document.getElementById("result").innerHTML =
               `<p>Login failed: ${data.message}</p>`;
           }
         } catch (error) {
-          console.error('Login error:', error);
-          document.getElementById('result').innerHTML =
+          console.error("Login error:", error);
+          document.getElementById("result").innerHTML =
             `<p>Login error: ${error.message}</p>`;
         }
       }

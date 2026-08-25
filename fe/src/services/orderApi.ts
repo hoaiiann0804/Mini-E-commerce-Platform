@@ -13,6 +13,13 @@ export interface OrderItem {
   subtotal: number;
   image?: string;
   attributes?: Record<string, any>;
+  Product?: {
+    id?: string;
+    name?: string;
+    thumbnail?: string;
+    images?: string[];
+    price?: number;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +28,7 @@ export interface Order {
   id: string;
   number: string;
   userId: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'expired';
   shippingFirstName: string;
   shippingLastName: string;
   shippingCompany?: string;
@@ -192,6 +199,21 @@ export const orderApi = api.injectEndpoints({
         { type: 'Order', id: 'LIST' },
       ],
     }),
+
+    // Re-order (Buy Again) - adds order items to active cart for new checkout
+    reorder: builder.mutation<
+      { status: string; message: string; data: { cartId: string } },
+      string
+    >({
+      query: (id) => ({
+        url: `/orders/${id}/reorder`,
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'Cart', id: 'LIST' },
+        { type: 'Order', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -202,4 +224,5 @@ export const {
   useCreateOrderMutation,
   useCancelOrderMutation,
   useRepayOrderMutation,
+  useReorderMutation,
 } = orderApi;

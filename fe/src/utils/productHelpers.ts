@@ -3,12 +3,7 @@
  * Utilities for managing product variants and stock
  */
 
-import {
-  Product,
-  ProductVariant,
-  ProductAttribute,
-} from '@/types/product.types';
-
+import { Product, ProductAttribute, ProductVariant } from "@/types/product.types";
 /**
  * Get available stock for specific attribute combination
  */
@@ -148,12 +143,14 @@ export const getVariantPrice = (
  * Check if all required attributes are selected
  */
 export const areAllAttributesSelected = (
-  attributes: ProductAttribute[],
+  attributes: Record<string, string>,
   selectedAttributes: Record<string, string>
 ): boolean => {
-  if (!attributes || attributes.length === 0) return true;
+  if (!attributes || Object.keys(attributes).length === 0) return true;
 
-  return attributes.every((attr) => selectedAttributes[attr.name]);
+  return Object.keys(attributes).every(
+    (attrName) => selectedAttributes[attrName]
+  );
 };
 
 /**
@@ -164,22 +161,54 @@ export const getAttributeValuesWithStock = (
   attributeName: string,
   selectedAttributes: Record<string, string> = {}
 ): Array<{ value: string; stock: number; available: boolean }> => {
-  const attribute = product.attributes?.find(
+  if (!product.attributes || !product.variants) {
+    return [];
+  }
+
+  const attributeList = Array.isArray(product.attributes)
+    ? (product.attributes as ProductAttribute[])
+    : [];
+  const variants = product.variants ?? [];
+
+  const attributeDefinition = attributeList.find(
     (attr) => attr.name === attributeName
   );
-  if (!attribute) return [];
 
-  return attribute.values.map((value) => {
-    // Create a temporary combination with this value
-    const tempAttributes = { ...selectedAttributes, [attributeName]: value };
+  if (!attributeDefinition || !attributeDefinition.values) {
+    return [];
+  }
 
-    // Get stock for this specific combination
-    const stock = getVariantStock(product, tempAttributes);
+  // Attributes selected for other categories
+  const otherSelectedAttributes: Record<string, string> = {
+    ...selectedAttributes,
+  };
+  delete otherSelectedAttributes[attributeName];
+
+  return attributeDefinition.values.map((value: string) => {
+    // Find all variants that could potentially match if we select this value
+    const potentiallyMatchingVariants = variants.filter((variant) => {
+      if (!variant.attributes) return false;
+
+      // Check if this variant has the current value for the current attribute
+      if (variant.attributes[attributeName] !== value) {
+        return false;
+      }
+
+      // Check if this variant also matches all *other* selected attributes
+      return Object.entries(otherSelectedAttributes).every(
+        ([key, selectedValue]) => variant.attributes[key] === selectedValue
+      );
+    });
+
+    const totalStockForValue = potentiallyMatchingVariants.reduce(
+      (sum, variant) => sum + variant.stockQuantity,
+      0
+    );
 
     return {
       value,
-      stock,
-      available: stock > 0,
+      stock: totalStockForValue,
+      available: totalStockForValue > 0,
     };
   });
 };
@@ -221,7 +250,7 @@ export const getAttributeValueStockWithContext = (
  * Format stock display text
  */
 export const formatStockText = (stock: number): string => {
-  if (stock === 0) return 'Hết hàng';
+  if (stock === 0) return "Hết hàng";
   if (stock < 10) return `Chỉ còn ${stock} sản phẩm`;
   return `Còn ${stock} sản phẩm`;
 };
@@ -230,7 +259,7 @@ export const formatStockText = (stock: number): string => {
  * Get stock status color
  */
 export const getStockStatusColor = (stock: number): string => {
-  if (stock === 0) return 'text-red-500';
-  if (stock < 10) return 'text-orange-500';
-  return 'text-green-500';
+  if (stock === 0) return "text-red-500";
+  if (stock < 10) return "text-orange-500";
+  return "text-green-500";
 };

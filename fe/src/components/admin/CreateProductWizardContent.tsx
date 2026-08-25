@@ -4,8 +4,9 @@ import { useGetCategoriesQuery } from "@/services/categoryApi";
 
 // Kiểm tra xem một chuỗi có phải là URL hình ảnh hay không
 const isImageUrl = (url: string): boolean => {
-  // Chấp nhận tất cả các URL
-  return true;
+  if (!url || typeof url !== 'string') return false;
+  // Simple regex to check for common image file extensions
+  return /\.(jpeg|jpg|gif|png|webp|svg)$/i.test(url);
 };
 import {
   Steps,
@@ -78,7 +79,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     description: "",
     price: 0,
     comparePrice: undefined,
-    stock: 0,
+    stockQuantity : 0,
     categoryIds: [],
     status: "active",
     featured: false,
@@ -92,22 +93,22 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
   // Effect để cập nhật form khi chuyển bước
   React.useEffect(() => {
-    console.log("Current step changed to:", currentStep);
-    console.log("Current formState:", formState);
+    //console.log("Current step changed to:", currentStep);
+    //console.log("Current formState:", formState);
 
     // Cập nhật form với dữ liệu đã lưu trong formState
     form.setFieldsValue(formState);
-  }, [currentStep]);
+  }, [currentStep]);;
 
   // Effect để lưu lại giá trị form khi có thay đổi
   React.useEffect(() => {
-    const subscription = form.getFieldsValue(true);
+    // const subscription = form.getFieldsValue(true);
     return () => {
       // Lưu lại giá trị form khi component unmount hoặc re-render
       const values = form.getFieldsValue(true);
       setFormState((prev) => ({ ...prev, ...values }));
     };
-  }, []);
+  }, []);;
 
   const steps = [
     {
@@ -204,7 +205,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
     try {
       // Lưu giá trị hiện tại của form trước khi chuyển bước
       const currentFormValues = form.getFieldsValue();
-      console.log("Current form values before validation:", currentFormValues);
+      //console.log("Current form values before validation:", currentFormValues);
 
       // Cập nhật formState với dữ liệu hiện tại
       setFormState((prevState) => ({
@@ -218,7 +219,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         try {
           // Lấy giá trị hiện tại của form
           const currentValues = form.getFieldsValue();
-          console.log(`Step ${currentStep} values:`, currentValues);
+          //console.log(`Step ${currentStep} values:`, currentValues);
 
           // Kiểm tra từng trường cụ thể dựa trên bước hiện tại
           if (currentStep === 0) {
@@ -266,27 +267,26 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             }
           }
 
-          // Nếu không có lỗi, tiếp tục validate thông qua Ant Design Form
-          await form.validateFields(fieldsToValidate);
+      // Nếu không có lỗi, tiếp tục validate thông qua Ant Design Form
+      await form.validateFields(fieldsToValidate);
 
-          // Lưu lại giá trị của form hiện tại
-          const currentFormData = form.getFieldsValue();
-          console.log("Form data after validation:", currentFormData);
+      // Lưu lại giá trị của form hiện tại
+      const currentFormData = form.getFieldsValue();
+      //console.log("Form data after validation:", currentFormData);
 
-          // Cập nhật formState với dữ liệu mới
-          setFormState((prevState) => ({
-            ...prevState,
-            ...currentFormData,
-          }));
-          console.log("Updated form state:", {
-            ...formState,
-            ...currentFormData,
-          });
+      // Cập nhật formState với dữ liệu mới
+      setFormState((prevState) => ({
+        ...prevState,
+        ...currentFormData,
+      }));
+      //console.log("Updated form state:", {
+        // ...formState,
+        // ...currentFormData,
 
           // Nếu validation thành công, chuyển sang bước tiếp theo
           setCurrentStep(currentStep + 1);
         } catch (validationError) {
-          console.log("Field validation failed:", validationError);
+          //console.log("Field validation failed:", validationError);
           message.error(
             "Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục"
           );
@@ -304,7 +304,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         setCurrentStep(currentStep + 1);
       }
     } catch (error) {
-      console.log("Validation failed:", error);
+      //console.log("Validation failed:", error);
       message.error(
         "Vui lòng điền đầy đủ thông tin bắt buộc trước khi tiếp tục"
       );
@@ -333,7 +333,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
   const handlePrev = () => {
     // Lưu giá trị hiện tại của form trước khi quay lại bước trước
     const currentFormValues = form.getFieldsValue();
-    console.log("Current form values before going back:", currentFormValues);
+    //console.log("Current form values before going back:", currentFormValues);
 
     // Cập nhật formState với dữ liệu hiện tại
     setFormState((prevState) => ({
@@ -377,12 +377,12 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Sử dụng formState đã được cập nhật
-      console.log("Form values before validation:", formState);
-      console.log("Current form values:", currentFormValues);
-      console.log("Combined form values:", {
-        ...formState,
-        ...currentFormValues,
-      });
+      //console.log("Form values before validation:", formState);
+      //console.log("Current form values:", currentFormValues);
+      //console.log("Combined form values:", {
+      //   ...formState,
+      //   ...currentFormValues,
+      // });
 
       // Kết hợp dữ liệu từ tất cả các bước
       const combinedValues = {
@@ -442,22 +442,22 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
       // Lấy tất cả giá trị form sau khi validate
       const allValues = combinedValues;
 
-      console.log("All validations passed!");
+      //console.log("All validations passed!");
 
       // Chuẩn bị dữ liệu sản phẩm để gửi đi
-      console.log("Preparing product data with name:", allValues.name);
-      console.log("All values to be used:", allValues);
+      //console.log("Preparing product data with name:", allValues.name);
+      //console.log("All values to be used:", allValues);
 
       // Đảm bảo name là string trước khi gọi trim()
       const productName =
         typeof allValues.name === "string"
           ? allValues.name.trim()
           : String(allValues.name);
-      console.log("Product name after processing:", productName);
+      //console.log("Product name after processing:", productName);
 
       // Trước khi tạo productData, log ra giá trị của images và thumbnail
-      console.log("Raw images value:", allValues.images);
-      console.log("Raw thumbnail value:", allValues.thumbnail);
+      //console.log("Raw images value:", allValues.images);
+      //console.log("Raw thumbnail value:", allValues.thumbnail);
 
       // Xử lý images
       let processedImages = [];
@@ -485,8 +485,8 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
         processedThumbnail = processedImages[0];
       }
 
-      console.log("Processed images:", processedImages);
-      console.log("Processed thumbnail:", processedThumbnail);
+      //console.log("Processed images:", processedImages);
+      //console.log("Processed thumbnail:", processedThumbnail);
 
       const productData = {
         name: productName,
@@ -521,7 +521,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             ? allValues.searchKeywords
                 .split(",")
                 .map((kw: string) => kw.trim())
-                .filter((kw) => kw)
+                .filter((kw: string) => kw)
             : [],
         seoTitle:
           allValues.seoTitle || (allValues.name ? allValues.name.trim() : ""),
@@ -550,7 +550,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
             ? allValues.seoKeywords
                 .split(",")
                 .map((kw: string) => kw.trim())
-                .filter((kw) => kw)
+                .filter((kw: string) => kw)
             : [],
         attributes: attributes
           .filter((attr) => attr.name.trim() && attr.value.trim())
@@ -563,11 +563,12 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           .map((variant) => ({
             name: variant.name.trim(),
             price: Number(variant.price) || 0,
+            stockQuantity: Number(variant.stock) || 0,
             stock: Number(variant.stock) || 0,
           })),
       };
 
-      console.log("Product data to be sent:", productData); // Debug log
+      //console.log("Product data to be sent:", productData); // Debug log
       await createProduct(productData).unwrap();
       message.success("Tạo sản phẩm thành công!");
 
@@ -583,7 +584,7 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
 
       // Log chi tiết lỗi để debug
       if (error.errorFields) {
-        console.log("Validation error fields:", error.errorFields);
+        //console.log("Validation error fields:", error.errorFields);
         // Hiển thị lỗi cụ thể từ trường đầu tiên bị lỗi
         if (error.errorFields.length > 0) {
           const firstError = error.errorFields[0];
@@ -995,8 +996,8 @@ const CreateProductWizardContent: React.FC<CreateProductWizardContentProps> = ({
           price: 0,
         }}
         onValuesChange={(changedValues, allValues) => {
-          console.log("Form values changed:", changedValues);
-          console.log("All form values:", allValues);
+          //console.log("Form values changed:", changedValues);
+          //console.log("All form values:", allValues);
 
           // Cập nhật formState khi giá trị form thay đổi
           setFormState((prevState) => ({

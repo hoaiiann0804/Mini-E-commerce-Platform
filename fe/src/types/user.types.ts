@@ -17,17 +17,28 @@ export interface User {
 }
 
 export interface Address {
-  id: string;
+  id?: string;
   name?: string; // Label for the address (e.g., "Home", "Work")
   firstName: string;
   lastName: string;
   company?: string;
   address1: string;
   address2?: string;
-  city: string;
-  state: string;
+  // Legacy fields (some backends store province/ward instead)
+  city?: string | null;
+  state?: string | null;
+  // Preferred fields (used by current backend)
+  province?: string | null;
+  ward?: string | null;
+  provinceCode?: string | null;
+  wardCode?: string | null;
+  lat?: number | string | null;
+  lng?: number | string | null;
   zip: string;
   country: string;
   phone?: string;
-  isDefault: boolean;
+  isDefault?: boolean;
+  addressType?: "home" | "office" | "other";
+  countryCode?: string;
+  stateCode?: string;
 }

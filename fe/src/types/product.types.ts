@@ -16,14 +16,14 @@ export interface Product {
     average: number;
     count: number;
   };
-  attributes?: ProductAttribute[];
+  attributes?: Record<string, string>;
   variants?: ProductVariant[];
   isNew?: boolean;
   isFeatured?: boolean;
   // New laptop-specific fields
   brand?: string;
   model?: string;
-  condition?: 'new' | 'like-new' | 'used' | 'refurbished';
+  condition?: "new" | "like-new" | "used" | "refurbished";
   warrantyMonths?: number;
   specifications?: Record<string, any>;
   warrantyPackages?: WarrantyPackage[];
@@ -33,12 +33,15 @@ export interface Product {
 }
 
 export interface ProductVariant {
-  id: string;
+  id?: string;
   name: string;
-  sku: string;
+  sku?: string;
   price: number;
+  compareAtPrice?: number;
   stockQuantity: number;
+  stock?: number;
   attributes: Record<string, string>;
+  specifications?: Record<string, any>;
   images?: string[];
   // New fields
   displayName?: string;
@@ -52,6 +55,8 @@ export interface ProductAttribute {
   productId: string;
   name: string;
   values: string[];
+  // Added for form/modal compatibility - stores comma-separated string
+  value: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -86,7 +91,8 @@ export interface ProductFilters {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
-  sort?: 'price_asc' | 'price_desc' | 'newest' | 'popular';
+  sort?: "price_asc" | "price_desc" | "newest" | "popular";
+  cursor?: string;
   page?: number;
   limit?: number;
   brand?: string[];
@@ -102,6 +108,7 @@ export interface ProductFormData {
   baseName?: string;
   description: string;
   shortDescription: string;
+  sku?: string;
 
   // Pricing (for non-variant products)
   price?: number;
@@ -119,9 +126,9 @@ export interface ProductFormData {
   categoryIds: string[];
 
   // Product settings
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
   featured: boolean;
-  condition: 'new' | 'like-new' | 'used' | 'refurbished';
+  condition: "new" | "like-new" | "used" | "refurbished";
 
   // SEO
   seoTitle?: string;
@@ -133,7 +140,7 @@ export interface ProductFormData {
   specifications?: ProductSpecification[];
 
   // Attributes & Variants
-  attributes?: ProductAttribute[];
+  attributes?: Record<string, string>;
   variants?: ProductVariantFormData[];
 
   // Warranty

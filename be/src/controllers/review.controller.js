@@ -5,9 +5,8 @@ const {
   Order,
   OrderItem,
   ReviewFeedback,
-} = require('../models');
-const { AppError } = require('../middlewares/errorHandler');
-const { Op } = require('sequelize');
+} = require("../models");
+const { AppError } = require("../middlewares/errorHandler");
 
 // Create review
 const createReview = async (req, res, next) => {
@@ -18,19 +17,19 @@ const createReview = async (req, res, next) => {
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      throw new AppError('Sản phẩm không tồn tại', 404);
+      throw new AppError("Sản phẩm không tồn tại", 404);
     }
 
     // Check if user has purchased the product
     const hasPurchased = await Order.findOne({
       where: {
         userId,
-        status: 'delivered', // Only delivered orders can be reviewed
+        status: "delivered", // Only delivered orders can be reviewed
       },
       include: [
         {
           model: OrderItem,
-          as: 'items',
+          as: "items",
           where: { productId },
           required: true,
         },
@@ -38,7 +37,7 @@ const createReview = async (req, res, next) => {
     });
 
     if (!hasPurchased) {
-      throw new AppError('Bạn cần mua sản phẩm trước khi đánh giá', 403);
+      throw new AppError("Bạn cần mua sản phẩm trước khi đánh giá", 403);
     }
 
     // Check if user has already reviewed this product
@@ -47,7 +46,7 @@ const createReview = async (req, res, next) => {
     });
 
     if (existingReview) {
-      throw new AppError('Bạn đã đánh giá sản phẩm này rồi', 400);
+      throw new AppError("Bạn đã đánh giá sản phẩm này rồi", 400);
     }
 
     // Create review
@@ -61,35 +60,8 @@ const createReview = async (req, res, next) => {
       isVerified: true, // Auto-verify since we checked purchase
     });
 
-    // Get review with user info
-    const createdReview = await Review.findByPk(review.id, {
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'firstName', 'lastName', 'avatar'],
-        },
-      ],
-    });
-
-    // Update product rating
-    const productReviews = await Review.findAll({
-      where: { productId },
-      attributes: ['rating'],
-    });
-
-    const avgRating =
-      productReviews.reduce((sum, review) => sum + review.rating, 0) /
-      productReviews.length;
-
-    await product.update({
-      rating: avgRating,
-      reviewCount: productReviews.length,
-    });
-
     res.status(201).json({
-      status: 'success',
-      data: createdReview,
+      status: "success",
     });
   } catch (error) {
     next(error);
@@ -109,7 +81,7 @@ const updateReview = async (req, res, next) => {
     });
 
     if (!review) {
-      throw new AppError('Không tìm thấy đánh giá', 404);
+      throw new AppError("Không tìm thấy đánh giá", 404);
     }
 
     // Update review
@@ -120,38 +92,8 @@ const updateReview = async (req, res, next) => {
       images: images !== undefined ? images : review.images,
       isVerified: true,
     });
-
-    // Get updated review with user info
-    const updatedReview = await Review.findByPk(review.id, {
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'firstName', 'lastName', 'avatar'],
-        },
-      ],
-    });
-
-    // Update product rating
-    const productReviews = await Review.findAll({
-      where: { productId: review.productId },
-      attributes: ['rating'],
-    });
-
-    const avgRating =
-      productReviews.reduce((sum, review) => sum + review.rating, 0) /
-      productReviews.length;
-
-    await Product.update(
-      {
-        rating: avgRating,
-      },
-      { where: { id: review.productId } }
-    );
-
     res.status(200).json({
-      status: 'success',
-      data: updatedReview,
+      status: "success",
     });
   } catch (error) {
     next(error);
@@ -170,7 +112,7 @@ const deleteReview = async (req, res, next) => {
     });
 
     if (!review) {
-      throw new AppError('Không tìm thấy đánh giá', 404);
+      throw new AppError("Không tìm thấy đánh giá", 404);
     }
 
     const productId = review.productId;
@@ -178,37 +120,9 @@ const deleteReview = async (req, res, next) => {
     // Delete review
     await review.destroy();
 
-    // Update product rating
-    const productReviews = await Review.findAll({
-      where: { productId },
-      attributes: ['rating'],
-    });
-
-    if (productReviews.length > 0) {
-      const avgRating =
-        productReviews.reduce((sum, review) => sum + review.rating, 0) /
-        productReviews.length;
-
-      await Product.update(
-        {
-          rating: avgRating,
-          reviewCount: productReviews.length,
-        },
-        { where: { id: productId } }
-      );
-    } else {
-      await Product.update(
-        {
-          rating: 0,
-          reviewCount: 0,
-        },
-        { where: { id: productId } }
-      );
-    }
-
     res.status(200).json({
-      status: 'success',
-      message: 'Xóa đánh giá thành công',
+      status: "success",
+      message: "Xóa đánh giá thành công",
     });
   } catch (error) {
     next(error);
@@ -222,7 +136,7 @@ const getProductReviews = async (req, res, next) => {
     const {
       page = 1,
       limit = 10,
-      sort = 'newest',
+      sort = "newest",
       rating,
       verified,
       withImages,
@@ -230,19 +144,19 @@ const getProductReviews = async (req, res, next) => {
 
     // Map sort options to actual database columns
     const sortMapping = {
-      newest: ['createdAt', 'DESC'],
-      oldest: ['createdAt', 'ASC'],
-      highest_rating: ['rating', 'DESC'],
-      lowest_rating: ['rating', 'ASC'],
-      most_helpful: ['likes', 'DESC'],
+      newest: ["createdAt", "DESC"],
+      oldest: ["createdAt", "ASC"],
+      highest_rating: ["rating", "DESC"],
+      lowest_rating: ["rating", "ASC"],
+      most_helpful: ["likes", "DESC"],
     };
 
-    const [sortColumn, sortOrder] = sortMapping[sort] || ['createdAt', 'DESC'];
+    const [sortColumn, sortOrder] = sortMapping[sort] || ["createdAt", "DESC"];
 
     // Check if product exists
     const product = await Product.findByPk(productId);
     if (!product) {
-      throw new AppError('Sản phẩm không tồn tại', 404);
+      throw new AppError("Sản phẩm không tồn tại", 404);
     }
 
     // Build where clause with filters
@@ -253,7 +167,7 @@ const getProductReviews = async (req, res, next) => {
     }
 
     if (verified !== undefined) {
-      whereClause.isVerified = verified === 'true';
+      whereClause.isVerified = verified === "true";
     }
 
     // Get reviews
@@ -262,8 +176,8 @@ const getProductReviews = async (req, res, next) => {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'firstName', 'lastName', 'avatar'],
+          as: "user",
+          attributes: ["id", "firstName", "lastName", "avatar"],
         },
       ],
       limit: parseInt(limit),
@@ -272,7 +186,7 @@ const getProductReviews = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total: count,
         pages: Math.ceil(count / limit),
@@ -297,16 +211,16 @@ const getUserReviews = async (req, res, next) => {
       include: [
         {
           model: Product,
-          attributes: ['id', 'name', 'slug', 'thumbnail'],
+          attributes: ["id", "name", "slug", "thumbnail"],
         },
       ],
       limit: parseInt(limit),
       offset: (parseInt(page) - 1) * parseInt(limit),
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total: count,
         pages: Math.ceil(count / limit),
@@ -326,7 +240,7 @@ const getAllReviews = async (req, res, next) => {
 
     const whereConditions = {};
     if (verified !== undefined) {
-      whereConditions.isVerified = verified === 'true';
+      whereConditions.isVerified = verified === "true";
     }
 
     // Get reviews
@@ -335,21 +249,21 @@ const getAllReviews = async (req, res, next) => {
       include: [
         {
           model: User,
-          as: 'user',
-          attributes: ['id', 'firstName', 'lastName', 'email'],
+          as: "user",
+          attributes: ["id", "firstName", "lastName", "email"],
         },
         {
           model: Product,
-          attributes: ['id', 'name', 'slug'],
+          attributes: ["id", "name", "slug"],
         },
       ],
       limit: parseInt(limit),
       offset: (parseInt(page) - 1) * parseInt(limit),
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       data: {
         total: count,
         pages: Math.ceil(count / limit),
@@ -371,17 +285,17 @@ const verifyReview = async (req, res, next) => {
     // Find review
     const review = await Review.findByPk(id);
     if (!review) {
-      throw new AppError('Không tìm thấy đánh giá', 404);
+      throw new AppError("Không tìm thấy đánh giá", 404);
     }
 
     // Update review
     await review.update({ isVerified });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       message: isVerified
-        ? 'Đánh giá đã được xác nhận'
-        : 'Đánh giá đã bị từ chối',
+        ? "Đánh giá đã được xác nhận"
+        : "Đánh giá đã bị từ chối",
       data: {
         id: review.id,
         isVerified,
@@ -402,12 +316,12 @@ const markReviewHelpful = async (req, res, next) => {
     // Find review
     const review = await Review.findByPk(id);
     if (!review) {
-      throw new AppError('Không tìm thấy đánh giá', 404);
+      throw new AppError("Không tìm thấy đánh giá", 404);
     }
 
     // Check if user is not reviewing their own review
     if (review.userId === userId) {
-      throw new AppError('Bạn không thể đánh giá đánh giá của chính mình', 400);
+      throw new AppError("Bạn không thể đánh giá đánh giá của chính mình", 400);
     }
 
     // Find existing review feedback
@@ -421,12 +335,12 @@ const markReviewHelpful = async (req, res, next) => {
         // Update review counts
         if (helpful) {
           // Change from dislike to like
-          await review.increment('likes');
-          await review.decrement('dislikes');
+          await review.increment("likes");
+          await review.decrement("dislikes");
         } else {
           // Change from like to dislike
-          await review.decrement('likes');
-          await review.increment('dislikes');
+          await review.decrement("likes");
+          await review.increment("dislikes");
         }
 
         // Update feedback
@@ -442,9 +356,9 @@ const markReviewHelpful = async (req, res, next) => {
 
       // Update review counts
       if (helpful) {
-        await review.increment('likes');
+        await review.increment("likes");
       } else {
-        await review.increment('dislikes');
+        await review.increment("dislikes");
       }
     }
 
@@ -452,10 +366,10 @@ const markReviewHelpful = async (req, res, next) => {
     const updatedReview = await Review.findByPk(id);
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       message: helpful
-        ? 'Đã đánh dấu đánh giá là hữu ích'
-        : 'Đã đánh dấu đánh giá là không hữu ích',
+        ? "Đã đánh dấu đánh giá là hữu ích"
+        : "Đã đánh dấu đánh giá là không hữu ích",
       data: {
         id: updatedReview.id,
         likes: updatedReview.likes,

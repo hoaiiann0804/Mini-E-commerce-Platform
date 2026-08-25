@@ -6,16 +6,16 @@ import ProductCard from "@/components/features/ProductCard";
 import ProductReviews from "@/components/features/ProductReviews";
 import WarrantySelection from "@/components/product/WarrantySelection";
 import ProductVariantSelector from "@/components/product/ProductVariantSelector";
-import DynamicProductTitle from "@/components/product/DynamicProductTitle";
 import SimpleDynamicTitle from "@/components/product/SimpleDynamicTitle";
 import ProductDetailsSection from "@/components/product/ProductDetailsSection";
 import { useAddToWishlistMutation } from "@/services/wishlistApi";
 import { productApi } from "@/services/productApi";
-import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
+import { Product, ProductVariant, ProductAttribute } from "@/types/product.types";
+import type { ServerWishlist, ServerWishlistItem, WishlistItem } from "@/types/wishlist.types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { Heart } from "lucide-react";
+
 
 import { useMemo } from "react";
 import {
@@ -27,7 +27,7 @@ import {
 import { RootState } from "@/store";
 import { v4 as uuidv4 } from "uuid";
 import { LeftOutlined, RightOutlined, EyeOutlined } from "@ant-design/icons";
-import { Image, message } from "antd";
+import { Image } from "antd";
 
 import { addItem, setServerCart } from "@/features/cart/cartSlice";
 import { addNotification } from "@/features/ui/uiSlice";
@@ -70,7 +70,6 @@ const ProductDetailPage: React.FC = () => {
     Record<string, string>
   >({});
   const [selectedWarranties, setSelectedWarranties] = useState<string[]>([]);
-  const [dynamicProductName, setDynamicProductName] = useState<string>("");
   const [mappedAttributes, setMappedAttributes] = useState<
     Record<string, string>
   >({});
@@ -114,8 +113,8 @@ const ProductDetailPage: React.FC = () => {
 
   // Auto-select first variant when product loads
   useEffect(() => {
-    // console.log("Product: ", product);
-    // console.log("Selected", selectedAttributes);
+    // //console.log("Product: ", product);
+    // //console.log("Selected", selectedAttributes);
     if (product && product.attributes && product.attributes.length > 0) {
       const firstAttribute = product.attributes[0];
       if (firstAttribute.values && firstAttribute.values.length > 0) {
@@ -126,7 +125,7 @@ const ProductDetailPage: React.FC = () => {
           const initialAttributes = { [firstAttribute.name]: firstValue };
           setSelectedAttributes(initialAttributes);
           setMappedAttributes(initialAttributes);
-          // console.log("MappedAttributes", initialAttributes);
+          // //console.log("MappedAttributes", initialAttributes);
         }
       }
     }
@@ -141,7 +140,7 @@ const ProductDetailPage: React.FC = () => {
   // Handle quantity change
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock || 99)) {
-      // console.log("Qantity", newQuantity);
+      // //console.log("Qantity", newQuantity);
       setQuantity(newQuantity);
     }
   };
@@ -166,8 +165,8 @@ const ProductDetailPage: React.FC = () => {
 
   // Handle attribute selection with toggle functionality
   const handleAttributeChange = (name: string, value: string) => {
-    // console.log("handleAttributeChange, name:", name, "value:", value); // name: CPU value: AMD Ryzen 5 PRO 6650U
-    // console.log("mappedAttributes trước:", mappedAttributes); // {CPU: 'AMD Ryzen 5 PRO 6650U'}
+    // //console.log("handleAttributeChange, name:", name, "value:", value); // name: CPU value: AMD Ryzen 5 PRO 6650U
+    // //console.log("mappedAttributes trước:", mappedAttributes); // {CPU: 'AMD Ryzen 5 PRO 6650U'}
     //
     setSelectedAttributes((prev) => {
       const newAttributes = { ...prev };
@@ -189,11 +188,7 @@ const ProductDetailPage: React.FC = () => {
 
     // Reset quantity to 1 when changing attributes
     setQuantity(1);
-    // console.log(quantity);
-  };
-
-  const handleDynamicNameUpdate = (newName: string, details: any) => {
-    setDynamicProductName(newName);
+    // //console.log(quantity);
   };
 
   // Handle warranty selection
@@ -231,14 +226,13 @@ const ProductDetailPage: React.FC = () => {
     } else {
       // Legacy attribute-based variant selection
       if (product.attributes && product.attributes.length > 0) {
-        const allSelected = areAllAttributesSelected(
-          product.attributes,
-          selectedAttributes
+        const allSelected = product.attributes.every(
+          (attr: any) => selectedAttributes[attr.name]
         );
         if (!allSelected) {
           const missingAttributes = product.attributes
-            .filter((attr) => !selectedAttributes[attr.name])
-            .map((attr) => attr.name);
+            .filter((attr: ProductAttribute) => !selectedAttributes[attr.name])
+            .map((attr: ProductAttribute) => attr.name);
 
           dispatch(
             addNotification({
@@ -283,12 +277,12 @@ const ProductDetailPage: React.FC = () => {
       return;
     }
 
-    console.log("🔐 isAuthenticated trong handleAddToCart:", isAuthenticated);
+    //console.log("🔐 isAuthenticated trong handleAddToCart:", isAuthenticated);
 
     if (isAuthenticated) {
       // Nếu đã đăng nhập, sử dụng API
       try {
-        // console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
+        // //console.log("🚀 Đã đăng nhập, gọi API để thêm vào giỏ hàng:", {
         //   productId: product.id,
         //   variantId,
         //   quantity,
@@ -301,7 +295,7 @@ const ProductDetailPage: React.FC = () => {
           warrantyPackageIds: selectedWarranties,
         }).unwrap();
 
-        console.log("✅ API success, server cart:", serverCart);
+        //console.log("✅ API success, server cart:", serverCart);
 
         // Update Redux store with server response
         dispatch(setServerCart(serverCart));
@@ -346,7 +340,7 @@ const ProductDetailPage: React.FC = () => {
       }
     } else {
       // Nếu chưa đăng nhập, KHÔNG gọi API, chỉ lưu vào localStorage
-      console.log("🔐 Chưa đăng nhập, chỉ lưu vào localStorage");
+      //console.log("🔐 Chưa đăng nhập, chỉ lưu vào localStorage");
 
       const newItem = {
         id: uuidv4(),
@@ -367,10 +361,10 @@ const ProductDetailPage: React.FC = () => {
       dispatch(addItem(newItem));
 
       // Debug: Check if localStorage was updated
-      console.log(
-        "🔍 localStorage after add:",
-        localStorage.getItem("cartItems")
-      );
+      //console.log(
+      //   "🔍 localStorage after add:",
+      //   localStorage.getItem("cartItems")
+      // );
 
       dispatch(
         addNotification({
@@ -390,9 +384,26 @@ const ProductDetailPage: React.FC = () => {
         const response = await addtoWishList({
           productId: product.id,
         }).unwrap();
-        console.log("✅ API success, server wishlist:", response);
+        //console.log("✅ API success, server wishlist:", response);
+        // Transform BackendWishlist to ServerWishlist format
+        const transformedWishlist: ServerWishlist = {
+          id: response.id as string || '',
+          items: (response.items || []).map((item: any) => ({
+            id: item.id,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            compareAtPrice: item.compareAtPrice,
+            thumbnail: item.thumbnail,
+            slug: item.slug,
+            dateAdded: new Date().toISOString()
+          })) as any[],
+          userId: 'current_user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
         // Update Redux store with server response
-        dispatch(setServerWishList(response));
+        dispatch(setServerWishList(transformedWishlist));
         // Show notification based on API response message
         dispatch(
           addNotification({
@@ -415,7 +426,8 @@ const ProductDetailPage: React.FC = () => {
           compareAtPrice: product.compareAtPrice,
           thumbnail: product.thumbnail,
           slug: product.slug,
-        };
+          dateAdded: new Date().toISOString(),
+        } as WishlistItem;
         dispatch(addItemWishlist(newItem));
         dispatch(
           addNotification({
@@ -445,7 +457,8 @@ const ProductDetailPage: React.FC = () => {
           compareAtPrice: product.compareAtPrice,
           thumbnail: product.thumbnail,
           slug: product.slug,
-        };
+          dateAdded: new Date().toISOString(),
+        } as WishlistItem;
         dispatch(addItemWishlist(newItem));
         dispatch(
           addNotification({
@@ -466,7 +479,7 @@ const ProductDetailPage: React.FC = () => {
       // Tìm variant ID dựa trên thuộc tính đã chọn
       let variantId: string | undefined;
       if (product.variants && Object.keys(selectedAttributes).length > 0) {
-        const selectedVariant = product.variants.find((variant) => {
+        const selectedVariant = product.variants.find((variant: ProductVariant) => {
           if (!variant.attributes) return false;
           return Object.entries(selectedAttributes).every(
             ([key, value]) => variant.attributes[key] === value
@@ -711,7 +724,7 @@ const ProductDetailPage: React.FC = () => {
           {/* Thumbnail gallery */}
           {product.images.length > 1 && (
             <div className="grid grid-cols-5 gap-3">
-              {product.images.map((image, index) => (
+              {product.images.map((image: string, index: number) => (
                 <button
                   key={index}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
@@ -867,7 +880,7 @@ const ProductDetailPage: React.FC = () => {
           {/* Dynamic Attributes Selector */}
           {product.attributes && product.attributes.length > 0 && (
             <div className="mb-6">
-              {product.attributes.map((attribute) => {
+              {product.attributes.map((attribute: ProductAttribute) => {
                 const attributeValuesWithStock = getAttributeValuesWithStock(
                   product,
                   attribute.name,
@@ -1123,7 +1136,7 @@ const ProductDetailPage: React.FC = () => {
             Sản phẩm liên quan
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.slice(0, 4).map((product) => (
+            {relatedProducts.slice(0, 4).map((product: Product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

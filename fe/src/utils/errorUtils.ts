@@ -7,13 +7,13 @@
  * Common error types in the application
  */
 export enum ErrorType {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
-  AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
-  NOT_FOUND_ERROR = 'NOT_FOUND_ERROR',
-  SERVER_ERROR = 'SERVER_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  NETWORK_ERROR = "NETWORK_ERROR",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR",
+  AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
+  NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
+  SERVER_ERROR = "SERVER_ERROR",
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
 
 /**
@@ -31,32 +31,32 @@ export interface AppError {
  */
 const ERROR_MESSAGES = {
   [ErrorType.NETWORK_ERROR]: {
-    vi: 'Không thể kết nối tới server. Vui lòng kiểm tra kết nối internet.',
-    en: 'Unable to connect to server. Please check your internet connection.',
+    vi: "Không thể kết nối tới server. Vui lòng kiểm tra kết nối internet.",
+    en: "Unable to connect to server. Please check your internet connection.",
   },
   [ErrorType.VALIDATION_ERROR]: {
-    vi: 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.',
-    en: 'Invalid data. Please check your information.',
+    vi: "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.",
+    en: "Invalid data. Please check your information.",
   },
   [ErrorType.AUTHENTICATION_ERROR]: {
-    vi: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
-    en: 'Session expired. Please login again.',
+    vi: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    en: "Session expired. Please login again.",
   },
   [ErrorType.AUTHORIZATION_ERROR]: {
-    vi: 'Bạn không có quyền truy cập tài nguyên này.',
-    en: 'You do not have permission to access this resource.',
+    vi: "Bạn không có quyền truy cập tài nguyên này.",
+    en: "You do not have permission to access this resource.",
   },
   [ErrorType.NOT_FOUND_ERROR]: {
-    vi: 'Không tìm thấy tài nguyên yêu cầu.',
-    en: 'Requested resource not found.',
+    vi: "Không tìm thấy tài nguyên yêu cầu.",
+    en: "Requested resource not found.",
   },
   [ErrorType.SERVER_ERROR]: {
-    vi: 'Lỗi server. Vui lòng thử lại sau.',
-    en: 'Server error. Please try again later.',
+    vi: "Lỗi server. Vui lòng thử lại sau.",
+    en: "Server error. Please try again later.",
   },
   [ErrorType.UNKNOWN_ERROR]: {
-    vi: 'Đã xảy ra lỗi không xác định.',
-    en: 'An unknown error occurred.',
+    vi: "Đã xảy ra lỗi không xác định.",
+    en: "An unknown error occurred.",
   },
 } as const;
 
@@ -68,7 +68,7 @@ export const parseError = (error: any): AppError => {
   if (error?.status) {
     const status = error.status;
     const message =
-      error.data?.message || error.data?.error?.message || 'Unknown error';
+      error.data?.message || error.data?.error?.message || "Unknown error";
 
     if (status === 400) {
       return {
@@ -115,7 +115,7 @@ export const parseError = (error: any): AppError => {
       };
     }
 
-    if (status === 'FETCH_ERROR') {
+    if (status === "FETCH_ERROR") {
       return {
         type: ErrorType.NETWORK_ERROR,
         message,
@@ -135,7 +135,7 @@ export const parseError = (error: any): AppError => {
   }
 
   // String error
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return {
       type: ErrorType.UNKNOWN_ERROR,
       message: error,
@@ -145,7 +145,7 @@ export const parseError = (error: any): AppError => {
   // Default unknown error
   return {
     type: ErrorType.UNKNOWN_ERROR,
-    message: 'An unknown error occurred',
+    message: "An unknown error occurred",
     details: error,
   };
 };
@@ -155,12 +155,12 @@ export const parseError = (error: any): AppError => {
  */
 export const getErrorMessage = (
   error: any,
-  language: 'vi' | 'en' = 'vi'
+  language: "vi" | "en" = "vi"
 ): string => {
   const parsedError = parseError(error);
 
   // Use provided message if available and not generic
-  if (parsedError.message && !parsedError.message.includes('Unknown error')) {
+  if (parsedError.message && !parsedError.message.includes("Unknown error")) {
     return parsedError.message;
   }
 
@@ -176,9 +176,9 @@ export const createErrorHandler = (onError?: (error: AppError) => void) => {
     const parsedError = parseError(error);
 
     if (import.meta.env.DEV) {
-      console.group('🚨 Error Handler');
-      console.log('Original error:', error);
-      console.log('Parsed error:', parsedError);
+      console.group("🚨 Error Handler");
+      //console.log('Original error:', error);
+      //console.log('Parsed error:', parsedError);
       console.groupEnd();
     }
 

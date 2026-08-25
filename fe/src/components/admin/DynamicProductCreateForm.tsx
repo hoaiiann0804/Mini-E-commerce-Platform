@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Form,
   Steps,
@@ -10,31 +10,31 @@ import {
   Row,
   Col,
   Alert,
-  Divider,
   Modal,
   Tag,
-} from 'antd';
+} from "antd";
 import {
-  InfoCircleOutlined,
   SaveOutlined,
   EyeOutlined,
   BulbOutlined,
   RocketOutlined,
   SettingOutlined,
-} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 // Import our enhanced components
-import EnhancedProductBasicForm from '../product/EnhancedProductBasicForm';
-import DynamicAttributeSelector from '../product/DynamicAttributeSelector';
-import ProductPricingForm from '../product/ProductPricingForm';
-import ProductImagesForm from '../product/ProductImagesForm';
-import ProductSeoForm from '../product/ProductSeoForm';
-import ProductCategoryForm from '../product/ProductCategoryForm';
+import EnhancedProductBasicForm from "../product/EnhancedProductBasicForm";
+import DynamicAttributeSelector from "../product/DynamicAttributeSelector";
+import ProductPricingForm from "../product/ProductPricingForm";
+import ProductImagesForm from "../product/ProductImagesForm";
+import ProductSeoForm from "../product/ProductSeoForm";
+import ProductCategoryForm from "../product/ProductCategoryForm";
+import { ProductVariant } from "@/types/product.types";
 
 // Import services
-import { adminProductService } from '@/services/adminProductApi';
-import { attributeService } from '@/services/attributeService';
+import { useCreateProductMutation } from "@/services/adminProductApi";
+import { useGetCategoriesQuery } from "@/services/categoryApi";
 
 const { Step } = Steps;
 const { Title, Text, Paragraph } = Typography;
@@ -45,9 +45,12 @@ interface ProductFormData {
   baseName?: string;
   description: string;
   shortDescription: string;
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
   featured: boolean;
   isVariantProduct: boolean;
+
+  // Variants
+  variants?: ProductVariant[];
 
   // Pricing
   price: number;
@@ -92,7 +95,11 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
   initialData,
 }) => {
   const [form] = Form.useForm();
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const [createProduct] = useCreateProductMutation();
+  const { data: categories = [], isLoading: isCategoriesLoading } =
+    useGetCategoriesQuery();
 
   // State
   const [currentStep, setCurrentStep] = useState(0);
@@ -100,7 +107,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
-  const [generatedName, setGeneratedName] = useState<string>('');
+  const [generatedName, setGeneratedName] = useState<string>("");
   const [nameDetails, setNameDetails] = useState<any>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [formData, setFormData] = useState<Partial<ProductFormData>>(
@@ -110,7 +117,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
   // Initialize form with default values
   useEffect(() => {
     form.setFieldsValue({
-      status: 'draft',
+      status: "draft",
       featured: false,
       isVariantProduct: true,
       inStock: true,
@@ -128,34 +135,40 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
 
   const steps = [
     {
-      title: '📝 Thông tin cơ bản',
-      description: 'Tên, mô tả, trạng thái',
-      key: 'basic',
+      title: t("admin.products.dynamicCreateForm.steps.basic.title"),
+      description: t("admin.products.dynamicCreateForm.steps.basic.description"),
+      key: "basic",
     },
     {
-      title: '🏷️ Thuộc tính động',
-      description: 'Chọn CPU, GPU, RAM, v.v.',
-      key: 'attributes',
+      title: t("admin.products.dynamicCreateForm.steps.attributes.title"),
+      description: t(
+        "admin.products.dynamicCreateForm.steps.attributes.description"
+      ),
+      key: "attributes",
     },
     {
-      title: '💰 Giá & Kho',
-      description: 'Định giá và quản lý kho',
-      key: 'pricing',
+      title: t("admin.products.dynamicCreateForm.steps.pricing.title"),
+      description: t(
+        "admin.products.dynamicCreateForm.steps.pricing.description"
+      ),
+      key: "pricing",
     },
     {
-      title: '📸 Hình ảnh',
-      description: 'Upload ảnh sản phẩm',
-      key: 'media',
+      title: t("admin.products.dynamicCreateForm.steps.media.title"),
+      description: t("admin.products.dynamicCreateForm.steps.media.description"),
+      key: "media",
     },
     {
-      title: '📂 Danh mục',
-      description: 'Phân loại sản phẩm',
-      key: 'category',
+      title: t("admin.products.dynamicCreateForm.steps.category.title"),
+      description: t(
+        "admin.products.dynamicCreateForm.steps.category.description"
+      ),
+      key: "category",
     },
     {
-      title: '🎯 SEO',
-      description: 'Tối ưu tìm kiếm',
-      key: 'seo',
+      title: "🎯 SEO",
+      description: t("admin.products.dynamicCreateForm.steps.seo.description"),
+      key: "seo",
     },
   ];
 
@@ -166,7 +179,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
       affectingNameOnly: Record<string, string>
     ) => {
       setSelectedAttributes(attributeValues);
-      form.setFieldValue('selectedAttributes', attributeValues);
+      form.setFieldValue("selectedAttributes", attributeValues);
 
       // Update form data
       setFormData((prev) => ({
@@ -190,19 +203,19 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
       }));
 
       // Auto-generate SEO fields if empty
-      if (!form.getFieldValue('seoTitle')) {
-        form.setFieldValue('seoTitle', name);
+      if (!form.getFieldValue("seoTitle")) {
+        form.setFieldValue("seoTitle", name);
       }
 
       if (
-        !form.getFieldValue('shortDescription') &&
+        !form.getFieldValue("shortDescription") &&
         details?.affectingAttributes
       ) {
         const attributeText = details.affectingAttributes
           .map((attr: any) => `${attr.groupName}: ${attr.name}`)
-          .join(', ');
+          .join(", ");
         const autoShortDesc = `${name} với cấu hình ${attributeText}`;
-        form.setFieldValue('shortDescription', autoShortDesc);
+        form.setFieldValue("shortDescription", autoShortDesc);
       }
     },
     [form]
@@ -215,11 +228,11 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
 
   // Fill example data
   const fillExampleData = useCallback(() => {
-    const exampleData = {
-      name: 'ThinkPad X1 Carbon Gen 11',
-      baseName: 'ThinkPad X1 Carbon',
+    const exampleData: Partial<ProductFormData> = {
+      name: "ThinkPad X1 Carbon Gen 11",
+      baseName: "ThinkPad X1 Carbon",
       shortDescription:
-        'Laptop doanh nhân cao cấp, siêu mỏng nhẹ với hiệu năng mạnh mẽ',
+        "Laptop doanh nhân cao cấp, siêu mỏng nhẹ với hiệu năng mạnh mẽ",
       description: `
         <h3>ThinkPad X1 Carbon Gen 11 - Định nghĩa mới về laptop doanh nhân</h3>
         
@@ -232,25 +245,25 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
       price: 35000000,
       compareAtPrice: 42000000,
       stockQuantity: 10,
-      sku: 'TPX1C-2024',
+      sku: "TPX1C-2024",
       featured: true,
       isVariantProduct: true,
-      status: 'active',
-      seoTitle: 'ThinkPad X1 Carbon Gen 11 - Laptop Doanh Nhân Cao Cấp',
+      status: "active",
+      seoTitle: "ThinkPad X1 Carbon Gen 11 - Laptop Doanh Nhân Cao Cấp",
       seoDescription:
-        'Mua ThinkPad X1 Carbon Gen 11 với giá tốt nhất. Laptop doanh nhân siêu mỏng nhẹ, hiệu năng mạnh, bảo mật tuyệt đối.',
-      seoKeywords: ['thinkpad', 'x1 carbon', 'laptop doanh nhân', 'lenovo'],
+        "Mua ThinkPad X1 Carbon Gen 11 với giá tốt nhất. Laptop doanh nhân siêu mỏng nhẹ, hiệu năng mạnh, bảo mật tuyệt đối.",
+      seoKeywords: ["thinkpad", "x1 carbon", "laptop doanh nhân", "lenovo"],
       searchKeywords: [
-        'thinkpad x1 carbon',
-        'laptop lenovo',
-        'laptop doanh nhân',
+        "thinkpad x1 carbon",
+        "laptop lenovo",
+        "laptop doanh nhân",
       ],
     };
 
     form.setFieldsValue(exampleData);
     setFormData((prev) => ({ ...prev, ...exampleData }));
-    message.success('Đã điền dữ liệu mẫu ThinkPad X1 Carbon!');
-  }, [form]);
+    message.success(t("admin.products.dynamicCreateForm.messages.sampleFilled"));
+  }, [form, t]);
 
   // Navigation handlers
   const handleNext = () => {
@@ -260,7 +273,9 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         setCurrentStep(currentStep + 1);
       })
       .catch(() => {
-        message.error('Vui lòng điền đầy đủ thông tin bắt buộc!');
+        message.error(
+          t("admin.products.dynamicCreateForm.messages.fillRequiredFields")
+        );
       });
   };
 
@@ -285,22 +300,24 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         stockQuantity: Number(values.stockQuantity) || 0,
       };
 
-      console.log('Submitting product:', productData);
+      //console.log("Submitting product:", productData);
 
       // Create the product
-      const response = await adminProductService.createProduct(productData);
+      const response = await createProduct(productData).unwrap();
 
-      if (response.success) {
-        message.success('Tạo sản phẩm thành công!');
+      if (response?.data) {
+        message.success(t("admin.products.dynamicCreateForm.messages.created"));
         if (onSuccess) {
           onSuccess(response.data);
         } else {
-          navigate('/admin/products');
+          navigate("/admin/products");
         }
       }
     } catch (error: any) {
-      console.error('Create product error:', error);
-      message.error(error.message || 'Có lỗi xảy ra khi tạo sản phẩm!');
+      console.error("Create product error:", error);
+      message.error(
+        error.message || t("admin.products.dynamicCreateForm.messages.createError")
+      );
     } finally {
       setLoading(false);
     }
@@ -316,7 +333,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
     const currentStepKey = steps[currentStep]?.key;
 
     switch (currentStepKey) {
-      case 'basic':
+      case "basic":
         return (
           <EnhancedProductBasicForm
             fillExampleData={fillExampleData}
@@ -325,7 +342,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
           />
         );
 
-      case 'attributes':
+      case "attributes":
         return (
           <DynamicAttributeSelector
             baseName={formData.baseName || formData.name}
@@ -335,16 +352,26 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
           />
         );
 
-      case 'pricing':
-        return <ProductPricingForm />;
+      case "pricing":
+        return (
+          <ProductPricingForm
+            hasVariants={Boolean(formData?.variants?.length)}
+            variants={formData?.variants || []}
+          />
+        );
 
-      case 'media':
-        return <ProductImagesForm />;
+      case "media":
+        return <ProductImagesForm form={form} />;
 
-      case 'category':
-        return <ProductCategoryForm />;
+      case "category":
+        return (
+          <ProductCategoryForm
+            categories={categories}
+            isLoading={isCategoriesLoading}
+          />
+        );
 
-      case 'seo':
+      case "seo":
         return <ProductSeoForm />;
 
       default:
@@ -359,18 +386,18 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
   return (
     <div
       style={{
-        padding: '24px',
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh',
+        padding: "24px",
+        backgroundColor: "#f5f5f5",
+        minHeight: "100vh",
       }}
     >
       <Card
-        style={{ maxWidth: 1200, margin: '0 auto' }}
+        style={{ maxWidth: 1200, margin: "0 auto" }}
         title={
           <Space>
-            <RocketOutlined style={{ color: '#1890ff' }} />
+            <RocketOutlined style={{ color: "#1890ff" }} />
             <Title level={3} style={{ margin: 0 }}>
-              Tạo sản phẩm với tính năng tên động
+              {t("admin.products.dynamicCreateForm.title")}
             </Title>
           </Space>
         }
@@ -381,9 +408,9 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
               onClick={handlePreview}
               disabled={!generatedName}
             >
-              Xem trước
+              {t("admin.products.dynamicCreateForm.actions.preview")}
             </Button>
-            {onCancel && <Button onClick={onCancel}>Hủy</Button>}
+            {onCancel && <Button onClick={onCancel}>{t("common.cancel")}</Button>}
           </Space>
         }
       >
@@ -402,10 +429,10 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
         {/* Current Name Display */}
         {generatedName && (
           <Alert
-            message="Tên sản phẩm hiện tại"
+            message={t("admin.products.dynamicCreateForm.currentName")}
             description={
-              <Space direction="vertical" style={{ width: '100%' }}>
-                <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Title level={4} style={{ margin: 0, color: "#1890ff" }}>
                   {generatedName}
                 </Title>
                 {nameDetails?.affectingAttributes && (
@@ -446,14 +473,17 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
             <Col>
               {!isFirstStep && (
                 <Button size="large" onClick={handlePrev}>
-                  ← Bước trước
+                  {t("admin.products.dynamicCreateForm.navigation.prev")}
                 </Button>
               )}
             </Col>
 
             <Col>
               <Text type="secondary">
-                Bước {currentStep + 1} / {steps.length}
+                {t("admin.products.dynamicCreateForm.navigation.stepCounter", {
+                  current: currentStep + 1,
+                  total: steps.length,
+                })}
               </Text>
             </Col>
 
@@ -461,7 +491,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
               <Space>
                 {!isLastStep ? (
                   <Button type="primary" size="large" onClick={handleNext}>
-                    Bước tiếp theo →
+                    {t("admin.products.dynamicCreateForm.navigation.next")}
                   </Button>
                 ) : (
                   <Button
@@ -471,7 +501,7 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
                     loading={loading}
                     onClick={handleSubmit}
                   >
-                    Tạo sản phẩm
+                    {t("admin.products.dynamicCreateForm.navigation.create")}
                   </Button>
                 )}
               </Space>
@@ -482,13 +512,13 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
 
       {/* Preview Modal */}
       <Modal
-        title="👀 Xem trước sản phẩm"
+        title={t("admin.products.dynamicCreateForm.preview.title")}
         open={previewVisible}
         onCancel={() => setPreviewVisible(false)}
         footer={null}
         width={800}
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" style={{ width: "100%" }}>
           <Title level={3}>{generatedName || formData.name}</Title>
 
           {formData.shortDescription && (
@@ -497,16 +527,20 @@ const DynamicProductCreateForm: React.FC<DynamicProductCreateFormProps> = ({
 
           <Row gutter={[16, 16]}>
             <Col span={12}>
-              <Text strong>Giá:</Text> {formData.price?.toLocaleString()} VNĐ
+              <Text strong>{t("admin.products.dynamicCreateForm.preview.price")}:</Text>{" "}
+              {formData.price?.toLocaleString()} VNĐ
             </Col>
             <Col span={12}>
-              <Text strong>Tồn kho:</Text> {formData.stockQuantity}
+              <Text strong>{t("admin.products.dynamicCreateForm.preview.stock")}:</Text>{" "}
+              {formData.stockQuantity}
             </Col>
           </Row>
 
           {Object.keys(selectedAttributes).length > 0 && (
             <div>
-              <Text strong>Thuộc tính đã chọn:</Text>
+              <Text strong>
+                {t("admin.products.dynamicCreateForm.preview.selectedAttributes")}:
+              </Text>
               <div style={{ marginTop: 8 }}>
                 <Space wrap>
                   {Object.entries(selectedAttributes).map(

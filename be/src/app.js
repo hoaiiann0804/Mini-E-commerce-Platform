@@ -9,11 +9,17 @@ const rateLimit = require("express-rate-limit");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const routes = require("./routes");
-const { errorHandler } = require("./middlewares/errorHandler");
+const aiRoutes = require("./routes/aiRoutes"); // Import AI routes
+const { errorHandler, AppError } = require("./middlewares/errorHandler");
 const path = require("path");
 
 // Initialize app
 const app = express();
+
+// Render/Reverse proxy (needed for secure cookies, correct req.ip, etc.)
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 // Set security HTTP headers
 app.use(
@@ -24,26 +30,40 @@ app.use(
 );
 
 // Enable CORS
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL || "https://yourdomain.com"
-        : [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:5175",
-          ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-    exposedHeaders: ["Set-Cookie"],
-  })
-);
+
+const parseList = (val)=> (val || "").split(",").map((s)=>s.trim()).filter(Boolean)
+const defaultDevOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+];
+
+const configuredOrigins = new Set([
+ ...parseList(process.env.CORS_ORIGIN),
+ ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL ]: []) ,
+ ...defaultDevOrigins
+]);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (configuredOrigins.has(origin)) {
+      return callback(null, true);
+    }
+  console.log("❌ Blocked by CORS:", origin);
+  return callback(null, false);  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  // exposedHeaders: ["Set-Cookie"],
+};
+
+
 
 // Handle preflight requests
-app.options("*", cors());
+app.use(cors(corsOptions))
+app.options("*", cors(corsOptions));
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
@@ -62,12 +82,18 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Body parser, reading data from body into req.body
-// Skip JSON parsing for multipart/form-data requests to avoid conflicts with multer
-//app.use(express.json({ limit: "50mb" }));
+// QUAN TRỌNG: Route /api/payments/webhook phải nhận Raw Buffer (không qua express.json())
+// vì Stripe dùng raw body để xác minh chữ ký webhook
+// express.raw() đã được khai báo trong payment.routes.js cho route /webhook
+// Ở đây dùng filter để bỏ qua việc parse JSON cho route đó
 app.use(
   express.json({
     limit: "50mb",
-    type: (req) => !req.headers["content-type"]?.startsWith("multipart/"),
+    type: (req) => {
+      // Bỏ qua JSON parsing cho Stripe webhook và multipart
+      if (req.path === "/api/payments/webhook") return false;
+      return !req.headers["content-type"]?.startsWith("multipart/");
+    },
   })
 );
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
@@ -81,12 +107,15 @@ app.use(xss());
 // Compression middleware
 app.use(compression());
 
-// Serve uploaded files statically
-//Kiểm tra xem folder /uploads có được public chưa:
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
+// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
+// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
+// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
+// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // API routes
 app.use("/api", routes);
+app.use("/api/ai", aiRoutes); // Add AI routes
 
 // Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

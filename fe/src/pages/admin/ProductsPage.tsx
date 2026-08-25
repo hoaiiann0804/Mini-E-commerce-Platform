@@ -85,7 +85,12 @@ const ProductsPage: React.FC = () => {
   const pagination = productsResponse?.data?.pagination;
 
   // Xử lý dữ liệu danh mục từ API
-  const apiCategories = categoriesResponse?.data || [];
+  // API có thể trả về Category[] | Category nên cần xử lý type
+  const apiCategories = Array.isArray(categoriesResponse?.data)
+    ? categoriesResponse.data
+    : categoriesResponse?.data
+      ? [categoriesResponse.data]
+      : [];
 
   // Tạo options cho dropdown danh mục
   const categoryOptions = [
@@ -101,18 +106,18 @@ const ProductsPage: React.FC = () => {
   // Log dữ liệu sản phẩm để debug
   useEffect(() => {
     if (products.length > 0) {
-      console.log("Products data:", products);
+      //console.log("Products data:", products);
       // Kiểm tra xem sản phẩm có biến thể không
       const hasVariants = products.some(
         (product) => product.variants && product.variants.length > 0
       );
-      console.log("Products have variants:", hasVariants);
+      //console.log("Products have variants:", hasVariants);
       if (hasVariants) {
         // Log sản phẩm đầu tiên có biến thể
         const productWithVariants = products.find(
           (product) => product.variants && product.variants.length > 0
         );
-        console.log("Example product with variants:", productWithVariants);
+        //console.log("Example product with variants:", productWithVariants);
       }
     }
   }, [products]);
@@ -121,6 +126,9 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     if (Array.isArray(apiCategories) && apiCategories.length > 0) {
       console.log("Categories data:", apiCategories);
+
+    if (apiCategories.length > 0) {
+      //console.log("Categories data:", apiCategories);
     }
   }, [apiCategories]);
 
@@ -293,7 +301,7 @@ const ProductsPage: React.FC = () => {
             type="link"
             icon={<EditOutlined />}
             onClick={() => {
-              console.log("Edit button clicked, record.id:", record.id);
+              //console.log("Edit button clicked, record.id:", record.id);
               navigate(`/admin/products/edit/${record.id}`);
             }}
             title="Chỉnh sửa"

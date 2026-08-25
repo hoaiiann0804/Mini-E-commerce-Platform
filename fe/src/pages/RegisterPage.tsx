@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import Button from '@/components/common/Button';
 import { PremiumButton } from '@/components/common';
 import Input from '@/components/common/Input';
 import { useRegisterMutation } from '@/services/authApi';
-import { loginSuccess } from '@/features/auth/authSlice';
 
 const RegisterPage: React.FC = () => {
-  const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,11 +82,11 @@ const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      console.log('🚀 Attempting registration with:', {
-        email,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-      });
+      // //console.log('🚀 Attempting registration with:', {
+      //   email,
+      //   firstName: firstName.trim(),
+      //   lastName: lastName.trim(),
+      // });
 
       const result = await register({
         email,
@@ -100,12 +96,11 @@ const RegisterPage: React.FC = () => {
         phone: phone.trim() || '', // Phone is optional
       }).unwrap();
 
-      console.log('✅ Registration successful:', result);
+      //console.log('✅ Registration successful:', result);
 
       // Show success message to user
       setSuccessMessage(
-        result.message ||
-          'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.'
+        'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.'
       );
 
       // Clear form
@@ -122,7 +117,7 @@ const RegisterPage: React.FC = () => {
         navigate('/login', { replace: true });
       }, 3000);
     } catch (err: any) {
-      console.log('❌ Registration failed:', err);
+      //console.log('❌ Registration failed:', err);
       // Clear any previous success message
       setSuccessMessage('');
       // Error is already handled by RTK Query and displayed in UI

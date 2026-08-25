@@ -1107,22 +1107,26 @@ Laptop MSI Modern 14 C12MO-660VN đã có mặt tại cửa hàng CellphoneS, đ
       },
     ],
   },
+
 ];
 
 async function importProducts() {
   try {
-    console.log('🚀 Bắt đầu import sản phẩm...');
+    //console.log('🚀 Bắt đầu import sản phẩm...');
 
-    // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
-    await OrderItem.destroy({ where: {} });
-    await CartItem.destroy({ where: {} });
-    await ProductVariant.destroy({ where: {} });
-    await ProductAttribute.destroy({ where: {} });
-    await ProductSpecification.destroy({ where: {} });
-    await Product.destroy({ where: {} });
-    await Category.destroy({ where: {} });
+    // Optional: wipe existing data (DANGEROUS). Only enable for empty/new DBs.
+    if (process.env.RESET_BEFORE_IMPORT === 'true') {
+      // Xóa dữ liệu cũ theo thứ tự để tránh foreign key constraint
+      await OrderItem.destroy({ where: {} });
+      await CartItem.destroy({ where: {} });
+      await ProductVariant.destroy({ where: {} });
+      await ProductAttribute.destroy({ where: {} });
+      await ProductSpecification.destroy({ where: {} });
+      await Product.destroy({ where: {} });
+      await Category.destroy({ where: {} });
+    }
 
-    console.log('🗑️ Đã xóa dữ liệu cũ');
+    //console.log('🗑️ Đã xóa dữ liệu cũ');
 
     // Tạo categories
     const categories = [
@@ -1151,8 +1155,16 @@ async function importProducts() {
       { name: 'Điện tử', slug: 'dien-tu', description: 'Thiết bị điện tử' },
     ];
 
-    const createdCategories = await Category.bulkCreate(categories);
-    console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
+    // Create categories idempotently (avoid unique constraint on slug)
+    const createdCategories = [];
+    for (const categoryData of categories) {
+      const [category] = await Category.findOrCreate({
+        where: { slug: categoryData.slug },
+        defaults: categoryData,
+      });
+      createdCategories.push(category);
+    }
+    //console.log(`📁 Đã tạo ${createdCategories.length} danh mục`);
 
     // Tạo products với attributes và variants
     for (const productData of sampleProducts) {
@@ -1162,6 +1174,16 @@ async function importProducts() {
       );
 
       // Tạo product
+      // Skip if product already exists (safe to re-run on production)
+      const existingProduct = await Product.findOne({
+        where: { name: productData.name },
+        attributes: ['id'],
+      });
+      if (existingProduct) {
+        console.log(`â­ Bá» qua (Ä‘Ă£ tá»“n táº¡i): ${productData.name}`);
+        continue;
+      }
+
       const product = await Product.create({
         name: productData.name,
         description: productData.description,
@@ -1256,10 +1278,10 @@ async function importProducts() {
       );
     }
 
-    console.log('🎉 Import thành công!');
-    console.log(`📊 Tổng kết:`);
-    console.log(`   - ${sampleProducts.length} sản phẩm`);
-    console.log(`   - ${createdCategories.length} danh mục`);
+    //console.log('🎉 Import thành công!');
+    //console.log(`📊 Tổng kết:`);
+    //console.log(`   - ${sampleProducts.length} sản phẩm`);
+    //console.log(`   - ${createdCategories.length} danh mục`);
     console.log(
       `   - Tổng variants: ${sampleProducts.reduce((sum, p) => sum + p.variants.length, 0)}`
     );
@@ -1270,6 +1292,6 @@ async function importProducts() {
 
 // Chạy import
 importProducts().then(() => {
-  console.log('🏁 Hoàn tất import');
+  //console.log('🏁 Hoàn tất import');
   process.exit(0);
 });

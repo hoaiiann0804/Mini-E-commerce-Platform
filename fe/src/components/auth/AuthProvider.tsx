@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { useGetCurrentUserQuery } from '@/services/authApi';
-import { loginSuccess, logout } from '@/features/auth/authSlice';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { useGetCurrentUserQuery } from "@/services/authApi";
+import { loginSuccess, logout } from "@/features/auth/authSlice";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -43,27 +43,27 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Nếu API trả về user successfully, cập nhật Redux state
     if (isSuccess && currentUser && token) {
-      console.log('✅ User info fetched successfully:', currentUser);
-      console.log('👤 User role:', currentUser.role);
-      console.log('🔐 Token:', token);
+      //console.log('✅ User info fetched successfully:', currentUser);
+      //console.log('👤 User role:', currentUser.role);
+      //console.log('🔐 Token:', token);
 
       dispatch(
         loginSuccess({
           user: currentUser,
           token: token,
-          refreshToken: localStorage.getItem('refreshToken') || '',
+          refreshToken: localStorage.getItem("refreshToken") || "",
         })
       );
 
-      console.log('📦 Dispatched loginSuccess with user data');
+      //console.log('📦 Dispatched loginSuccess with user data');
     }
   }, [isSuccess, currentUser, token, dispatch]);
 
   useEffect(() => {
     // Nếu API trả về lỗi (token không hợp lệ), logout user
     if (isError && error) {
-      console.log('❌ Failed to fetch user info:', error);
-      console.log('🔐 Logging out due to invalid token...');
+      //console.log('❌ Failed to fetch user info:', error);
+      //console.log('🔐 Logging out due to invalid token...');
 
       // Clear authentication state
       dispatch(logout());

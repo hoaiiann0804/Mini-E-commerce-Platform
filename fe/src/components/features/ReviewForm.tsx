@@ -164,7 +164,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 onClick={() => {
                   setFormData({ ...formData, rating: star });
                   // Xóa lỗi khi người dùng chọn rating
-                  setErrors((prev) => ({ ...prev, rating: undefined }));
+                  setErrors((prev) => {
+                    const { rating, ...rest } = prev;
+                    return rest;
+                  });
                 }}
                 className={`w-8 h-8 ${
                   star <= formData.rating
@@ -215,7 +218,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             onChange={(e) => {
               setFormData({ ...formData, title: e.target.value });
               // Xóa lỗi khi người dùng nhập title
-              setErrors((prev) => ({ ...prev, title: undefined }));
+              setErrors((prev) => {
+                const { title, ...rest } = prev;
+                return rest;
+              });
             }}
             placeholder="Nhập tiêu đề cho đánh giá của bạn"
             className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-neutral-700 dark:text-white"
@@ -245,7 +251,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             onChange={(e) => {
               setFormData({ ...formData, comment: e.target.value });
               // Xóa lỗi khi người dùng nhập comment
-              setErrors((prev) => ({ ...prev, comment: undefined }));
+              setErrors((prev) => {
+                const { comment, ...rest } = prev;
+                return rest;
+              });
             }}
             placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
             rows={4}
@@ -313,3 +322,4 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 };
 
 export default ReviewForm;
+

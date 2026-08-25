@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, Button, Space, Typography, Tag, Divider } from 'antd';
-import { CheckOutlined } from '@ant-design/icons';
-import { ProductWithVariants } from '@/types/product';
+import React from "react";
+import { Card, Button, Space, Typography, Tag, Divider } from "antd";
+import { CheckOutlined } from "@ant-design/icons";
+import { ProductWithVariants } from "@/types/product.types";
 
 const { Text, Title } = Typography;
 
@@ -27,9 +27,9 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(price);
   };
 
@@ -47,49 +47,49 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
       }
       size="small"
     >
-      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+      <Space direction="vertical" style={{ width: "100%" }} size="middle">
         {/* Current Selection Display */}
         {currentVariant && (
           <div
             style={{
-              padding: '12px',
-              backgroundColor: '#f0f9ff',
-              borderRadius: '8px',
-              border: '1px solid #0ea5e9',
+              padding: "12px",
+              backgroundColor: "#f0f9ff",
+              borderRadius: "8px",
+              border: "1px solid #0ea5e9",
             }}
           >
             <Space direction="vertical" size="small">
-              <Text strong style={{ color: '#0ea5e9' }}>
+              <Text strong style={{ color: "#0ea5e9" }}>
                 <CheckOutlined style={{ marginRight: 4 }} />
                 Đã chọn: {currentVariant.name}
               </Text>
               <Space>
-                <Text strong style={{ fontSize: '16px', color: '#dc2626' }}>
+                <Text strong style={{ fontSize: "16px", color: "#dc2626" }}>
                   {formatPrice(currentVariant.price)}
                 </Text>
                 {currentVariant.compareAtPrice &&
                   currentVariant.compareAtPrice > currentVariant.price && (
-                    <Text delete style={{ color: '#6b7280' }}>
+                    <Text delete style={{ color: "#6b7280" }}>
                       {formatPrice(currentVariant.compareAtPrice)}
                     </Text>
                   )}
               </Space>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                SKU: {currentVariant.sku} | Còn lại:{' '}
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                SKU: {currentVariant.sku} | Còn lại:{" "}
                 {currentVariant.stockQuantity}
               </Text>
             </Space>
           </div>
         )}
 
-        <Divider style={{ margin: '8px 0' }} />
+        <Divider style={{ margin: "8px 0" }} />
 
         {/* Variant Options */}
         <div>
-          <Text strong style={{ marginBottom: 8, display: 'block' }}>
+          <Text strong style={{ marginBottom: 8, display: "block" }}>
             Các phiên bản có sẵn:
           </Text>
-          <Space direction="vertical" style={{ width: '100%' }} size="small">
+          <Space direction="vertical" style={{ width: "100%" }} size="small">
             {availableVariants.map((variant) => {
               const isSelected =
                 selectedVariantId === variant.id ||
@@ -102,31 +102,31 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
                   onClick={() => onVariantChange(variant.id)}
                   disabled={isOutOfStock}
                   style={{
-                    width: '100%',
-                    height: 'auto',
-                    padding: '12px 16px',
-                    textAlign: 'left',
+                    width: "100%",
+                    height: "auto",
+                    padding: "12px 16px",
+                    textAlign: "left",
                     border: isSelected
-                      ? '2px solid #0ea5e9'
-                      : '1px solid #d1d5db',
-                    backgroundColor: isSelected ? '#f0f9ff' : 'white',
+                      ? "2px solid #0ea5e9"
+                      : "1px solid #d1d5db",
+                    backgroundColor: isSelected ? "#f0f9ff" : "white",
                     opacity: isOutOfStock ? 0.5 : 1,
                   }}
                 >
-                  <div style={{ width: '100%' }}>
+                  <div style={{ width: "100%" }}>
                     <div
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
                         marginBottom: 4,
                       }}
                     >
                       <Text
                         strong
                         style={{
-                          color: isSelected ? '#0ea5e9' : '#374151',
-                          fontSize: '14px',
+                          color: isSelected ? "#0ea5e9" : "#374151",
+                          fontSize: "14px",
                         }}
                       >
                         {isSelected && (
@@ -136,12 +136,12 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
                       </Text>
                       <Space>
                         {variant.isDefault && (
-                          <Tag color="blue" size="small">
+                          <Tag color="blue" style={{ fontSize: 11 }}>
                             Mặc định
                           </Tag>
                         )}
                         {isOutOfStock && (
-                          <Tag color="red" size="small">
+                          <Tag color="red" style={{ fontSize: 11 }}>
                             Hết hàng
                           </Tag>
                         )}
@@ -150,17 +150,17 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
 
                     <div
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                       }}
                     >
                       <Space>
                         <Text
                           strong
                           style={{
-                            color: '#dc2626',
-                            fontSize: '14px',
+                            color: "#dc2626",
+                            fontSize: "14px",
                           }}
                         >
                           {formatPrice(variant.price)}
@@ -170,8 +170,8 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
                             <Text
                               delete
                               style={{
-                                color: '#6b7280',
-                                fontSize: '12px',
+                                color: "#6b7280",
+                                fontSize: "12px",
                               }}
                             >
                               {formatPrice(variant.compareAtPrice)}
@@ -179,7 +179,7 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
                           )}
                       </Space>
 
-                      <Text type="secondary" style={{ fontSize: '12px' }}>
+                      <Text type="secondary" style={{ fontSize: "12px" }}>
                         Còn: {variant.stockQuantity}
                       </Text>
                     </div>
@@ -193,14 +193,14 @@ const ProductVariantSelector: React.FC<ProductVariantSelectorProps> = ({
         {/* Price Comparison */}
         {availableVariants.length > 1 && (
           <>
-            <Divider style={{ margin: '8px 0' }} />
-            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+            <Divider style={{ margin: "8px 0" }} />
+            <div style={{ fontSize: "12px", color: "#6b7280" }}>
               <Text type="secondary">
-                Giá từ{' '}
+                Giá từ{" "}
                 {formatPrice(
                   Math.min(...availableVariants.map((v) => v.price))
-                )}{' '}
-                đến{' '}
+                )}{" "}
+                đến{" "}
                 {formatPrice(
                   Math.max(...availableVariants.map((v) => v.price))
                 )}

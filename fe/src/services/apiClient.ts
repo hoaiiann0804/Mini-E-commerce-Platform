@@ -1,16 +1,20 @@
-import axios from 'axios';
-import { getValidToken } from '@/utils/tokenManager';
-import { handleUnauthorizedError } from '@/utils/authUtils';
+import axios from "axios";
+import { getValidToken } from "@/utils/tokenManager";
+import { handleUnauthorizedError } from "@/utils/authUtils";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:8888/api';
+const getApiBaseUrl = (): string => {
+  const raw = import.meta.env.VITE_API_URL || "http://localhost:8888";
+  return raw.endsWith("/api") ? raw : `${raw}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -36,10 +40,10 @@ apiClient.interceptors.response.use(
   (error) => {
     // Log error in development
     if (import.meta.env.DEV) {
-      console.group('🚨 API Client Error');
-      console.log('URL:', error.config?.url);
-      console.log('Status:', error.response?.status);
-      console.log('Data:', error.response?.data);
+      console.group("🚨 API Client Error");
+      //console.log("URL:", error.config?.url);
+      //console.log("Status:", error.response?.status);
+      //console.log("Data:", error.response?.data);
       console.groupEnd();
     }
 

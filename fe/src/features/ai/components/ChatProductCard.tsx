@@ -1,13 +1,13 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ProductRecommendation } from '../services/chatbotApi';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ProductRecommendation } from "../services/chatbotApi";
 import {
   useTrackChatbotAnalyticsMutation,
   useAddToCartViaChatbotMutation,
-} from '../services/chatbotApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+} from "../services/chatbotApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 interface ChatProductCardProps {
   product: ProductRecommendation;
@@ -29,11 +29,11 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
   const handleProductClick = async () => {
     // Track product click
     await trackAnalytics({
-      event: 'product_clicked',
+      event: "product_clicked",
       userId: user?.id,
       sessionId,
       productId: product.id,
-      metadata: { source: 'chatbot_recommendation' },
+      metadata: { source: "chatbot_recommendation" },
     });
 
     onProductClick?.(product);
@@ -52,25 +52,25 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
 
       // Track add to cart
       await trackAnalytics({
-        event: 'product_added_to_cart',
+        event: "product_added_to_cart",
         userId: user?.id,
         sessionId,
         productId: product.id,
         value: product.price,
-        metadata: { source: 'chatbot_recommendation' },
+        metadata: { source: "chatbot_recommendation" },
       });
 
       // Show success message (you could add a toast notification here)
-      console.log('Product added to cart successfully');
+      //console.log('Product added to cart successfully');
     } catch (error) {
-      console.error('Failed to add product to cart:', error);
+      console.error("Failed to add product to cart:", error);
     }
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(price);
   };
 
@@ -79,7 +79,7 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
       <span
         key={i}
         className={`text-sm ${
-          i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'
+          i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"
         }`}
       >
         ★
@@ -95,7 +95,7 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
       {/* Product Image */}
       <div className="relative overflow-hidden">
         <img
-          src={product.thumbnail || '/images/placeholder-product.jpg'}
+          src={product.thumbnail || "/images/placeholder-product.jpg"}
           alt={product.name}
           className="w-full h-32 object-cover group-hover:scale-110 transition-transform duration-300"
         />
@@ -111,7 +111,7 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
         {!product.inStock && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
-              {t('product.outOfStock')}
+              {t("product.outOfStock")}
             </span>
           </div>
         )}
@@ -152,7 +152,7 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
             onClick={handleProductClick}
             className="flex-1 bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 rounded-lg text-xs font-medium hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
           >
-            {t('product.viewDetails')}
+            {t("product.viewDetails")}
           </button>
 
           {product.inStock && (
@@ -160,7 +160,7 @@ const ChatProductCard: React.FC<ChatProductCardProps> = ({
               onClick={handleAddToCart}
               className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors"
             >
-              🛒 {t('product.addToCart')}
+              🛒 {t("product.addToCart")}
             </button>
           )}
         </div>

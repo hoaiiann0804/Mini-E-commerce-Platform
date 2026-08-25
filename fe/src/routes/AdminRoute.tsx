@@ -4,12 +4,20 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useGetCurrentUserQuery } from "@/services/authApi";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { RootState } from '@/store';
+import { useGetCurrentUserQuery } from '@/services/authApi';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface AdminRouteProps {
   children: ReactNode;
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, user, token } = useSelector(
     (state: RootState) => state.auth
   );
@@ -37,7 +45,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
         <div className="text-center">
           <LoadingSpinner size="lg" />
           <p className="mt-4 text-neutral-600 dark:text-neutral-400">
-            Đang xác thực quyền truy cập...
+            {t('admin.auth.verifyingAccess')}
           </p>
         </div>
       </div>

@@ -31,7 +31,7 @@ export const useCartMerge = (
     const performCartMerge = async () => {
       if (isAuthenticated && justLoggedIn) {
         try {
-          console.log('🔄 Checking for local cart items to merge...');
+          //console.log('🔄 Checking for local cart items to merge...');
 
           // Check if there are items in localStorage
           const localItems = JSON.parse(
@@ -39,13 +39,13 @@ export const useCartMerge = (
           );
 
           if (localItems.length > 0) {
-            console.log('🛒 Found local cart items:', localItems);
+            //console.log('🛒 Found local cart items:', localItems);
 
             // First, get the current server cart
             await refetch();
 
             // Add each local item to the server cart one by one
-            console.log('🔄 Adding local items to server cart...');
+            //console.log('🔄 Adding local items to server cart...');
 
             // Keep track of added items for notification
             let addedItemsCount = 0;
@@ -60,7 +60,7 @@ export const useCartMerge = (
                 }).unwrap();
 
                 addedItemsCount += item.quantity;
-                console.log(`✅ Added item ${item.name} to cart`);
+                //console.log(`✅ Added item ${item.name} to cart`);
               } catch (itemError) {
                 console.error(
                   `❌ Failed to add item ${item.name} to cart:`,
@@ -75,14 +75,14 @@ export const useCartMerge = (
               if (result && result.data) {
                 // Update Redux store with the final cart
                 dispatch(setServerCart(result.data));
-                console.log('✅ Cart merge successful:', result.data);
+                //console.log('✅ Cart merge successful:', result.data);
               } else if (serverCart) {
                 // Fallback to current serverCart if refetch doesn't return new data
                 dispatch(setServerCart(serverCart));
-                console.log(
-                  '✅ Cart merge successful (using current data):',
-                  serverCart
-                );
+                //console.log(
+                //   '✅ Cart merge successful (using current data):',
+                //   serverCart
+                // );
               }
             } catch (refetchError) {
               console.error('❌ Failed to refetch cart:', refetchError);
@@ -104,15 +104,15 @@ export const useCartMerge = (
             }
           } else {
             // If no local items, just merge any session cart on the server
-            console.log(
-              '🔄 No local items, checking for session cart on server...'
-            );
+            //console.log(
+            //   '🔄 No local items, checking for session cart on server...'
+            // );
             const mergedCart = await mergeCart().unwrap();
 
             // Update Redux store with merged cart
             dispatch(setServerCart(mergedCart));
 
-            console.log('✅ Server cart merge successful:', mergedCart);
+            //console.log('✅ Server cart merge successful:', mergedCart);
 
             // Show notification if items were merged
             if (mergedCart.totalItems > 0) {

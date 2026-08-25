@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Product } from '@/services/productApi';
+import { Product } from '@/types';
 
 interface ProductsState {
   recentlyViewed: Product[];

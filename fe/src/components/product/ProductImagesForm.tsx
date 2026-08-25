@@ -53,9 +53,8 @@ const ProductImagesForm: React.FC<Props> = ({ form }) => {
                 phẩm
               </p>
               <p>
-                <strong>🔗 Backend:</strong> Sử dụng
-                http://localhost:8888/uploads cho local images (KHÔNG dùng
-                /api/uploads)
+                <strong>🔗 Backend:</strong> Dùng URL Cloudinary trả về từ upload (không dùng
+                local <code>/uploads</code>)
               </p>
             </div>
           }

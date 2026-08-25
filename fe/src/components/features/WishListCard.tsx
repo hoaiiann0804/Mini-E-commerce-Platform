@@ -38,7 +38,7 @@ const WishListCard: React.FC<WishListCardProps> = ({ items }) => {
     if (isAuthenticated) {
       try {
         await removeWishlistItem(item.id).unwrap();
-        console.log("✅ Remove API success");
+        //console.log("✅ Remove API success");
         // Remove from local state
         dispatch(removeItemWishlist(item));
         dispatch(

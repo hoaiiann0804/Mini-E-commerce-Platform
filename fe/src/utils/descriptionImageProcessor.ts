@@ -1,12 +1,13 @@
 import { message } from 'antd';
 
+// Update ProcessDescriptionOptions to use correct category type
 export interface ProcessDescriptionOptions {
   productId?: string;
   category?: 'product' | 'user' | 'review';
   uploadImageFn: (params: {
     base64Data: string;
     options?: {
-      category?: string;
+      category?: 'product' | 'user' | 'review';
       productId?: string;
     };
   }) => Promise<any>;
@@ -52,7 +53,7 @@ export const processDescriptionImages = async (
     };
   }
 
-  console.log(`Found ${base64Images.length} base64 images to convert`);
+  //console.log(`Found ${base64Images.length} base64 images to convert`);
 
   let processedDescription = description;
   const uploadedImages: ProcessDescriptionResult['uploadedImages'] = [];
@@ -72,7 +73,7 @@ export const processDescriptionImages = async (
       const base64Data = base64Images[i];
 
       try {
-        console.log(`Converting image ${i + 1}/${base64Images.length}`);
+        //console.log(`Converting image ${i + 1}/${base64Images.length}`);
 
         // Update loading message
         message.loading({
@@ -91,7 +92,11 @@ export const processDescriptionImages = async (
         });
 
         if (result?.data) {
-          const uploadedUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8888'}${result.data.url}`;
+          const uploadedUrl =
+            typeof result?.data?.url === 'string' &&
+            /^https?:\/\//i.test(result.data.url)
+              ? result.data.url
+              : `${(import.meta.env.VITE_API_URL || 'http://localhost:8888/api').replace(/\/api\/?$/, '')}${result.data.url}`;
 
           // Replace base64 with uploaded URL in description
           processedDescription = processedDescription.replace(
@@ -105,9 +110,9 @@ export const processDescriptionImages = async (
             imageId: result.data.id,
           });
 
-          console.log(
-            `Successfully converted image ${i + 1}: ${result.data.fileName}`
-          );
+          //console.log(
+          //   `Successfully converted image ${i + 1}: ${result.data.fileName}`
+          // );
         } else {
           console.error(
             `Failed to convert image ${i + 1}: No data in response`

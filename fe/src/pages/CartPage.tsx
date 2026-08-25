@@ -35,13 +35,13 @@ const CartPage: React.FC = () => {
   } = useGetCartQuery(isAuthenticated ? undefined : skipToken);
 
   // Debug logging
-  console.log('🛒 CartPage Debug:', {
-    serverCart,
-    cartError,
-    cartLoading,
-    isAuthenticated,
-    localItems: items,
-  });
+  //console.log('🛒 CartPage Debug:', {
+  //   serverCart,
+  //   cartError,
+  //   cartLoading,
+  //   isAuthenticated,
+  //   localItems: items,
+  // });
   const [clearServerCart, { isLoading: clearingCart }] = useClearCartMutation();
 
   // Initialize cart on mount

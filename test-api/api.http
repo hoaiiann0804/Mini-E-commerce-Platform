@@ -1,0 +1,40 @@
+# GET http://localhost:8888/api/products?/products?minPrice=5000000&maxPrice=200000000 HTTP/1.1
+# content-type: application/json
+
+
+# GET http://localhost:8888/api/products?/products?minPrice=5000000&maxPrice=200000000 HTTP/1.1
+# content-type: application/json
+
+### Biến môi trường (Tùy chỉnh nếu cần)
+@baseUrl = http://localhost:8888/api
+@authToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU1YzY0ZjI3LWZjYWYtNGM2Yi1hNzZhLTcxODk0NmQxYTk1NyIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc3NDg1Mzk4MywiZXhwIjoxNzc0OTQwMzgzfQ.GOFIbXYc1Rxc7_TUf11Ba8Nk3vud9mVASpB3UZjO5yI
+
+### Tạo đơn hàng mới (Create Order)
+POST {{baseUrl}/orders HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "shippingFirstName": "Nguyễn",
+    "shippingLastName": "Văn A",
+    "shippingCompany": "Công ty ABC",
+    "shippingAddress1": "123 Đường Lê Lợi",
+    "shippingAddress2": "Phường Bến Thành",
+    "shippingCity": "Quận 1",
+    "shippingState": "TP. Hồ Chí Minh",
+    "shippingZip": "70000",
+    "shippingCountry": "Vietnam",
+    "shippingPhone": "0901234567",
+    "billingFirstName": "Nguyễn",
+    "billingLastName": "Văn A",
+    "billingCompany": "Công ty ABC",
+    "billingAddress1": "123 Đường Lê Lợi",
+    "billingAddress2": "Phường Bến Thành",
+    "billingCity": "Quận 1",
+    "billingState": "TP. Hồ Chí Minh",
+    "billingZip": "70000",
+    "billingCountry": "Vietnam",
+    "billingPhone": "0901234567",
+    "paymentMethod": "cod",
+    "notes": "Giao hàng giờ hành chính giúp mình nhé!"
+}

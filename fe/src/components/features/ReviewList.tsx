@@ -41,8 +41,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId }) => {
   };
 
   const handleLoadMore = () => {
-    if (reviewsData && filters.page < reviewsData.data.pages) {
-      setFilters((prev) => ({ ...prev, page: prev.page! + 1 }));
+    const currentPage = filters.page ?? 1;
+    if (reviewsData && currentPage < reviewsData.data.pages) {
+      setFilters((prev) => ({ ...prev, page: (prev.page ?? 1) + 1 }));
     }
   };
 
@@ -294,7 +295,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId }) => {
           ))}
 
           {/* Load more button */}
-          {reviewsData && filters.page < reviewsData.data.pages && (
+          {reviewsData && (filters.page ?? 1) < reviewsData.data.pages && (
             <div className="text-center pt-4">
               <button
                 onClick={handleLoadMore}

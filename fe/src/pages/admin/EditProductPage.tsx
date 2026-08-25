@@ -44,6 +44,8 @@ import VariantModal from "@/components/modals/VariantModal";
 // Types
 import { ProductFormData, ProductAttribute, ProductVariant, Category } from "@/types";
 
+import { ProductFormData, ProductAttribute, ProductVariant } from "@/types";
+import { Category } from "@/types/category.types";
 // Utils
 import {
   processDescriptionImages,
@@ -74,7 +76,7 @@ const EditProductPage: React.FC = () => {
     attributes,
     setAttributes,
     attributeModalVisible,
-    editingAttribute,
+    editingAttributeForModal,
     handleAddAttribute,
     handleDeleteAttribute,
     openAttributeModal,
@@ -305,9 +307,6 @@ const EditProductPage: React.FC = () => {
     isSubmitting: isUpdating,
   });
 
-  // State để theo dõi quá trình tải dữ liệu
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-
   // Load product data into form
   useEffect(() => {
     if (productResponse?.data) {
@@ -347,6 +346,14 @@ const EditProductPage: React.FC = () => {
       `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
   )
   .join("<br/>");
+
+
+          .filter((img: string) => img.includes("data:image"))
+          .map(
+            (img: string) =>
+              `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
+          )
+          .join("<br/>");
 
 
         if (imageElements) {
@@ -512,7 +519,15 @@ const EditProductPage: React.FC = () => {
   };
 
   const categories: Category[] = Array.isArray(categoriesResponse?.data)?categoriesResponse.data : categoriesResponse?.data ?[categoriesResponse.data]: [];
+  // Helper function to get categories as array
+  const getCategoriesArray = (): Category[] => {
+    const data = categoriesResponse?.data;
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    return [data];
+  };
 
+  const categories = getCategoriesArray();
   // Handle loading and error states
   if (isLoadingProduct) {
     return (
@@ -670,7 +685,7 @@ const EditProductPage: React.FC = () => {
         <AttributeModal
           visible={attributeModalVisible}
           onClose={closeAttributeModal}
-          attribute={editingAttribute}
+          attribute={editingAttributeForModal}
           onSave={handleAddAttribute}
         />
       )}

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useSearchParams,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
@@ -8,7 +13,8 @@ import { useResetPasswordMutation } from "@/services/authApi";
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const { token: tokenFromParams } = useParams<{ token: string }>();
+  const params = useParams<{ token?: string }>();
+  const tokenFromParams = params.token;
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,7 +28,7 @@ const ResetPasswordPage: React.FC = () => {
   }>({});
 
   const token = tokenFromParams || searchParams.get("token");
-  console.log(token);
+  //console.log(token);
 
   useEffect(() => {
     // Check if token exists, if not redirect to forgot password
@@ -67,21 +73,27 @@ const ResetPasswordPage: React.FC = () => {
     if (!validateForm()) return;
     setError("");
     try {
-      await reserPassword({ token: token as string, password, confirmPassword });
+      await reserPassword({
+        token: token as string,
+        password,
+        confirmPassword,
+      });
       // Mock success - in real app, call your API here with token and new password
       setIsSuccess(true);
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate("/login");
       }, 3000);
-    } catch (err) {
-      setError(
-        t(
-          typeof err === "string"
-            ? err
-            : err?.data || "Đặt lại mật khẩu thất bại"
-        )
-      );
+    } catch (err: unknown) {
+      const errorMessage =
+        err && typeof err === "object" && "data" in err
+          ? (err as { data?: string }).data
+          : "Đặt lại mật khẩu thất bại";
+      const finalErrorMessage =
+        typeof err === "string"
+          ? err
+          : errorMessage || "Đặt lại mật khẩu thất bại";
+      setError(t(finalErrorMessage));
     }
   };
 

@@ -1,153 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { Box, MenuItem, FormControl, InputLabel, Select, SelectChangeEvent, CircularProgress } from '@mui/material';
-import { ICountry, IState, ICity } from 'country-state-city';
-import { Country, State, City } from 'country-state-city';
+import React from "react";
+import { Box, TextField } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
-interface LocationSelectorsProps {
-  onLocationChange: (location: {
-    country: string | null;
-    state: string | null;
-    city: string | null;
-    countryCode?: string;
-    stateCode?: string;
-  }) => void;
-  initialValues?: {
-    country?: string;
-    state?: string;
-    city?: string;
-  };
-}
+export type LocationValue = {
+  country: string;
+  province: string; // Tỉnh/Thành phố
+  ward: string; // Phường/Xã
+};
 
-const LocationSelectors: React.FC<LocationSelectorsProps> = ({ 
-  onLocationChange, 
-  initialValues = {} 
+type LegacyInitialValues = {
+  country?: string;
+  state?: string;
+  city?: string;
+};
+
+type LocationSelectorsProps =
+  | {
+      value?: LocationValue;
+      onChange: (value: LocationValue) => void;
+      initialValues?: never;
+      onLocationChange?: never;
+    }
+  | {
+      initialValues?: LegacyInitialValues;
+      onLocationChange: (value: LocationValue) => void;
+      value?: never;
+      onChange?: never;
+    };
+
+const LocationSelectors: React.FC<LocationSelectorsProps> = ({
+  value,
+  onChange,
+  initialValues,
+  onLocationChange,
 }) => {
-  const [selectedCountry, setSelectedCountry] = useState<string>(initialValues.country || '');
-  const [selectedState, setSelectedState] = useState<string>(initialValues.state || '');
-  const [selectedCity, setSelectedCity] = useState<string>(initialValues.city || '');
-  const [states, setStates] = useState<IState[]>([]);
-  const [cities, setCities] = useState<ICity[]>([]);
-  const [loading, setLoading] = useState({
-    countries: false,
-    states: false,
-    cities: false
-  });
+  const { t } = useTranslation();
+  const [internalValue, setInternalValue] = React.useState<LocationValue>(() => ({
+    country: initialValues?.country ?? "Vietnam",
+    province: initialValues?.state ?? "",
+    ward: initialValues?.city ?? "",
+  }));
 
-  const countries = Country.getAllCountries();
+  const safeValue: LocationValue =
+    value ??
+    internalValue ?? {
+      country: "Vietnam",
+      province: "",
+      ward: "",
+    };
 
-  useEffect(() => {
-    if (selectedCountry) {
-      const countryData = countries.find(c => c.name === selectedCountry);
-      if (countryData) {
-        setLoading(prev => ({ ...prev, states: true }));
-        const countryStates = State.getStatesOfCountry(countryData.isoCode);
-        setStates(countryStates);
-        setLoading(prev => ({ ...prev, states: false }));
-      }
-    }
-  }, [selectedCountry]);
-
-  useEffect(() => {
-    if (selectedState && selectedCountry) {
-      const countryData = countries.find(c => c.name === selectedCountry);
-      if (countryData) {
-        const stateData = states.find(s => s.name === selectedState);
-        if (stateData) {
-          setLoading(prev => ({ ...prev, cities: true }));
-          const stateCities = City.getCitiesOfState(countryData.isoCode, stateData.isoCode);
-          setCities(stateCities);
-          setLoading(prev => ({ ...prev, cities: false }));
-        }
-      }
-    }
-  }, [selectedState, selectedCountry]);
-
-  const handleCountryChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedCountry(value);
-    setSelectedState('');
-    setSelectedCity('');
-    setCities([]);
-    onLocationChange({
-      country: value,
-      state: null,
-      city: null
-    });
-  };
-
-  const handleStateChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedState(value);
-    setSelectedCity('');
-    onLocationChange({
-      country: selectedCountry,
-      state: value,
-      city: null
-    });
-  };
-
-  const handleCityChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    setSelectedCity(value);
-    onLocationChange({
-      country: selectedCountry,
-      state: selectedState,
-      city: value
-    });
+  const emitChange = (next: LocationValue) => {
+    if (onChange) return onChange(next);
+    setInternalValue(next);
+    onLocationChange?.(next);
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={2} width="100%">
-      <FormControl fullWidth>
-        <InputLabel id="country-label">Country</InputLabel>
-        <Select
-          labelId="country-label"
-          value={selectedCountry}
-          label="Country"
-          onChange={handleCountryChange}
-          disabled={loading.countries}
-        >
-          {countries.map((country) => (
-            <MenuItem key={country.isoCode} value={country.name}>
-              {country.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <Box display="flex" flexDirection="column" gap={2}>
+      <TextField
+        label={t("address.province")}
+        value={safeValue.province}
+        onChange={(e) => emitChange({ ...safeValue, province: e.target.value })}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel id="state-label">State/Province</InputLabel>
-        <Select
-          labelId="state-label"
-          value={selectedState}
-          label="State/Province"
-          onChange={handleStateChange}
-          disabled={!selectedCountry || loading.states}
-        >
-          {states.map((state) => (
-            <MenuItem key={state.isoCode} value={state.name}>
-              {state.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <TextField
+        label={t("address.ward")}
+        value={safeValue.ward}
+        onChange={(e) => emitChange({ ...safeValue, ward: e.target.value })}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel id="city-label">City</InputLabel>
-        <Select
-          labelId="city-label"
-          value={selectedCity}
-          label="City"
-          onChange={handleCityChange}
-          disabled={!selectedState || loading.cities}
-        >
-          {cities.map((city) => (
-            <MenuItem key={city.name} value={city.name}>
-              {city.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <TextField
+        label={t("address.country")}
+        value={safeValue.country}
+        onChange={(e) => emitChange({ ...safeValue, country: e.target.value })}
+      />
     </Box>
   );
 };

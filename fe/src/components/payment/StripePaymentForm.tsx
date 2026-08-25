@@ -69,10 +69,10 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
         console.error("Payment confirmation error:", error);
         onError?.(error.message || t("payment.errors.paymentFailed"));
       } else if (paymentIntent) {
-        console.log(
-          "Payment succeeded on Stripe, confirming with backend...",
-          paymentIntent.id
-        );
+        //console.log(
+        //   "Payment succeeded on Stripe, confirming with backend...",
+        //   paymentIntent.id
+        // );
 
         // Confirm payment on our backend
         try {
@@ -80,7 +80,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
             paymentIntentId: paymentIntent.id,
           }).unwrap();
 
-          console.log("Backend confirmation successful:", confirmResponse);
+          //console.log("Backend confirmation successful:", confirmResponse);
           onSuccess?.(confirmResponse.data.paymentIntent);
         } catch (backendError) {
           console.error("Backend confirmation error:", backendError);
@@ -113,24 +113,24 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
       </div>
 
       {/* Address Element */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-          {/* {t('payment.billingAddress')} */}
-        </h3>
-        <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
-          {/* <AddressElement
+      {/* <div className="space-y-4"> */}
+        {/* <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
+          {/* {t('payment.billingAddress')}
+        </h3> */}
+        {/* <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
+           <AddressElement
             options={{
               mode: 'billing',
             }}
-          /> */}
-        </div>
-      </div>
+          />
+        </div> */}
+      {/* </div> */}
 
       {/* Submit Button */}
       <Button
         type="submit"
-        variant="primary"
-        size="lg"
+        variant="success"
+        size="md"
         className="w-full"
         disabled={!stripe || !elements || isLoading}
       >

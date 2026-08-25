@@ -22,7 +22,7 @@ const convertServerWishlist = (serverItem: any): WishlistItem => ({
   compareAtPrice: serverItem.compareAtPrice,
   thumbnail: serverItem.thumbnail,
   slug: serverItem.slug,
-  //dateAdded: serverItem.//dateAdded,
+  dateAdded: serverItem.dateAdded || new Date().toISOString(), // Ensure dateAdded is always present
 });
 
 const wishlistSlice = createSlice({
@@ -44,14 +44,12 @@ const wishlistSlice = createSlice({
       // Nếu chưa có (index === -1 ) thì thêm mới
       if (existingItemIndex === -1) {
         state.items.push(action.payload);
-        console.log("Wishlist Updated", state.items);
+        //console.log("Wishlist Updated", state.items);
       }
       localStorage.setItem("wishlistItems", JSON.stringify(state.items));
     },
     removeItemWishlist: (state, action: PayloadAction<WishlistItem>) => {
-      state.items = state.items.filter(
-        (item) => item.id !== action.payload.id
-      );
+      state.items = state.items.filter((item) => item.id !== action.payload.id);
       localStorage.setItem("wishlistItems", JSON.stringify(state.items));
     },
     clearWishlist: (state) => {
@@ -121,7 +119,7 @@ const wishlistSlice = createSlice({
           compareAtPrice: item.compareAtPrice,
           thumbnail: item.thumbnail,
           slug: item.slug,
-          //dateAdded: item.//dateAdded,
+          dateAdded: item.dateAdded || new Date().toISOString(), // Ensure dateAdded is always present
         })),
       };
 

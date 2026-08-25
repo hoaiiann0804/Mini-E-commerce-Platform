@@ -1,0 +1,137 @@
+﻿services:
+  db:
+    image: postgres:15
+    container_name: e-commerce-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+      POSTGRES_DB: ${DB_NAME:-websitebanhangmini}
+    mem_limit: 1g
+    cpus: 0.5
+    ports:
+      - "6000:5432"
+    volumes:
+      - pgdata_ecommerce:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+
+  api:
+    build:
+      context: ../../be
+      dockerfile: Dockerfile.dev
+    container_name: e-commerce-web
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    dns_opt:
+      - use-vc
+    ports:
+      - "8888:8888"
+    env_file:
+      - ../../be/.env
+      - ../../ops/env/.env.dev
+    environment:
+      NODE_OPTIONS: --dns-result-order=ipv4first
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
+    volumes:
+      - ../../be:/app
+      - ../../uploads:/app/uploads
+      - api_node_modules:/app/node_modules
+    command: sh -c "if [ ! -x node_modules/.bin/nodemon ]; then npm install; fi; npm run dev -- --legacy-watch"
+    mem_limit: 1g
+    cpus: 0.5
+    depends_on:
+      db:
+        condition: service_healthy
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: e-commerce-pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: e-commerce-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      db:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: e-commerce-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: e-commerce-cadvisor
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - api
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: e-commerce-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_URI: db:5432/${DB_NAME:-websitebanhangmini}?sslmode=disable
+      DATA_SOURCE_USER: ${DB_USER:-postgres}
+      DATA_SOURCE_PASS: ${DB_PASSWORD:-123456}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata_ecommerce:
+    name: e-commrcemini_pgdata_ecommerce
+  pgadmin_data:
+  api_node_modules:
+  prometheus_data:
+  grafana_data:

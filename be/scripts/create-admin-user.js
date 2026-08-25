@@ -3,22 +3,22 @@
  * Sử dụng: node scripts/create-admin-user.js
  */
 
-const { User } = require('../src/models');
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
+const { User } = require("../src/models");
+const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
 
 async function createAdminUser() {
   try {
-    console.log('🚀 Bắt đầu tạo tài khoản admin...');
+    // //console.log('🚀 Bắt đầu tạo tài khoản admin...');
 
     // Thông tin admin
     const adminData = {
       id: uuidv4(),
-      email: 'admin@example.com',
-      password: 'Admin@123',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
+      email: "admin@example.com",
+      password: "Admin@123",
+      firstName: "Admin",
+      lastName: "User",
+      role: "admin",
       isEmailVerified: true,
       isActive: true,
     };
@@ -29,9 +29,9 @@ async function createAdminUser() {
     });
 
     if (existingAdmin) {
-      console.log('⚠️ Tài khoản admin đã tồn tại!');
-      console.log(`📧 Email: ${adminData.email}`);
-      console.log('🔑 Mật khẩu: (giữ nguyên mật khẩu hiện tại)');
+      //console.log('⚠️ Tài khoản admin đã tồn tại!');
+      //console.log(`📧 Email: ${adminData.email}`);
+      //console.log('🔑 Mật khẩu: (giữ nguyên mật khẩu hiện tại)');
       return;
     }
 
@@ -40,11 +40,11 @@ async function createAdminUser() {
       ...adminData,
     });
 
-    console.log('✅ Tạo tài khoản admin thành công!');
-    console.log(`📧 Email: ${adminData.email}`);
-    console.log(`🔑 Mật khẩu: ${adminData.password}`);
+    //console.log('✅ Tạo tài khoản admin thành công!');
+    //console.log(`📧 Email: ${adminData.email}`);
+    //console.log(`🔑 Mật khẩu: ${adminData.password}`);
   } catch (error) {
-    console.error('❌ Lỗi khi tạo tài khoản admin:', error);
+    console.error("❌ Lỗi khi tạo tài khoản admin:", error);
   } finally {
     process.exit(0);
   }

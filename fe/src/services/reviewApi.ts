@@ -67,8 +67,8 @@ export const reviewApi = api.injectEndpoints({
           method: 'GET',
         };
       },
-      providesTags: (result, error, { productId }) => [
-        { type: 'Review', id: `product-${productId}` },
+      providesTags: (_result, _error, { productId }) => [
+        { type: 'Review' as const, id: `product-${productId}` },
       ],
     }),
 
@@ -79,9 +79,9 @@ export const reviewApi = api.injectEndpoints({
         method: 'POST',
         body: reviewData,
       }),
-      invalidatesTags: (result, error, { productId }) => [
-        { type: 'Review', id: `product-${productId}` },
-        { type: 'Product', id: productId },
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Review' as const, id: `product-${productId}` },
+        { type: 'Product' as const, id: productId },
       ],
     }),
 
@@ -95,9 +95,9 @@ export const reviewApi = api.injectEndpoints({
         method: 'PUT',
         body: reviewData,
       }),
-      invalidatesTags: (result, error, { productId }) => [
-        { type: 'Review', id: `product-${productId}` },
-        ...(productId ? [{ type: 'Product', id: productId }] : []),
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Review' as const, id: `product-${productId}` },
+        ...(productId ? [{ type: 'Product' as const, id: productId }] : []),
       ],
     }),
 
@@ -107,7 +107,7 @@ export const reviewApi = api.injectEndpoints({
         url: `/reviews/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result) => [{ type: 'Review', id: 'LIST' }],
+      invalidatesTags: (_result, _error, _id) => [{ type: 'Review' as const, id: 'LIST' }],
     }),
 
     // Mark review as helpful
@@ -120,9 +120,9 @@ export const reviewApi = api.injectEndpoints({
         method: 'PUT',
         body: { helpful },
       }),
-      invalidatesTags: (result, error, { id, productId }) => [
-        { type: 'Review', id },
-        ...(productId ? [{ type: 'Review', id: `product-${productId}` }] : []),
+      invalidatesTags: (_result, _error, { id, productId }) => [
+        { type: 'Review' as const, id },
+        ...(productId ? [{ type: 'Review' as const, id: `product-${productId}` }] : []),
       ],
     }),
 

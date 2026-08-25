@@ -1,257 +1,593 @@
-# 🛍️ Website Bán Hàng Mini
+﻿🛍️ **E-Commerce Mini**
+# E-Commerce Mini | Bilingual README (English / Tiếng Việt)
 
-[![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.x-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Project Status](https://img.shields.io/badge/status-active_development-yellowgreen)](https://github.com/hoaiiann0804/WebsiteE-Commerce-Mini-with-AI-Chatbot)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+> Last synchronized with source code on **April 2, 2026**
 
-## 🌟 Giới thiệu
+## 1. Project Overview | Tổng quan dự án
 
-**Website Bán Hàng Mini** là một ứng dụng thương mại điện tử full-stack, tích hợp chatbot AI (Gemini) và thanh toán Stripe, mang đến trải nghiệm mua sắm trực tuyến mượt mà, an toàn và responsive.
+| English | Tiếng Việt |
+|---|---|
+| **E-Commerce Mini** is a full-stack e-commerce platform with AI chatbot integration (Gemini), Stripe payment, admin management, and multilingual UI. | **E-Commerce Mini** là nền tảng thương mại điện tử full-stack, tích hợp chatbot AI (Gemini), thanh toán Stripe, trang quản trị và giao diện đa ngôn ngữ. |
+| The codebase is split into `fe/` (React + TypeScript + Vite) and `be/` (Node.js + Express + Sequelize + PostgreSQL). | Mã nguồn được tách thành `fe/` (React + TypeScript + Vite) và `be/` (Node.js + Express + Sequelize + PostgreSQL). |
+| Development supports Docker Compose with dedicated scripts at root and backend levels. | Luồng phát triển hỗ trợ Docker Compose với các script ở cả root và backend. |
 
-**Vai trò của tôi**:
+### 1.1 Workflow Diagrams | Sơ đồ luồng hoạt động
 
-- Phát triển toàn bộ frontend (React, TypeScript, Zustand) và backend (Node.js, Express, PostgreSQL).
-- Tích hợp Stripe cho thanh toán và Gemini AI cho chatbot.
-- Tối ưu hiệu suất với lazy loading, database indexing, và API caching.
+#### Architecture Overview | Tổng quan kiến trúc
 
-## 🎯 Tính năng chính
+```mermaid
+graph TB
+    subgraph "Frontend (React + TypeScript)"
+        A[User Interface] --> B[React Components]
+        B --> C[State Management - Redux Toolkit + RTK Query]
+        C --> D[API Services]
+        D --> E[HTTP Client - fetchBaseQuery / Axios]
+    end
 
-### Phía người dùng
+    subgraph "Backend (Node.js + Express)"
+        F[Express Server] --> G[Authentication Middleware]
+        G --> H[Route Controllers]
+        H --> I[Business Logic Services]
+        I --> J[Database Models]
+        J --> K[PostgreSQL Database]
+    end
 
-- 🔐 **Xác thực**: Đăng ký/đăng nhập với JWT, hỗ trợ vai trò khách hàng và admin.
-- 🔍 **Quản lý sản phẩm**: Tìm kiếm, lọc sản phẩm theo danh mục, giá, và thuộc tính.
-- 🛒 **Giỏ hàng**: Thêm/xóa sản phẩm, tính toán tổng tiền.
-- 💳 **Thanh toán**: Tích hợp Stripe với webhook để xử lý giao dịch an toàn.
-- 📱 **Responsive**: Giao diện tương thích mọi thiết bị, hỗ trợ đa ngôn ngữ (i18n).
-- 🤖 **Chatbot AI**: Hỗ trợ khách hàng với Gemini AI, có chế độ fallback khi API không khả dụng.
+    subgraph "External Services"
+        L[Stripe Payment]
+        M[Gemini AI Chatbot]
+        N[File Storage]
+    end
 
-### Phía quản trị
+    E --> F
+    I --> L
+    I --> M
+    I --> N
+```
 
-- 📊 **Dashboard**: Thống kê doanh thu và phân tích dữ liệu.
-- 📦 **Quản lý sản phẩm**: CRUD sản phẩm, danh mục, và thuộc tính.
-- 📝 **Quản lý đơn hàng**: Theo dõi và cập nhật trạng thái đơn hàng.
-- 👥 **Quản lý người dùng**: Phân quyền admin và khách hàng.
+#### Main Flows | Luồng hoạt động chính
 
-## 🚀 Công nghệ sử dụng
+##### 1) User Authentication | Xác thực người dùng
 
-- **Frontend**: React 18.2.0, TypeScript 5.0.2, Zustand, Tailwind CSS, Vite
-- **Backend**: Node.js 18.x, Express, PostgreSQL 15.x, Sequelize
-- **Dịch vụ bên ngoài**: Stripe (thanh toán), Gemini AI (chatbot)
-- **Khác**: JWT, i18n, lazy loading, database indexing, RESTful API
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
 
-## 📸 Hình ảnh demo
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
 
-![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/homepage.png)
-![Trang chủ](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/ProductList_homepage.png)
+    U->>FE: Đăng nhập/Đăng ký
+    FE->>BE: POST /api/auth/login
+    BE->>DB: Kiểm tra thông tin
+    DB-->>BE: Trả về user data
+    BE-->>FE: JWT Token + User Info
+    FE-->>U: Chuyển hướng Dashboard
+```
 
-_Trang chủ với danh sách sản phẩm và thanh tìm kiếm_
+</details>
 
-![Chi tiết sản phẩm](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/product-detail.png)
+##### 2) Product Management | Quản lý sản phẩm
 
-_Thông tin sản phẩm, variants, và đánh giá_
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
 
-![Giỏ hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/cart.png)
+```mermaid
+sequenceDiagram
+    participant A as Admin
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
+    participant FS as File Storage
 
-_Quản lý sản phẩm trong giỏ hàng_
+    A->>FE: Tạo/Sửa sản phẩm
+    FE->>BE: POST /api/products (với hình ảnh)
+    BE->>FS: Upload hình ảnh
+    FS-->>BE: URL hình ảnh
+    BE->>DB: Lưu thông tin sản phẩm
+    DB-->>BE: Xác nhận
+    BE-->>FE: Sản phẩm đã tạo
+    FE-->>A: Hiển thị thông báo thành công
+```
 
-![Thanh toán](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment.png)
-![Tích hợp stripe](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/payment_stripe.png)
+</details>
 
-_Thanh toán an toàn với Stripe_
+##### 3) Purchase Flow | Quy trình mua hàng
 
-![Đơn hàng](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/order.png)
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
 
-_Xem chi tiết đơn hàng, cập nhật trạng thái, và thanh toán_
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Database
+    participant ST as Stripe
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_home.png)
-_Dashboard quản trị với thống kê doanh thu_
+    C->>FE: Thêm sản phẩm vào giỏ
+    FE->>FE: Cập nhật Local State
+    C->>FE: Tiến hành thanh toán
+    FE->>BE: POST /api/orders/create
+    BE->>DB: Tạo đơn hàng tạm
+    BE->>ST: Tạo Payment Intent
+    ST-->>BE: Client Secret
+    BE-->>FE: Payment Intent
+    FE->>ST: Xử lý thanh toán
+    ST-->>FE: Kết quả thanh toán
+    FE->>BE: Xác nhận thanh toán
+    BE->>DB: Cập nhật trạng thái đơn hàng
+    DB-->>BE: Xác nhận
+    BE-->>FE: Đơn hàng hoàn tất
+    FE-->>C: Hiển thị thành công
+```
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_product.png)
+</details>
 
-_Dashboard quản trị với danh sách sản phẩm_
+##### 4) Chatbot Support | Chatbot hỗ trợ
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_categories.png)
-\*Dashboard quản trị với danh sách danh mục
+<details>
+<summary>Xem chi tiết luồng / View Detailed Flow</summary>
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_order.png)
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant FE as Frontend
+    participant BE as Backend
+    participant AI as Gemini AI
+    participant DB as Database
 
-_Dashboard quản trị với danh sách đơn hàng_
+    U->>FE: Gửi tin nhắn chat
+    FE->>BE: POST /api/chat/message
+    BE->>DB: Lấy context sản phẩm
+    DB-->>BE: Thông tin sản phẩm
+    BE->>AI: Gửi prompt + context
+    AI-->>BE: Phản hồi AI
+    BE->>DB: Lưu lịch sử chat
+    BE-->>FE: Tin nhắn phản hồi
+    FE-->>U: Hiển thị phản hồi
+```
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_user.png)
+</details>
 
-_Dashboard quản trị với danh sách ngườin dùng_
+#### Detailed Architecture | Kiến trúc chi tiết
 
-![Admin Dashboard](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/admin_warranty.png)
+```text
+Frontend (fe/src/)
+├── components/          # UI components tái sử dụng
+├── pages/               # Các trang chính
+├── store/               # Redux Toolkit store
+├── services/            # API calls (RTK Query + Axios)
+├── hooks/               # Custom hooks
+├── utils/               # Helper functions
+└── types/               # Type definitions
 
-_Dashboard quản trị với danh sách gói bảo hành_
+Backend (be/src/)
+├── controllers/         # Route handlers
+├── middlewares/         # Express middlewares
+├── models/              # Database models
+├── services/            # Business logic
+├── routes/              # API routes
+└── utils/               # Helper functions
+```
 
-![Chatbot AI](https://github.com/hoaiiann0804/E-Commerce-Mini-with-AI-Chatbot/raw/main/screenshots/chatbot.png)
+#### Security & Authentication | Bảo mật & xác thực
 
-_Tương tác với Gemini AI_
+```mermaid
+graph LR
+    A[Request] --> B{JWT Token?}
+    B -->|Yes| C[Verify Token]
+    B -->|No| D[Return 401]
+    C --> E{Valid?}
+    E -->|Yes| F[Extract User Info]
+    E -->|No| D
+    F --> G[Proceed to Controller]
+    G --> H[Check Permissions]
+    H --> I{Authorized?}
+    I -->|Yes| J[Execute Action]
+    I -->|No| K[Return 403]
+```
 
-## 🛠️ Cài đặt và chạy local
+#### Responsive Design Flow | Luồng responsive
 
-### Yêu cầu
+```mermaid
+graph TD
+    A[User Access] --> B{Device Type?}
+    B -->|Desktop| C[Full Layout]
+    B -->|Tablet| D[Adapted Layout]
+    B -->|Mobile| E[Mobile Layout]
 
-- Node.js >= 18.x
-- PostgreSQL >= 15.x
-- Yarn hoặc npm
-- API keys: [Stripe](https://stripe.com), [Gemini AI](https://ai.google.dev)
+    C --> F[Sidebar Navigation]
+    D --> G[Collapsible Sidebar]
+    E --> H[Bottom Navigation]
 
-### Các bước cài đặt
+    F --> I[Grid Layout]
+    G --> I
+    H --> J[Stack Layout]
+```
 
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/hoaiiann0804/WebsiteE-Commerce-Mini-with-AI-Chatbot.git
-   cd WebsiteE-Commerce-Mini-with-AI-Chatbot
-   ```
+#### i18n Flow | Luồng đa ngôn ngữ
 
-Cài đặt dependencies
-bash# Frontend
-cd frontend
-yarn install
+```mermaid
+graph LR
+    A[User Selects Language] --> B[Update i18n Context]
+    B --> C[Reload Text Resources]
+    C --> D[Re-render Components]
+    D --> E[Update Local Storage]
+    E --> F[Persist Language Choice]
+```
 
+#### State Management Flow | Luồng quản lý trạng thái
+
+```mermaid
+graph TB
+    subgraph "State Store (Redux Toolkit)"
+        A[Auth Slice] --> B[User Info, Token]
+        C[Cart Slice] --> D[Items, Total, Quantity]
+        E[Product Slice] --> F[Products, Categories, Filters]
+        G[UI Slice] --> H[Loading, Modals, Notifications]
+        I[Chat Slice] --> J[Chat Messages, Status]
+    end
+
+    subgraph "React Components"
+        K[Login Component] --> A
+        L[Cart Component] --> C
+        M[Product List] --> E
+        N[Loading Spinner] --> G
+        O[Chat Widget] --> I
+    end
+```
+
+#### Deployment Flow | Luồng triển khai
+
+```mermaid
+graph LR
+    A[Source Code] --> B[Build Process]
+    B --> C{Environment}
+    C -->|Development| D[Local Server]
+    C -->|Production| E[Production Server]
+
+    D --> F[npm run dev]
+    E --> G[npm run build]
+    G --> H[Static Files]
+    H --> I[Web Server]
+```
+
+#### Performance Optimization | Tối ưu hiệu năng
+
+```mermaid
+graph TD
+    A[Performance Strategy] --> B[Frontend Optimization]
+    A --> C[Backend Optimization]
+
+    B --> D[Code Splitting]
+    B --> E[Lazy Loading]
+    B --> F[Image Optimization]
+    B --> G[Caching]
+
+    C --> H[Database Indexing]
+    C --> I[API Response Caching]
+    C --> J[File Compression]
+    C --> K[Connection Pooling]
+```
+
+#### Data Flow Summary | Tóm tắt luồng dữ liệu
+
+1. **User Interaction** → Frontend captures user actions  
+   **Tương tác người dùng** → Frontend ghi nhận thao tác người dùng
+2. **State Management** → Store manages application state  
+   **Quản lý trạng thái** → Store quản lý trạng thái ứng dụng
+3. **API Calls** → Frontend communicates with backend via REST API  
+   **Gọi API** → Frontend giao tiếp với backend qua REST API
+4. **Authentication** → JWT tokens secure all requests  
+   **Xác thực** → JWT bảo mật tất cả request
+5. **Business Logic** → Backend processes requests and applies business rules  
+   **Nghiệp vụ** → Backend xử lý request và áp dụng business rules
+6. **Database Operations** → PostgreSQL stores and retrieves data  
+   **Dữ liệu** → PostgreSQL lưu trữ và truy xuất dữ liệu
+7. **External Services** → Integration with Stripe and Gemini AI  
+   **Dịch vụ ngoài** → Tích hợp Stripe và Gemini AI
+8. **Response** → Data flows back to frontend and updates UI  
+   **Phản hồi** → Dữ liệu trả về frontend và cập nhật UI
+
+---
+
+## 2. Core Features | Tính năng chính
+
+| English | Tiếng Việt |
+|---|---|
+| Authentication with JWT for customer and admin roles. | Xác thực JWT cho vai trò khách hàng và admin. |
+| Product browsing with search, filters, sorting, and variants. | Duyệt sản phẩm với tìm kiếm, lọc, sắp xếp và biến thể. |
+| Cart and checkout flow with Stripe payment integration. | Luồng giỏ hàng và thanh toán với tích hợp Stripe. |
+| AI chatbot assistant powered by Gemini (backend service, with optional client-side demo mode). | Trợ lý chatbot AI dùng Gemini (dịch vụ backend, có chế độ demo phía client). |
+| Admin dashboard for users, products, orders, reviews, and warranty packages. | Dashboard admin quản lý người dùng, sản phẩm, đơn hàng, đánh giá và gói bảo hành. |
+| Responsive and multilingual UI with i18n support. | Giao diện responsive và đa ngôn ngữ với i18n. |
+
+## 3. Code-Synced Changes | Thay đổi đã đồng bộ theo mã nguồn
+
+| Change (EN) | Thay đổi (VI) | Impact |
+|---|---|---|
+| Added Docker scripts in `be/package.json` and root `package.json`. | Đã thêm script Docker trong `be/package.json` và `package.json` ở root. | Faster local setup and standardized dev operations. |
+| PostgreSQL host port in development config moved from `5432` to `5438` (`be/config/config.json`). | Cổng PostgreSQL phía host ở cấu hình dev đổi từ `5432` sang `5438` (`be/config/config.json`). | Avoids local port conflicts with existing PostgreSQL instances. |
+| `docker-compose.dev.yml` defines `db` + `api` services with resource limits and health check. | `docker-compose.dev.yml` định nghĩa 2 service `db` + `api` với giới hạn tài nguyên và health check. | More stable local environment, services start in dependency order. |
+| Admin routes remain functionally the same; formatting was normalized. | Route admin giữ nguyên hành vi; thay đổi chủ yếu là chuẩn hoá format code. | No API behavior regression from this formatting update. |
+
+## 4. Tech Stack | Công nghệ sử dụng
+
+| Layer | English | Tiếng Việt |
+|---|---|---|
+| Frontend | React 18, TypeScript, Vite, Redux Toolkit + RTK Query, Axios, Tailwind CSS, i18next | React 18, TypeScript, Vite, Redux Toolkit + RTK Query, Axios, Tailwind CSS, i18next |
+| Backend | Node.js, Express, Sequelize, PostgreSQL, JWT, Swagger | Node.js, Express, Sequelize, PostgreSQL, JWT, Swagger |
+| Payments | Stripe | Stripe |
+| AI | Gemini API (server + optional client demo) | Gemini API (server + demo phía client) |
+| DevOps (Local) | Docker Compose (`db`, `api`) | Docker Compose (`db`, `api`) |
+
+## 5. Project Structure | Cấu trúc thư mục
+
+```text
+E-commerce Mini/
+├─ fe/                     # Frontend (Vite + React + TS)
+├─ be/                     # Backend API (Express + Sequelize)
+├─ docs/                   # Supporting documentation
+├─ screenshots/            # UI screenshots
+├─ docker-compose.dev.yml  # Local Docker services
+└─ package.json            # Root-level docker helper scripts
+```
+
+## 6. Demo Images | Hình ảnh demo
+
+### 6.1 Home & Product Listing | Trang chủ & danh sách sản phẩm
+
+![Home](screenshots/homepage.png)
+![Product List](screenshots/ProductList_homepage.png)
+
+### 6.2 Product Detail | Chi tiết sản phẩm
+
+![Product Detail](screenshots/product-detail.png)
+
+### 6.3 Cart | Giỏ hàng
+
+![Cart](screenshots/cart.png)
+
+### 6.4 Checkout & Stripe | Thanh toán & Stripe
+
+![Payment](screenshots/payment.png)
+![Stripe Payment](screenshots/payment_stripe.png)
+
+### 6.5 Orders | Đơn hàng
+
+![Order](screenshots/order.png)
+
+### 6.6 AI Chatbot | Chatbot AI
+
+![Chatbot](screenshots/chatbot.png)
+![Chatbot 2](screenshots/chatbot2.png)
+
+### 6.7 Admin | Quản trị
+
+![Admin Home](screenshots/admin_home.png)
+![Admin Product](screenshots/admin_product.png)
+![Admin Categories](screenshots/admin_categories.png)
+![Admin Order](screenshots/admin_order.png)
+![Admin User](screenshots/admin_user.png)
+![Admin Warranty](screenshots/admin_warranty.png)
+
+## 7. Run Locally (Without Docker) | Chạy local (không dùng Docker)
+
+### 7.1 Requirements | Yêu cầu
+
+| English | Tiếng Việt |
+|---|---|
+| Node.js >= 18 | Node.js >= 18 |
+| PostgreSQL >= 15 | PostgreSQL >= 15 |
+| npm / pnpm / yarn | npm / pnpm / yarn |
+
+### 7.2 Install & Start | Cài đặt và chạy
+
+```bash
 # Backend
+cd be
+npm install
+npm run dev
 
-cd ../backend
-yarn install
-
-Cấu hình môi trường
-
-Copy frontend/.env.example và backend/.env.example thành .env.
-Cập nhật biến môi trường trong backend/.env:
-```
-envDB_URL=postgres://user:password@localhost:5432/ecommerce
-STRIPE_KEY=your_stripe_key
-GEMINI_API_KEY=your_gemini_api_key
-JWT_SECRET=your_jwt_secret
+# Frontend (new terminal)
+cd fe
+npm install
+npm run dev
 ```
 
-Khởi tạo database
-bash# Tạo database
-psql -U postgres -c "CREATE DATABASE ecommerce;"
+| English | Tiếng Việt |
+|---|---|
+| Frontend default URL: `http://localhost:5173` | URL mặc định frontend: `http://localhost:5173` |
+| Backend default URL: `http://localhost:8888` | URL mặc định backend: `http://localhost:8888` |
+| API docs: `http://localhost:8888/api-docs` | Tài liệu API: `http://localhost:8888/api-docs` |
 
-# Chạy migrations
+## 8. Run with Docker Compose | Chạy bằng Docker Compose
 
-cd backend
-yarn migrate
+### 8.1 Root scripts | Script ở root
 
-# (Tùy chọn) Seed dữ liệu
-
-yarn seed
-
-Khởi động ứng dụng
-bash# Backend
-cd backend
-yarn start
-
-# Frontend
-
-cd ../frontend
-yarn dev
-
-Truy cập
-
-Website: http://localhost:3000
-Admin dashboard: http://localhost:3000/admin
-Tài khoản thử nghiệm:
-
-Khách hàng: user@example.com / password123
-Admin: admin@example.com / admin123
-
-Lưu ý
-
-Đảm bảo PostgreSQL chạy trên localhost:5432 hoặc cập nhật DB_URL.
-Nếu thiếu API keys, ứng dụng chạy ở chế độ demo (thanh toán giả lập, chatbot fallback).
-Để kiểm tra webhook Stripe trên local, sử dụng ngrok:
-bashngrok http 3000
-
-🔍 Kết quả đạt được
-
-Tải trang dưới 2 giây nhờ lazy loading và API caching.
-Chatbot AI trả lời trong <1 giây, cải thiện trải nghiệm người dùng.
-Giao dịch thanh toán an toàn với Stripe và webhook.
-Database tối ưu với indexing, giảm thời gian truy vấn.
-
-📚 Bài học rút ra
-
-Thành thạo tích hợp API bên thứ ba (Stripe, Gemini AI) và thiết kế RESTful API.
-Học cách tối ưu hiệu suất với lazy loading, database indexing, và caching.
-Giải quyết thách thức đa ngôn ngữ (i18n) với lazy loading translations.
-Nâng cao kỹ năng debug trong môi trường full-stack.
-
-📂 Cấu trúc dự án
-
-### Frontend Architecture
-
-```
-src/
-├── components/          # UI Components tái sử dụng
-│   ├── common/         # Button, Input, Modal...
-│   ├── layout/         # Header, Footer, Sidebar
-│   └── forms/          # Form components
-├── pages/              # Các trang chính
-│   ├── auth/           # Login, Register
-│   ├── shop/           # Product listing, detail
-│   ├── admin/          # Admin dashboard
-│   └── checkout/       # Cart, Payment
-├── store/              # Zustand state management
-├── services/           # API calls
-├── hooks/              # Custom React hooks
-├── utils/              # Helper functions
-└── types/              # TypeScript definitions
+```bash
+npm run docker:up
+npm run docker:up:build
+npm run docker:logs
+npm run docker:logs:api
+npm run docker:ps
+npm run docker:down
+npm run docker:down:v
 ```
 
-### Backend Architecture
+### 8.2 Backend scripts | Script trong `be/`
 
+```bash
+cd be
+npm run docker:up
+npm run docker:up:build
+npm run docker:logs
+npm run docker:down
 ```
-src/
-├── controllers/        # Route handlers
-│   ├── auth.js        # Authentication
-│   ├── products.js    # Product management
-│   ├── orders.js      # Order processing
-│   └── chat.js        # Chatbot
-├── middlewares/        # Express middlewares
-│   ├── auth.js        # JWT verification
-│   ├── upload.js      # File upload
-│   └── validation.js  # Input validation
-├── models/            # Database models
-├── services/          # Business logic
-├── routes/            # API routes
-└── utils/             # Helper functions
-🚀 Triển khai
 
-Lưu ý: Triển khai hiện cần API keys hợp lệ cho Stripe và Gemini AI.
+### 8.3 Service Mapping | Ánh xạ service
 
-Triển khai Backend
+| Service | Container Port | Host Port | Notes |
+|---|---:|---:|---|
+| db (PostgreSQL) | 5432 | 5438 | Host uses 5438 to prevent collision |
+| api (Backend) | 8888 | 8888 | Depends on healthy db service |
 
-Deploy trên Render hoặc Heroku.
-Cấu hình PostgreSQL trên dịch vụ như Neon.
-Cập nhật DB_URL và các biến môi trường trong dashboard của dịch vụ.
+## 9. Environment Variables | Biến môi trường
 
-Triển khai Frontend
+### 9.1 Root `.env` (Docker compose db bootstrap)
 
-Build production:
-bashcd frontend
-yarn build
+| Variable | Type | English | Tiếng Việt |
+|---|---|---|---|
+| DB_HOST | string | Database host for compose/network setup | Host CSDL cho cấu hình compose/network |
+| DB_PORT | number | Database port | Cổng CSDL |
+| DB_NAME | string | Database name | Tên CSDL |
+| DB_USER | string | Database user | Tài khoản CSDL |
+| DB_PASSWORD | string | Database password | Mật khẩu CSDL |
 
-Deploy thư mục dist lên Vercel hoặc Netlify.
+### 9.2 Backend `be/.env`
 
-🤝 Đóng góp
-Chúng tôi hoan nghênh mọi đóng góp! Để tham gia:
+| Variable | Type | English | Tiếng Việt |
+|---|---|---|---|
+| NODE_ENV | enum | development / test / production | Môi trường chạy |
+| PORT | number | Backend listen port (default 8888) | Cổng backend (mặc định 8888) |
+| API_URL | string | Public API URL | URL public của API |
+| DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD | string/number | PostgreSQL connection settings | Cấu hình kết nối PostgreSQL |
+| DB_SYNC | boolean string | Auto-sync Sequelize models in development | Tự đồng bộ model Sequelize ở development |
+| JWT_SECRET JWT_REFRESH_SECRET | string | JWT signing secrets | Khóa ký JWT |
+| JWT_EXPIRES_IN JWT_REFRESH_EXPIRES_IN | string | Token TTL | Thời gian sống token |
+| EMAIL_* | string/number/bool | SMTP email configuration | Cấu hình SMTP email |
+| FRONTEND_URL | string | Allowed frontend origin for production CORS | Origin frontend cho CORS ở production |
+| REDIS_* | string/number | Redis settings (if enabled) | Cấu hình Redis (nếu bật) |
+| STRIPE_SECRET_KEY | string | Stripe secret key | Khóa bí mật Stripe |
+| STRIPE_WEBHOOK_SECRET | string | Stripe webhook verification secret | Khóa xác thực webhook Stripe |
+| GEMINI_API_KEY | string | Gemini API key (server-side) | API key Gemini (server-side) |
+| UPLOAD_DIR | string | Upload directory path | Thư mục upload |
+| MAX_FILE_SIZE | number | Upload file size limit | Giới hạn kích thước tệp |
+| DATABASE_URL | string | Optional full DB connection URI | URI kết nối DB đầy đủ (tuỳ chọn) |
 
-Fork repository này.
-Tạo branch mới: git checkout -b feature/your-feature.
-Commit thay đổi: git commit -m "feat: mô tả thay đổi".
-Push branch: git push origin feature/your-feature.
-Tạo Pull Request với mô tả chi tiết.
+### 9.3 Frontend `fe/.env`
 
-📞 Liên hệ
-Tên: Nguyễn Hoài An
-GitHub: github.com/hoaiiann0804
-Email: hoaiiann0804@gmail.com
+| Variable | Type | English | Tiếng Việt |
+|---|---|---|---|
+| VITE_API_URL | string | Backend API base URL | URL API backend |
+| VITE_BASE_URL | string | Frontend base URL | URL gốc frontend |
+| VITE_APP_NAME | string | App display name | Tên hiển thị ứng dụng |
+| VITE_APP_VERSION | string | App version metadata | Phiên bản ứng dụng |
+| VITE_BUILD_SOURCEMAP | boolean string | Generate source maps for build | Bật/tắt source map khi build |
+| VITE_STRIPE_PUBLISHABLE_KEY | string | Stripe publishable key | Khóa public Stripe |
+| VITE_GEMINI_API_KEY | string | Gemini key for client-side demo mode | Gemini key cho demo phía client |
 
-```
+> Note: Client-side Gemini key is optional and should be a **demo** key. For production, prefer server-side Gemini calls via `GEMINI_API_KEY` in backend to avoid exposing secrets.
+
+## 10. Admin API (Validated Parameters) | API Admin (tham số đã validate)
+
+Base path: `/api/admin`  
+Auth: `adminAuthenticate` middleware required for all routes.
+
+### 10.1 Query Parameters (list endpoints)
+
+| Parameter | Type | Rules | English | Tiếng Việt |
+|---|---|---|---|---|
+| page | integer | >= 1 | Page index for pagination | Trang hiện tại phân trang |
+| limit | integer | 1..100 | Items per page | Số phần tử mỗi trang |
+| sortBy | string | optional | Sort field | Trường sắp xếp |
+| sortOrder | enum | ASC / DESC (case-insensitive) | Sort direction | Chiều sắp xếp |
+
+### 10.2 Stats Endpoint
+
+`GET /api/admin/stats`
+
+| Parameter | Type | Rules | English | Tiếng Việt |
+|---|---|---|---|---|
+| startDate | ISO 8601 string | required in controller flow | Start date for analytics range | Ngày bắt đầu thống kê |
+| endDate | ISO 8601 string | required in controller flow | End date for analytics range | Ngày kết thúc thống kê |
+| groupBy | enum | hour / day / week / month | Aggregation granularity | Độ hạt tổng hợp dữ liệu |
+
+### 10.3 Update Order Status
+
+`PUT /api/admin/orders/:id/status`
+
+| Field | Type | Rules | English | Tiếng Việt |
+|---|---|---|---|---|
+| id | UUID | path param | Order identifier | Mã đơn hàng |
+| status | enum | pending processing shipped delivered cancelled | Target status | Trạng thái cần cập nhật |
+| note | string | max length 500 | Admin note | Ghi chú của admin |
+
+### 10.4 Update User
+
+`PUT /api/admin/users/:id`
+
+| Field | Type | Rules | English | Tiếng Việt |
+|---|---|---|---|---|
+| id | UUID | path param | User identifier | Mã người dùng |
+| firstName | string | 2..50 | Given name | Tên |
+| lastName | string | 2..50 | Family name | Họ |
+| phone | string | optional | Phone number | Số điện thoại |
+| role | enum | customer / admin / manager | User role | Vai trò người dùng |
+| isEmailVerified | boolean | optional | Email verification flag | Cờ xác thực email |
+| isActive | boolean | optional | Activation flag | Cờ kích hoạt tài khoản |
+
+## 11. Frontend Data Types (Core) | Kiểu dữ liệu frontend (chính)
+
+### 11.1 ProductFilters (from `fe/src/types/product.types.ts`)
+
+| Field | Type | English | Tiếng Việt |
+|---|---|---|---|
+| categoryId | UUID / String | Filter by category | Lọc theo danh mục |
+| search | string | Search keyword | Từ khóa tìm kiếm |
+| minPrice / maxPrice | number | Price range filter | Lọc theo khoảng giá |
+| sort | 'price_asc' \\| 'price_desc' \\| 'newest' \\| 'popular' | Sorting mode | Chế độ sắp xếp |
+| page / limit | number | Pagination controls | Điều khiển phân trang |
+| brand / color / size | string[] | Attribute-based filters | Bộ lọc theo thuộc tính |
+| [key: string] | any | Dynamic attribute filters | Bộ lọc động mở rộng |
+
+### 11.2 ProductFormData (admin product form)
+
+| Field | Type | English | Tiếng Việt |
+|---|---|---|---|
+| name, description, shortDescription | string | Core product content | Nội dung sản phẩm cơ bản |
+| baseName | string | Base name for variants | Tên gốc cho biến thể |
+| sku | string | Product SKU | Mã SKU sản phẩm |
+| price, compareAtPrice | number | Pricing fields | Trường giá |
+| stockQuantity, inStock | number, boolean | Stock control | Quản lý tồn kho |
+| images, thumbnail | string[] / string | Media fields | Ảnh sản phẩm |
+| categoryIds | string[] | Category associations | Liên kết danh mục |
+| status, featured | enum, boolean | Publish & featured | Trạng thái & nổi bật |
+| condition | enum | Product condition | Tình trạng sản phẩm |
+| seoTitle, seoDescription, seoKeywords | string / string[] | SEO fields | Trường SEO |
+| searchKeywords | string[] | Search keywords | Từ khóa tìm kiếm |
+| specifications | array | Specifications list | Danh sách thông số |
+| attributes, variants | object / array | Variant-capable model | Mô hình có biến thể |
+| warrantyMonths, warrantyPackageIds | number / string[] | Warranty linkage | Liên kết bảo hành |
+| isVariantProduct | boolean | Variant product flag | Cờ sản phẩm có biến thể |
+
+## 12. Runtime Logic Notes | Ghi chú logic vận hành
+
+| English | Tiếng Việt |
+|---|---|
+| Backend starts by authenticating DB connection, loading models, and optionally syncing schema (`DB_SYNC=true` in development). | Backend khởi động bằng cách xác thực kết nối DB, nạp model, và có thể đồng bộ schema (`DB_SYNC=true` ở development). |
+| Docker Compose runs `db` and `api` concurrently, with `api` waiting until DB health check passes. | Docker Compose chạy `db` và `api` đồng thời (concurrent), `api` chỉ chạy sau khi health check của DB thành công. |
+| CORS in development allows localhost ports 3000, 5173, 5174, 5175; production uses `FRONTEND_URL`. | CORS ở development cho phép localhost 3000, 5173, 5174, 5175; production dùng `FRONTEND_URL`. |
+| Uploaded files are served via `/uploads` static route. | Tệp upload được public qua route tĩnh `/uploads`. |
+
+## 13. Useful Endpoints | Endpoint hữu ích
+
+| Endpoint | English | Tiếng Việt |
+|---|---|---|
+| GET /api/health | API health check | Kiểm tra trạng thái API |
+| GET /api-docs | Swagger UI | Giao diện Swagger |
+| GET /api-docs.json | OpenAPI JSON spec | Đặc tả OpenAPI dạng JSON |
+
+## 14. Notes | Lưu ý
+
+| English | Tiếng Việt |
+|---|---|
+| Do not commit real secrets in `.env` files. | Không commit secret thật vào file `.env`. |
+| If local PostgreSQL already uses 5432, keep Docker mapped to 5438 as configured. | Nếu máy đã dùng PostgreSQL ở 5432, giữ mapping Docker ở 5438 như hiện tại. |
+| The admin API is protected; test with a valid admin token/session. | API admin được bảo vệ; cần token/session admin hợp lệ để test. |
+
+## 15. License | Giấy phép
+
+MIT License.

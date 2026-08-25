@@ -135,7 +135,11 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
           },
         }).unwrap();
 
-        const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8888'}${result.data.url}`;
+        const imageUrl =
+          typeof result?.data?.url === 'string' &&
+          /^https?:\/\//i.test(result.data.url)
+            ? result.data.url
+            : `${(import.meta.env.VITE_API_URL || 'http://localhost:8888/api').replace(/\/api\/?$/, '')}${result.data.url}`;
 
         // Insert image into editor
         const quill = quillRef.current?.getEditor();
@@ -204,7 +208,11 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
               },
             }).unwrap();
 
-            const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8888'}${result.data.url}`;
+            const imageUrl =
+              typeof result?.data?.url === 'string' &&
+              /^https?:\/\//i.test(result.data.url)
+                ? result.data.url
+                : `${(import.meta.env.VITE_API_URL || 'http://localhost:8888/api').replace(/\/api\/?$/, '')}${result.data.url}`;
 
             // Insert image into editor
             const quill = quillRef.current?.getEditor();
