@@ -73,6 +73,12 @@ const SimpleNamingTestPage: React.FC = () => {
 
   const runTestScenario = (scenario: (typeof testScenarios)[0]) => {
     setBaseName(scenario.baseName);
+    setSelectedAttributes(
+      Object.fromEntries(
+        Object.entries(scenario.attributes).filter(([_, value]) => value !== undefined)
+      )
+    );
+
     // Filter out undefined values to match Record<string, string>
     const filteredAttributes = Object.fromEntries(
       Object.entries(scenario.attributes).filter(

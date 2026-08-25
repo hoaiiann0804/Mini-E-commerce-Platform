@@ -4,6 +4,7 @@ import {
   createProductFiltersParams,
   transformProductsResponse,
   generateProductTags,
+  TransformedProduct,
 } from '@/utils/productTransform';
 
 export const productApi = api.injectEndpoints({
@@ -103,7 +104,7 @@ export const productApi = api.injectEndpoints({
     }),
 
     getDeals: builder.query<
-      any,
+      { data: TransformedProduct[] },
       { minDiscount?: number; limit?: number; sort?: string } | void
     >({
       query: (params) => {

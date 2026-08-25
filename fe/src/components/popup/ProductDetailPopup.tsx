@@ -51,14 +51,10 @@ const ProductDetailPopup: React.FC<ProductDetailPopupProps> = ({
   >({});
   const [qty, setQty] = useState<number>(1);
 
-
-
-  // lay thong tin dang nhap tu reudx store
   const isAuthenticated = useSelector(
     (state: any) => state.auth.isAuthenticated
   );
 
-  //API hooks - fetch full product data if we have an ID
   const {
     data: productData,
     isLoading,

@@ -1,5 +1,8 @@
 import { PremiumButton } from "@/components/common";
 
+import { Product } from "@/types/product.types";
+
+
 interface ProductItem {
   id: string;
   name: string;
@@ -13,6 +16,10 @@ interface ProductItem {
   rating?: number;
   reviewCount?: number;
   stock?: number;
+
+  createdAt: string;
+  updatedAt: string;
+
   [key: string]: any;
 }
 
@@ -38,6 +45,12 @@ import {
 } from "@/utils/imageUtils";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+
+
+/**
+ * HomePage component - Main landing page with hero, featured products, and categories
+ */
+
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
 
@@ -140,6 +153,15 @@ const HomePage: React.FC = () => {
     >
       {/* Hero Section */}
       <HeroSection />
+      {/* <div className="pt-3">
+      <div className="bg-white">
+      <h2 className="text-center text-xl font-semibold mb-4">
+        Trusted by companies worldwide
+      </h2>
+      <BrandCarousel />
+    </div>
+      </div>
+       */}
 
       {/* Featured Products */}
       <PageSection
@@ -186,6 +208,21 @@ const HomePage: React.FC = () => {
             {featuredProducts.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
+
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
+                stock={product.stock || 0}
                 {...mapProductToCardProps(product)}
               />
             ))}
@@ -242,6 +279,21 @@ const HomePage: React.FC = () => {
             {bestSellers.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
+
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
+                stock={product.stock || 0}
                 {...mapProductToCardProps(product)}
               />
             ))}
@@ -298,8 +350,22 @@ const HomePage: React.FC = () => {
             {newArrivals.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-                {...mapProductToCardProps(product)}
-              />
+                {...product}
+                images={product.images || []}
+                description={product.description || ""}
+                categoryId={product.categoryId || ""}
+                categoryName={product.categoryName || ""}
+                ratings={
+                  product.rating
+                    ? {
+                        average: product.rating,
+                        count: product.reviewCount || 0,
+                      }
+                    : undefined
+                }
+                stock={product.stock || 0}
+
+                {...mapProductToCardProps(product)}              />
             ))}
           </ProductGrid>
         ) : (

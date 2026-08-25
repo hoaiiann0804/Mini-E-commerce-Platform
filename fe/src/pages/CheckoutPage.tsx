@@ -3,11 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { Button, Radio, Space } from "antd";
+
+import {
+  LoadingOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 // Add address related imports and types
 import { useGetAddressesQuery } from "@/services/userApi";
 import type { Address } from "@/types/user.types";
+
 import { formatAddressForDisplay } from "@/utils/addressFormatter";
 import PremiumButton from "@/components/common/PremiumButton";
 import Input from "@/components/common/Input";
@@ -310,7 +317,6 @@ const CheckoutPage: React.FC = () => {
       }),
     }));
   };
-
   // Validate form
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -477,6 +483,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+
   // Handle form submission for non-Stripe payments (unused, kept for potential future use)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _handleSubmit = async (e: React.FormEvent) => {
@@ -502,10 +509,6 @@ const CheckoutPage: React.FC = () => {
 
       // Refetch cart count to update header badge
       dispatch(cartApi.util.invalidateTags(["CartCount"]));
-
-      navigate("/orders");
-    }
-  };
 
   // Trạng thái loading cho giỏ hàng
   const [isCartLoading, setIsCartLoading] = useState(true);
@@ -668,6 +671,16 @@ const CheckoutPage: React.FC = () => {
                         </Radio>
                       </Space>
                     </Radio.Group>
+
+
+                    <Button
+                      type="link"
+                      icon={<PlusOutlined />}
+                      onClick={() => navigate('/user/address')}
+                      className="p-0 text-sm"
+                    >
+                      {t('checkout.manageAddresses')}
+                    </Button>
                     <Link to="/user/address">
                       <Button
                         type="link"
@@ -764,6 +777,8 @@ const CheckoutPage: React.FC = () => {
                     onChange={(value) => handleInputChange("country", value)}
                     options={countries}
                     error={errors.country}
+
+                    disabled={!isUsingCustomAddress && selectedAddressId !== null}
                     disabled={
                       !isUsingCustomAddress && selectedAddressId !== null
                     }
@@ -909,6 +924,44 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-6">
+              {items.map((item) => (
+                <CartItem
+                  key={`${item.id}-${item.variantId || "default"}`}
+                  item={item}
+                  isCheckout
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Totals */}
+          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">
+            {!isRepayingOrder ? (
+              <>
+                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                  <span>{t("checkout.orderSummary.subtotal")}</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                  <span>{t("checkout.orderSummary.shipping")}</span>
+                  <span>
+                    {shippingCost === 0
+                      ? t("checkout.orderSummary.freeShipping")
+                      : formatPrice(shippingCost)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
+                  <span>{t("checkout.orderSummary.tax")}</span>
+                  <span>{formatPrice(tax)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-700">
+                  <span>{t("checkout.orderSummary.total")}</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
+              </>
             ) : (
               <div className="space-y-4 mb-6">
                 {items.map((item) => (

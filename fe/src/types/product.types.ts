@@ -27,6 +27,7 @@ export interface Product {
   warrantyMonths?: number;
   specifications?: Record<string, any>;
   warrantyPackages?: WarrantyPackage[];
+  discountPercentage?: number;
   createdAt: string;
   updatedAt: string;
 }

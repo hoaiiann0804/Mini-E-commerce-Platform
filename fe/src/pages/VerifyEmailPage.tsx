@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useVerifyEmailMutation } from '@/services/authApi';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Button from '@/components/common/Button';
+import React, { useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useVerifyEmailMutation } from "@/services/authApi";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Button from "@/components/common/Button";
 
 const VerifyEmailPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -14,6 +14,7 @@ const VerifyEmailPage: React.FC = () => {
   useEffect(() => {
     if (token && !hasVerified.current) {
       hasVerified.current = true;
+      console.log("Attempting to verify email with token:", token);
       //console.log('Attempting to verify email with token:', token);
       verifyEmail(token);
     }
@@ -21,6 +22,15 @@ const VerifyEmailPage: React.FC = () => {
 
   // Debug logging
   useEffect(() => {
+    console.log("VerifyEmailPage state:", {
+      isLoading,
+      isSuccess,
+      isError,
+      error,
+      token,
+      hasVerified: hasVerified.current,
+    });
+
     // console.log('VerifyEmailPage state:', {
     //   isLoading,
     //   isSuccess,
@@ -29,21 +39,22 @@ const VerifyEmailPage: React.FC = () => {
     //   token,
     //   hasVerified: hasVerified.current,
     // });
+
   }, [isLoading, isSuccess, isError, error, token]);
 
   const handleGoToLogin = () => {
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleGoHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <LoadingSpinner size="large" />
+          <LoadingSpinner size="lg" />
           <h2 className="mt-6 text-2xl font-bold text-gray-900">
             Đang xác thực email...
           </h2>
@@ -97,16 +108,16 @@ const VerifyEmailPage: React.FC = () => {
   }
 
   if (isError) {
-    let errorMessage = 'Có lỗi xảy ra khi xác thực email';
+    let errorMessage = "Có lỗi xảy ra khi xác thực email";
 
-    if (error && typeof error === 'object' && 'data' in error) {
+    if (error && typeof error === "object" && "data" in error) {
       const errorData = error.data as any;
       if (errorData?.message) {
         errorMessage = errorData.message;
-      } else if (typeof errorData === 'string') {
+      } else if (typeof errorData === "string") {
         errorMessage = errorData;
       }
-    } else if (error && typeof error === 'object' && 'message' in error) {
+    } else if (error && typeof error === "object" && "message" in error) {
       errorMessage = (error as any).message;
     }
 

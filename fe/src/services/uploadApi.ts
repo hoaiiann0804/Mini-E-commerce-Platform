@@ -28,7 +28,6 @@ export interface MultipleUploadResponse {
   };
 }
 
-// Sử dụng api.injectEndpoints để thêm các endpoints vào API service chính
 export const uploadApi = api.injectEndpoints({
   endpoints: (builder) => ({
     uploadSingle: builder.mutation<

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+
 import {
   PencilIcon,
   TrashIcon,
@@ -35,6 +37,8 @@ interface CategoryFormData {
 }
 
 const CategoryPage: React.FC = () => {
+  // const navigate = useNavigate();
+
   const [messageApi, contextHolder] = message.useMessage();
 
   // API hooks
@@ -755,6 +759,8 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
+                value={formData.description ?? ''}
+
                 value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
@@ -769,7 +775,7 @@ const CategoryPage: React.FC = () => {
                 Hình ảnh
               </label>
               <Input
-                value={formData.image}
+                value={formData.image ?? ''}
                 onChange={(e) => handleInputChange('image', e.target.value)}
                 placeholder="Nhập URL hình ảnh"
               />
@@ -802,6 +808,8 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <Input
                   type="number"
+                  value={formData.sortOrder?.toString() ?? '0'}
+
                   value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
@@ -886,6 +894,8 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
+                value={formData.description ?? ''}
+
                 value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
@@ -900,7 +910,7 @@ const CategoryPage: React.FC = () => {
                 Hình ảnh
               </label>
               <Input
-                value={formData.image}
+                value={formData.image ?? ''}
                 onChange={(e) => handleInputChange('image', e.target.value)}
                 placeholder="Nhập URL hình ảnh"
               />
@@ -933,6 +943,7 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <Input
                   type="number"
+                  value={formData.sortOrder?.toString() ?? '0'}
                   value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(

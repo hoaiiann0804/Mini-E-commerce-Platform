@@ -42,9 +42,10 @@ import AttributeModal from "@/components/modals/AttributeModal";
 import VariantModal from "@/components/modals/VariantModal";
 
 // Types
+import { ProductFormData, ProductAttribute, ProductVariant, Category } from "@/types";
+
 import { ProductFormData, ProductAttribute, ProductVariant } from "@/types";
 import { Category } from "@/types/category.types";
-
 // Utils
 import {
   processDescriptionImages,
@@ -336,12 +337,24 @@ const EditProductPage: React.FC = () => {
         Array.isArray(product.images)
       ) {
         const imageElements = product.images
+  .filter(
+    (img): img is string =>
+      typeof img === "string" && img.startsWith("data:image")
+  )
+  .map(
+    (img) =>
+      `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
+  )
+  .join("<br/>");
+
+
           .filter((img: string) => img.includes("data:image"))
           .map(
             (img: string) =>
               `<img src="${img}" alt="Product image" style="max-width: 100%; height: auto;" />`
           )
           .join("<br/>");
+
 
         if (imageElements) {
           processedDescription = imageElements;
@@ -505,6 +518,7 @@ const EditProductPage: React.FC = () => {
     return "Cập nhật sản phẩm thất bại. Vui lòng thử lại.";
   };
 
+  const categories: Category[] = Array.isArray(categoriesResponse?.data)?categoriesResponse.data : categoriesResponse?.data ?[categoriesResponse.data]: [];
   // Helper function to get categories as array
   const getCategoriesArray = (): Category[] => {
     const data = categoriesResponse?.data;
@@ -514,7 +528,6 @@ const EditProductPage: React.FC = () => {
   };
 
   const categories = getCategoriesArray();
-
   // Handle loading and error states
   if (isLoadingProduct) {
     return (

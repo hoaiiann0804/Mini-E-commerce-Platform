@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
           </div>
         </div> */}
 
-        {/* Footer content */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company info */}
           <div>
@@ -43,7 +43,6 @@ const Footer: React.FC = () => {
               experience.
             </p>
             <div className="flex space-x-4">
-              {/* Social media icons */}
               {['facebook', 'twitter', 'instagram', 'youtube'].map((social) => (
                 <a
                   key={social}

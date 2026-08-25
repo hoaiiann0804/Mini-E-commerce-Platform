@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Button from '@/components/common/Button';
 import { PremiumButton } from '@/components/common';
 
 interface FormData {

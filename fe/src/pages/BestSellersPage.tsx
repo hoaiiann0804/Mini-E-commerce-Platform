@@ -4,16 +4,22 @@ import ProductCard from "@/components/features/ProductCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Select from "@/components/common/Select";
 import Pagination from "@/components/common/Pagination";
+
+import type { Product } from "@/types";
+
+const BestSellersPage: React.FC = () => {
+  type SortOption = "popular" | "price_asc" | "price_desc" | "newest";
+=======
 import { Product } from "@/types/product.types";
 
 type SortOption = "popular" | "price_asc" | "price_desc" | "newest";
 
 const BestSellersPage: React.FC = () => {
+
   const [sortOption, setSortOption] = useState<SortOption>("popular");
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 12;
 
-  // Get best selling products
   const {
     data: productsData,
     isLoading,
@@ -22,16 +28,21 @@ const BestSellersPage: React.FC = () => {
     sort: sortOption,
     page: currentPage,
     limit,
-    bestSellers: true, // This would be a parameter in a real API to filter for best sellers
+    bestSellers: true,
   });
 
+
+  const sortOptions: { value: SortOption; label: string }[] = [
   const sortOptions = [
+
     { value: "popular", label: "Most Popular" },
     { value: "price_asc", label: "Price: Low to High" },
     { value: "price_desc", label: "Price: High to Low" },
     { value: "newest", label: "Newest" },
   ];
 
+  const handleSortChange = (value: SortOption) => {
+    setSortOption(value);
   const handleSortChange = (value: string) => {
     setSortOption(value as SortOption);
     setCurrentPage(1);
@@ -89,7 +100,7 @@ const BestSellersPage: React.FC = () => {
           <Select
             options={sortOptions}
             value={sortOption}
-            onChange={handleSortChange}
+            onValueChange={handleSortChange}
             placeholder="Sort By"
           />
         </div>

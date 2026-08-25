@@ -78,7 +78,7 @@ const ProductsPage: React.FC = () => {
     sortOrder,
   });
 
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
 
   // Xử lý dữ liệu sản phẩm từ API
   const products = productsResponse?.data?.products || [];
@@ -124,6 +124,9 @@ const ProductsPage: React.FC = () => {
 
   // Log dữ liệu danh mục để debug
   useEffect(() => {
+    if (Array.isArray(apiCategories) && apiCategories.length > 0) {
+      console.log("Categories data:", apiCategories);
+
     if (apiCategories.length > 0) {
       //console.log("Categories data:", apiCategories);
     }
@@ -247,11 +250,13 @@ const ProductsPage: React.FC = () => {
       dataIndex: "price",
       key: "price",
       sorter: true,
-      render: (price: number, record: any) => (
-        <span style={{ fontWeight: 500, color: "#52c41a" }}>
-          {calculateDisplayPrice(record)}
-        </span>
-      ),
+      render: (_price: any, record: any) => {
+        return (
+          <span style={{ fontWeight: 500, color: "#52c41a" }}>
+            {calculateDisplayPrice(record)}
+          </span>
+        );
+      },
     },
     {
       title: "Kho",
@@ -325,8 +330,8 @@ const ProductsPage: React.FC = () => {
 
   // Handle table change (sorting, pagination)
   const handleTableChange = (
-    paginationInfo: any,
-    filters: any,
+    _paginationInfo: any,
+    _filters: any,
     sorter: any
   ) => {
     if (sorter.field) {

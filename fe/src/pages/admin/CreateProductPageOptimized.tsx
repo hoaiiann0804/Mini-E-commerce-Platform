@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateProductMutation } from "@/services/adminProductApi";
 import { useGetCategoriesQuery } from "@/services/categoryApi";
+
 import { useConvertBase64ToImageMutation } from "@/services/imageApi";
 import { useGetWarrantyPackagesQuery } from "@/services/warrantyApi";
 import { WarrantyPackage } from "@/types/product.types";
@@ -291,6 +292,7 @@ const CreateProductPage: React.FC = () => {
         }
         break;
 
+
       case "variants":
         if (formData.isVariantProduct && formData.variants.length === 0) {
           newErrors.variants = "Cần tạo ít nhất 1 biến thể";
@@ -351,6 +353,10 @@ const CreateProductPage: React.FC = () => {
         description: processedDescription,
         shortDescription: formData.shortDescription,
         price: formData.isVariantProduct ? 0 : formData.price,
+        comparePrice: formData.isVariantProduct
+          ? undefined
+          : (formData.compareAtPrice ?? undefined),
+
         compareAtPrice: formData.compareAtPrice,
         images: formData.images,
         thumbnail: formData.thumbnail || formData.images[0],
@@ -373,6 +379,14 @@ const CreateProductPage: React.FC = () => {
           category: spec.category,
         })),
         isVariantProduct: formData.isVariantProduct,
+        attributes: formData.parentAttributes.flatMap((attr) =>
+          attr.values.map((value) => ({
+            name: attr.name,
+            value,
+          }))
+        ),
+        variants: formData.variants.map((variant, index) => ({
+
         attributes: formData.parentAttributes.map((attr) => ({
           name: attr.name,
           value: attr.values.join(","),
@@ -1051,6 +1065,9 @@ const CreateProductPage: React.FC = () => {
                               </label>
                               <Select
                                 value={attr.type}
+                                onValueChange={(value) =>
+                                  updateAttribute(attr.id, "type", value)
+
                                 onChange={(value) =>
                                   updateAttribute(
                                     attr.id,
