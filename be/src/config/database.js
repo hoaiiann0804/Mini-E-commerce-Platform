@@ -47,10 +47,9 @@ module.exports = {
         : false,
     },
     pool: {
-      // Neon has limited concurrent connections; keep pool small in production
-      max: Number(process.env.DB_POOL_MAX) || 2,
-      min: Number(process.env.DB_POOL_MIN) || 0,
-      acquire: 30000,
+      max: Number(process.env.DB_POOL_MAX) || 15,
+      min: Number(process.env.DB_POOL_MIN) || 2,
+      acquire: 60000,
       idle: 10000,
     },
   },
