@@ -172,17 +172,118 @@ const resetPassword = async ({ token, password }) => {
   };
 };
 
-const getCurrentUser = async ({ userId }) => {
-  const user = await authRepository.findUserById(userId);
+const getCurrentUser = async (userIdOrObj) => {
+  const userId =
+    typeof userIdOrObj === "object" && userIdOrObj !== null
+      ? userIdOrObj.userId || userIdOrObj.id
+      : userIdOrObj;
+
+  const user = await authRepository.findUserProfileById(userId);
   if (!user) {
     throw new AppError("Không tìm thấy người dùng", 404);
   }
   return user.toJSON();
 };
 
+const loginWithOAuth = async ({ provider, profile }) => {
+  const { id: providerId, emails, name, displayName, photos } = profile;
+  const email = emails && emails.length > 0 ? emails[0].value.toLowerCase() : null;
+  const avatar = photos && photos.length > 0 ? photos[0].value : null;
+
+  let firstName = name?.givenName;
+  let lastName = name?.familyName;
+
+  if (!firstName && displayName) {
+    const parts = displayName.trim().split(" ");
+    if (parts.length === 1) {
+      firstName = parts[0];
+      lastName = "";
+    } else {
+      firstName = parts[0];
+      lastName = parts.slice(1).join(" ");
+    }
+  }
+
+  firstName = firstName || "User";
+  lastName = lastName || "";
+
+  let user = null;
+
+  // 1. Tìm user theo provider ID
+  if (provider === "google") {
+    user = await authRepository.findUserByGoogleId(providerId);
+  } else if (provider === "facebook") {
+    user = await authRepository.findUserByFacebookId(providerId);
+  }
+
+  // 2. Nếu chưa có providerId, tìm user theo email để link account
+  if (!user && email) {
+    user = await authRepository.findUserByEmail(email);
+    if (user) {
+      await authRepository.linkOAuthProvider(user, {
+        googleId: provider === "google" ? providerId : null,
+        facebookId: provider === "facebook" ? providerId : null,
+        avatar,
+      });
+    }
+  }
+
+  // 3. Nếu vẫn không có -> tạo user mới
+  if (!user) {
+    if (!email) {
+      throw new AppError(
+        "Không tìm thấy email từ tài khoản mạng xã hội của bạn. Vui lòng cấp quyền truy cập email.",
+        400
+      );
+    }
+    user = await authRepository.createOAuthUser({
+      email,
+      firstName,
+      lastName,
+      avatar,
+      googleId: provider === "google" ? providerId : null,
+      facebookId: provider === "facebook" ? providerId : null,
+      provider,
+    });
+  }
+
+  // 4. Kiểm tra tài khoản có bị khóa không
+  if (!user.isActive) {
+    throw new AppError(
+      "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên",
+      401
+    );
+  }
+
+  // Reset failed login attempts
+  if (user.failedLoginAttempts > 0 || user.lockUntil) {
+    await authRepository.updateUser(user, {
+      failedLoginAttempts: 0,
+      lockUntil: null,
+    });
+  }
+
+  // 5. Generate tokens
+  const token = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  const refreshTokenExpiresAt = getRefreshTokenExpiresAt(refreshToken);
+  await authRepository.createRefreshToken({
+    userId: user.id,
+    token: refreshToken,
+    expiresAt: refreshTokenExpiresAt,
+  });
+
+  return {
+    token,
+    refreshToken,
+    user: user.toJSON(),
+  };
+};
+
 module.exports = {
   register,
   login,
+  loginWithOAuth,
   logout,
   verifyEmail,
   resendVerification,

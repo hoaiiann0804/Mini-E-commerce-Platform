@@ -12,6 +12,7 @@ const routes = require("./routes");
 const aiRoutes = require("./routes/aiRoutes"); // Import AI routes
 const { errorHandler, AppError } = require("./middlewares/errorHandler");
 const path = require("path");
+const passport = require("./config/passport");
 
 // Initialize app
 const app = express();
@@ -107,11 +108,8 @@ app.use(xss());
 // Compression middleware
 app.use(compression());
 
-// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
-// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
-// Serve uploaded files statically (REMOVE THIS LINE WHEN USING CLOUD STORAGE LIKE CLOUDINARY)
-// In production, images should be served directly from a cloud storage service (e.g., Cloudinary).
-// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Passport middleware
+app.use(passport.initialize());
 
 // API routes
 app.use("/api", routes);
