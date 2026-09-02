@@ -78,12 +78,9 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
 
-            parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, ""))}
-
             parser={(value) =>
               Number((value ?? "").replace(/\$\s?|(,*)/g, "")) || 0
             }
-
             addonAfter="đ"
             min={0}
             disabled={hasVariants && variants.length > 0}
@@ -103,7 +100,6 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
             formatter={(value) =>
               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
-            parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, ""))}
             parser={(value) =>
               Number((value ?? "").replace(/\$\s?|(,*)/g, "")) || 0
             }

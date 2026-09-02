@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useGetDealsQuery } from "@/services/productApi";
 import ProductCard from "@/components/features/ProductCard";
@@ -6,14 +5,6 @@ import ProductListCard from "@/components/features/ProductListCard";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Select from "@/components/common/Select";
 import { Product } from "@/types/product.types";
-import { useState, useMemo } from 'react';
-import { useGetDealsQuery } from '@/services/productApi';
-import ProductCard from '@/components/features/ProductCard';
-import ProductListCard from '@/components/features/ProductListCard';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import Select from '@/components/common/Select';
-import { Product } from '@/types/product.types';
-
 
 const DealsPage: React.FC = () => {
   const [sortOption, setSortOption] = useState("discount_desc");
@@ -36,10 +27,7 @@ const DealsPage: React.FC = () => {
   const formattedProducts = useMemo<Product[]>(() => {
     if (!dealsData?.data) return [];
 
-
     return dealsData.data.map((item: any) => {
-    return dealsData.data.map((item: Product) => {
-
       // Chuyển đổi chuỗi giá thành số
       const price =
         typeof item.price === "string" ? parseFloat(item.price) : item.price;
@@ -55,9 +43,8 @@ const DealsPage: React.FC = () => {
           : 0;
 
       // Tạo đối tượng ratings nếu không có
-
       const ratings = {
-        average: 4.5, 
+        average: 4.5,
         count: 10,
       };
 
@@ -65,17 +52,14 @@ const DealsPage: React.FC = () => {
         ...item,
         price,
         compareAtPrice,
+        discountPercentage,
         ratings,
         isNew:
           item.createdAt &&
           new Date(item.createdAt) >
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Sản phẩm mới nếu được tạo trong 7 ngày qua
-
         categoryName: item.categories?.[0]?.name || "Uncategorized",
-        stock: item.stockQuantity || 0,
-
-        // Sử dụng categoryName thay vì categories
-        stock: item.stock || 0,
+        stock: item.stockQuantity || item.stock || 0,
       } as Product;
     });
   }, [dealsData]);
@@ -103,55 +87,47 @@ const DealsPage: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-red-600 mb-4">
-          Lỗi khi tải sản phẩm giảm giá
+          Không thể tải dữ liệu ưu đãi
         </h1>
         <p className="text-neutral-600 dark:text-neutral-400">
-          Đã xảy ra lỗi khi tải danh sách sản phẩm giảm giá. Vui lòng thử lại
-          sau.
+          Đã có lỗi xảy ra khi tải danh sách ưu đãi. Vui lòng thử lại sau.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-950">
-      <div className="container mx-auto px-4 py-8 animate-fadeIn">
-        {/* Hero section */}
-        <div className="bg-gradient-to-r from-primary-600 to-secondary-500 rounded-xl p-8 mb-8 text-white text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            Siêu Giảm Giá - Trên 50% OFF
-          </h1>
-          <p className="text-lg max-w-2xl mx-auto mb-6">
-            Khám phá các sản phẩm giảm giá sốc với mức giảm trên 50%. Cơ hội có
-            hạn, mua ngay kẻo lỡ!
-          </p>
-          <div className="inline-block bg-white text-primary-600 font-bold py-3 px-6 rounded-full text-lg">
-            GIẢM GIÁ TRÊN 50%
-          </div>
+    <div className="container mx-auto px-4 py-16">
+      {/* Hero section */}
+      <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-8 mb-12 text-white text-center">
+        <h1 className="text-4xl font-bold mb-4">Siêu Ưu Đãi & Giảm Giá</h1>
+        <p className="text-lg max-w-2xl mx-auto mb-6">
+          Khám phá các ưu đãi tốt nhất của chúng tôi với mức giảm giá từ 50% trở lên.
+        </p>
+        <div className="inline-block bg-white text-red-600 font-bold py-3 px-6 rounded-full text-lg">
+          Giảm giá tới 70%
         </div>
+      </div>
 
-        {/* Page header - Removed duplicate title */}
-        <div className="mb-8 text-center">
-          <p className="text-neutral-600 dark:text-neutral-400 text-lg">
-            {formattedProducts.length > 0
-              ? `Hiển thị ${formattedProducts.length} sản phẩm giảm giá trên 50%`
-              : "Khám phá các sản phẩm giảm giá sốc"}
-          </p>
-        </div>
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Controls */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <span className="text-neutral-600 dark:text-neutral-400">
+              Tìm thấy {formattedProducts.length} sản phẩm
+            </span>
 
-        {/* Sort and view controls */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <div className="flex items-center gap-4 mb-4 md:mb-0">
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-white dark:bg-neutral-800 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700">
+            <div className="flex items-center bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-colors ${
+                className={`p-2 rounded ${
                   viewMode === "grid"
-                    ? "bg-primary-500 text-white"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
+                    ? "bg-white dark:bg-neutral-700 shadow-sm"
+                    : "text-neutral-500"
                 }`}
-                aria-label="Grid view"
+                title="Dạng lưới"
               >
                 <svg
                   className="h-4 w-4"
@@ -169,12 +145,12 @@ const DealsPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-colors ${
+                className={`p-2 rounded ${
                   viewMode === "list"
-                    ? "bg-primary-500 text-white"
-                    : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200"
+                    ? "bg-white dark:bg-neutral-700 shadow-sm"
+                    : "text-neutral-500"
                 }`}
-                aria-label="List view"
+                title="Dạng danh sách"
               >
                 <svg
                   className="h-4 w-4"
@@ -228,44 +204,33 @@ const DealsPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <>
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr"
-                  : "space-y-8"
-              }
-            >
-
-              {formattedProducts.map((product) =>
-                viewMode === "grid" ? (
-              {formattedProducts.map((product: Product) =>
-                viewMode === 'grid' ? (
-                  <ProductCard
-                    key={product.id}
-                    {...product}
-                    // Tính discountPercentage từ compareAtPrice và price
-                    discountPercentage={
-                      product.compareAtPrice && product.compareAtPrice > product.price
-                        ? Math.round(
-                            ((product.compareAtPrice - product.price) /
-                              product.compareAtPrice) *
-                              100
-                          )
-                        : 0
-                    }
-                  />
-                ) : (
-                  <ProductListCard
-                    key={product.id}
-                    {...product}
-                  />
-                )
-              )}
-            </div>
-
-            {/* Pagination - Note: The deals API doesn't support pagination yet */}
-          </>
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 auto-rows-fr"
+                : "space-y-8"
+            }
+          >
+            {formattedProducts.map((product: Product) =>
+              viewMode === "grid" ? (
+                <ProductCard
+                  key={product.id}
+                  {...product}
+                  discountPercentage={
+                    product.compareAtPrice && product.compareAtPrice > product.price
+                      ? Math.round(
+                          ((product.compareAtPrice - product.price) /
+                            product.compareAtPrice) *
+                            100
+                        )
+                      : 0
+                  }
+                />
+              ) : (
+                <ProductListCard key={product.id} {...product} />
+              )
+            )}
+          </div>
         )}
       </div>
     </div>

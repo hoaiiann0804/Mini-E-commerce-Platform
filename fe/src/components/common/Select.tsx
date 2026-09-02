@@ -27,10 +27,8 @@ const Select: React.FC<SelectProps> = ({
   label,
   error,
   disabled = false,
-
-  className = "",
   required = false,
-  className = '',
+  className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);

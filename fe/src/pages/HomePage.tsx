@@ -208,21 +208,6 @@ const HomePage: React.FC = () => {
             {featuredProducts.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-
-                {...product}
-                images={product.images || []}
-                description={product.description || ""}
-                categoryId={product.categoryId || ""}
-                categoryName={product.categoryName || ""}
-                ratings={
-                  product.rating
-                    ? {
-                        average: product.rating,
-                        count: product.reviewCount || 0,
-                      }
-                    : undefined
-                }
-                stock={product.stock || 0}
                 {...mapProductToCardProps(product)}
               />
             ))}
@@ -279,21 +264,6 @@ const HomePage: React.FC = () => {
             {bestSellers.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-
-                {...product}
-                images={product.images || []}
-                description={product.description || ""}
-                categoryId={product.categoryId || ""}
-                categoryName={product.categoryName || ""}
-                ratings={
-                  product.rating
-                    ? {
-                        average: product.rating,
-                        count: product.reviewCount || 0,
-                      }
-                    : undefined
-                }
-                stock={product.stock || 0}
                 {...mapProductToCardProps(product)}
               />
             ))}
@@ -350,22 +320,8 @@ const HomePage: React.FC = () => {
             {newArrivals.data?.data?.map((product: ProductItem) => (
               <ProductCard
                 key={product.id}
-                {...product}
-                images={product.images || []}
-                description={product.description || ""}
-                categoryId={product.categoryId || ""}
-                categoryName={product.categoryName || ""}
-                ratings={
-                  product.rating
-                    ? {
-                        average: product.rating,
-                        count: product.reviewCount || 0,
-                      }
-                    : undefined
-                }
-                stock={product.stock || 0}
-
-                {...mapProductToCardProps(product)}              />
+                {...mapProductToCardProps(product)}
+              />
             ))}
           </ProductGrid>
         ) : (
