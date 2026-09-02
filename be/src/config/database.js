@@ -42,7 +42,7 @@ module.exports = {
       underscored: true,
     },
     dialectOptions: {
-      ssl: toBool(process.env.DB_SSL || "true")
+      ssl: toBool(process.env.DB_SSL)
         ? { require: true, rejectUnauthorized: false }
         : false,
     },

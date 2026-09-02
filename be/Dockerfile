@@ -7,4 +7,4 @@ COPY package*.json ./
 RUN npm install --omit=dev
 COPY . .
 EXPOSE 8888
-CMD ["sh", "-c", "npm run db:migrate --silent && node src/server.js"]
+CMD ["sh", "-c", "npx sequelize-cli db:migrate && node src/server.js"]
