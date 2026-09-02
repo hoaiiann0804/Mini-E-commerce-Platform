@@ -44,7 +44,7 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_SSL: false
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
