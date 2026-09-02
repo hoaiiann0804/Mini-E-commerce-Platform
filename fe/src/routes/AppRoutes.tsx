@@ -20,6 +20,7 @@ const CartPage = lazy(() => import("@/pages/CartPage"));
 const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
+const OAuthCallbackPage = lazy(() => import("@/pages/OAuthCallbackPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const VerifyEmailPage = lazy(() => import("@/pages/VerifyEmailPage"));
@@ -134,6 +135,7 @@ const AppRoutes: React.FC = () => {
             }
           />
           <Route path="verify-email/:token" element={<VerifyEmailPage />} />
+          <Route path="auth/callback" element={<OAuthCallbackPage />} />
 
           {/* Protected routes (require authentication) */}
           <Route
