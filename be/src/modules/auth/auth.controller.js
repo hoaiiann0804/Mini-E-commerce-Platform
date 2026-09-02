@@ -64,12 +64,11 @@ const verifyEmailWithToken = async (req, res, next) => {
 const resendVerification = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const result = await authService.resendVerification(email);
+    await authService.resendVerification(email);
     return res.status(200).json({
       status: "success",
-      message:
-        "Nếu email tồn tại và chưa xác thực, chúng tôi đã gửi lại email xác thực.",
-    });
+      message: "Email xác thực đã được gửi lại thành công.",
+    }); 
   } catch (error) {
     next(error);
   }
@@ -126,6 +125,28 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
+const handleOAuthCallback = async (req, res, next) => {
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5175";
+  try {
+    if (!req.user || !req.user.token) {
+      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
+
+    const { token, refreshToken } = req.user;
+    return res.redirect(
+      `${frontendUrl}/auth/callback?token=${encodeURIComponent(
+        token
+      )}&refreshToken=${encodeURIComponent(refreshToken)}`
+    );
+  } catch (error) {
+    return res.redirect(
+      `${frontendUrl}/login?error=${encodeURIComponent(
+        error.message || "oauth_failed"
+      )}`
+    );
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -137,4 +158,5 @@ module.exports = {
   resetPassword,
   getCurrentUser,
   refreshAccessToken,
+  handleOAuthCallback,
 };

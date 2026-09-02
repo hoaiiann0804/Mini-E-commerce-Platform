@@ -89,16 +89,63 @@ const revokeRefreshToken = (token) => {
     },
   );
 };
+const findUserByGoogleId = async (googleId) => {
+  return User.findOne({
+    where: { googleId },
+  });
+};
+
+const findUserByFacebookId = async (facebookId) => {
+  return User.findOne({
+    where: { facebookId },
+  });
+};
+
+const createOAuthUser = async ({
+  email,
+  firstName,
+  lastName,
+  avatar,
+  googleId,
+  facebookId,
+  provider,
+}) => {
+  return User.create({
+    email,
+    firstName: firstName || "User",
+    lastName: lastName || "",
+    avatar: avatar || null,
+    googleId: googleId || null,
+    facebookId: facebookId || null,
+    provider: provider || "local",
+    isEmailVerified: true,
+    isActive: true,
+  });
+};
+
+const linkOAuthProvider = async (user, { googleId, facebookId, avatar }) => {
+  const updateData = {};
+  if (googleId && !user.googleId) updateData.googleId = googleId;
+  if (facebookId && !user.facebookId) updateData.facebookId = facebookId;
+  if (avatar && !user.avatar) updateData.avatar = avatar;
+  if (!user.isEmailVerified) updateData.isEmailVerified = true;
+
+  return user.update(updateData);
+};
+
 module.exports = {
   findUserByEmail,
   findUserById,
+  findUserByGoogleId,
+  findUserByFacebookId,
   findUserByValidVerificationToken,
   findUserByResetPasswordToken,
-  findUserById,
+  findUserProfileById,
   createUser,
+  createOAuthUser,
+  linkOAuthProvider,
   updateUser,
   createRefreshToken,
   findValidRefreshToken,
   revokeRefreshToken,
-  
 };

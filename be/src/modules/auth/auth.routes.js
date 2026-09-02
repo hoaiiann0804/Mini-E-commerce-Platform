@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../auth/auth.controller");
+const passport = require("../../config/passport");
 const { validateRequest } = require("../../middlewares/validateRequest");
 const {
   registerSchema,
@@ -12,6 +13,7 @@ const {
 } = require("../user/user.validator");
 const {
   authLimiter,
+  oauthLimiter,
   resendVerificationLimiter,
   forgotPasswordLimiter,
 } = require("../../middlewares/rateLimiter");
@@ -304,5 +306,81 @@ router.post(
  *         description: Not authenticated
  */
 router.get("/me", authenticate, authController.getCurrentUser);
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   get:
+ *     summary: Login with Google OAuth
+ *     tags: [Authentication]
+ *     responses:
+ *       302:
+ *         description: Redirect to Google login consent
+ */
+router.get(
+  "/google",
+  oauthLimiter,
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback
+ *     tags: [Authentication]
+ *     responses:
+ *       302:
+ *         description: Redirect to frontend with tokens or error
+ */
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5175"}/login?error=oauth_failed`,
+  }),
+  authController.handleOAuthCallback
+);
+
+/**
+ * @swagger
+ * /api/auth/facebook:
+ *   get:
+ *     summary: Login with Facebook OAuth
+ *     tags: [Authentication]
+ *     responses:
+ *       302:
+ *         description: Redirect to Facebook login consent
+ */
+router.get(
+  "/facebook",
+  oauthLimiter,
+  passport.authenticate("facebook", {
+    scope: ["email"],
+    session: false,
+  })
+);
+
+/**
+ * @swagger
+ * /api/auth/facebook/callback:
+ *   get:
+ *     summary: Facebook OAuth callback
+ *     tags: [Authentication]
+ *     responses:
+ *       302:
+ *         description: Redirect to frontend with tokens or error
+ */
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5175"}/login?error=oauth_failed`,
+  }),
+  authController.handleOAuthCallback
+);
 
 module.exports = router;

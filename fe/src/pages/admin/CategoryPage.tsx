@@ -759,8 +759,6 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
-                value={formData.description ?? ''}
-
                 value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
@@ -808,8 +806,6 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={formData.sortOrder?.toString() ?? '0'}
-
                   value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(
@@ -894,8 +890,6 @@ const CategoryPage: React.FC = () => {
                 Mô tả
               </label>
               <Textarea
-                value={formData.description ?? ''}
-
                 value={formData.description || ''}
                 onChange={(e) =>
                   handleInputChange('description', e.target.value)
@@ -943,7 +937,6 @@ const CategoryPage: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={formData.sortOrder?.toString() ?? '0'}
                   value={(formData.sortOrder ?? 0).toString()}
                   onChange={(e) =>
                     handleInputChange(

@@ -378,15 +378,6 @@ const CreateProductPage: React.FC = () => {
           value: spec.value,
           category: spec.category,
         })),
-        isVariantProduct: formData.isVariantProduct,
-        attributes: formData.parentAttributes.flatMap((attr) =>
-          attr.values.map((value) => ({
-            name: attr.name,
-            value,
-          }))
-        ),
-        variants: formData.variants.map((variant, index) => ({
-
         attributes: formData.parentAttributes.map((attr) => ({
           name: attr.name,
           value: attr.values.join(","),
@@ -1066,9 +1057,6 @@ const CreateProductPage: React.FC = () => {
                               <Select
                                 value={attr.type}
                                 onValueChange={(value) =>
-                                  updateAttribute(attr.id, "type", value)
-
-                                onChange={(value) =>
                                   updateAttribute(
                                     attr.id,
                                     "type",

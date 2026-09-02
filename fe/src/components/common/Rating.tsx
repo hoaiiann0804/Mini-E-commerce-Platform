@@ -16,10 +16,8 @@ export const Rating: React.FC<RatingProps> = ({
   onChange,
   size = "medium",
   interactive = false,
-
-  className = "",
   readonly = false,
-  className = '',
+  className = "",
   showCount = false,
   count,
 }) => {

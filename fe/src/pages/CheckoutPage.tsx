@@ -9,7 +9,6 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 
 // Add address related imports and types
 import { useGetAddressesQuery } from "@/services/userApi";
@@ -509,6 +508,9 @@ const CheckoutPage: React.FC = () => {
 
       // Refetch cart count to update header badge
       dispatch(cartApi.util.invalidateTags(["CartCount"]));
+      navigate(`/orders/${order.id}`);
+    }
+  };
 
   // Trạng thái loading cho giỏ hàng
   const [isCartLoading, setIsCartLoading] = useState(true);
@@ -673,14 +675,6 @@ const CheckoutPage: React.FC = () => {
                     </Radio.Group>
 
 
-                    <Button
-                      type="link"
-                      icon={<PlusOutlined />}
-                      onClick={() => navigate('/user/address')}
-                      className="p-0 text-sm"
-                    >
-                      {t('checkout.manageAddresses')}
-                    </Button>
                     <Link to="/user/address">
                       <Button
                         type="link"
@@ -778,7 +772,6 @@ const CheckoutPage: React.FC = () => {
                     options={countries}
                     error={errors.country}
 
-                    disabled={!isUsingCustomAddress && selectedAddressId !== null}
                     disabled={
                       !isUsingCustomAddress && selectedAddressId !== null
                     }
@@ -924,7 +917,6 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
           ) : (
             <div className="space-y-4 mb-6">
               {items.map((item) => (
@@ -936,43 +928,6 @@ const CheckoutPage: React.FC = () => {
               ))}
             </div>
           )}
-
-          {/* Totals */}
-          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">
-            {!isRepayingOrder ? (
-              <>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.subtotal")}</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.shipping")}</span>
-                  <span>
-                    {shippingCost === 0
-                      ? t("checkout.orderSummary.freeShipping")
-                      : formatPrice(shippingCost)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
-                  <span>{t("checkout.orderSummary.tax")}</span>
-                  <span>{formatPrice(tax)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-semibold text-neutral-800 dark:text-neutral-100 pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                  <span>{t("checkout.orderSummary.total")}</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <CartItem
-                    key={`${item.id}-${item.variantId || "default"}`}
-                    item={item}
-                    readonly
-                  />
-                ))}
-              </div>
-            )}
 
             {/* Totals */}
             <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">

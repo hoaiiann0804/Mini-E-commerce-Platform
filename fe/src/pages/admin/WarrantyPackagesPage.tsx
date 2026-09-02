@@ -205,8 +205,6 @@ const WarrantyPackagesPage: React.FC = () => {
       title: "Thao tác",
       key: "actions",
       render: (_: unknown, record: WarrantyPackage) => (
-
-      render: (_: any, record: WarrantyPackage) => (
         <Space>
           <Tooltip title="Chỉnh sửa">
             <Button
@@ -350,9 +348,6 @@ const WarrantyPackagesPage: React.FC = () => {
                   style={{ width: "100%" }}
                   formatter={(value) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
-                  parser={(value) => Number(value?.replace(/\$\s?|(,*)/g, "") ?? 0)}
-
                   }
                   parser={(value) =>
                     Number((value ?? "").replace(/\$\s?|(,*)/g, "")) || 0

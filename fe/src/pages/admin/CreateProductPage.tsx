@@ -124,9 +124,6 @@ const CreateProductPage: React.FC = () => {
   // API hooks
   const { data: categoriesResponse, isLoading: isCategoriesLoading } =
     useGetAllCategoriesQuery();
-  const { isLoading: isWarrantyLoading } =
-    useGetWarrantyPackagesQuery({ isActive: true });
-
   const { isLoading: isWarrantyLoading } = useGetWarrantyPackagesQuery({
     isActive: true,
   });
@@ -316,9 +313,6 @@ const CreateProductPage: React.FC = () => {
               ) || 0,
           sku: hasVariants
             ? undefined
-            : allFormValues.sku || `PROD-${Date.now()}`,
-          status: allFormValues.status || values.status || 'active',
-
             : allFormValues.sku || values.sku || `PROD-${Date.now()}`,
           status: allFormValues.status || values.status || "active",
           featured: allFormValues.featured || values.featured || false,

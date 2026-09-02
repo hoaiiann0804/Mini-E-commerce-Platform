@@ -126,9 +126,6 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     if (Array.isArray(apiCategories) && apiCategories.length > 0) {
       console.log("Categories data:", apiCategories);
-
-    if (apiCategories.length > 0) {
-      //console.log("Categories data:", apiCategories);
     }
   }, [apiCategories]);
 

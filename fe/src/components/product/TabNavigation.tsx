@@ -13,9 +13,7 @@ interface TabNavigationProps {
   isLastTab?: boolean;
   completedSteps?: Record<string, boolean>;
 
-  onSubmit?: () => void | Promise<void>;
-
-  onSubmit?: (values?: any) => void;
+  onSubmit?: (values?: any) => void | Promise<void>;
 
   isSubmitting?: boolean;
   submitText?: string;

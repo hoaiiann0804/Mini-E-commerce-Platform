@@ -20,10 +20,30 @@ const User = sequelize.define(
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       validate: {
-        len: [6, 100],
+        len: {
+          args: [6, 100],
+          msg: "Mật khẩu phải từ 6 đến 100 ký tự",
+        },
       },
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+      field: "google_id",
+    },
+    facebookId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+      field: "facebook_id",
+    },
+    provider: {
+      type: DataTypes.ENUM("local", "google", "facebook"),
+      allowNull: false,
+      defaultValue: "local",
     },
     firstName: {
       type: DataTypes.STRING,
@@ -100,7 +120,7 @@ const User = sequelize.define(
         }
       },
       beforeUpdate: async (user) => {
-        if (user.changed("password")) {
+        if (user.changed("password") && user.password) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
         }
@@ -111,6 +131,7 @@ const User = sequelize.define(
 
 // Instance methods
 User.prototype.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -14,16 +14,28 @@ const apiLimiter = rateLimit({
 
 // Auth endpoints rate limiter (more strict)
 const authLimiter = rateLimit({
-  // windowMs: 60 * 60 * 1000, // 1 hour
-  windowMs: 15 * 60 * 1000, //15 minutes
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // limit each IP to 5 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => `${req.ip}-${req.body.email}`,
+  keyGenerator: (req) => `${req.ip}-${req.body.email || ""}`,
   skipSuccessfulRequests: true,
   message: {
     status: "error",
     message: "Quá nhiều lần đăng nhập, vui lòng thử lại sau.",
+  },
+});
+
+// OAuth rate limiter (for social login redirects and callbacks)
+const oauthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Cho phép 20 lượt thử/15 phút cho mỗi IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  message: {
+    status: "error",
+    message: "Quá nhiều yêu cầu đăng nhập qua mạng xã hội, vui lòng thử lại sau.",
   },
 });
 
@@ -64,9 +76,11 @@ const forgotPasswordLimiter = rateLimit({
       "Bạn đã yêu cầu đặt lại mật khẩu quá nhiều lần. Vui lòng thử lại sau.",
   },
 });
+
 module.exports = {
   apiLimiter,
   authLimiter,
+  oauthLimiter,
   orderLimiter,
   resendVerificationLimiter,
   forgotPasswordLimiter,

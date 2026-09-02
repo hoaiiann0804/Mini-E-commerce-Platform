@@ -163,10 +163,6 @@ const UsersPage: React.FC = () => {
       title: "Người dùng",
       key: "user",
       render: (_: unknown, record: User) => (
-
-      title: 'Người dùng',
-      key: 'user',
-      render: (_:any, record: User) => (
         <div className="flex items-center gap-3">
           <Avatar src={record.avatar} icon={<UserOutlined />} size={48} />
           <div>
@@ -207,8 +203,6 @@ const UsersPage: React.FC = () => {
       key: "status",
       width: 150,
       render: (_: unknown, record: User) => (
-
-      render: (_:any, record: User) => (
         <div className="space-y-1">
           <div>
             <Tag color={record.isActive ? "success" : "error"}>
@@ -235,8 +229,6 @@ const UsersPage: React.FC = () => {
       key: "actions",
       width: 120,
       render: (_: unknown, record: User) => (
-
-      render: (_:any, record: User) => (
         <Space>
           <Button
             type="link"
