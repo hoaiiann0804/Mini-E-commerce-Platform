@@ -4,6 +4,7 @@ const app = require("./app");
 const sequelize = require("./config/sequelize");
 const logger = require("./shared/utils/logger");
 const { startOrderCleanupJob } = require("./jobs/orderCleanup.job");
+const { connectRedis, disconnectRedis } = require("./config/redis");
 
 // Optional: force IPv4 DNS resolution to bypass getaddrinfo/DNS issues in some environments
 if (process.env.FORCE_DNS_IPV4 === "true") {
@@ -108,6 +109,19 @@ const startServer = async () => {
   await connectDB();
   await addStripeColumn();
 
+  /**
+   * Khởi động Redis sau khi DB đã sẵn sàng
+   *
+   * TƯ DUY KIẾN TRÚC - THỨ TỰ KHỚI ĐỘNG:
+   * DB → Redis → Server
+   * Redis phụ thuộc DB (cần models), nhưng server không phụ thuộc Redis
+   * (Redis down → server vẫn chạy, chỉ mất dedup view)
+   *
+   * "Graceful degradation": Hệ thống degraded (một số feature bị hạn chế)
+   * thì tốt hơn là toàn bộ server sập
+   */
+  await connectRedis();
+
   const PORT = process.env.PORT || 8888;
   const server = app.listen(PORT, () => {
     logger.info(
@@ -133,6 +147,9 @@ const startServer = async () => {
     logger.info("👋 SIGTERM RECEIVED. Shutting down gracefully");
     // Dừng cleanup job trước khi đóng server
     if (cleanupIntervalId) clearInterval(cleanupIntervalId);
+    // Đóng kết nối Redis trước khi tắt server
+    // Quan trọng: để Redis flush buffer và đóng sạch TCP connection
+    disconnectRedis();
     server.close(() => {
       logger.info("💥 Process terminated!");
     });
