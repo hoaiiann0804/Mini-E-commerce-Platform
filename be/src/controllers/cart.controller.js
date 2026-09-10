@@ -615,8 +615,6 @@ const syncCart = async (req, res, next) => {
 
 // Merge guest cart with user cart (called when user logs in)
 const mergeCart = async (req, res, next) => {
-  const transaction = await sequelize.transaction();
-
   try {
     if (!req.user) {
       throw new AppError("Bạn cần đăng nhập để thực hiện chức năng này", 401);
@@ -640,6 +638,10 @@ const mergeCart = async (req, res, next) => {
       // No session cart to merge, just return user cart
       return getCart(req, res, next);
     }
+
+    // Chỉ mở transaction KHI ĐÃ CÓ sessionCart hợp lệ cần merge!
+    const transaction = await sequelize.transaction();
+    try {
 
     // Get or create user cart
     const [userCart] = await Cart.findOrCreate({
@@ -711,10 +713,12 @@ const mergeCart = async (req, res, next) => {
     // Clear session cookie to prevent duplicate merging
     res.clearCookie("sessionId");
 
-    // Return updated user cart
     return getCart(req, res, next);
+    } catch (txError) {
+      await transaction.rollback();
+      throw txError;
+    }
   } catch (error) {
-    await transaction.rollback();
     next(error);
   }
 };

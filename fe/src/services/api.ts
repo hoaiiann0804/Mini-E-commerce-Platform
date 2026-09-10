@@ -101,9 +101,9 @@ const isUnauthorizedError = (error: any): boolean => {
 const logApiError = (args: string | FetchArgs, error: any): void => {
   if (import.meta.env.DEV) {
     console.group("🚨 API Error");
-    //console.log("Endpoint:", typeof args === "string" ? args : args.url);
-    //console.log("Status:", error.status);
-    //console.log("Data:", error.data);
+    console.log("Endpoint:", typeof args === "string" ? args : args.url);
+    console.log("Status:", error.status);
+    console.log("Data:", error.data);
     console.groupEnd();
   }
 };
