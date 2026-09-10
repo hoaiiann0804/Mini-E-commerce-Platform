@@ -15,7 +15,11 @@ interface ProductItem {
   categoryName?: string;
   rating?: number;
   reviewCount?: number;
+  avgRating?: string | number;
   stock?: number;
+  stockQuantity?: number;
+  viewCount?: number;
+  soldCount?: number;
 
   createdAt: string;
   updatedAt: string;
@@ -107,21 +111,35 @@ const HomePage: React.FC = () => {
           : [];
 
     const rawAverage =
-      (product as any).ratings?.average ??
-      (product as any).ratings ?? // sometimes ratings is a number
-      (product as any).rating?.average ??
-      (product as any).rating ?? // sometimes rating is a number
+      (product as any).ratings?.average ||
+      (product as any).avgRating ||
+      (product as any).avg_rating ||
+      (product as any).rating?.average ||
+      (product as any).rating ||
       0;
 
     const rawCount =
-      (product as any).ratings?.count ??
-      (product as any).rating?.count ??
-      product.reviewCount ??
-      (product as any).reviewCount ??
+      (product as any).ratings?.count ||
+      (product as any).reviewCount ||
+      (product as any).review_count ||
+      (product as any).rating?.count ||
       0;
 
-    const average = Number(rawAverage) || 0;
+    const average = Number(rawAverage) ? parseFloat(Number(rawAverage).toFixed(1)) : 0;
     const count = Number(rawCount) || 0;
+
+    const soldCount = Number(
+      product.soldCount ??
+      (product as any).sold_count ??
+      (product as any).units_sold ??
+      0
+    );
+
+    const viewCount = Number(
+      product.viewCount ??
+      (product as any).view_count ??
+      0
+    );
 
     return {
       id: product.id,
@@ -138,7 +156,9 @@ const HomePage: React.FC = () => {
         average,
         count,
       },
-      stock: product.stock ?? 0,
+      stock: product.stock ?? (product as any).stockQuantity ?? 0,
+      viewCount,
+      soldCount,
       createdAt: (product as any).createdAt ?? new Date().toISOString(),
       updatedAt: (product as any).updatedAt ?? new Date().toISOString(),
     };

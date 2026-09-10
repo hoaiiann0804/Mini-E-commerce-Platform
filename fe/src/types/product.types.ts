@@ -28,6 +28,8 @@ export interface Product {
   specifications?: Record<string, any>;
   warrantyPackages?: WarrantyPackage[];
   discountPercentage?: number;
+  viewCount?: number;
+  soldCount?: number;
   createdAt: string;
   updatedAt: string;
 }

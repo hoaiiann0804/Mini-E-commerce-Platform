@@ -52,3 +52,20 @@ export const parsePrice = (price: string | number): number => {
   const parsed = parseFloat(price);
   return isNaN(parsed) ? 0 : parsed;
 };
+
+/**
+ * Format count in compact format for social proof (e.g., 1.2k, 15k, 1.5M)
+ * Used for viewCount and soldCount like Shopee/Lazada
+ * @param count - The count to format
+ * @returns Compact formatted string
+ */
+export const formatCompactNumber = (count: number = 0): string => {
+  const num = Number(count) || 0;
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
+  }
+  return num.toLocaleString('vi-VN');
+};

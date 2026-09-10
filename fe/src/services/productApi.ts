@@ -191,6 +191,22 @@ export const productApi = api.injectEndpoints({
       },
       providesTags: ['Product'],
     }),
+
+    trackProductView: builder.mutation<{ counted: boolean }, string>({
+      query: (productId) => {
+        const token = localStorage.getItem('token');
+        return {
+          url: `/products/${productId}/view`,
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        };
+      },
+      transformResponse: (response: any) => {
+        return response?.data || { counted: false };
+      },
+      invalidatesTags: (result, error, productId) =>
+        result?.counted ? [{ type: 'Product', id: productId }] : [],
+    }),
   }),
 });
 
@@ -208,4 +224,5 @@ export const {
   useGetProductReviewsSummaryQuery,
   useSearchProductsQuery,
   useGetProductFiltersQuery,
+  useTrackProductViewMutation,
 } = productApi;

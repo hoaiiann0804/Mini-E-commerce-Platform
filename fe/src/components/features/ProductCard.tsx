@@ -1,6 +1,7 @@
 import { addNotification } from "@/features/ui/uiSlice";
 import { Product } from "@/types/product.types";
 import { calculatePriceRange } from "@/utils/priceUtils";
+import { formatCompactNumber } from "@/utils/format";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
@@ -25,6 +26,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discountPercentage,
   variants,
   enableVariantPricing = false, // Mặc định tắt để tránh quá nhiều API calls
+  viewCount = 0,
+  soldCount = 0,
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -64,6 +67,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <span className="drop-shadow-sm">-{discount}%</span>
             </div>
           )}
+          {soldCount >= 5 && (
+            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-lg backdrop-blur-sm border border-white/20">
+              <span className="drop-shadow-sm">🔥 BÁN CHẠY</span>
+            </div>
+          )}
           {isNew && (
             <div className="bg-gradient-to-r from-emerald-500 via-emerald-600 to-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-sm border border-white/20">
               <span className="drop-shadow-sm">MỚI</span>
@@ -89,23 +97,38 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Enhanced product info section */}
       <div className="p-6 space-y-4 flex-grow flex flex-col">
-        {/* Rating positioned at top */}
-        <div className="flex items-center">
-          {ratings && (
-            <div className="flex items-center bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 px-3 py-1.5 rounded-xl border border-amber-200/50 dark:border-amber-800/50">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-amber-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              <span className="text-sm text-amber-700 dark:text-amber-300 ml-1.5 font-semibold">
-                {ratings.average}
+        {/* Rating, Views & Sold Count (Shopee / Lazada style) */}
+        <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            {ratings && (
+              <div className="flex items-center bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 px-2.5 py-1 rounded-lg border border-amber-200/50 dark:border-amber-800/50">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5 text-amber-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span className="text-xs text-amber-700 dark:text-amber-300 ml-1 font-bold">
+                  {ratings.average}
+                </span>
+              </div>
+            )}
+            {viewCount > 0 && (
+              <span className="flex items-center gap-1 text-neutral-400 dark:text-neutral-500" title={`${viewCount} lượt xem`}>
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>{formatCompactNumber(viewCount)}</span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
+
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+            Đã bán {formatCompactNumber(soldCount)}
+          </span>
         </div>
 
         {/* Enhanced title */}
