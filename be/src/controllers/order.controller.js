@@ -9,6 +9,14 @@ const {
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 const emailService = require("../shared/services/email/emailService");
+/**
+ * Import service xử lý analytics (view count, sold count)
+ *
+ * TƯ DUY KIẾN TRÚC:
+ * Tách biệt business logic: Order controller chỉ quản lý
+ * vòng đời đơn hàng, còn việc cập nhật sold_count
+ * là "side effect" được ủy thác cho analytics service
+ */
 
 // Thời gian giữ chỗ tồn kho (phút)
 const HOLD_MINUTES = 15;
@@ -556,25 +564,143 @@ const updateOrderStatus = async (req, res, next) => {
       throw new AppError("Không tìm thấy đơn hàng", 404);
     }
 
-    // Update order status
-    await order.update({ status });
+    /**
+     * Lưu trạng thái cũ trước khi cập nhật
+     *
+     * TƯ DUY NGHIỆP VỤ:
+     * Cần biết trạng thái cũ để xác định đây có phải là lần ĐẦU TIÊN
+     * chuyển sang 'delivered' hay không.
+     *
+     * Tại sao cần check? Nếu admin vô tình click 'delivered' 2 lần:
+     *   - Lần 1: pending → delivered → soldCount += N (đúng)
+     *   - Lần 2: delivered → delivered → soldCount += N nữa (ĐỤC ĐÔI, sai!)
+     * → Phải kiểm tra previousStatus ≠ 'delivered' mới cập nhật soldCount
+     */
+    const previousStatus = order.status;
 
-    // Send status update email
+    /**
+     * ═══════════════════════════════════════════════════════════════
+     * DATABASE TRANSACTION — All-or-Nothing Consistency
+     * ═══════════════════════════════════════════════════════════════
+     *
+     * TƯ DUY KỸ THUẬT - TẠI SAO DÙNG TRANSACTION?
+     *
+     * Vấn đề cũ (Fire-and-Forget):
+     *   await order.update({ status });     ← Commit vào DB
+     *   updateSoldCount().catch(...)        ← Chạy ngầm, không đảm bảo
+     *   → Nếu Node.js crash sau commit nhưng trước khi updateSoldCount chạy:
+     *     orders.status = 'delivered' ✅  (đã commit)
+     *     products.sold_count = cũ    ❌  (mất vĩnh viễn, không khôi phục)
+     *
+     * Giải pháp (Transaction):
+     *   BEGIN TRANSACTION
+     *     UPDATE orders SET status = 'delivered'       ← Atomic
+     *     UPDATE products SET sold_count += N          ← Atomic, cùng transaction
+     *   COMMIT  ← Cả 2 thành công cùng lúc
+     *   ROLLBACK ← Cả 2 thất bại cùng lúc nếu có lỗi
+     *
+     * → Không bao giờ có trạng thái bất đối xứng
+     *
+     * Lưu ý: Email gửi NGOÀI transaction vì:
+     *   - Email là non-critical side effect (không ảnh hưởng dữ liệu)
+     *   - Gửi email trong transaction = giữ DB lock lâu hơn (không cần)
+     *   - Email lỗi không được rollback order (đơn vẫn phải delivered)
+     * ═══════════════════════════════════════════════════════════════
+     */
+    const transaction = await sequelize.transaction();
+
     try {
-      await emailService.sendOrderStatusUpdateEmail(order.user.email, {
+      // BƯỚC 1: Cập nhật status đơn hàng trong transaction
+      await order.update({ status }, { transaction });
+
+      /**
+       * BƯỚC 2: Cập nhật soldCount KHI VÀ CHỈ KHI đơn chuyển sang 'delivered'
+       *
+       * Điều kiện kép:
+       *   (1) status === 'delivered': Trạng thái mới phải là delivered
+       *   (2) previousStatus !== 'delivered': Trạng thái cũ không được là delivered
+       *       → Chỉ tăng soldCount 1 lần duy nhất cho mỗi đơn hàng
+       *
+       * Ví dụ các trường hợp:
+       *   processing → delivered : (1)=true, (2)=true  → Cập nhật soldCount ✅
+       *   shipped    → delivered : (1)=true, (2)=true  → Cập nhật soldCount ✅
+       *   delivered  → delivered : (1)=true, (2)=false → Bỏ qua              ❌
+       *   delivered  → cancelled : (1)=false           → Bỏ qua              ❌
+       */
+      if (status === "delivered" && previousStatus !== "delivered") {
+        /**
+         * Lấy tất cả items trong đơn hàng, group theo productId
+         *
+         * Tại sao GROUP BY productId?
+         * Đơn hàng có thể có nhiều variant của cùng 1 sản phẩm
+         * (vd: iPhone 15 đen qty=1 + iPhone 15 trắng qty=1 → cộng lại = 2)
+         * SUM(quantity) = tổng số lượng thực sự của sản phẩm đó trong đơn
+         */
+        const itemGroups = await OrderItem.findAll({
+          attributes: [
+            "productId",
+            [sequelize.fn("SUM", sequelize.col("quantity")), "totalQuantity"],
+          ],
+          where: { orderId: id },
+          group: ["productId"],
+          raw: true,
+          transaction, // ← Phải nằm trong cùng transaction!
+        });
+
+        if (itemGroups && itemGroups.length > 0) {
+          /**
+           * Cập nhật soldCount song song cho tất cả sản phẩm
+           *
+           * TƯ DUY KỸ THUẬT:
+           * - Promise.all: chạy song song, nhanh hơn sequential await
+           * - Product.increment: SQL "SET sold_count = sold_count + N"
+           *   → Atomic tại tầng DB, không race condition
+           * - transaction: đảm bảo cùng transaction với order.update()
+           */
+          await Promise.all(
+            itemGroups.map(({ productId, totalQuantity }) =>
+              Product.increment("soldCount", {
+                by: parseInt(totalQuantity),
+                where: { id: productId },
+                transaction, // ← Cùng transaction!
+              })
+            )
+          );
+
+          console.log(
+            `[updateOrderStatus] ✅ soldCount đã cập nhật cho ${itemGroups.length} sản phẩm (order: ${id})`
+          );
+        }
+      }
+
+      // COMMIT: Cả 2 bước trên thành công → ghi vào DB
+      await transaction.commit();
+    } catch (txError) {
+      // ROLLBACK: Bất kỳ bước nào lỗi → hoàn tác cả 2
+      await transaction.rollback();
+      console.error("[updateOrderStatus] Transaction rollback:", txError.message);
+      throw txError; // Re-throw để catch bên ngoài xử lý
+    }
+
+    // ─── Ngoài transaction: Email (non-critical side effect) ───────────
+    // Gửi email KHÔNG nằm trong transaction vì:
+    // - Email lỗi không nên ảnh hưởng đến trạng thái đơn hàng
+    // - Giữ DB lock ngắn nhất có thể (performance)
+    emailService
+      .sendOrderStatusUpdateEmail(order.user.email, {
         orderNumber: order.number,
         orderDate: order.createdAt,
         status,
+      })
+      .catch((error) => {
+        console.error("[email] order status update failed", {
+          orderId: order.id,
+          orderNumber: order.number,
+          email: order.user?.email,
+          status,
+          message: error?.message,
+        });
       });
-    } catch (error) {
-      console.error("[email] order status update failed", {
-        orderId: order.id,
-        orderNumber: order.number,
-        email: order.user?.email,
-        status,
-        message: error?.message,
-      });
-    }
 
     res.status(200).json({
       status: "success",
