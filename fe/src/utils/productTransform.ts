@@ -15,6 +15,8 @@ export interface RawProduct {
     average: number;
     count: number;
   };
+  viewCount?: number;
+  soldCount?: number;
   [key: string]: any;
 }
 
@@ -31,6 +33,8 @@ export interface TransformedProduct {
     average: number;
     count: number;
   };
+  viewCount?: number;
+  soldCount?: number;
   [key: string]: any;
 }
 
@@ -117,6 +121,8 @@ export const transformProduct = (product: RawProduct): TransformedProduct => {
       average: 0,
       count: 0,
     },
+    viewCount: Number(product.viewCount ?? product.view_count ?? 0),
+    soldCount: Number(product.soldCount ?? product.sold_count ?? 0),
     // Ensure variants and attributes are passed through
     variants: product.variants || [],
     attributes: product.attributes || [],

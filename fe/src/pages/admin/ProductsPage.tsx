@@ -272,6 +272,34 @@ const ProductsPage: React.FC = () => {
       },
     },
     {
+      title: "Lượt xem",
+      dataIndex: "viewCount",
+      key: "viewCount",
+      sorter: true,
+      width: 110,
+      render: (viewCount: number) => (
+        <Space size={4}>
+          <EyeOutlined style={{ color: "#1890ff" }} />
+          <span style={{ fontWeight: 500 }}>{(viewCount || 0).toLocaleString("vi-VN")}</span>
+        </Space>
+      ),
+    },
+    {
+      title: "Đã bán",
+      dataIndex: "soldCount",
+      key: "soldCount",
+      sorter: true,
+      width: 110,
+      render: (soldCount: number) => {
+        const count = soldCount || 0;
+        return (
+          <Tag color={count > 0 ? "cyan" : "default"} style={{ fontWeight: 500 }}>
+            {count.toLocaleString("vi-VN")}
+          </Tag>
+        );
+      },
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
@@ -546,6 +574,18 @@ const ProductsPage: React.FC = () => {
                       {statusOptions.find(
                         (s) => s.value === selectedProduct.status
                       )?.label || selectedProduct.status}
+                    </Tag>
+                  </div>
+                  <div>
+                    <strong>Lượt xem:</strong>{" "}
+                    <span>
+                      {(selectedProduct.viewCount || 0).toLocaleString("vi-VN")} lượt
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Đã bán:</strong>{" "}
+                    <Tag color={(selectedProduct.soldCount || 0) > 0 ? "cyan" : "default"}>
+                      {(selectedProduct.soldCount || 0).toLocaleString("vi-VN")} sản phẩm
                     </Tag>
                   </div>
                   {selectedProduct.description && (

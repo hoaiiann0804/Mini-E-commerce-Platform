@@ -15,6 +15,7 @@ const SORT_OPTIONS = {
   price_asc: { field: "price", order: "ASC" },
   price_desc: { field: "price", order: "DESC" },
   rating: { field: "avgRating", order: "DESC" },
+  bestselling: { field: "soldCount", order: "DESC" },
 };
 const getAllProducts = async (req, res, next) => {
   try {
@@ -200,6 +201,8 @@ const getAllProducts = async (req, res, next) => {
         "reviewCount",
         "avgRating",
         "minVariantPrice",
+        "viewCount",
+        "soldCount",
       ],
       where: whereConditions,
       include: include,
@@ -968,6 +971,9 @@ const getFeaturedProducts = async (req, res, next) => {
           (totalRating / productJson.reviews.length).toFixed(1)
         );
         ratings.count = productJson.reviews.length;
+      } else if (productJson.avgRating || productJson.avg_rating) {
+        ratings.average = parseFloat(productJson.avgRating || productJson.avg_rating) || 0;
+        ratings.count = productJson.reviewCount || productJson.review_count || 0;
       }
 
       // Use variant price if available, otherwise use product price
@@ -1202,6 +1208,9 @@ const getNewArrivals = async (req, res, next) => {
           (totalRating / productJson.reviews.length).toFixed(1)
         );
         ratings.count = productJson.reviews.length;
+      } else if (productJson.avgRating || productJson.avg_rating) {
+        ratings.average = parseFloat(productJson.avgRating || productJson.avg_rating) || 0;
+        ratings.count = productJson.reviewCount || productJson.review_count || 0;
       }
 
       // Add ratings and remove reviews from response
@@ -1225,91 +1234,111 @@ const getNewArrivals = async (req, res, next) => {
 // Get best sellers
 const getBestSellers = async (req, res, next) => {
   try {
-    const { limit = 10, period = "month" } = req.query;
+    const { limit = 10, period } = req.query;
 
-    // Calculate date range based on period
-    const now = new Date();
-    let startDate;
+    let bestSellers = [];
 
-    switch (period) {
-      case "week":
-        startDate = new Date(now.setDate(now.getDate() - 7));
-        break;
-      case "month":
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
-        break;
-      case "year":
-        startDate = new Date(now.setFullYear(now.getFullYear() - 1));
-        break;
-      default:
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
-    }
+    // If period is provided (e.g., week, month, year), calculate best sellers from orders
+    if (period) {
+      const now = new Date();
+      let startDate;
 
-    // Get best selling products based on order items
-    const bestSellers = await sequelize.query(
-      `
-      SELECT 
-        p.id, 
-        p.name, 
-        p.slug, 
-        p.price, 
-        p.compare_at_price, 
-        p.thumbnail, 
-        p.in_stock,
-        p.stock_quantity,
-        p.featured,
-        COUNT(oi.product_id) as sales_count,
-        SUM(oi.quantity) as units_sold
-      FROM products p
-      JOIN order_items oi ON p.id = oi.product_id
-      JOIN orders o ON oi.order_id = o.id
-      WHERE o.status != 'cancelled'
-      AND o.created_at >= :startDate
-      GROUP BY p.id
-      ORDER BY units_sold DESC
-      LIMIT :limit
-      `,
-      {
-        replacements: { startDate, limit: parseInt(limit) },
-        type: sequelize.QueryTypes.SELECT,
+      switch (period) {
+        case "week":
+          startDate = new Date(now.setDate(now.getDate() - 7));
+          break;
+        case "month":
+          startDate = new Date(now.setMonth(now.getMonth() - 1));
+          break;
+        case "year":
+          startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+          break;
+        default:
+          startDate = new Date(now.setMonth(now.getMonth() - 1));
       }
-    );
 
-    // If no best sellers found, return newest products
-    if (bestSellers.length === 0) {
-      return await getNewArrivals(req, res, next);
+      bestSellers = await sequelize.query(
+        `
+        SELECT 
+          p.id, 
+          COUNT(oi.product_id) as sales_count,
+          SUM(oi.quantity) as units_sold
+        FROM products p
+        JOIN order_items oi ON p.id = oi.product_id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.status != 'cancelled'
+        AND o.created_at >= :startDate
+        GROUP BY p.id
+        ORDER BY units_sold DESC
+        LIMIT :limit
+        `,
+        {
+          replacements: { startDate, limit: parseInt(limit) },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
     }
 
-    // Get product IDs
-    const productIds = bestSellers.map((product) => product.id);
+    let productsRaw;
 
-    // Get full product details
-    const productsRaw = await Product.findAll({
-      where: { id: { [Op.in]: productIds } },
-      include: [
-        {
-          association: "categories",
-          through: { attributes: [] },
-        },
-        {
-          association: "reviews",
-          attributes: ["rating"],
-        },
-        {
-          association: "variants",
-          attributes: ["id", "name", "price", "stockQuantity", "sku"],
-        },
-      ],
-      order: [
-        [
-          sequelize.literal(
-            `CASE ${productIds
-              .map((id, index) => `WHEN "Product"."id" = '${id}' THEN ${index}`)
-              .join(" ")} END`
-          ),
+    // If we have period-based best sellers, load products in that order
+    if (bestSellers.length > 0) {
+      const productIds = bestSellers.map((product) => product.id);
+
+      productsRaw = await Product.findAll({
+        where: { id: { [Op.in]: productIds } },
+        include: [
+          {
+            association: "categories",
+            through: { attributes: [] },
+          },
+          {
+            association: "reviews",
+            attributes: ["rating"],
+          },
+          {
+            association: "variants",
+            attributes: ["id", "name", "price", "stockQuantity", "sku"],
+          },
         ],
-      ],
-    });
+        order: [
+          [
+            sequelize.literal(
+              `CASE ${productIds
+                .map((id, index) => `WHEN "Product"."id" = '${id}' THEN ${index}`)
+                .join(" ")} END`
+            ),
+          ],
+        ],
+      });
+    } else {
+      // Chuẩn TMĐT Shopee/Lazada: Sắp xếp theo số lượng đã bán thực tế (sold_count DESC)
+      productsRaw = await Product.findAll({
+        where: {
+          status: "active",
+        },
+        include: [
+          {
+            association: "categories",
+            through: { attributes: [] },
+          },
+          {
+            association: "reviews",
+            attributes: ["rating"],
+          },
+          {
+            association: "variants",
+            attributes: ["id", "name", "price", "stockQuantity", "sku"],
+          },
+        ],
+        order: [
+          ["soldCount", "DESC"],
+          ["avgRating", "DESC"],
+          ["createdAt", "DESC"],
+        ],
+        limit: parseInt(limit),
+      });
+    }
 
     // Process products to add ratings (same shape as featured/new-arrivals)
     const products = productsRaw.map((product) => {
@@ -1329,6 +1358,9 @@ const getBestSellers = async (req, res, next) => {
           (totalRating / productJson.reviews.length).toFixed(1)
         );
         ratings.count = productJson.reviews.length;
+      } else if (productJson.avgRating || productJson.avg_rating) {
+        ratings.average = parseFloat(productJson.avgRating || productJson.avg_rating) || 0;
+        ratings.count = productJson.reviewCount || productJson.review_count || 0;
       }
 
       // Use variant price if available, otherwise use product price

@@ -3,8 +3,10 @@ const router = express.Router();
 const productController = require("../controllers/product.controller");
 const { validateRequest } = require("../middlewares/validateRequest");
 const { productSchema } = require("../validators/product.validator");
-const { authenticate } = require("../middlewares/authenticate");
+const { authenticate, optionalAuthenticate } = require("../middlewares/authenticate");
 const { authorize } = require("../middlewares/authorize");
+const { trackProductView } = require("../shared/services/product/productAnalytics.service");
+const { catchAsync } = require("../shared/utils/catchAsync");
 
 /**
  * @swagger
@@ -415,6 +417,76 @@ router.get("/:id/reviews-summary", productController.getProductReviewsSummary);
  *         description: Product not found
  */
 router.get("/:id", productController.getProductById);
+
+/**
+ * @swagger
+ * /api/products/{id}/view:
+ *   post:
+ *     summary: Track a product view (deduplicated per user/IP per 24h)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: View tracked (or ignored if duplicate)
+ */
+/**
+ * POST /api/products/:id/view
+ *
+ * TƯ DUY THIẾT KẾ API:
+ * Tại sao dùng POST thay vì GET?
+ * - GET: Theo HTTP spec, GET phải idempotent (gọi N lần = gọi 1 lần)
+ *   Tracking view có side effect (tăng counter) → KHÔNG phải idempotent
+ * - POST: Phù hợp cho actions có side effect
+ * - Ngoài ra: GET request có thể bị cache bởi browser/CDN → không chạy tracking
+ *
+ * Tại sao KHÔNG yêu cầu authenticate?
+ * - Người dùng chưa đăng nhập vẫn có thể xem sản phẩm
+ * - Nếu bắt đăng nhập → mất rất nhiều view data của guest users
+ * - Guest users chiếm 60-70% traffic TMĐT (theo industry research)
+ * - Dùng IP để dedup cho guest, userId cho logged-in user
+ */
+router.post(
+  "/:id/view",
+  optionalAuthenticate,
+  catchAsync(async (req, res) => {
+    const { id } = req.params;
+
+    /**
+     * Lấy identifier:
+     * - req.user?.id: có nếu user đã đăng nhập (từ JWT middleware tùy chọn)
+     * - req.ip: IP của client
+     *
+     * req.ip trả về IP thực của client (không phải IP của proxy)
+     * nhờ app.set('trust proxy', 1) đã cấu hình trong app.js cho production
+     */
+    const userId = req.user?.id || null;
+    const clientIp = req.ip || req.headers["x-forwarded-for"] || "unknown";
+
+    const result = await trackProductView(id, {
+      userId,
+      ip: clientIp,
+    });
+
+    /**
+     * Luôn trả 200 dù view có được đếm hay không
+     *
+     * TƯ DUY THIẾT KẾ:
+     * - Frontend không cần biết có bị dedup hay không
+     * - Tránh lộ logic dedup để người dùng không tìm cách bypass
+     * - 'counted' field chỉ để debug/monitoring, không cần ở production
+     */
+    res.status(200).json({
+      status: "success",
+      data: { counted: result.counted },
+    });
+  })
+);
 
 /**
  * @swagger

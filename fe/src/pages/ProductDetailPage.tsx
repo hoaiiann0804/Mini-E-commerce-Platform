@@ -9,15 +9,13 @@ import ProductVariantSelector from "@/components/product/ProductVariantSelector"
 import SimpleDynamicTitle from "@/components/product/SimpleDynamicTitle";
 import ProductDetailsSection from "@/components/product/ProductDetailsSection";
 import { useAddToWishlistMutation } from "@/services/wishlistApi";
-import { productApi } from "@/services/productApi";
+import { productApi, useTrackProductViewMutation } from "@/services/productApi";
 import { Product, ProductVariant, ProductAttribute } from "@/types/product.types";
 import type { ServerWishlist, ServerWishlistItem, WishlistItem } from "@/types/wishlist.types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-
-
-import { useMemo } from "react";
+import { formatCompactNumber } from "@/utils/format";
 import {
   Link,
   useNavigate,
@@ -90,6 +88,9 @@ const ProductDetailPage: React.FC = () => {
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addtoWishList, { isLoading: isAddingtoWishList }] =
     useAddToWishlistMutation();
+  const [trackProductView] = useTrackProductViewMutation();
+  const trackedProductIdRef = useRef<string | null>(null);
+
   const { data: relatedProductsData } = productApi.useGetRelatedProductsQuery(
     productData?.data?.id || "",
     {
@@ -98,6 +99,16 @@ const ProductDetailPage: React.FC = () => {
   );
 
   const product = productData?.data;
+
+  // Track product view (deduplicated per 24h per IP/user on backend)
+  useEffect(() => {
+    const targetId = product?.id || productId;
+    if (targetId && trackedProductIdRef.current !== targetId) {
+      trackedProductIdRef.current = targetId;
+      trackProductView(targetId).catch(() => {});
+    }
+  }, [product?.id, productId, trackProductView]);
+
   const relatedProducts = relatedProductsData?.data || [];
   const warrantyPackages = product?.warrantyPackages || [];
   const wishlist = useSelector((state: RootState) => state.wishlist.items);
@@ -809,22 +820,58 @@ const ProductDetailPage: React.FC = () => {
               })()}
             </div>
 
-            {/* Ratings */}
-            {product.ratings && (
-              <div className="flex items-center mb-4">
+            {/* Social Proof & Product Stats (Rating, Views, Sold Count) */}
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mb-5 py-2.5 px-4 bg-neutral-50/90 dark:bg-neutral-800/60 rounded-xl border border-neutral-200/60 dark:border-neutral-700/60 text-sm">
+              {/* Ratings */}
+              <div className="flex items-center">
                 <Rating
-                  value={product.ratings.average}
-                  showCount={true}
-                  count={product.ratings.count}
+                  value={product.ratings?.average || 0}
+                  showCount={false}
                 />
+                <span className="ml-1.5 font-bold text-amber-600 dark:text-amber-400">
+                  {product.ratings?.average ? Number(product.ratings.average).toFixed(1) : "5.0"}
+                </span>
                 <Link
                   to="#reviews"
-                  className="ml-2 text-sm text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="ml-1.5 text-xs text-neutral-500 hover:text-primary-600 dark:text-neutral-400 dark:hover:text-primary-400 underline underline-offset-2"
                 >
-                  Xem đánh giá
+                  ({product.ratings?.count || 0} đánh giá)
                 </Link>
               </div>
-            )}
+
+              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 hidden sm:block" />
+
+              {/* View count */}
+              <div className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-300">
+                <EyeOutlined className="text-neutral-400 dark:text-neutral-500 text-sm" />
+                <span>
+                  <strong className="text-neutral-900 dark:text-neutral-100 font-semibold">
+                    {formatCompactNumber(product.viewCount || 0)}
+                  </strong>{" "}
+                  lượt xem
+                </span>
+              </div>
+
+              <div className="h-4 w-[1px] bg-neutral-300 dark:bg-neutral-700 hidden sm:block" />
+
+              {/* Sold count */}
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 shadow-sm">
+                  <svg
+                    className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Đã bán {formatCompactNumber(product.soldCount || 0)}
+                </span>
+              </div>
+            </div>
 
             {/* Stock status */}
             <div className="mb-4">

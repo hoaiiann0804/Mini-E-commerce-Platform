@@ -87,6 +87,8 @@ export interface AdminProduct {
     price: number;
     stock: number;
   }>;
+  viewCount?: number;
+  soldCount?: number;
   createdAt: string;
   updatedAt: string;
 }

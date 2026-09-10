@@ -192,6 +192,55 @@ const Product = sequelize.define(
       allowNull: true,
       field: "min_variant_price",
     },
+
+    /**
+     * LƯỢT XEM SẢN PHẨM
+     *
+     * TƯ DUY NGHIỆP VỤ:
+     * - Đây là "popularity signal" quan trọng trong TMĐT
+     * - Shopee/Lazada dùng chỉ số này để:
+     *   (1) Rank sản phẩm trong kết quả tìm kiếm
+     *   (2) Hiển thị social proof: "10.000 lượt xem"
+     *   (3) Feed vào thuật toán gợi ý sản phẩm
+     *
+     * TƯ DUY KỸ THUẬT:
+     * - Lưu denormalized tại đây (không tính real-time từ log)
+     *   vì mỗi lần load trang chi tiết sản phẩm cần giá trị này
+     *   → Tính real-time từ log = quá chậm
+     * - Deduplication (chống spam) được xử lý bởi Redis ở tầng API
+     *   → Cột này chỉ chứa số đã được filter, không cần lo spam
+     * - Dùng INTEGER vì view_count không cần độ chính xác tuyệt đối
+     *   (sai vài đơn vị do race condition là chấp nhận được)
+     */
+    viewCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: "view_count",
+    },
+
+    /**
+     * SỐ LƯỢNG ĐÃ BÁN
+     *
+     * TƯ DUY NGHIỆP VỤ:
+     * - "Social proof" mạnh nhất trong TMĐT: khách hàng tin vào số đông
+     * - "Đã bán 5.000+" → giảm lo lắng khi mua sản phẩm mới
+     * - Chỉ tính từ đơn hàng status = 'delivered' (giao thành công)
+     *   → Đảm bảo con số phản ánh GIAO DỊCH THỰC, không phải đặt hàng
+     *   → Loại bỏ: pending (chưa chắc mua), cancelled (hủy), shipped (chưa nhận)
+     *
+     * TƯ DUY KỸ THUẬT:
+     * - Denormalized: lưu thẳng vào bảng products thay vì
+     *   SUM(order_items.quantity) JOIN orders mỗi lần query
+     * - Cập nhật tự động khi đơn hàng chuyển sang 'delivered'
+     * - Backfill từ dữ liệu lịch sử khi migrate (xem migration file)
+     * - Race condition: dùng SQL INCREMENT (không phải read-modify-write)
+     *   để tránh mất dữ liệu khi nhiều đơn delivered cùng lúc
+     */
+    soldCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: "sold_count",
+    },
   },
   {
     tableName: "products",

@@ -1,4 +1,4 @@
-﻿services:
+services:
   db:
     image: postgres:15
     container_name: e-commerce-postgres
@@ -50,6 +50,37 @@
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        # Redis phải healthy trước khi api start
+        # để đảm bảo connectRedis() thành công khi server khởi động
+        condition: service_healthy
+
+  # ============================================================
+  # REDIS SERVICE
+  # ============================================================
+  # Tư duy kiến trúc: Redis chạy cùng container network với api
+  # → api kết nối qua hostname 'redis' (tên service trong compose)
+  # → REDIS_HOST=redis trong .env
+  redis:
+    image: redis:7-alpine
+    # Dùng alpine để image nhẹ (~30MB vs ~100MB full image)
+    container_name: e-commerce-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    # Giới hạn memory: Redis mặc định dùng RAM không giới hạn
+    # maxmemory-policy allkeys-lru: Khi hết RAM, tự xóa key ít dùng nhất gần đây
+    # Phù hợp cho cache/dedup (không cần giữ mãi)
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    mem_limit: 200m
+    cpus: 0.2
+    healthcheck:
+      # redis-cli ping: trả về PONG nếu Redis đang chạy
+      # được dùng bởi docker compose để xác định service ready
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
   pgadmin:
     image: dpage/pgadmin4
     container_name: e-commerce-pgadmin
