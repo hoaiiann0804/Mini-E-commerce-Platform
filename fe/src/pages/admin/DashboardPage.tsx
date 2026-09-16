@@ -1,9 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useGetDashboardStatsQuery } from "@/services/adminDashboardApi";
+import {
+  useGetDashboardStatsQuery,
+  useGetDetailedStatsQuery,
+} from "@/services/adminDashboardApi";
 import { useGetAdminOrdersQuery } from "@/services/adminOrderApi";
 import { formatPrice } from "@/utils/format";
+import {
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 // Status badge colors
 const statusColors: Record<string, string> = {
@@ -19,13 +36,33 @@ const statusColors: Record<string, string> = {
   expired: "bg-neutral-100 text-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-300",
 };
 
+// Màu sắc cho Donut chart
+const DONUT_COLORS: Record<string, string> = {
+  pending: "#faad14",
+  processing: "#1890ff",
+  shipped: "#722ed1",
+  delivered: "#52c41a",
+  cancelled: "#ff4d4f",
+  expired: "#8c8c8c",
+};
+
+// Helper: tính ngày n-ngày trước theo ISO string
+const daysAgo = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split("T")[0];
+};
+
+const today = () => new Date().toISOString().split("T")[0];
+
 const DashboardPage: React.FC = () => {
   const { t, i18n } = useTranslation();
 
-  // Debug logging
-  //console.log('DashboardPage - i18n ready:', i18n.isInitialized);
-  //console.log('DashboardPage - current language:', i18n.language);
-  //console.log('DashboardPage - test translation:', t('admin.dashboard.title'));
+  // Chart date range state — default 30 ngày gần nhất
+  const [chartRange, setChartRange] = useState({
+    startDate: daysAgo(29),
+    endDate: today(),
+  });
 
   // Fetch dashboard stats
   const {
@@ -33,6 +70,14 @@ const DashboardPage: React.FC = () => {
     isLoading: isDashboardLoading,
     isError: isDashboardError,
   } = useGetDashboardStatsQuery();
+
+  // Fetch time-series chart data — dùng endpoint /api/admin/stats hiện có
+  const { data: detailedData, isFetching: isChartFetching } =
+    useGetDetailedStatsQuery({
+      startDate: chartRange.startDate,
+      endDate: chartRange.endDate,
+      groupBy: "day",
+    });
 
   // Fetch recent orders
   const { data: ordersData, isLoading: isOrdersLoading } =
@@ -370,6 +415,216 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── ANALYTICS CHARTS SECTION ─────────────────────────────── */}
+      {/* TÙ DUY UX: Đặt charts TRƯỚC recent orders vì Admin cần thấy xu hướng
+          tổng quan trước khi đi vào chi tiết đơn hàng cụ thể. */}
+
+      {/* KPI bổ sung: AOV + Expired Orders */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {/* AOV Card */}
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-5 border border-neutral-200 dark:border-neutral-700">
+          <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
+            Giá trị đơn TB (AOV)
+          </div>
+          <div className="text-xl font-bold text-neutral-800 dark:text-neutral-100">
+            {formatCurrency(stats?.overview?.avgOrderValue || 0)}
+          </div>
+          <div className="text-xs text-neutral-400 mt-1">
+            = Doanh thu / Đơn đã giao ({stats?.overview?.totalDeliveredOrders ?? 0})
+          </div>
+        </div>
+
+        {/* Delivered Count */}
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-5 border border-neutral-200 dark:border-neutral-700">
+          <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
+            Đơn giao thành công
+          </div>
+          <div className="text-xl font-bold text-green-600 dark:text-green-400">
+            {stats?.overview?.totalDeliveredOrders ?? 0}
+          </div>
+          <div className="text-xs text-neutral-400 mt-1">
+            Trên tổng {stats?.overview?.totalOrders ?? 0} đơn
+          </div>
+        </div>
+
+        {/* Expired Orders */}
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-5 border border-neutral-200 dark:border-neutral-700">
+          <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
+            Đơn hết hạn thanh toán
+          </div>
+          <div className="text-xl font-bold text-neutral-500 dark:text-neutral-400">
+            {stats?.overview?.expiredOrders ?? 0}
+          </div>
+          <div className="text-xs text-neutral-400 mt-1">
+            Hàng đã hoàn kho tự động
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Row: Revenue Line + Order Status Donut */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Revenue + Orders Line/Bar Chart (chiếm 2/3) */}
+        <div className="lg:col-span-2 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-neutral-800 dark:text-neutral-100">
+              Doanh thu & Đơn hàng
+            </h2>
+            {/* Quick-pick buttons */}
+            <div className="flex gap-2">
+              {[
+                { label: "7N", days: 6 },
+                { label: "30N", days: 29 },
+                { label: "90N", days: 89 },
+              ].map(({ label, days }) => {
+                const isActive = chartRange.startDate === daysAgo(days);
+                return (
+                  <button
+                    key={label}
+                    onClick={() => setChartRange({ startDate: daysAgo(days), endDate: today() })}
+                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary-600 text-white"
+                        : "bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {isChartFetching ? (
+            <div className="h-48 flex items-center justify-center text-neutral-400 text-sm">
+              Đang tải dữ liệu...
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <ComposedChart
+                data={detailedData?.data?.orders || []}
+                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="period"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(val) => val.slice(5)} // Bỏ năm: YYYY-MM-DD → MM-DD
+                />
+                <YAxis
+                  yAxisId="revenue"
+                  orientation="left"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v) =>
+                    v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v
+                  }
+                />
+                <YAxis
+                  yAxisId="orders"
+                  orientation="right"
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    name === "revenue"
+                      ? formatCurrency(value)
+                      : value,
+                    name === "revenue" ? "Doanh thu" : "Số đơn",
+                  ]}
+                  labelFormatter={(label) => `Ngày ${label}`}
+                />
+                <Legend
+                  formatter={(value) =>
+                    value === "revenue" ? "Doanh thu (đơn giao)" : "Tổng đơn"
+                  }
+                />
+                <Bar
+                  yAxisId="orders"
+                  dataKey="orderCount"
+                  fill="#93c5fd"
+                  opacity={0.7}
+                  radius={[3, 3, 0, 0]}
+                  name="orderCount"
+                />
+                <Line
+                  yAxisId="revenue"
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  dot={false}
+                  name="revenue"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Order Status Donut Chart (chiếm 1/3) */}
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 p-5">
+          <h2 className="text-base font-semibold text-neutral-800 dark:text-neutral-100 mb-4">
+            Phân bổ đơn hàng
+          </h2>
+          {stats?.orderStatusBreakdown ? (
+            <>
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie
+                    data={Object.entries(stats.orderStatusBreakdown)
+                      .filter(([, v]) => v > 0)
+                      .map(([k, v]) => ({ name: k, value: v }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {Object.entries(stats.orderStatusBreakdown)
+                      .filter(([, v]) => v > 0)
+                      .map(([k]) => (
+                        <Cell key={k} fill={DONUT_COLORS[k] || "#999"} />
+                      ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number, name: string) => [
+                      value,
+                      name === "pending" ? "Chờ xử lý"
+                        : name === "processing" ? "Đang xử lý"
+                        : name === "shipped" ? "Đang giao"
+                        : name === "delivered" ? "Đã giao"
+                        : name === "cancelled" ? "Đã hủy"
+                        : "Hết hạn",
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend text */}
+              <div className="space-y-1 mt-2">
+                {Object.entries(stats.orderStatusBreakdown)
+                  .filter(([, v]) => v > 0)
+                  .map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ background: DONUT_COLORS[k] }}
+                        />
+                        <span className="text-neutral-600 dark:text-neutral-400 capitalize">{k}</span>
+                      </div>
+                      <span className="font-medium text-neutral-800 dark:text-neutral-200">{v}</span>
+                    </div>
+                  ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-48 flex items-center justify-center text-neutral-400 text-sm">
+              Không có dữ liệu
+            </div>
+          )}
+        </div>
+      </div>
+      {/* ── END ANALYTICS CHARTS ─────────────────────────────────── */}
 
       {/* Pending Orders Alert */}
       {(stats?.overview?.pendingOrders ?? 0) > 0 && (

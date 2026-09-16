@@ -3,6 +3,7 @@ const {
   Product,
   Order,
   Review,
+  ReviewReply,
   Category,
   OrderItem,
   ProductAttribute,
@@ -23,6 +24,12 @@ const {
 
 /**
  * Dashboard - Thống kê tổng quan
+ *
+ * TÙ DUY NGHIỆP VỤ:
+ * Revenue chỉ được tính từ đơn "delivered" — đây là tiền thực sự vào túi.
+ * Đơn "pending/processing" là tiền đang giữ, chưa chắc chắn.
+ * Đơn "cancelled/expired" là tiền bị mất.
+ * AOV (Average Order Value) = totalRevenue / totalDeliveredOrders — cùng tập dữ liệu, không trộn lẫn.
  */
 const getDashboardStats = catchAsync(async (req, res) => {
   const today = new Date();
@@ -38,9 +45,24 @@ const getDashboardStats = catchAsync(async (req, res) => {
   const totalUsers = await User.count({ where: { role: "customer" } });
   const totalProducts = await Product.count();
   const totalOrders = await Order.count();
+
+  // Revenue chỉ tính đơn đã giao thành công
   const totalRevenue = await Order.sum("total", {
     where: { status: "delivered" },
   });
+
+  // Tổng số đơn delivered — dùng để tính AOV cùng mẫu số
+  const totalDeliveredOrders = await Order.count({
+    where: { status: "delivered" },
+  });
+
+  // AOV = Average Order Value — chỉ số quan trọng cho portfolio
+  // Công thức: totalRevenue / totalDeliveredOrders (không phải / totalOrders)
+  // Lý do: Nếu dùng / totalOrders thì đơn cancelled làm giảm AOV giả tạo
+  const avgOrderValue =
+    totalDeliveredOrders > 0
+      ? parseFloat((totalRevenue / totalDeliveredOrders).toFixed(0))
+      : 0;
 
   // Thống kê theo tháng
   const monthlyUsers = await User.count({
@@ -91,7 +113,7 @@ const getDashboardStats = catchAsync(async (req, res) => {
     },
   });
 
-  // Tính tỷ lệ tăng trưởng
+  // Tồ lê tăng trưởng
   const userGrowth = lastMonthUsers
     ? ((monthlyUsers - lastMonthUsers) / lastMonthUsers) * 100
     : 0;
@@ -102,15 +124,38 @@ const getDashboardStats = catchAsync(async (req, res) => {
     ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
     : 0;
 
-  // Top sản phẩm bán chạy
+  // Phân bổ đơn hàng theo trạng thái — dùng cho Donut chart trên Dashboard
+  // TÙ DUY: Thực hiện bằng 1 query GROUP BY thay vì 6 query COUNT riêng lẻ
+  // Lợi ích: Giảm từ 6 round-trip xuống 1 → nhanh hơn đáng kể
+  const statusBreakdownRaw = await Order.findAll({
+    attributes: [
+      "status",
+      [Sequelize.fn("COUNT", Sequelize.col("id")), "count"],
+    ],
+    group: ["status"],
+    raw: true,
+  });
+
+  // Chuyển mảng thành object key-value, đảm bảo mọi trạng thái đều có mặt (kể cả = 0)
+  const statusBreakdown = [
+    "pending", "processing", "shipped", "delivered", "cancelled", "expired",
+  ].reduce((acc, status) => {
+    const found = statusBreakdownRaw.find((r) => r.status === status);
+    acc[status] = found ? parseInt(found.count) : 0;
+    return acc;
+  }, {});
+
+  // Top sản phẩm bán chạy — CHỈ tính từ đơn delivered
+  // TÙ DUY: JOIN với Order để lọc status, tránh tính cả đơn cancelled
+  // Không JOIN thì top products bị sai vì hàng hủy vẫn được tính vào 'sold'
   const topProducts = await OrderItem.findAll({
     attributes: [
       "productId",
-      [Sequelize.fn("SUM", Sequelize.col("quantity")), "totalSold"],
+      [Sequelize.fn("SUM", Sequelize.col("OrderItem.quantity")), "totalSold"],
       [
         Sequelize.fn(
           "SUM",
-          Sequelize.literal('quantity * "OrderItem"."price"'),
+          Sequelize.literal('"OrderItem".quantity * "OrderItem".price'),
         ),
         "totalRevenue",
       ],
@@ -118,22 +163,29 @@ const getDashboardStats = catchAsync(async (req, res) => {
     include: [
       {
         model: Product,
-        attributes: ["name", "images", "price"],
+        attributes: ["id", "name", "images", "price"],
+      },
+      {
+        // JOIN với Order để lọc chỉ lấy đơn đã delivered
+        // required: true = INNER JOIN — đúng vì ta muốn loại bỏ OrderItem của đơn cancelled
+        model: Order,
+        attributes: [],
+        where: { status: "delivered" },
+        required: true,
       },
     ],
-    group: ["productId", "Product.id"],
-    order: [[Sequelize.fn("SUM", Sequelize.col("quantity")), "DESC"]],
+    group: [
+      "productId",
+      "Product.id",
+    ],
+    order: [[Sequelize.fn("SUM", Sequelize.col("OrderItem.quantity")), "DESC"]],
     limit: 5,
+    subQuery: false, // Cần thiết khi JOIN + GROUP BY + LIMIT cùng lúc
   });
 
-  // Đơn hàng gần đây cần xử lý
-  const pendingOrders = await Order.count({
-    where: { status: "pending" },
-  });
-
-  const processingOrders = await Order.count({
-    where: { status: "processing" },
-  });
+  // Đơn hàng cần xử lý
+  const pendingOrders = statusBreakdown.pending;
+  const processingOrders = statusBreakdown.processing;
 
   res.status(200).json({
     status: "success",
@@ -143,8 +195,11 @@ const getDashboardStats = catchAsync(async (req, res) => {
         totalProducts,
         totalOrders,
         totalRevenue: totalRevenue || 0,
+        totalDeliveredOrders,
+        avgOrderValue,          // Mới: AOV đúng nghĩa
         pendingOrders,
         processingOrders,
+        expiredOrders: statusBreakdown.expired, // Mới: tracking đơn hết hạn
       },
       monthly: {
         users: monthlyUsers,
@@ -156,6 +211,7 @@ const getDashboardStats = catchAsync(async (req, res) => {
         orders: parseFloat(orderGrowth.toFixed(2)),
         revenue: parseFloat(revenueGrowth.toFixed(2)),
       },
+      orderStatusBreakdown: statusBreakdown, // Mới: dùng cho Donut chart
       topProducts: topProducts.map((item) => ({
         product: item.Product,
         totalSold: parseInt(item.getDataValue("totalSold")),
@@ -167,7 +223,104 @@ const getDashboardStats = catchAsync(async (req, res) => {
 
 /**
  * Thống kê chi tiết theo khoảng thời gian
+ *
+ * TÙ DUY KỸ THUÂT — Tại sao phải đổi DATE_FORMAT sang TO_CHAR?
+ * DATE_FORMAT() là cú pháp MySQL. Project này dùng PostgreSQL.
+ * PostgreSQL không có DATE_FORMAT → lỗi ngay khi chạy.
+ * PostgreSQL dùng: DATE_TRUNC (cắt về đơn vị) + TO_CHAR (format hiển thị)
+ *
+ * TÙ DUY MÚÍ GIỜ (Timezone):
+ * DB lưu timestamp dạng UTC. Server ở Việt Nam thì chỉnh mục này có thể không cần.
+ * Nhưng nếu server deploy trên cloud (UTC), cần AT TIME ZONE để ngày hiển đúng.
+ *
+ * TÙ DUY FILL ZERO:
+ * DB chỉ trả những ngày có dữ liệu. Ngày không có đơn bị bỏ qua.
+ * Recharts vẽ chart từ mảng → nếu mảng thiếu ngày thì chart bị lỗi (nhảy điểm).
+ * Giải pháp: fillDateGaps() tạo ra đủ các điểm ngày, giá trị = 0 nếu không có data.
  */
+
+/**
+ * Helper: Phân rã dateFormat cho PostgreSQL theo groupBy
+ * Trả về object chứa:
+ * - truncUnit: đơn vị cho DATE_TRUNC ('day', 'week', 'month', 'hour')
+ * - toCharFormat: format hiển thị cho TO_CHAR
+ * - fillStep: đơn vị để fillDateGaps() biết nhảy bao nhiêu mỗi bước
+ */
+const getDateConfig = (groupBy) => {
+  switch (groupBy) {
+    case "hour":
+      return { truncUnit: "hour", toCharFormat: "YYYY-MM-DD HH24:00", fillStep: "hour" };
+    case "week":
+      return { truncUnit: "week", toCharFormat: "IYYY-IW", fillStep: "week" };
+    case "month":
+      return { truncUnit: "month", toCharFormat: "YYYY-MM", fillStep: "month" };
+    default: // day
+      return { truncUnit: "day", toCharFormat: "YYYY-MM-DD", fillStep: "day" };
+  }
+};
+
+/**
+ * Helper: Điền 0 vào các ngày không có data trong khoảng thời gian
+ *
+ * TÙ DUY: DB chỉ trả sparse data (ngày có đận). Ta cần dense data (mọi ngày).
+ * Ví dụ: [09-01: 5, 09-05: 3] → [09-01:5, 09-02:0, 09-03:0, 09-04:0, 09-05:3]
+ *
+ * @param {Array} data - Mảng dữ liệu từ DB (sparse)
+ * @param {Date} start - Ngày bắt đầu
+ * @param {Date} end - Ngày kết thúc
+ * @param {string} step - 'day' | 'week' | 'month' | 'hour'
+ * @param {Object} defaultValues - Giá trị mặc định cho ngày không có data
+ */
+const fillDateGaps = (data, start, end, step, defaultValues) => {
+  const result = [];
+  const dataMap = new Map(data.map((item) => [item.period, item]));
+
+  const current = new Date(start);
+  // Mả đảm bảo end cũng bao gồm ngày cuối
+  const endTime = new Date(end);
+  endTime.setHours(23, 59, 59);
+
+  // Format date theo step để tạo key khớp với period từ DB
+  const formatPeriod = (date) => {
+    if (step === "month") {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+    if (step === "week") {
+      // ISO week format — đơn giản hóa bằng toISOString
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      const weekNum = 1 + Math.round(((d - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+      return `${d.getFullYear()}-${String(weekNum).padStart(2, "0")}`;
+    }
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+
+  while (current <= endTime) {
+    const periodKey = formatPeriod(current);
+    if (dataMap.has(periodKey)) {
+      result.push(dataMap.get(periodKey));
+    } else {
+      // Ngày không có data → push giá trị 0
+      result.push({ period: periodKey, ...defaultValues });
+    }
+
+    // Bước nhảy theo step
+    if (step === "month") {
+      current.setMonth(current.getMonth() + 1);
+    } else if (step === "week") {
+      current.setDate(current.getDate() + 7);
+    } else if (step === "hour") {
+      current.setHours(current.getHours() + 1);
+    } else {
+      current.setDate(current.getDate() + 1); // day (mặc định)
+    }
+  }
+
+  return result;
+};
+
 const getDetailedStats = catchAsync(async (req, res) => {
   const { startDate, endDate, groupBy = "day" } = req.query;
 
@@ -176,91 +329,95 @@ const getDetailedStats = catchAsync(async (req, res) => {
   }
 
   const start = new Date(startDate);
+  // Cho end bao gồm cả ngày cuối (23:59:59)
   const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
 
-  // Format theo groupBy
-  let dateFormat;
-  switch (groupBy) {
-    case "hour":
-      dateFormat = "%Y-%m-%d %H:00:00";
-      break;
-    case "day":
-      dateFormat = "%Y-%m-%d";
-      break;
-    case "week":
-      dateFormat = "%Y-%u";
-      break;
-    case "month":
-      dateFormat = "%Y-%m";
-      break;
-    default:
-      dateFormat = "%Y-%m-%d";
-  }
+  const { truncUnit, toCharFormat, fillStep } = getDateConfig(groupBy);
+
+  // TÙ DUY PostgreSQL: DATE_TRUNC trước → cắt timestamp về đơn vị
+  // TO_CHAR sau → định dạng hiển thị cho FE
+  // AT TIME ZONE: đảm bảo thống kê theo giờ Việt Nam, không bị lệch ngày
+  const periodExpr = Sequelize.fn(
+    "TO_CHAR",
+    Sequelize.fn(
+      "DATE_TRUNC",
+      truncUnit,
+      Sequelize.fn(
+        "TIMEZONE",
+        "Asia/Ho_Chi_Minh",
+        Sequelize.col("created_at")
+      )
+    ),
+    toCharFormat
+  );
 
   // Thống kê đơn hàng theo thời gian
+  // Revenue: CHỈ tính đơn delivered — đơn pending/cancelled không phải doanh thu thực
+  // TÙ DUY: Dùng FILTER (WHERE) trong SUM thay vì WHERE trên toàn bộ query
+  // Vì ta vẫn muốn đếm orderCount TÙ mọi trạng thái (volume), nhưng revenue chỉ từ delivered
   const orderStats = await Order.findAll({
     attributes: [
-      [
-        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-        "period",
-      ],
+      [periodExpr, "period"],
       [Sequelize.fn("COUNT", Sequelize.col("id")), "orderCount"],
-      [Sequelize.fn("SUM", Sequelize.col("total")), "revenue"],
+      [
+        // FILTER: điều kiện trong aggregate — chỉ cộng total của đơn delivered
+        Sequelize.literal(
+          `SUM(CASE WHEN status = 'delivered' THEN total ELSE 0 END)`
+        ),
+        "revenue",
+      ],
     ],
     where: {
-      createdAt: {
-        [Op.between]: [start, end],
-      },
+      createdAt: { [Op.between]: [start, end] },
     },
-    group: [
-      Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-    ],
-    order: [
-      [
-        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-        "ASC",
-      ],
-    ],
+    group: [periodExpr],
+    order: [[periodExpr, "ASC"]],
+    raw: true,
   });
 
   // Thống kê user mới theo thời gian
   const userStats = await User.findAll({
     attributes: [
-      [
-        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-        "period",
-      ],
+      [periodExpr, "period"],
       [Sequelize.fn("COUNT", Sequelize.col("id")), "newUsers"],
     ],
     where: {
       role: "customer",
-      createdAt: {
-        [Op.between]: [start, end],
-      },
+      createdAt: { [Op.between]: [start, end] },
     },
-    group: [
-      Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-    ],
-    order: [
-      [
-        Sequelize.fn("DATE_FORMAT", Sequelize.col("createdAt"), dateFormat),
-        "ASC",
-      ],
-    ],
+    group: [periodExpr],
+    order: [[periodExpr, "ASC"]],
+    raw: true,
+  });
+
+  // Định dạng dữ liệu thô từ DB
+  const formattedOrders = orderStats.map((stat) => ({
+    period: stat.period,
+    orderCount: parseInt(stat.orderCount),
+    revenue: parseFloat(stat.revenue || 0),
+  }));
+
+  const formattedUsers = userStats.map((stat) => ({
+    period: stat.period,
+    newUsers: parseInt(stat.newUsers),
+  }));
+
+  // Điền 0 vào các ngày không có data
+  const filledOrders = fillDateGaps(formattedOrders, start, end, fillStep, {
+    orderCount: 0,
+    revenue: 0,
+  });
+
+  const filledUsers = fillDateGaps(formattedUsers, start, end, fillStep, {
+    newUsers: 0,
   });
 
   res.status(200).json({
     status: "success",
     data: {
-      orders: orderStats.map((stat) => ({
-        period: stat.getDataValue("period"),
-        orderCount: parseInt(stat.getDataValue("orderCount")),
-        revenue: parseFloat(stat.getDataValue("revenue") || 0),
-      })),
-      users: userStats.map((stat) => ({
-        period: stat.getDataValue("period"),
-        newUsers: parseInt(stat.getDataValue("newUsers")),
-      })),
+      orders: filledOrders,
+      users: filledUsers,
     },
   });
 });
@@ -1475,6 +1632,11 @@ const getAllProducts = catchAsync(async (req, res) => {
 
 /**
  * Quản lý Reviews - Lấy danh sách review
+ *
+ * Fixes:
+ * 1. Thêm as: "user" đúng với alias khai báo trong models/index.js:82
+ * 2. Thêm filter isVerified (lọc theo "Verified Purchase")
+ * 3. Thêm filter search theo tên sản phẩm
  */
 const getAllReviews = catchAsync(async (req, res) => {
   const {
@@ -1482,6 +1644,8 @@ const getAllReviews = catchAsync(async (req, res) => {
     limit = 10,
     productId = "",
     rating = "",
+    isVerified,
+    search = "",
     sortBy = "createdAt",
     sortOrder = "DESC",
   } = req.query;
@@ -1489,31 +1653,44 @@ const getAllReviews = catchAsync(async (req, res) => {
   const offset = (page - 1) * limit;
   const whereClause = {};
 
-  // Filter theo product
+  // Filter theo product ID cụ thể
   if (productId) {
     whereClause.productId = productId;
   }
 
-  // Filter theo rating
+  // Filter theo rating (1–5 sao)
   if (rating) {
     whereClause.rating = parseInt(rating);
   }
 
+  // Filter theo Verified Purchase (isVerified là boolean tự động — không phải kiểm duyệt nội dung)
+  if (isVerified !== undefined && isVerified !== "") {
+    whereClause.isVerified = isVerified === "true";
+  }
+
+  // Build include clause — dùng đúng alias 'user' theo models/index.js:82
+  const includeClause = [
+    {
+      model: User,
+      as: "user",  // FIX: thêm alias đúng, không có dòng này Sequelize sẽ báo lỗi
+      attributes: ["id", "firstName", "lastName", "email", "avatar"],
+    },
+    {
+      model: Product,
+      attributes: ["id", "name", "images", "slug"],
+      // Filter theo tên sản phẩm nếu có search query
+      ...(search ? { where: { name: { [Op.iLike]: `%${search}%` } }, required: true } : {}),
+    },
+  ];
+
   const { count, rows: reviews } = await Review.findAndCountAll({
     where: whereClause,
-    include: [
-      {
-        model: User,
-        attributes: ["id", "firstName", "lastName", "avatar"],
-      },
-      {
-        model: Product,
-        attributes: ["id", "name", "images"],
-      },
-    ],
+    include: includeClause,
     limit: parseInt(limit),
     offset: parseInt(offset),
     order: [[sortBy, sortOrder.toUpperCase()]],
+    // Cần subQuery: false khi có filter trên include để tránh lỗi COUNT
+    subQuery: false,
   });
 
   res.status(200).json({
@@ -1522,7 +1699,7 @@ const getAllReviews = catchAsync(async (req, res) => {
       reviews,
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(count / limit),
+        totalPages: Math.ceil(count / parseInt(limit)),
         totalItems: count,
         itemsPerPage: parseInt(limit),
       },
@@ -1546,6 +1723,82 @@ const deleteReview = catchAsync(async (req, res) => {
   res.status(200).json({
     status: "success",
     message: "Xóa đánh giá thành công",
+  });
+});
+
+/**
+ * Phản hồi Review của khách hàng (Admin Reply)
+ *
+ * TÙ DUY NGHIỆP VỤ:
+ * Mỗi review chỉ có đúng 1 phản hồi chính thức từ Shop.
+ * Admin có thể gọi endpoint này nhiều lần (create hoặc update).
+ *
+ * TÙ DUY KỸ THUÂT:
+ * Dùng Sequelize upsert thay vì check-then-create/update riêng lẻ.
+ * Lý do: Nếu dùng 2 query riêng, có khả năng race condition khi Admin
+ * click 2 lần liên tiếp → 2 INSERT cùng lúc → vi phạm UNIQUE constraint.
+ * upsert giải quyết bằng 1 câu SQL duy nhất (INSERT ... ON CONFLICT UPDATE).
+ */
+const replyToReview = catchAsync(async (req, res) => {
+  const { id } = req.params; // id của Review
+  const { content } = req.body;
+  const adminId = req.user.id;
+
+  if (!content || content.trim().length === 0) {
+    throw new AppError("Nội dung phản hồi không được để trống", 400);
+  }
+
+  if (content.trim().length > 2000) {
+    throw new AppError("Nội dung phản hồi không được vượt quá 2000 ký tự", 400);
+  }
+
+  // Kiểm tra review tồn tại
+  const review = await Review.findByPk(id);
+  if (!review) {
+    throw new AppError("Không tìm thấy đánh giá", 404);
+  }
+
+  // upsert: Nếu có rồi → UPDATE content và adminId
+  //         Nếu chưa có → INSERT mới
+  // Conflict được xác định bởi UNIQUE(review_id) trên DB
+  const [reply, created] = await ReviewReply.upsert(
+    {
+      reviewId: id,
+      adminId,
+      content: content.trim(),
+    },
+    {
+      returning: true, // PostgreSQL trả về record vừa upsert
+    }
+  );
+
+  res.status(created ? 201 : 200).json({
+    status: "success",
+    message: created ? "Phản hồi đã được gửi" : "Phản hồi đã được cập nhật",
+    data: { reply },
+  });
+});
+
+/**
+ * Xóa phản hồi của Admin
+ *
+ * TÙ DUY: Admin có thể rút lại phản hồi nếu đã reply sai.
+ * Không kiểm tra adminId vì Admin có quyền xóa reply của Admin khác (admin > admin).
+ */
+const deleteReviewReply = catchAsync(async (req, res) => {
+  // Tên param phải khớp với route: /reviews/replies/:replyId
+  const { replyId } = req.params;
+
+  const reply = await ReviewReply.findByPk(replyId);
+  if (!reply) {
+    throw new AppError("Không tìm thấy phản hồi", 404);
+  }
+
+  await reply.destroy();
+
+  res.status(200).json({
+    status: "success",
+    message: "Xóa phản hồi thành công",
   });
 });
 
@@ -1670,6 +1923,8 @@ module.exports = {
   getAllProducts,
   getAllReviews,
   deleteReview,
+  replyToReview,
+  deleteReviewReply,
   getAllOrders,
   updateOrderStatus,
 };
