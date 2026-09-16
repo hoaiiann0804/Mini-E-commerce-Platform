@@ -10,6 +10,7 @@ const ProductVariant = require("./productVariant");
 const ProductSpecification = require("./productSpecification");
 const Review = require("./review");
 const ReviewFeedback = require("./reviewFeedback");
+const ReviewReply = require("./reviewReply"); // Mới: Phản hồi của Shop
 const Cart = require("./cart");
 const CartItem = require("./cartItem");
 const Order = require("./order");
@@ -80,6 +81,16 @@ Review.belongsTo(Product, { foreignKey: "productId" });
 // User - Review relationship
 User.hasMany(Review, { foreignKey: "userId", as: "reviews" });
 Review.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+// Review - ReviewReply relationship (1-1: mỗi review chỉ có 1 reply chính thức từ Shop)
+// hasOne phía Review, belongsTo phía ReviewReply
+Review.hasOne(ReviewReply, { foreignKey: "reviewId", as: "reply" });
+ReviewReply.belongsTo(Review, { foreignKey: "reviewId" });
+
+// ReviewReply - User (Admin) relationship
+// as: 'admin' để phân biệt với as: 'user' trên Review
+User.hasMany(ReviewReply, { foreignKey: "adminId", as: "reviewReplies" });
+ReviewReply.belongsTo(User, { foreignKey: "adminId", as: "admin" });
 
 // Review - ReviewFeedback relationship
 Review.hasMany(ReviewFeedback, { foreignKey: "reviewId", as: "feedbacks" });
@@ -211,6 +222,7 @@ module.exports = {
   ProductSpecification,
   Review,
   ReviewFeedback,
+  ReviewReply,
   Cart,
   CartItem,
   Order,

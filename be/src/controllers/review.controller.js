@@ -5,6 +5,7 @@ const {
   Order,
   OrderItem,
   ReviewFeedback,
+  ReviewReply,
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 
@@ -115,9 +116,6 @@ const deleteReview = async (req, res, next) => {
       throw new AppError("Không tìm thấy đánh giá", 404);
     }
 
-    const productId = review.productId;
-
-    // Delete review
     await review.destroy();
 
     res.status(200).json({
@@ -139,7 +137,7 @@ const getProductReviews = async (req, res, next) => {
       sort = "newest",
       rating,
       verified,
-      withImages,
+
     } = req.query;
 
     // Map sort options to actual database columns
@@ -170,7 +168,7 @@ const getProductReviews = async (req, res, next) => {
       whereClause.isVerified = verified === "true";
     }
 
-    // Get reviews
+    // Get reviews kèm reply của Shop (nếu có)
     const { count, rows: reviews } = await Review.findAndCountAll({
       where: whereClause,
       include: [
@@ -178,6 +176,21 @@ const getProductReviews = async (req, res, next) => {
           model: User,
           as: "user",
           attributes: ["id", "firstName", "lastName", "avatar"],
+        },
+        {
+          // TÙ DUY: required: false = LEFT JOIN
+          // Review không có reply vẫn được trả về (reply = null)
+          // required: true = INNER JOIN → chỉ trả review đã có reply → SAI
+          model: ReviewReply,
+          as: "reply",
+          required: false,
+          include: [
+            {
+              model: User,
+              as: "admin",
+              attributes: ["id", "firstName", "lastName"], // Chỉ lấy tên, không lấy email/avatar admin
+            },
+          ],
         },
       ],
       limit: parseInt(limit),

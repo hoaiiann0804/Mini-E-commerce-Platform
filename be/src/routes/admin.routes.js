@@ -120,6 +120,23 @@ router.delete(
 );
 
 /**
+ * REVIEW REPLY ROUTES
+ * TÙ DUY: Dùng POST/:id/reply thay vì PATCH để rõ ý "hành động reply"
+ * Cùng endpoint POST xử lý cả create lẫn update (upsert) → API đơn giản hơn cho FE
+ */
+// POST /api/admin/reviews/:id/reply - Tạo hoặc cập nhật phản hồi cho review
+router.post(
+  "/reviews/:id/reply",
+  adminController.replyToReview,
+);
+
+// DELETE /api/admin/reviews/replies/:replyId - Xóa phản hồi
+router.delete(
+  "/reviews/replies/:replyId",
+  adminController.deleteReviewReply,
+);
+
+/**
  * ORDER MANAGEMENT ROUTES
  */
 // GET /api/admin/orders - Lấy danh sách đơn hàng
