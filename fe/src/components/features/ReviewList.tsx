@@ -289,6 +289,46 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId }) => {
                       <span>Không hữu ích ({review.dislikes})</span>
                     </button>
                   </div>
+
+                  {/* ── PHẢN HỒI CỦA SHOP ─────────────────────────────── */}
+                  {/* Tư duy UX: Dùng border trái màu xanh + nền nhạt để phân biệt
+                      rõ ràng với review của khách. Người dùng hiểu ngay đây là
+                      tiếng nói chính thức từ cửa hàng. */}
+                  {(review as any).reply?.content && (
+                    <div className="mt-4 pl-4 border-l-4 border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg p-3">
+                      <div className="flex items-center space-x-2 mb-2">
+                        {/* Store icon */}
+                        <svg
+                          className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                          />
+                        </svg>
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                          Phản hồi từ Shop
+                        </span>
+                        <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                          ·{' '}
+                          {new Date((review as any).reply.createdAt).toLocaleDateString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+                        {(review as any).reply.content}
+                      </p>
+                    </div>
+                  )}
+                  {/* ── END PHẢN HỒI CỦA SHOP ─────────────────────────── */}
                 </div>
               </div>
             </div>

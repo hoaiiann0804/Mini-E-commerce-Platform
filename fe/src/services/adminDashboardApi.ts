@@ -6,8 +6,11 @@ export interface DashboardOverview {
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
+  totalDeliveredOrders: number; // Mới: đơn giao thành công
+  avgOrderValue: number;        // Mới: AOV = totalRevenue / totalDeliveredOrders
   pendingOrders: number;
   processingOrders: number;
+  expiredOrders: number;        // Mới: tracking đơn hết hạn
 }
 
 export interface MonthlyStats {
@@ -33,10 +36,21 @@ export interface TopProduct {
   totalRevenue: number;
 }
 
+// Mới: Phân bổ đơn hàng theo trạng thái — dùng cho Donut chart
+export interface OrderStatusBreakdown {
+  pending: number;
+  processing: number;
+  shipped: number;
+  delivered: number;
+  cancelled: number;
+  expired: number;
+}
+
 export interface DashboardStats {
   overview: DashboardOverview;
   monthly: MonthlyStats;
   growth: GrowthStats;
+  orderStatusBreakdown: OrderStatusBreakdown; // Mới
   topProducts: TopProduct[];
 }
 
