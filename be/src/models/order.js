@@ -169,6 +169,14 @@ const Order = sequelize.define(
       allowNull: true,
       field: 'expires_at',
     },
+    // Mã giảm giá đã áp dụng cho đơn hàng này
+    // Nullable vì phần lớn đơn không dùng coupon
+    // Kết hợp với field `discount` (line 140) để biết đơn này giảm bao nhiêu
+    couponId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'coupon_id',
+    },
 
   },
   {

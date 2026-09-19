@@ -11,6 +11,7 @@ const ProductSpecification = require("./productSpecification");
 const Review = require("./review");
 const ReviewFeedback = require("./reviewFeedback");
 const ReviewReply = require("./reviewReply"); // Mới: Phản hồi của Shop
+const Coupon = require("./coupon"); // Mới: Mã giảm giá
 const Cart = require("./cart");
 const CartItem = require("./cartItem");
 const Order = require("./order");
@@ -115,6 +116,12 @@ CartItem.belongsTo(ProductVariant, { foreignKey: "variantId" });
 // User - Order relationship
 User.hasMany(Order, { foreignKey: "userId", as: "orders" });
 Order.belongsTo(User, { foreignKey: "userId" });
+
+// Coupon - Order relationship
+// 1 coupon có thể được dùng cho nhiều đơn hàng (1:N)
+// as: "coupon" để include khi query order details
+Coupon.hasMany(Order, { foreignKey: "couponId", as: "orders" });
+Order.belongsTo(Coupon, { foreignKey: "couponId", as: "coupon" });
 
 // Order - OrderItem relationship
 Order.hasMany(OrderItem, { foreignKey: "orderId", as: "items" });
@@ -234,5 +241,6 @@ module.exports = {
   AttributeValue,
   ProductAttributeGroup,
   Image,
+  Coupon,
   RefreshToken,
 };

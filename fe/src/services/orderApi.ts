@@ -100,6 +100,7 @@ export interface CreateOrderRequest {
   billingPhone?: string;
   paymentMethod: string;
   notes?: string;
+  couponCode?: string;
 }
 
 export interface CreateOrderResponse {

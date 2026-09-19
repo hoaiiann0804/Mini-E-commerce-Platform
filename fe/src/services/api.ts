@@ -168,6 +168,7 @@ export const api = createApi({
     "WarrantyPackages",
     "Images",
     "Wishlist",
+    "Coupon",
   ],
   endpoints: () => ({}),
 });

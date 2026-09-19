@@ -17,6 +17,7 @@ const chatbotRoutes = require("./chatbot.routes");
 const warrantyPackageRoutes = require("./warrantyPackages.route");
 const attributeRoutes = require("./attribute.routes");
 const imageRoutes = require("./image.routes");
+const couponRoutes = require("./coupon.routes");
 
 // API routes
 router.use("/auth", authRoutes);
@@ -34,6 +35,7 @@ router.use("/chatbot", chatbotRoutes);
 router.use("/warranty-packages", warrantyPackageRoutes);
 router.use("/attributes", attributeRoutes);
 router.use("/images", imageRoutes);
+router.use("/coupons", couponRoutes);
 
 // Health check route
 router.get("/health", (req, res) => {

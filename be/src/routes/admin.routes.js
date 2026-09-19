@@ -152,5 +152,31 @@ router.put(
   validate(updateOrderStatusValidation),
   adminController.updateOrderStatus,
 );
+/**
+ * COUPON MANAGEMENT ROUTES
+ */
+// GET /api/admin/coupons - Danh sách coupon + phân trang + filter
+router.get(
+  "/coupons",
+  adminController.getAllCoupons,
+);
+
+// POST /api/admin/coupons - Tạo coupon mới
+router.post(
+  "/coupons",
+  adminController.createCoupon,
+);
+
+// PUT /api/admin/coupons/:id - Cập nhật coupon
+router.put(
+  "/coupons/:id",
+  adminController.updateCoupon,
+);
+
+// PATCH /api/admin/coupons/:id/toggle - Bật/tắt coupon
+router.patch(
+  "/coupons/:id/toggle",
+  adminController.toggleCouponStatus,
+);
 
 module.exports = router;

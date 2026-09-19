@@ -9,6 +9,7 @@ const {
 } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 const emailService = require("../shared/services/email/emailService");
+const couponService = require("../services/coupon.service");
 /**
  * Import service xử lý analytics (view count, sold count)
  *
@@ -50,6 +51,7 @@ const createOrder = async (req, res, next) => {
       billingPhone,
       paymentMethod,
       notes,
+      couponCode,
     } = req.body;
 
     // Get active cart
@@ -136,7 +138,37 @@ const createOrder = async (req, res, next) => {
     }
     const tax = 0;
     const shippingCost = 0;
-    const discount = 0;
+
+    // ============================================================
+    // TÍCH HỢP COUPON — "Never trust the client"
+    //
+    // TƯ DUY NGHIỆP VỤ:
+    // Client chỉ gửi couponCode (một chuỗi string).
+    // Server tự validate, tính discountAmount, và increment usedCount.
+    // Nếu client gửi discount=500000 → bị bỏ qua hoàn toàn.
+    //
+    // TƯ DUY KỸ THUẬT:
+    // validateCoupon dùng SELECT FOR UPDATE (Pessimistic Lock)
+    // trong transaction hiện tại → chống race condition
+    // khi 2 user cùng dùng coupon sắp hết lượt.
+    // ============================================================
+    let discount = 0;
+    let couponId = null;
+
+    if (couponCode && couponCode.trim()) {
+      const couponResult = await couponService.validateCoupon(
+        couponCode,
+        subtotal,
+        userId,
+        transaction // Truyền transaction → SELECT FOR UPDATE
+      );
+      discount = couponResult.discountAmount;
+      couponId = couponResult.coupon.id;
+
+      // Tăng usedCount trong transaction (atomic)
+      await couponService.applyCoupon(couponId, transaction);
+    }
+
     const total = subtotal + tax + shippingCost - discount;
 
     // Generate order number
@@ -184,6 +216,7 @@ const createOrder = async (req, res, next) => {
         discount,
         total,
         notes,
+        couponId,
         // Giữ chỗ tồn kho tạm thời: 15 phút
         // Sau khi Stripe thanh toán thành công -> expiresAt = null (chốt vĩnh viễn)
         // Cleanup job sẽ hoàn kho nếu quá 15 phút
