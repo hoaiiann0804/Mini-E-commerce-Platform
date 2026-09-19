@@ -4,6 +4,7 @@ const {
   Order,
   Review,
   ReviewReply,
+  Coupon,
   Category,
   OrderItem,
   ProductAttribute,
@@ -1910,6 +1911,213 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * =====================================================
+ * QUẢN LÝ COUPON / MÃ GIẢM GIÁ
+ * =====================================================
+ *
+ * TƯ DUY NGHIỆP VỤ:
+ * Admin tạo coupon để kích cầu, thanh lý tồn kho, hoặc giữ chân khách cũ.
+ * Mỗi coupon có vòng đời: Tạo → Active → Expired/Disabled.
+ * Không cho xóa coupon đã dùng — giữ lịch sử đối soát.
+ */
+
+/**
+ * Lấy danh sách coupon với phân trang và filter
+ *
+ * Filter status:
+ * - "active": isActive=true, chưa hết hạn, chưa hết lượt
+ * - "expired": đã hết hạn hoặc hết lượt
+ * - "disabled": isActive=false (admin tắt)
+ * - "all": tất cả
+ */
+const getAllCoupons = catchAsync(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    status = "all",
+    search = "",
+    sortBy = "createdAt",
+    sortOrder = "DESC",
+  } = req.query;
+
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const whereClause = {};
+  const now = new Date();
+
+  // Filter theo status
+  if (status === "active") {
+    whereClause.isActive = true;
+    whereClause.expiresAt = { [Op.gt]: now };
+    whereClause.startDate = { [Op.lte]: now };
+  } else if (status === "expired") {
+    whereClause[Op.or] = [
+      { expiresAt: { [Op.lte]: now } },
+      // Hết lượt: usedCount >= usageLimit (chỉ khi usageLimit != null)
+      {
+        usageLimit: { [Op.ne]: null },
+        usedCount: { [Op.gte]: Sequelize.col("usage_limit") },
+      },
+    ];
+  } else if (status === "disabled") {
+    whereClause.isActive = false;
+  }
+
+  // Search theo code hoặc description
+  if (search) {
+    whereClause[Op.or] = [
+      ...(whereClause[Op.or] || []),
+      { code: { [Op.iLike]: `%${search}%` } },
+      { description: { [Op.iLike]: `%${search}%` } },
+    ];
+    // Nếu đã có Op.or từ status filter, merge lại
+    // Giải pháp đơn giản: nếu status có Op.or, wrap trong Op.and
+  }
+
+  const { count, rows: coupons } = await Coupon.findAndCountAll({
+    where: whereClause,
+    limit: parseInt(limit),
+    offset,
+    order: [[sortBy, sortOrder.toUpperCase()]],
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      coupons,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(count / parseInt(limit)),
+        totalItems: count,
+        itemsPerPage: parseInt(limit),
+      },
+    },
+  });
+});
+
+/**
+ * Tạo coupon mới
+ *
+ * TƯ DUY VALIDATION:
+ * - code unique (DB enforce + check trước cho UX tốt)
+ * - percentage value <= 100
+ * - startDate < expiresAt
+ * - maxDiscount chỉ có ý nghĩa với type=percentage
+ */
+const createCoupon = catchAsync(async (req, res) => {
+  const {
+    code,
+    description,
+    type,
+    value,
+    minOrderAmount = 0,
+    maxDiscount,
+    usageLimit,
+    usagePerUser = 1,
+    startDate,
+    expiresAt,
+  } = req.body;
+
+  // Validate required fields
+  if (!code || !type || !value || !startDate || !expiresAt) {
+    throw new AppError("Vui lòng điền đầy đủ các trường bắt buộc", 400);
+  }
+
+  // Check code unique (trước khi DB throw error, cho message thân thiện hơn)
+  const existingCoupon = await Coupon.findOne({
+    where: { code: code.trim().toUpperCase() },
+  });
+  if (existingCoupon) {
+    throw new AppError(`Mã coupon "${code.toUpperCase()}" đã tồn tại`, 409);
+  }
+
+  const coupon = await Coupon.create({
+    code,
+    description,
+    type,
+    value,
+    minOrderAmount,
+    maxDiscount: type === 'percentage' ? maxDiscount : null,
+    usageLimit,
+    usagePerUser,
+    startDate,
+    expiresAt,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: `Tạo coupon ${coupon.code} thành công`,
+    data: { coupon },
+  });
+});
+
+/**
+ * Cập nhật coupon
+ *
+ * TƯ DUY: Không cho sửa code — vì orders đã dùng lưu couponId,
+ * sửa code sẽ gây confusion trong đối soát.
+ * Cho sửa: description, value, limits, dates, maxDiscount.
+ */
+const updateCoupon = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const coupon = await Coupon.findByPk(id);
+
+  if (!coupon) {
+    throw new AppError("Không tìm thấy coupon", 404);
+  }
+
+  // Danh sách fields cho phép cập nhật (không có 'code')
+  const allowedFields = [
+    'description', 'type', 'value', 'minOrderAmount', 'maxDiscount',
+    'usageLimit', 'usagePerUser', 'startDate', 'expiresAt',
+  ];
+
+  const updateData = {};
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updateData[field] = req.body[field];
+    }
+  }
+
+  // Nếu chuyển sang fixed, xóa maxDiscount
+  if (updateData.type === 'fixed') {
+    updateData.maxDiscount = null;
+  }
+
+  await coupon.update(updateData);
+
+  res.status(200).json({
+    status: "success",
+    message: `Cập nhật coupon ${coupon.code} thành công`,
+    data: { coupon },
+  });
+});
+
+/**
+ * Toggle trạng thái active/inactive
+ *
+ * TƯ DUY UX: Admin click 1 nút để tắt/bật nhanh coupon
+ * mà không cần mở form edit.
+ */
+const toggleCouponStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const coupon = await Coupon.findByPk(id);
+
+  if (!coupon) {
+    throw new AppError("Không tìm thấy coupon", 404);
+  }
+
+  await coupon.update({ isActive: !coupon.isActive });
+
+  res.status(200).json({
+    status: "success",
+    message: coupon.isActive
+      ? `Đã kích hoạt coupon ${coupon.code}`
+      : `Đã vô hiệu hóa coupon ${coupon.code}`,
+    data: { coupon },
+  });
+});
+
 module.exports = {
   getDashboardStats,
   getDetailedStats,
@@ -1927,4 +2135,8 @@ module.exports = {
   deleteReviewReply,
   getAllOrders,
   updateOrderStatus,
+  getAllCoupons,
+  createCoupon,
+  updateCoupon,
+  toggleCouponStatus,
 };

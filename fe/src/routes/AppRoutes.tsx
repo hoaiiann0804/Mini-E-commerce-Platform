@@ -52,6 +52,7 @@ const AdminWarrantyPackagesPage = lazy(
   () => import("@/pages/admin/WarrantyPackagesPage")
 );
 const AdminReviewsPage = lazy(() => import("@/pages/admin/ReviewsPage"));
+const AdminCouponsPage = lazy(() => import("@/pages/admin/CouponsPage"));
 const SimpleNamingTestPage = lazy(
   () => import("@/pages/admin/SimpleNamingTestPage")
 );
@@ -228,6 +229,7 @@ const AppRoutes: React.FC = () => {
             element={<AdminWarrantyPackagesPage />}
           />
           <Route path="reviews" element={<AdminReviewsPage />} />
+          <Route path="coupons" element={<AdminCouponsPage />} />
 
           {/* Test Pages */}
           <Route path="test-simple-naming" element={<SimpleNamingTestPage />} />

@@ -71,6 +71,9 @@ const createOrderSchema = Joi.object({
     'any.required': 'Phương thức thanh toán là trường bắt buộc',
   }),
   notes: Joi.string().allow('').optional(),
+  couponCode: Joi.string().max(50).allow('').optional().messages({
+    'string.max': 'Mã giảm giá không được vượt quá 50 ký tự',
+  }),
 });
 
 // Update order status validation schema
