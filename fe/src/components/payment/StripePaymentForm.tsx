@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   useStripe,
   useElements,
   PaymentElement,
-  AddressElement,
   Elements,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -20,19 +19,16 @@ const stripePromise = loadStripe(
 );
 
 interface StripePaymentFormProps {
-  amount: number;
-  currency?: string;
-  orderId?: string;
+  orderId: string;
   onSuccess?: (paymentIntent: any) => void;
   onError?: (error: string) => void;
   onProcessing?: (processing: boolean) => void;
 }
 
 // Inner form component that uses Stripe hooks
-const PaymentForm: React.FC<StripePaymentFormProps> = ({
+const PaymentForm: React.FC<StripePaymentFormProps & { amount: number; currency: string }> = ({
   amount,
   currency = "usd",
-  orderId,
   onSuccess,
   onError,
   onProcessing,
@@ -143,7 +139,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
           t("payment.payNow", {
             amount:
               currency === "vnd"
-                ? `${Math.round(amount * 25000).toLocaleString("vi-VN")} ₫`
+                ? `${Math.round(amount).toLocaleString("vi-VN")} ₫`
                 : `$${amount.toFixed(2)}`,
           })
         )}
@@ -176,60 +172,53 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
 // Main component that creates Elements wrapper with clientSecret
 const StripePaymentForm: React.FC<StripePaymentFormProps> = (props) => {
   const { t } = useTranslation();
-  const [clientSecret, setClientSecret] = useState<string>("");
+  const [quote, setQuote] = useState<import("@/services/stripeApi").CreatePaymentIntentResponse["data"] | null>(null);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
+  const onErrorRef = useRef(props.onError);
+  onErrorRef.current = props.onError;
 
-  // Create payment intent when component mounts
+  // Tư duy nghiệp vụ: chỉ mã đơn quyết định báo giá, callback render lại không tạo khoản thu mới.
+  // Tư duy xử lý bất đồng bộ: bỏ qua response cũ khi chuyển đơn hoặc unmount.
   useEffect(() => {
-    const initializePayment = async () => {
-      try {
-        const response = await createPaymentIntent({
-          amount: props.amount,
-          currency: props.currency,
-          orderId: props.orderId,
-        }).unwrap();
+    let active = true;
+    setQuote(null);
+    setError(false);
+    createPaymentIntent({ orderId: props.orderId }).unwrap()
+      .then((response) => { if (active) setQuote(response.data); })
+      .catch(() => {
+        if (active) {
+          setError(true);
+          onErrorRef.current?.(t("payment.errors.initializationFailed"));
+        }
+      });
+    return () => { active = false; };
+  }, [props.orderId, createPaymentIntent, attempt, t]);
 
-        setClientSecret(response.data.clientSecret);
-      } catch (error) {
-        console.error("Failed to create payment intent:", error);
-        props.onError?.(t("payment.errors.initializationFailed"));
-      }
-    };
-
-    if (props.amount > 0) {
-      initializePayment();
-    }
-  }, [
-    props.amount,
-    props.currency,
-    props.orderId,
-    createPaymentIntent,
-    props.onError,
-    t,
-  ]);
-
-  if (!clientSecret) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-        <span className="ml-2 text-neutral-600 dark:text-neutral-400">
-          {t("payment.initializingPayment")}
-        </span>
-      </div>
-    );
-  }
+  if (error) return (
+    <div role="alert" className="space-y-3 p-4">
+      <p>{t("payment.errors.initializationFailed")}</p>
+      <Button onClick={() => setAttempt((value) => value + 1)}>{t("payment.retry")}</Button>
+    </div>
+  );
+  if (!quote) return (
+    <div className="flex items-center justify-center p-8">
+      <span>{t("payment.initializingPayment")}</span>
+    </div>
+  );
 
   return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        clientSecret,
-        appearance: {
-          theme: "stripe",
-        },
-      }}
-    >
-      <PaymentForm {...props} />
+    <Elements key={quote.clientSecret} stripe={stripePromise}
+      options={{ clientSecret: quote.clientSecret, appearance: { theme: "stripe" } }}>
+      {/* UI hiển thị số tiền của PaymentIntent, không tự quy đổi lại. */}
+      {quote.exchangeRate && (
+        <p className="mb-3 text-sm text-neutral-500">
+          {t("payment.exchangeRate", { rate: quote.exchangeRate.toLocaleString() })}{" "}
+          <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API</a>
+        </p>
+      )}
+      <PaymentForm {...props} amount={quote.amount} currency={quote.currency} />
     </Elements>
   );
 };

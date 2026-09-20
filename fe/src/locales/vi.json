@@ -536,6 +536,8 @@
     "tryAgain": "Thử Lại"
   },
   "payment": {
+    "retry": "Thử lại",
+    "exchangeRate": "Tỷ giá đã chốt: 1 USD = {{rate}} VND.",
     "initializingPayment": "Đang khởi tạo thanh toán...",
     "paymentDetails": "Chi Tiết Thanh Toán",
     "billingAddress": "Địa Chỉ Thanh Toán",

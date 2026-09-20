@@ -1366,8 +1366,7 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
                 <StripePaymentForm
-                  amount={parseFloat(currentOrder.total) / 25000} // Convert VND to USD (approximate rate)
-                  currency="usd"
+                  key={currentOrder.id}
                   orderId={currentOrder.id}
                   onSuccess={handlePaymentSuccess}
                   onError={handlePaymentError}

@@ -1,9 +1,7 @@
 import { api } from './api';
 
 export interface CreatePaymentIntentRequest {
-  amount: number;
-  currency?: string;
-  orderId?: string;
+  orderId: string;
 }
 
 export interface CreatePaymentIntentResponse {
@@ -11,6 +9,10 @@ export interface CreatePaymentIntentResponse {
   data: {
     clientSecret: string;
     paymentIntentId: string;
+    amount: number;
+    currency: string;
+    exchangeRate: number | null;
+    rateUpdatedAt: string | null;
   };
 }
 
