@@ -165,8 +165,159 @@ const applyCoupon = async (couponId, transaction) => {
   });
 };
 
+/**
+ * Hoàn lại 1 lượt dùng coupon khi đơn hàng bị hủy hoặc hết hạn
+ *
+ * TƯ DUY NGHIỆP VỤ & KỸ THUẬT (SAGA / COMPENSATION PATTERN):
+ * - Khi đơn hàng ở trạng thái pending bị timeout giữ kho (15 phút) hoặc khách/admin hủy đơn:
+ *   Cần giải phóng tài nguyên coupon để khách hàng có thể tái sử dụng và không làm hao hụt quota của shop.
+ * - Atomic & Defensive: Dùng decrement() với điều kiện usedCount > 0 để chống underflow (số âm).
+ *
+ * @param {string} couponId - ID coupon cần hoàn lượt
+ * @param {object} transaction - Sequelize transaction (bắt buộc)
+ */
+const rollbackCoupon = async (couponId, transaction) => {
+  if (!couponId) return;
+
+  await Coupon.decrement('usedCount', {
+    by: 1,
+    where: {
+      id: couponId,
+      usedCount: { [Op.gt]: 0 },
+    },
+    transaction,
+  });
+};
+
+/**
+ * getAvailableCoupons — Giải quyết bài toán "Coupon Discovery"
+ *
+ * VẤN ĐỀ NGHIỆP VỤ:
+ * Nếu khách hàng không biết mã nào đang tồn tại thì ô nhập mã
+ * trở thành "hộp đen" gây friction — họ hoặc bỏ qua, hoặc mở tab
+ * khác tìm mã (Cart Abandonment Risk).
+ *
+ * GIẢI PHÁP: "Phòng Voucher" — Liệt kê tất cả mã đang hiệu lực
+ * (công khai) và phân loại trạng thái khả dụng cho user hiện tại.
+ *
+ * TƯ DUY THIẾT KẾ RESPONSE:
+ * Thay vì trả về list phẳng, chúng ta enrich từng coupon với
+ * trường `eligible` và `reason` để Frontend phân loại hiển thị:
+ *   - eligible=true  → Thẻ xanh "Có thể dùng" → Click chọn
+ *   - eligible=false → Thẻ xám "Cần thêm X.000đ" → Gợi ý mua thêm
+ *
+ * CHIẾN LƯỢC BỘC LỘ THÔNG TIN (Information Architecture):
+ * - KHÔNG ẩn mã không đủ điều kiện → Thay vào đó hiện & giải thích lý do
+ * - Lý do: Mã xám với tooltip "Cần thêm 50K" kích thích khách
+ *   mua thêm 1 sản phẩm nhỏ để đủ điều kiện (Upsell trigger).
+ *
+ * @param {string} userId    — ID user đang xem checkout
+ * @param {number} subtotal  — Tổng tiền hàng hiện tại (để tính eligibility)
+ */
+const getAvailableCoupons = async (userId, subtotal) => {
+  const now = new Date();
+
+  // Truy vấn các coupon CÔNG KHAI đang trong thời gian hiệu lực.
+  // TƯ DUY: Lọc tại DB (không fetch hết rồi filter JS)
+  // → Giảm data transfer, tránh expose mã private (nếu sau này có loại targeted).
+  const coupons = await Coupon.findAll({
+    where: {
+      isActive: true,
+      startDate: { [Op.lte]: now },  // Đã bắt đầu hiệu lực
+      expiresAt: { [Op.gt]: now },   // Chưa hết hạn
+      // Còn lượt: usageLimit IS NULL (unlimited) HOẶC usedCount < usageLimit
+      [Op.or]: [
+        { usageLimit: null },
+        // Sequelize không có col-to-col comparison trực tiếp, dùng raw query nhỏ:
+        { usedCount: { [Op.lt]: Coupon.sequelize.col('usage_limit') } },
+      ],
+    },
+    order: [
+      // Ưu tiên hiển thị: mã gần hết hạn nhất lên đầu
+      // → Tạo urgency ("Còn 2 ngày!"), thúc đẩy hành động ngay
+      ['expiresAt', 'ASC'],
+    ],
+  });
+
+  // Kiểm tra lịch sử dùng coupon của user hiện tại (1 query duy nhất).
+  // TƯ DUY HIỆU NĂNG: Không query từng coupon một (N+1 problem).
+  // Lấy tất cả couponId mà user đã dùng đủ quota → nhóm lại trong Map.
+  const userUsages = await Order.findAll({
+    attributes: ['couponId'],
+    where: {
+      userId,
+      couponId: { [Op.ne]: null },
+      status: { [Op.notIn]: ['cancelled', 'expired'] },
+    },
+    raw: true,
+  });
+
+  // Map: couponId → số lần user đã dùng (để check usagePerUser)
+  const usageMap = {};
+  for (const row of userUsages) {
+    usageMap[row.couponId] = (usageMap[row.couponId] || 0) + 1;
+  }
+
+  // Enrich từng coupon với trạng thái khả dụng của user cụ thể
+  const enrichedCoupons = coupons.map((coupon) => {
+    const c = coupon.toJSON();
+    const userUsedCount = usageMap[c.id] || 0;
+    const sub = parseFloat(subtotal) || 0;
+    const minAmount = parseFloat(c.minOrderAmount) || 0;
+
+    // Phân tích lý do không đủ điều kiện (theo thứ tự ưu tiên)
+    let eligible = true;
+    let reason = null;
+
+    if (userUsedCount >= c.usagePerUser) {
+      // User đã dùng hết quota cá nhân → Ẩn hẳn thì gây khó chịu,
+      // vẫn show nhưng báo rõ để user hiểu quy tắc.
+      eligible = false;
+      reason = `Bạn đã sử dụng hết ${c.usagePerUser} lượt của mã này`;
+    } else if (sub < minAmount) {
+      // Chưa đủ giá trị đơn → Cơ hội Upsell!
+      // Báo chính xác cần thêm bao nhiêu → Khuyến khích mua thêm
+      const missing = minAmount - sub;
+      eligible = false;
+      reason = `Cần thêm ${missing.toLocaleString('vi-VN')}đ để đạt mức tối thiểu`;
+    }
+
+    // Preview số tiền giảm nếu đủ điều kiện (cho UX tốt hơn)
+    const discountPreview = eligible
+      ? calculateDiscount(coupon, subtotal)
+      : null;
+
+    // Tính % lượt đã dùng để hiển thị progress bar (social proof)
+    // "Còn 3/10 lượt" → Tạo cảm giác khan hiếm (Scarcity Effect)
+    const usageInfo =
+      c.usageLimit !== null
+        ? { used: c.usedCount, limit: c.usageLimit, unlimited: false }
+        : { unlimited: true };
+
+    return {
+      id: c.id,
+      code: c.code,
+      description: c.description,
+      type: c.type,
+      value: parseFloat(c.value),
+      minOrderAmount: parseFloat(c.minOrderAmount),
+      maxDiscount: c.maxDiscount ? parseFloat(c.maxDiscount) : null,
+      expiresAt: c.expiresAt,
+      startDate: c.startDate,
+      usageInfo,
+      eligible,
+      reason,          // null nếu eligible, string giải thích nếu không
+      discountPreview, // Tiền giảm thực tế nếu áp dụng (null nếu không đủ điều kiện)
+    };
+  });
+
+  return enrichedCoupons;
+};
+
 module.exports = {
   validateCoupon,
   calculateDiscount,
   applyCoupon,
+  rollbackCoupon,
+  getAvailableCoupons,
 };

@@ -24,6 +24,7 @@ const {
   sequelize,
 } = require("../models");
 const emailService = require("../shared/services/email/emailService");
+const couponService = require("../services/coupon.service");
 
 /**
  * Tìm và xử lý các đơn hàng hết hạn thanh toán
@@ -132,6 +133,14 @@ const processExpiredOrder = async (expiredOrder) => {
           transaction,
         });
       }
+    }
+
+    // Bước 4.2: Hoàn lại lượt dùng Coupon nếu đơn hàng có áp mã
+    if (lockedOrder.couponId) {
+      await couponService.rollbackCoupon(lockedOrder.couponId, transaction);
+      console.log(
+        `[OrderCleanup] 🎟️ Đã hoàn 1 lượt dùng cho coupon ${lockedOrder.couponId} (đơn ${lockedOrder.number})`
+      );
     }
 
     // Bước 5: Đổi trạng thái đơn hàng thành 'expired'

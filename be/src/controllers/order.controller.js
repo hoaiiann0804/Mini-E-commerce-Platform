@@ -50,6 +50,7 @@ const createOrder = async (req, res, next) => {
       billingCountry,
       billingPhone,
       paymentMethod,
+      shippingMethod,
       notes,
       couponCode,
     } = req.body;
@@ -136,8 +137,23 @@ const createOrder = async (req, res, next) => {
         }),
       );
     }
-    const tax = 0;
-    const shippingCost = 0;
+    // ============================================================
+    // TÍNH TOÁN VẬN CHUYỂN & THUẾ (SERVER-SIDE CALCULATION)
+    //
+    // TƯ DUY NGHIỆP VỤ: "Never trust the client"
+    // Client chỉ gửi shippingMethod ("standard", "express", "free").
+    // Server tự tra cứu cước phí tương ứng và tính thuế VAT chuẩn 7%.
+    // ============================================================
+    const SHIPPING_RATES = {
+      standard: 30000,
+      express: 50000,
+      free: 0,
+    };
+    const shippingCost =
+      SHIPPING_RATES[shippingMethod] !== undefined
+        ? SHIPPING_RATES[shippingMethod]
+        : 30000;
+    const tax = Math.round(subtotal * 0.07); // Thuế VAT 7%
 
     // ============================================================
     // TÍCH HỢP COUPON — "Never trust the client"
@@ -169,7 +185,7 @@ const createOrder = async (req, res, next) => {
       await couponService.applyCoupon(couponId, transaction);
     }
 
-    const total = subtotal + tax + shippingCost - discount;
+    const total = Math.max(0, subtotal + tax + shippingCost - discount);
 
     // Generate order number
     const date = new Date();
@@ -216,6 +232,7 @@ const createOrder = async (req, res, next) => {
         discount,
         total,
         notes,
+        shippingProvider: shippingMethod || "standard",
         couponId,
         // Giữ chỗ tồn kho tạm thời: 15 phút
         // Sau khi Stripe thanh toán thành công -> expiresAt = null (chốt vĩnh viễn)
@@ -376,6 +393,10 @@ const getOrderById = async (req, res, next) => {
             },
           ],
         },
+        {
+          association: "coupon",
+          attributes: ["id", "code", "type", "value", "description"],
+        },
       ],
     });
 
@@ -419,6 +440,10 @@ const getOrderByNumber = async (req, res, next) => {
               attributes: ["id", "name", "thumbnail", "images", "price"],
             },
           ],
+        },
+        {
+          association: "coupon",
+          attributes: ["id", "code", "type", "value", "description"],
         },
       ],
     });
@@ -507,6 +532,14 @@ const cancelOrder = async (req, res, next) => {
           { transaction },
         );
       }
+    }
+
+    // Hoàn lại lượt dùng Coupon nếu đơn hàng có áp mã
+    if (order.couponId) {
+      await couponService.rollbackCoupon(order.couponId, transaction);
+      console.log(
+        `[cancelOrder] 🎟️ Đã hoàn lại 1 lượt cho coupon ${order.couponId} (đơn ${order.number})`
+      );
     }
 
     await transaction.commit();
@@ -706,7 +739,15 @@ const updateOrderStatus = async (req, res, next) => {
         }
       }
 
-      // COMMIT: Cả 2 bước trên thành công → ghi vào DB
+      // Hoàn lại lượt dùng Coupon nếu đơn chuyển sang 'cancelled' và trước đó chưa cancelled
+      if (status === "cancelled" && previousStatus !== "cancelled" && order.couponId) {
+        await couponService.rollbackCoupon(order.couponId, transaction);
+        console.log(
+          `[updateOrderStatus] 🎟️ Đã hoàn lại 1 lượt cho coupon ${order.couponId} (đơn ${order.number})`
+        );
+      }
+
+      // COMMIT: Các bước trên thành công → ghi vào DB
       await transaction.commit();
     } catch (txError) {
       // ROLLBACK: Bất kỳ bước nào lỗi → hoàn tác cả 2
