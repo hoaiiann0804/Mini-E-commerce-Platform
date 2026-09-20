@@ -1844,6 +1844,12 @@ const getAllOrders = catchAsync(async (req, res) => {
       attributes: ["id", "firstName", "lastName", "email", "phone"],
     },
     {
+      model: Coupon,
+      as: "coupon",
+      attributes: ["id", "code", "type", "value"],
+      required: false,
+    },
+    {
       model: OrderItem,
       as: "items",
       include: [

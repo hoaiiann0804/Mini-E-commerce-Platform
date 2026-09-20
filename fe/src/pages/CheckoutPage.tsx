@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { Button, Radio, Space } from "antd";
+import { Button, Radio, Space, Modal, Spin } from "antd";
 
 import {
   LoadingOutlined,
@@ -11,9 +11,15 @@ import {
   CheckCircleFilled,
   CloseCircleOutlined,
   DeleteOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 
-import { useValidateCouponMutation, type ValidateCouponResponse } from "@/services/couponApi";
+import {
+  useValidateCouponMutation,
+  useGetAvailableCouponsQuery,
+  type ValidateCouponResponse,
+  type AvailableCoupon,
+} from "@/services/couponApi";
 
 
 // Add address related imports and types
@@ -267,14 +273,25 @@ const CheckoutPage: React.FC = () => {
     { value: "FR", label: t("checkout.countries.FR") },
   ];
 
-  // Coupon state
+  // =====================================================================
+  // COUPON STATE — Kiến trúc 3 pha (Discovery → Preview → Commit)
+  // =====================================================================
+
+  // Pha 2 — Preview: mutation để validate mã user gõ/chọn
   const [validateCoupon, { isLoading: isValidatingCoupon }] =
     useValidateCouponMutation();
+
+  // State ô nhập + mã đã áp dụng thành công
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<
     ValidateCouponResponse["data"] | null
   >(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+
+  // Pha 1 — Discovery: mở/đóng Modal "Phòng Voucher"
+  // TƯ DUY UX: Đặt state modal ở đây, KHÔNG tạo component riêng
+  // vì nó cần access trực tiếp vào subtotal + handleApplyCoupon
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
   // Calculate totals
   const subtotal = items.reduce(
@@ -289,7 +306,56 @@ const CheckoutPage: React.FC = () => {
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const total = Math.max(0, subtotal + shippingCost + tax - discountAmount);
 
-  // Coupon handlers
+  // Pha 1 — Discovery Query
+  // TƯ DUY: Dùng `skip` khi modal chưa mở → tránh call API khi không cần
+  // Khi modal mở (isVoucherModalOpen=true) → RTK Query tự fetch và cache
+  const { data: availableCouponsData, isLoading: isLoadingCoupons } =
+    useGetAvailableCouponsQuery(subtotal, {
+      skip: !isVoucherModalOpen, // Lazy load — chỉ fetch khi user mở modal
+    });
+  const availableCoupons = availableCouponsData?.data?.coupons ?? [];
+  const eligibleCount = availableCouponsData?.data?.eligibleCount ?? 0;
+
+  /**
+   * handleSelectFromModal — Chọn voucher từ "Phòng Voucher"
+   *
+   * TƯ DUY UX:
+   * Khi user click "Dùng ngay" trong modal:
+   * 1. Đóng modal ngay lập tức (responsiveness)
+   * 2. Điền mã vào input (visual feedback)
+   * 3. Tự động gọi validate (không cần user bấm nút "Áp dụng" thêm lần nữa)
+   *
+   * Kết quả: 1 click thay vì 3 bước thủ công.
+   */
+  const handleSelectFromModal = async (coupon: AvailableCoupon) => {
+    setIsVoucherModalOpen(false);
+    setCouponCodeInput(coupon.code);
+    setCouponError(null);
+    try {
+      const res = await validateCoupon({
+        code: coupon.code,
+        subtotal,
+      }).unwrap();
+      if (res.data) {
+        setAppliedCoupon(res.data);
+        dispatch(
+          addNotification({
+            type: "success",
+            message: `Áp dụng mã ${res.data.code} thành công! Giảm ${formatPrice(res.data.discountAmount)}`,
+          })
+        );
+      }
+    } catch (err: any) {
+      const errorMsg =
+        err?.data?.message ||
+        err?.message ||
+        "Mã giảm giá không hợp lệ";
+      setCouponError(errorMsg);
+      setAppliedCoupon(null);
+    }
+  };
+
+  // Pha 2 — Preview handler (khi user gõ tay và bấm "Áp dụng")
   const handleApplyCoupon = async () => {
     if (!couponCodeInput.trim()) {
       setCouponError("Vui lòng nhập mã giảm giá");
@@ -474,6 +540,7 @@ const CheckoutPage: React.FC = () => {
           ? formData.phone
           : formData.billingPhone,
         paymentMethod: formData.paymentMethod,
+        shippingMethod: formData.shippingMethod,
         notes: formData.notes,
         couponCode: appliedCoupon?.code || undefined,
       };
@@ -987,12 +1054,30 @@ const CheckoutPage: React.FC = () => {
             </div>
           )}
 
-            {/* Coupon / Voucher Box */}
+            {/* =========================================================== */}
+            {/* COUPON / VOUCHER BOX — Kiến trúc 3 Pha                       */}
+            {/* =========================================================== */}
             {!isRepayingOrder && (
               <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 pb-2">
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                  <TagOutlined className="mr-1 text-primary-500" /> Mã giảm giá / Voucher
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    <TagOutlined className="mr-1 text-primary-500" /> Mã giảm giá / Voucher
+                  </label>
+
+                  {/* Pha 1 — Discovery Trigger Button */}
+                  {/* TƯ DUY: Link nhỏ, không chiếm không gian nhưng cực kỳ hữu dụng */}
+                  {/* User thấy "(3 mã)" → tò mò → click → Discovery flow */}
+                  {!appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={() => setIsVoucherModalOpen(true)}
+                      className="text-xs text-primary-600 dark:text-primary-400 hover:underline font-medium flex items-center gap-1 cursor-pointer"
+                    >
+                      <GiftOutlined />
+                      Xem mã đang có
+                    </button>
+                  )}
+                </div>
 
                 {appliedCoupon ? (
                   /* Applied Coupon State - Card style */
@@ -1023,7 +1108,7 @@ const CheckoutPage: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  /* Input State */
+                  /* Pha 2 — Input State */
                   <div className="space-y-2">
                     <div className="flex space-x-2">
                       <input
@@ -1061,6 +1146,118 @@ const CheckoutPage: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* =========================================================== */}
+            {/* PHA 1 — VOUCHER DISCOVERY MODAL                              */}
+            {/* Hiển thị danh sách mã đang hiệu lực + trạng thái eligibility */}
+            {/* =========================================================== */}
+            <Modal
+              title={
+                <div className="flex items-center gap-2">
+                  <GiftOutlined className="text-primary-500" />
+                  <span>Chọn Voucher</span>
+                  {!isLoadingCoupons && availableCoupons.length > 0 && (
+                    <span className="text-xs font-normal text-neutral-500 ml-1">
+                      ({eligibleCount} mã có thể dùng ngay)
+                    </span>
+                  )}
+                </div>
+              }
+              open={isVoucherModalOpen}
+              onCancel={() => setIsVoucherModalOpen(false)}
+              footer={null}
+              width={520}
+            >
+              {isLoadingCoupons ? (
+                <div className="flex justify-center items-center py-10">
+                  <Spin size="large" />
+                </div>
+              ) : availableCoupons.length === 0 ? (
+                <div className="text-center py-10 text-neutral-500">
+                  <GiftOutlined style={{ fontSize: 40, opacity: 0.3 }} />
+                  <p className="mt-3">Hiện chưa có voucher nào đang hoạt động</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                  {/* TƯ DUY HIỂN THỊ: Mã eligible lên đầu, mã ineligible xuống dưới */}
+                  {/* Không ẩn mã ineligible — hiện & giải thích → Upsell trigger */}
+                  {[...availableCoupons]
+                    .sort((a, b) => (b.eligible ? 1 : 0) - (a.eligible ? 1 : 0))
+                    .map((coupon) => (
+                      <div
+                        key={coupon.id}
+                        className={`border rounded-xl p-4 transition-all ${
+                          coupon.eligible
+                            ? "border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30"
+                            : "border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50 opacity-75"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          {/* Coupon Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {/* Mã coupon dạng "pill" */}
+                              <span className={`font-mono font-bold text-sm tracking-widest px-2 py-0.5 rounded ${
+                                coupon.eligible
+                                  ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200"
+                                  : "bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400"
+                              }`}>
+                                {coupon.code}
+                              </span>
+
+                              {/* Badge loại giảm */}
+                              <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                                {coupon.type === "percentage"
+                                  ? `Giảm ${coupon.value}%${coupon.maxDiscount ? ` (tối đa ${formatPrice(coupon.maxDiscount)})` : ""}`
+                                  : `Giảm ${formatPrice(coupon.value)}`}
+                              </span>
+                            </div>
+
+                            {/* Điều kiện áp dụng */}
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                              Đơn tối thiểu: <strong>{formatPrice(coupon.minOrderAmount)}</strong>
+                              {" • "}
+                              HSD: {new Date(coupon.expiresAt).toLocaleDateString("vi-VN")}
+                            </p>
+
+                            {/* Usage info — tạo cảm giác khan hiếm (Scarcity Effect) */}
+                            {!("unlimited" in coupon.usageInfo && coupon.usageInfo.unlimited) && (
+                              <p className="text-xs text-orange-500 dark:text-orange-400 mt-0.5">
+                                🔥 Còn {(coupon.usageInfo as any).limit - (coupon.usageInfo as any).used}/{(coupon.usageInfo as any).limit} lượt
+                              </p>
+                            )}
+
+                            {/* Reason khi ineligible — Upsell trigger */}
+                            {!coupon.eligible && coupon.reason && (
+                              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                                ⚠️ {coupon.reason}
+                              </p>
+                            )}
+
+                            {/* Preview tiết kiệm được bao nhiêu */}
+                            {coupon.eligible && coupon.discountPreview !== null && (
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                                ✓ Tiết kiệm ngay: <strong>{formatPrice(coupon.discountPreview)}</strong>
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Action Button */}
+                          <Button
+                            type={coupon.eligible ? "primary" : "default"}
+                            size="small"
+                            disabled={!coupon.eligible}
+                            onClick={() => coupon.eligible && handleSelectFromModal(coupon)}
+                            className="shrink-0 mt-1"
+                          >
+                            {coupon.eligible ? "Dùng ngay" : "Chưa đủ điều kiện"}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </Modal>
 
             {/* Totals */}
             <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-2">

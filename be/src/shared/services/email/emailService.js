@@ -9,6 +9,33 @@ const getFrontendBaseUrl = () => {
   return frontendUrl.replace(/\/+$/, "");
 };
 
+// ============================================================
+// ĐỊNH DẠNG THỜI GIAN THEO MÚI GIỜ VIỆT NAM (GMT+7)
+// TƯ DUY NGHIỆP VỤ:
+// Máy chủ / Docker container thường chạy múi giờ UTC (GMT+0).
+// Nếu không chỉ định rõ timeZone: "Asia/Ho_Chi_Minh", 12:18 trưa tại Việt Nam
+// sẽ bị format thành 05:18 (giờ UTC), gây hiểu lầm nghiêm trọng cho khách hàng.
+// ============================================================
+const VIETNAM_TIMEZONE = "Asia/Ho_Chi_Minh";
+
+const formatVietnamTime = (date, options = {}) => {
+  if (!date) return "";
+  return new Date(date).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: VIETNAM_TIMEZONE,
+    ...options,
+  });
+};
+
+const formatVietnamDate = (date, options = {}) => {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("vi-VN", {
+    timeZone: VIETNAM_TIMEZONE,
+    ...options,
+  });
+};
+
 // Check email configuration
 const emailServiceType = (process.env.EMAIL_SERVICE || "resend").toLowerCase();
 
@@ -193,10 +220,7 @@ const sendOrderPendingPaymentEmail = async (email, order) => {
   } = order;
 
   const expiresAtText = expiresAt
-    ? new Date(expiresAt).toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? formatVietnamTime(expiresAt)
     : "15 phút";
 
   const itemsHtml = items
@@ -229,7 +253,7 @@ const sendOrderPendingPaymentEmail = async (email, order) => {
 
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${formatVietnamDate(orderDate)}</p>
           <p><strong>Tổng tiền:</strong> ${Number(total).toLocaleString("vi-VN")}đ</p>
         </div>
 
@@ -303,7 +327,7 @@ const sendOrderConfirmationEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${formatVietnamDate(orderDate)}</p>
           <p><strong>Tổng tiền:</strong> ${total.toLocaleString("vi-VN")}đ</p>
         </div>
         
@@ -371,7 +395,7 @@ const sendOrderStatusUpdateEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${formatVietnamDate(orderDate)}</p>
           <p><strong>Trạng thái mới:</strong> ${statusText}</p>
         </div>
         
@@ -396,7 +420,7 @@ const sendOrderCancellationEmail = async (email, order) => {
         
         <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p><strong>Mã đơn hàng:</strong> #${orderNumber}</p>
-          <p><strong>Ngày đặt hàng:</strong> ${new Date(orderDate).toLocaleDateString("vi-VN")}</p>
+          <p><strong>Ngày đặt hàng:</strong> ${formatVietnamDate(orderDate)}</p>
         </div>
         
         <p>Nếu bạn đã thanh toán cho đơn hàng này, khoản tiền sẽ được hoàn lại trong vòng 5-7 ngày làm việc.</p>

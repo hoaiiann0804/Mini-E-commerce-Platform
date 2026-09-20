@@ -61,13 +61,13 @@ const OrdersPage: React.FC = () => {
     setSelectedOrder(selectedOrder === orderId ? null : orderId);
   };
 
-  // Mua lại đơn hàng (Buy Again): Copy items sang giỏ hàng và chuyển hướng Checkout tạo đơn MỚI
+  // Mua lại đơn hàng (Buy Again): Copy items sang giỏ hàng và chuyển hướng Giỏ hàng
   const handleReorder = async (orderId: string) => {
     setReorderingId(orderId);
     try {
       await reorder(orderId).unwrap();
       toast.success(t("orders.reorderSuccess", "Đã thêm sản phẩm vào giỏ hàng!"));
-      navigate("/checkout");
+      navigate("/cart");
     } catch (error) {
       console.error("Failed to reorder:", error);
       toast.error(t("orders.reorderFailed", "Không thể mua lại. Vui lòng thử lại sau."));
