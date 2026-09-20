@@ -3,43 +3,67 @@ const { Order, OrderItem, User, sequelize } = require("../models");
 const { AppError } = require("../middlewares/errorHandler");
 const emailService = require("../shared/services/email/emailService");
 
-// Create payment intent
+const exchangeRateService = require("../shared/services/payment/exchange-rate.service");
+
+// Tư duy nghiệp vụ: chỉ nhận orderId, giá và quyền sở hữu phải được kiểm tra tại server.
 const createPaymentIntent = async (req, res, next) => {
   try {
-    const { amount, currency = "usd", orderId } = req.body;
-    const userId = req.user.id;
-
-    if (!amount || amount <= 0) {
-      throw new AppError("Invalid amount", 400);
-    }
-
-    // Create payment intent with metadata
-    //console.log('Creating payment intent with metadata:', {
-    //   userId,
-    //   orderId: orderId || '',
-    // });
-
-    const paymentIntent = await stripeService.createPaymentIntent({
-      amount,
-      currency,
-      metadata: {
-        userId,
-        orderId: orderId || "",
-      },
+    const { orderId } = req.body;
+    if (!orderId) throw new AppError("Order ID is required", 400);
+    const findPayableOrder = async (transaction) => {
+      const order = await Order.findOne({
+        where: { id: orderId, userId: req.user.id },
+        lock: transaction.LOCK.UPDATE, transaction,
+      });
+      if (!order) throw new AppError("Order not found", 404);
+      if (order.paymentMethod !== "stripe" || order.status !== "pending" ||
+          !["pending", "failed"].includes(order.paymentStatus) ||
+          (order.expiresAt && new Date(order.expiresAt).getTime() <= Date.now())) {
+        throw new AppError("Order is no longer payable", 409);
+      }
+      return order;
+    };
+    // Tư duy giải quyết lỗi mạng: commit báo giá trước khi gọi Stripe để retry vẫn dùng
+    // cùng số tiền và idempotency key, kể cả khi Stripe đã tạo intent nhưng response bị mất.
+    await sequelize.transaction(async (transaction) => {
+      const order = await findPayableOrder(transaction);
+      if (!order.paymentQuote && !order.paymentTransactionId) {
+        const paymentQuote = await exchangeRateService.createQuote(order.total);
+        await order.update({ paymentQuote }, { transaction });
+      }
     });
-
-    //console.log('Payment intent created:', {
-    //   id: paymentIntent.paymentIntentId,
-    //   metadata: paymentIntent.metadata,
-    // });
-
-    res.status(200).json({
-      status: "success",
-      data: paymentIntent,
+    const data = await sequelize.transaction(async (transaction) => {
+      const order = await findPayableOrder(transaction);
+      let intent;
+      if (order.paymentTransactionId) {
+        intent = await stripeService.confirmPaymentIntent(order.paymentTransactionId);
+      } else {
+        const quote = order.paymentQuote;
+        intent = await stripeService.createPaymentIntent({
+          amountInCents: quote.amountInCents, currency: quote.currency,
+          idempotencyKey: "order-payment-" + order.id,
+          metadata: {
+            userId: String(req.user.id), orderId: order.id,
+            totalVnd: String(quote.totalVnd), exchangeRate: String(quote.rate),
+            rateUpdatedAt: quote.updatedAt, rateSource: quote.source,
+          },
+        });
+        await order.update({ paymentTransactionId: intent.id, paymentProvider: "stripe" }, { transaction });
+      }
+      if (intent.metadata?.orderId !== order.id || intent.currency !== "usd" ||
+          (order.paymentQuote && intent.amount !== order.paymentQuote.amountInCents) ||
+          !["requires_payment_method", "requires_confirmation", "requires_action"].includes(intent.status)) {
+        throw new AppError("Payment cannot be restarted in its current state", 409);
+      }
+      return {
+        clientSecret: intent.client_secret, paymentIntentId: intent.id,
+        amount: intent.amount / 100, currency: intent.currency,
+        exchangeRate: order.paymentQuote?.rate ?? null,
+        rateUpdatedAt: order.paymentQuote?.updatedAt ?? null,
+      };
     });
-  } catch (error) {
-    next(error);
-  }
+    res.status(200).json({ status: "success", data });
+  } catch (error) { next(error); }
 };
 
 // Confirm payment (gọi từ Frontend sau khi Stripe Element thanh toán xong)

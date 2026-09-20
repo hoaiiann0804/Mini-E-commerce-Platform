@@ -535,6 +535,8 @@
     "tryAgain": "Try Again"
   },
   "payment": {
+    "retry": "Try again",
+    "exchangeRate": "Locked exchange rate: 1 USD = {{rate}} VND.",
     "initializingPayment": "Initializing payment...",
     "paymentDetails": "Payment Details",
     "billingAddress": "Billing Address",

@@ -50,15 +50,15 @@ class StripeService {
   /**
    * Create a payment intent for checkout
    * @param {Object} params - Payment parameters
-   * @param {number} params.amount - Amount in cents
+   * @param {number} params.amountInCents - Locked USD amount in cents
    * @param {string} params.currency - Currency code (default: 'usd')
    * @param {Object} params.metadata - Additional metadata
    * @returns {Object} Payment intent object
    */
-  async createPaymentIntent({ amount, currency = "usd", metadata = {} }) {
+  async createPaymentIntent({ amountInCents, currency = "usd", metadata = {}, idempotencyKey }) {
     try {
-      const stripeAmount =
-        currency === "vnd" ? Math.round(amount) : Math.round(amount * 100);
+      // Báo giá đã làm tròn sang cent tại backend; không quy đổi thêm lần nữa.
+      const stripeAmount = amountInCents;
 
       //console.log('Creating Stripe payment intent with params:', {
       //   amount: stripeAmount,
@@ -69,19 +69,16 @@ class StripeService {
 
       const paymentIntent = await withDnsLookupOverride(() =>
         stripe.paymentIntents.create({
-          amount: stripeAmount, // VND doesn't use decimals
+          amount: stripeAmount,
           currency,
           metadata,
           automatic_payment_methods: {
             enabled: true,
           },
-        }),
+        }, { idempotencyKey }),
       );
 
-      return {
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id,
-      };
+      return paymentIntent;
     } catch (error) {
       console.error("Stripe createPaymentIntent error:", error);
       console.error("Error details:", {

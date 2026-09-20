@@ -117,6 +117,12 @@ const Order = sequelize.define(
       type: DataTypes.ENUM('pending', 'paid', 'failed', 'refunded'),
       defaultValue: 'pending',
     },
+    // Chốt tỷ giá và số cent cho một đơn; tải lại trang không làm thay đổi số tiền.
+    paymentQuote: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      field: 'payment_quote',
+    },
     paymentTransactionId: {
       type: DataTypes.STRING,
       allowNull: true,
