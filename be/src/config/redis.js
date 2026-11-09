@@ -50,6 +50,10 @@ let isConnected = false;
  * → Tránh Single Point Of Failure cho hệ thống
  */
 const connectRedis = async () => {
+  if (!process.env.REDIS_HOST && !process.env.REDIS_URL) {
+    console.info("[Redis] ℹ️ Không cấu hình REDIS_HOST/REDIS_URL -> Bỏ qua kết nối Redis (Graceful Degradation).");
+    return null;
+  }
   try {
     redisClient = createClient({
       socket: {
