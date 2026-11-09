@@ -69,13 +69,18 @@ class SimpleNamingService {
     const { baseName, selectedAttributes, separator = ' ' } = config;
 
     const addedParts: string[] = [];
-    const nameParts = [baseName];
+    const nameParts = [baseName.trim()];
 
-    // Simply append all selected attribute values
+    // Simply append all selected attribute values nếu trong baseName chưa có sẵn
     Object.entries(selectedAttributes).forEach(([attrName, attrValue]) => {
       if (attrValue && attrValue.trim() !== '') {
-        nameParts.push(attrValue);
-        addedParts.push(`${attrName}: ${attrValue}`);
+        const val = attrValue.trim();
+        // Kiểm tra tránh trùng lặp từ khóa đã có sẵn trong tên gốc
+        const regex = new RegExp(`\\b${val}\\b`, 'i');
+        if (!regex.test(baseName)) {
+          nameParts.push(val);
+        }
+        addedParts.push(`${attrName}: ${val}`);
       }
     });
 
