@@ -5,11 +5,13 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { ProductVariant } from "@/types/product.types";
 
 interface ProductPricingFormProps {
+  stockReadOnly?: boolean;
   hasVariants?: boolean;
   variants?: ProductVariant[];
 }
 
 const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
+  stockReadOnly = false,
   hasVariants = false,
   variants = [],
 }) => {
@@ -134,7 +136,7 @@ const ProductPricingForm: React.FC<ProductPricingFormProps> = ({
             placeholder="0"
             style={{ width: "100%" }}
             min={0}
-            disabled={hasVariants && totalStock > 0}
+            disabled={stockReadOnly || (hasVariants && totalStock > 0)}
           />
         </Form.Item>
       </Col>

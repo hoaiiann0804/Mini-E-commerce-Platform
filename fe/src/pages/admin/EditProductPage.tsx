@@ -585,7 +585,7 @@ const EditProductPage: React.FC = () => {
     {
       key: "pricing",
       label: "5. Giá & Kho hàng",
-      children: <ProductPricingForm hasVariants={variants.length > 0} />,
+      children: <ProductPricingForm hasVariants={variants.length > 0} stockReadOnly />,
     },
     {
       key: "category",
@@ -623,7 +623,7 @@ const EditProductPage: React.FC = () => {
             <Title level={2} style={{ margin: 0 }}>
               Chỉnh sửa sản phẩm
             </Title>
-            <Text type="secondary">Cập nhật thông tin sản phẩm</Text>
+            <Text type="secondary">Cập nhật thông tin sản phẩm. Nhập hàng và điều chỉnh số lượng tại trang Tồn kho.</Text>
           </Col>
           <Col>
             <Button
@@ -681,6 +681,7 @@ const EditProductPage: React.FC = () => {
 
       {variantModalVisible && (
         <VariantModal
+          stockReadOnly
           visible={variantModalVisible}
           onClose={closeVariantModal}
           variant={editingVariant}

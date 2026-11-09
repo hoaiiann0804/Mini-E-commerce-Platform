@@ -1,3 +1,4 @@
+const inventoryService = require("../services/inventory.service");
 const {
   Order,
   OrderItem,
@@ -61,13 +62,11 @@ const createOrder = async (req, res, next) => {
         userId,
         status: "active",
       },
-      include: [
-        {
-          association: "items",
-        },
-      ],
+      lock: transaction.LOCK.UPDATE,
       transaction,
     });
+
+    if (cart) cart.items = await CartItem.findAll({ where: { cartId: cart.id }, transaction });
 
     if (!cart || cart.items.length === 0) {
       throw new AppError("Giỏ hàng trống", 400);
@@ -77,7 +76,8 @@ const createOrder = async (req, res, next) => {
     let subtotal = 0;
     // Create order items
     const orderItemsToCreate = [];
-    const stockUpdatePromises = [];
+    // Lock parents in a stable order before locking variants.
+    await inventoryService.lockProducts(cart.items, transaction);
     for (const item of cart.items) {
       let targetModel;
       let variant = null;
@@ -130,12 +130,7 @@ const createOrder = async (req, res, next) => {
         // attributes: targetModel.attributes,
       });
 
-      stockUpdatePromises.push(
-        targetModel.decrement("stockQuantity", {
-          by: item.quantity,
-          transaction,
-        }),
-      );
+
     }
     // ============================================================
     // TÍNH TOÁN VẬN CHUYỂN & THUẾ (SERVER-SIDE CALCULATION)
@@ -246,9 +241,9 @@ const createOrder = async (req, res, next) => {
       ...item,
       orderId: order.id,
     }));
+    const createdItems = await OrderItem.bulkCreate(orderItemsWithId, { transaction });
+    await inventoryService.orderMovement(order, createdItems, "OUT", req.user, transaction, "Trừ số lượng khả dụng khi tạo đơn");
     await Promise.all([
-      OrderItem.bulkCreate(orderItemsWithId, { transaction }),
-      ...stockUpdatePromises,
       cart.update(
         {
           status: "converted",
@@ -473,105 +468,10 @@ const getOrderByNumber = async (req, res, next) => {
 
 // Cancel order
 const cancelOrder = async (req, res, next) => {
-  const transaction = await sequelize.transaction();
-
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    const order = await Order.findOne({
-      where: { id, userId },
-      include: [
-        {
-          association: "items",
-          include: [
-            {
-              model: Product,
-            },
-            {
-              model: ProductVariant,
-            },
-          ],
-        },
-      ],
-    });
-
-    if (!order) {
-      throw new AppError("Không tìm thấy đơn hàng", 404);
-    }
-
-    // Check if order can be cancelled
-    if (order.status !== "pending" && order.status !== "processing") {
-      throw new AppError("Không thể hủy đơn hàng này", 400);
-    }
-
-    // Update order status
-    await order.update(
-      {
-        status: "cancelled",
-      },
-      { transaction },
-    );
-
-    // Restore stock
-    for (const item of order.items) {
-      if (item.variantId) {
-        const variant = item.ProductVariant;
-        await variant.update(
-          {
-            stockQuantity: variant.stockQuantity + item.quantity,
-          },
-          { transaction },
-        );
-      } else {
-        const product = item.Product;
-        await product.update(
-          {
-            stockQuantity: product.stockQuantity + item.quantity,
-          },
-          { transaction },
-        );
-      }
-    }
-
-    // Hoàn lại lượt dùng Coupon nếu đơn hàng có áp mã
-    if (order.couponId) {
-      await couponService.rollbackCoupon(order.couponId, transaction);
-      console.log(
-        `[cancelOrder] 🎟️ Đã hoàn lại 1 lượt cho coupon ${order.couponId} (đơn ${order.number})`
-      );
-    }
-
-    await transaction.commit();
-
-    // Send cancellation email
-    try {
-      await emailService.sendOrderCancellationEmail(req.user.email, {
-        orderNumber: order.number,
-        orderDate: order.createdAt,
-      });
-    } catch (error) {
-      console.error("[email] order cancellation failed", {
-        orderId: order.id,
-        orderNumber: order.number,
-        email: req.user?.email,
-        message: error?.message,
-      });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "Đơn hàng đã được hủy",
-      data: {
-        id: order.id,
-        number: order.number,
-        status: "cancelled",
-      },
-    });
-  } catch (error) {
-    await transaction.rollback();
-    next(error);
-  }
+    const order = await inventoryService.transitionOrder(req.params.id, "cancelled", req.user, { customer: true });
+    res.status(200).json({ status: "success", message: "Đã hủy đơn và hoàn kho", data: { order, status: order.status } });
+  } catch (error) { next(error); }
 };
 
 // Admin: Get all orders
@@ -614,180 +514,9 @@ const getAllOrders = async (req, res, next) => {
 // Admin: Update order status
 const updateOrderStatus = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const order = await Order.findByPk(id, {
-      include: [
-        {
-          association: "user",
-          attributes: ["id", "firstName", "lastName", "email"],
-        },
-      ],
-    });
-
-    if (!order) {
-      throw new AppError("Không tìm thấy đơn hàng", 404);
-    }
-
-    /**
-     * Lưu trạng thái cũ trước khi cập nhật
-     *
-     * TƯ DUY NGHIỆP VỤ:
-     * Cần biết trạng thái cũ để xác định đây có phải là lần ĐẦU TIÊN
-     * chuyển sang 'delivered' hay không.
-     *
-     * Tại sao cần check? Nếu admin vô tình click 'delivered' 2 lần:
-     *   - Lần 1: pending → delivered → soldCount += N (đúng)
-     *   - Lần 2: delivered → delivered → soldCount += N nữa (ĐỤC ĐÔI, sai!)
-     * → Phải kiểm tra previousStatus ≠ 'delivered' mới cập nhật soldCount
-     */
-    const previousStatus = order.status;
-
-    /**
-     * ═══════════════════════════════════════════════════════════════
-     * DATABASE TRANSACTION — All-or-Nothing Consistency
-     * ═══════════════════════════════════════════════════════════════
-     *
-     * TƯ DUY KỸ THUẬT - TẠI SAO DÙNG TRANSACTION?
-     *
-     * Vấn đề cũ (Fire-and-Forget):
-     *   await order.update({ status });     ← Commit vào DB
-     *   updateSoldCount().catch(...)        ← Chạy ngầm, không đảm bảo
-     *   → Nếu Node.js crash sau commit nhưng trước khi updateSoldCount chạy:
-     *     orders.status = 'delivered' ✅  (đã commit)
-     *     products.sold_count = cũ    ❌  (mất vĩnh viễn, không khôi phục)
-     *
-     * Giải pháp (Transaction):
-     *   BEGIN TRANSACTION
-     *     UPDATE orders SET status = 'delivered'       ← Atomic
-     *     UPDATE products SET sold_count += N          ← Atomic, cùng transaction
-     *   COMMIT  ← Cả 2 thành công cùng lúc
-     *   ROLLBACK ← Cả 2 thất bại cùng lúc nếu có lỗi
-     *
-     * → Không bao giờ có trạng thái bất đối xứng
-     *
-     * Lưu ý: Email gửi NGOÀI transaction vì:
-     *   - Email là non-critical side effect (không ảnh hưởng dữ liệu)
-     *   - Gửi email trong transaction = giữ DB lock lâu hơn (không cần)
-     *   - Email lỗi không được rollback order (đơn vẫn phải delivered)
-     * ═══════════════════════════════════════════════════════════════
-     */
-    const transaction = await sequelize.transaction();
-
-    try {
-      // BƯỚC 1: Cập nhật status đơn hàng trong transaction
-      await order.update({ status }, { transaction });
-
-      /**
-       * BƯỚC 2: Cập nhật soldCount KHI VÀ CHỈ KHI đơn chuyển sang 'delivered'
-       *
-       * Điều kiện kép:
-       *   (1) status === 'delivered': Trạng thái mới phải là delivered
-       *   (2) previousStatus !== 'delivered': Trạng thái cũ không được là delivered
-       *       → Chỉ tăng soldCount 1 lần duy nhất cho mỗi đơn hàng
-       *
-       * Ví dụ các trường hợp:
-       *   processing → delivered : (1)=true, (2)=true  → Cập nhật soldCount ✅
-       *   shipped    → delivered : (1)=true, (2)=true  → Cập nhật soldCount ✅
-       *   delivered  → delivered : (1)=true, (2)=false → Bỏ qua              ❌
-       *   delivered  → cancelled : (1)=false           → Bỏ qua              ❌
-       */
-      if (status === "delivered" && previousStatus !== "delivered") {
-        /**
-         * Lấy tất cả items trong đơn hàng, group theo productId
-         *
-         * Tại sao GROUP BY productId?
-         * Đơn hàng có thể có nhiều variant của cùng 1 sản phẩm
-         * (vd: iPhone 15 đen qty=1 + iPhone 15 trắng qty=1 → cộng lại = 2)
-         * SUM(quantity) = tổng số lượng thực sự của sản phẩm đó trong đơn
-         */
-        const itemGroups = await OrderItem.findAll({
-          attributes: [
-            "productId",
-            [sequelize.fn("SUM", sequelize.col("quantity")), "totalQuantity"],
-          ],
-          where: { orderId: id },
-          group: ["productId"],
-          raw: true,
-          transaction, // ← Phải nằm trong cùng transaction!
-        });
-
-        if (itemGroups && itemGroups.length > 0) {
-          /**
-           * Cập nhật soldCount song song cho tất cả sản phẩm
-           *
-           * TƯ DUY KỸ THUẬT:
-           * - Promise.all: chạy song song, nhanh hơn sequential await
-           * - Product.increment: SQL "SET sold_count = sold_count + N"
-           *   → Atomic tại tầng DB, không race condition
-           * - transaction: đảm bảo cùng transaction với order.update()
-           */
-          await Promise.all(
-            itemGroups.map(({ productId, totalQuantity }) =>
-              Product.increment("soldCount", {
-                by: parseInt(totalQuantity),
-                where: { id: productId },
-                transaction, // ← Cùng transaction!
-              })
-            )
-          );
-
-          console.log(
-            `[updateOrderStatus] ✅ soldCount đã cập nhật cho ${itemGroups.length} sản phẩm (order: ${id})`
-          );
-        }
-      }
-
-      // Hoàn lại lượt dùng Coupon nếu đơn chuyển sang 'cancelled' và trước đó chưa cancelled
-      if (status === "cancelled" && previousStatus !== "cancelled" && order.couponId) {
-        await couponService.rollbackCoupon(order.couponId, transaction);
-        console.log(
-          `[updateOrderStatus] 🎟️ Đã hoàn lại 1 lượt cho coupon ${order.couponId} (đơn ${order.number})`
-        );
-      }
-
-      // COMMIT: Các bước trên thành công → ghi vào DB
-      await transaction.commit();
-    } catch (txError) {
-      // ROLLBACK: Bất kỳ bước nào lỗi → hoàn tác cả 2
-      await transaction.rollback();
-      console.error("[updateOrderStatus] Transaction rollback:", txError.message);
-      throw txError; // Re-throw để catch bên ngoài xử lý
-    }
-
-    // ─── Ngoài transaction: Email (non-critical side effect) ───────────
-    // Gửi email KHÔNG nằm trong transaction vì:
-    // - Email lỗi không nên ảnh hưởng đến trạng thái đơn hàng
-    // - Giữ DB lock ngắn nhất có thể (performance)
-    emailService
-      .sendOrderStatusUpdateEmail(order.user.email, {
-        orderNumber: order.number,
-        orderDate: order.createdAt,
-        status,
-      })
-      .catch((error) => {
-        console.error("[email] order status update failed", {
-          orderId: order.id,
-          orderNumber: order.number,
-          email: order.user?.email,
-          status,
-          message: error?.message,
-        });
-      });
-
-    res.status(200).json({
-      status: "success",
-      message: "Cập nhật trạng thái đơn hàng thành công",
-      data: {
-        id: order.id,
-        number: order.number,
-        status: order.status,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
+    const order = await inventoryService.transitionOrder(req.params.id, req.body.status, req.user);
+    res.status(200).json({ status: "success", data: { order, status: order.status } });
+  } catch (error) { next(error); }
 };
 
 /**
@@ -808,19 +537,13 @@ const repayOrder = async (req, res, next) => {
     }
 
     // Kiểm tra trạng thái đơn hàng
-    if (
-      order.status !== "pending" &&
-      order.status !== "cancelled" &&
-      order.paymentStatus !== "failed"
-    ) {
+    if (order.status !== "pending" || !["pending", "failed"].includes(order.paymentStatus) ||
+        (order.expiresAt && new Date(order.expiresAt) <= new Date())) {
       throw new AppError("Đơn hàng này không thể thanh toán lại", 400);
     }
 
     // Cập nhật trạng thái đơn hàng
-    await order.update({
-      status: "pending",
-      paymentStatus: "pending",
-    });
+    // A payment retry never reopens an order or changes stock.
 
     // Lấy origin từ request header để tạo URL thanh toán động
     const origin = req.get("origin") || "http://localhost:5175";

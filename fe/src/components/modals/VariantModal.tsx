@@ -23,6 +23,7 @@ interface Variant {
 }
 
 interface VariantModalProps {
+  stockReadOnly?: boolean;
   visible: boolean;
   onClose: () => void;
   variant?: Variant | null;
@@ -31,6 +32,7 @@ interface VariantModalProps {
 }
 
 const VariantModal: React.FC<VariantModalProps> = ({
+  stockReadOnly = false,
   visible,
   onClose,
   variant,
@@ -195,6 +197,7 @@ const VariantModal: React.FC<VariantModalProps> = ({
             ]}
           >
             <InputNumber
+              disabled={stockReadOnly}
               placeholder={t("admin.products.variantModal.placeholders.stock")}
               min={0}
               style={{ width: "100%" }}

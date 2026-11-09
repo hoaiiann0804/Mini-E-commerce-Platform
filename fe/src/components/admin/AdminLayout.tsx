@@ -31,6 +31,7 @@ const AdminLayout: React.FC = () => {
   };
 
   const adminNavItems = [
+    { key: "inventory", path: "/admin/inventory", label: "Tồn kho", icon: <span aria-hidden="true">▦</span> },
     {
       key: "dashboard",
       path: "/admin/dashboard",
