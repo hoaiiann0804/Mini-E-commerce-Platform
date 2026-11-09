@@ -1,3 +1,4 @@
+const inventoryService = require("../services/inventory.service");
 const {
   Product,
   Category,
@@ -523,6 +524,7 @@ const createProduct = async (req, res, next) => {
   const transaction = await sequelize.transaction();
 
   try {
+    await inventoryService.context(transaction, { ...inventoryService.actor(req.user), source: "CATALOG", type: "ADJUSTMENT", reason: "Khởi tạo hoặc cập nhật danh mục" });
     const {
       name,
       baseName,
@@ -633,7 +635,7 @@ const createProduct = async (req, res, next) => {
       const productVariants = variants.map((variant, index) => ({
         productId: product.id,
         sku: variant.sku || `${product.id}-VAR-${index + 1}`,
-        variantName: variant.name || variant.variantName,
+        name: variant.name || variant.variantName,
         price: parseFloat(variant.price) || 0,
         compareAtPrice: variant.compareAtPrice
           ? parseFloat(variant.compareAtPrice)
@@ -711,6 +713,7 @@ const updateProduct = async (req, res, next) => {
   const transaction = await sequelize.transaction();
 
   try {
+    await inventoryService.context(transaction, { ...inventoryService.actor(req.user), source: "CATALOG", type: "ADJUSTMENT", reason: "Khởi tạo hoặc cập nhật danh mục" });
     const { id } = req.params;
     const {
       name,
@@ -750,7 +753,20 @@ const updateProduct = async (req, res, next) => {
     const updateData = {};
 
     // Chỉ cập nhật các trường có trong request body
-    if (req.body.hasOwnProperty("name")) updateData.name = name;
+    if (req.body.hasOwnProperty("name")) {
+      updateData.name = name;
+      /**
+       * BUSINESS LOGIC - ĐỒNG BỘ BASE_NAME KHI ĐỔI TÊN SẢN PHẨM:
+       * baseName dùng làm tiền tố để ghép tên động với các thuộc tính biến thể (SimpleDynamicTitle).
+       * Khi đổi tên sản phẩm cha (vd: từ 2022 -> 2025), nếu client không truyền baseName riêng,
+       * ta tự động đồng bộ baseName = name để tránh hiện tượng ngoài danh sách là tên mới nhưng
+       * vào chi tiết lại hiển thị baseName cũ.
+       */
+      if (!req.body.hasOwnProperty("baseName")) {
+        updateData.baseName = (name || "").trim();
+      }
+    }
+    if (req.body.hasOwnProperty("baseName")) updateData.baseName = req.body.baseName;
     if (req.body.hasOwnProperty("description"))
       updateData.description = description;
     if (req.body.hasOwnProperty("shortDescription"))
@@ -761,9 +777,8 @@ const updateProduct = async (req, res, next) => {
     // Removed comparePrice update as it's not in the Product model
     if (req.body.hasOwnProperty("images")) updateData.images = images;
     if (req.body.hasOwnProperty("thumbnail")) updateData.thumbnail = thumbnail;
-    if (req.body.hasOwnProperty("inStock")) updateData.inStock = inStock;
-    if (req.body.hasOwnProperty("stockQuantity"))
-      updateData.stockQuantity = stockQuantity;
+    // Inventory derives availability.
+    // Inventory endpoint owns stock.
     if (req.body.hasOwnProperty("featured")) updateData.featured = featured;
     if (req.body.hasOwnProperty("searchKeywords"))
       updateData.searchKeywords = searchKeywords;
@@ -808,23 +823,8 @@ const updateProduct = async (req, res, next) => {
       }
     }
 
-    // Update variants - chỉ khi variants được gửi trong request
-    if (req.body.hasOwnProperty("variants")) {
-      // Delete existing variants
-      await ProductVariant.destroy({
-        where: { productId: id },
-        transaction,
-      });
-
-      // Create new variants
-      if (variants && variants.length > 0) {
-        const productVariants = variants.map((variant) => ({
-          ...variant,
-          productId: id,
-        }));
-
-        await ProductVariant.bulkCreate(productVariants, { transaction });
-      }
+    if (Object.prototype.hasOwnProperty.call(req.body, "variants")) {
+      await inventoryService.saveVariants(id, variants || [], transaction);
     }
 
     // Update warranty packages - chỉ khi warrantyPackageIds được gửi trong request
@@ -908,6 +908,9 @@ const updateProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (await require("../models/inventoryTransaction").count({ where: { productId: id } })) {
+      throw new AppError("Sản phẩm có lịch sử kho; hãy chuyển sang ngừng hoạt động thay vì xóa", 409);
+    }
 
     // Find product
     const product = await Product.findByPk(id);

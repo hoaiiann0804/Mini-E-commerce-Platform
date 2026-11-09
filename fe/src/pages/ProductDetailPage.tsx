@@ -122,21 +122,46 @@ const ProductDetailPage: React.FC = () => {
     }
   }, [error, navigate]);
 
-  // Auto-select first variant when product loads
+  // Auto-select initial variant when product loads
   useEffect(() => {
-    // //console.log("Product: ", product);
-    // //console.log("Selected", selectedAttributes);
-    if (product && product.attributes && product.attributes.length > 0) {
-      const firstAttribute = product.attributes[0];
-      if (firstAttribute.values && firstAttribute.values.length > 0) {
-        const firstValue = firstAttribute.values[0];
+    /**
+     * BUSINESS LOGIC - ĐỒNG BỘ GIÁ VÀ BIẾN THỂ KHI VÀO TRANG CHI TIẾT:
+     * 1. Đối với sản phẩm có biến thể (variants):
+     *    - Danh sách ngoài hiển thị giá khởi điểm (minVariantPrice, ví dụ: 28.990.000đ).
+     *    - Khi khách bấm vào trang chi tiết, cần tự động chọn đúng biến thể mặc định (isDefault)
+     *      hoặc biến thể có giá thấp nhất (bản base) để giá hiển thị trong trang chi tiết
+     *      khớp 100% với giá khách vừa nhìn thấy bên ngoài (tránh khách bị sốc giá lên 42tr hay 49tr).
+     *    - Đồng thời set đầy đủ các thuộc tính của biến thể đó để tiêu đề động (SimpleDynamicTitle)
+     *      hiển thị chính xác tên cấu hình ngay từ đầu.
+     */
+    if (product && Object.keys(selectedAttributes).length === 0) {
+      if (product.variants && product.variants.length > 0) {
+        // Tìm biến thể mặc định hoặc biến thể có giá thấp nhất
+        const defaultOrCheapestVariant =
+          product.variants.find((v: ProductVariant) => v.isDefault && v.isAvailable) ||
+          [...product.variants]
+            .filter((v: ProductVariant) => v.isAvailable)
+            .sort((a: ProductVariant, b: ProductVariant) => Number(a.price) - Number(b.price))[0] ||
+          product.variants[0];
 
-        // Only auto-select if nothing is selected yet
-        if (Object.keys(selectedAttributes).length === 0) {
-          const initialAttributes = { [firstAttribute.name]: firstValue };
+        if (defaultOrCheapestVariant?.attributes) {
+          setSelectedAttributes(defaultOrCheapestVariant.attributes);
+          setMappedAttributes(defaultOrCheapestVariant.attributes);
+          return;
+        }
+      }
+
+      // Fallback: nếu sản phẩm chỉ có thuộc tính nhưng chưa cấu hình variants
+      if (product.attributes && product.attributes.length > 0) {
+        const initialAttributes: Record<string, string> = {};
+        product.attributes.forEach((attr: any) => {
+          if (attr.values && attr.values.length > 0) {
+            initialAttributes[attr.name] = attr.values[0];
+          }
+        });
+        if (Object.keys(initialAttributes).length > 0) {
           setSelectedAttributes(initialAttributes);
           setMappedAttributes(initialAttributes);
-          // //console.log("MappedAttributes", initialAttributes);
         }
       }
     }
@@ -768,7 +793,7 @@ const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             {/* Simple Dynamic Product Title */}
             <SimpleDynamicTitle
-              baseName={product.baseName || product.name}
+              baseName={product.name || product.baseName}
               selectedAttributes={mappedAttributes}
               level={1}
               style={{ marginBottom: 8 }}
