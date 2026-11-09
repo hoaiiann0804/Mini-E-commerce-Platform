@@ -5,6 +5,10 @@ require('dotenv').config();
 const toBool = (value) => String(value).toLowerCase() === 'true';
 
 const withOptionalDatabaseUrl = (base) => {
+  if (process.env.DIRECT_DATABASE_URL) {
+    const { username, password, database, host, port, ...rest } = base;
+    return { use_env_variable: 'DIRECT_DATABASE_URL', ...rest };
+  }
   if (!process.env.DATABASE_URL) return base;
   const { username, password, database, host, port, ...rest } = base;
   return { use_env_variable: 'DATABASE_URL', ...rest };

@@ -42,13 +42,14 @@ module.exports = {
       underscored: true,
     },
     dialectOptions: {
-      ssl: toBool(process.env.DB_SSL)
+      ssl: toBool(process.env.DB_SSL ?? "true")
         ? { require: true, rejectUnauthorized: false }
         : false,
+      keepAlive: true,
     },
     pool: {
-      max: Number(process.env.DB_POOL_MAX) || 15,
-      min: Number(process.env.DB_POOL_MIN) || 2,
+      max: Number(process.env.DB_POOL_MAX) || 5,
+      min: Number(process.env.DB_POOL_MIN) || 0,
       acquire: 60000,
       idle: 10000,
     },
