@@ -265,7 +265,7 @@ const ProductsPage: React.FC = () => {
         const stock =
           stockQuantity !== undefined ? stockQuantity : record.stock;
         return (
-          <span style={{ color: stock > 0 ? "#52c41a" : "#ff4d4f" }}>
+          <span style={{ color: stock > 5 ? "#52c41a" : "#ff4d4f" }}>
             {stock}
           </span>
         );

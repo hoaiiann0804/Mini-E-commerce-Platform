@@ -73,9 +73,8 @@ const connectDB = async () => {
       process.env.NODE_ENV === "development" &&
       process.env.DB_SYNC === "true"
     ) {
-      // Use alter: true instead of force: true to preserve data
-      // force: true will DROP and recreate tables (DELETES ALL DATA)
-      // alter: true will modify existing tables to match models
+      // Only create missing tables in opt-in development mode.
+      // Evolve existing schemas with versioned migrations, not startup alter/force.
       await sequelize.sync();
       logger.info(
         "Database tables synchronized successfully (preserving data).",

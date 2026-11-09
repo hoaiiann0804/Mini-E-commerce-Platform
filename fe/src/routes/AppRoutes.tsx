@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicOnlyRoute from "@/components/auth/PublicOnlyRoute";
 import AdminRoute from "./AdminRoute";
+const InventoryPage = lazy(() => import("@/pages/admin/InventoryPage"));
 
 // import SideBarPerson from "@/pages/SideBarPerson";
 
@@ -214,6 +215,7 @@ const AppRoutes: React.FC = () => {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="inventory" element={<InventoryPage />} />
 
           {/* Product management */}
           <Route path="products" element={<AdminProductsPage />} />

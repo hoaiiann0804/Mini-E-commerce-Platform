@@ -30,6 +30,7 @@ router.use("/reviews", reviewRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/admin", adminRoutes);
+router.use("/admin/inventory", require("./inventory.routes"));
 router.use("/payment", paymentRoutes);
 router.use("/chatbot", chatbotRoutes);
 router.use("/warranty-packages", warrantyPackageRoutes);

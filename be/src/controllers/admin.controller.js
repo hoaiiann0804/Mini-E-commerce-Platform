@@ -1,3 +1,4 @@
+const inventoryService = require("../services/inventory.service");
 const {
   User,
   Product,
@@ -597,7 +598,8 @@ const getProductById = catchAsync(async (req, res) => {
 /**
  * Quản lý Products - Tạo sản phẩm mới
  */
-const createProduct = catchAsync(async (req, res) => {
+const createProduct = catchAsync(inventoryService.catalogMutation(async (req, res) => {
+  const transaction = require("../config/transactionContext").get("transaction");
   //console.log(
   //   "Create product request body:",
   //   JSON.stringify(req.body, null, 2)
@@ -668,7 +670,8 @@ const createProduct = catchAsync(async (req, res) => {
     images: images || [],
     thumbnail: images && images[0] ? images[0] : thumbnail,
     inStock: status === "active",
-    stockQuantity: stock || stockQuantity || 0,
+    stockQuantity: variants.length ? 0 : (stock ?? stockQuantity ?? 0),
+    isVariantProduct: variants.length > 0,
     sku: uniqueSku,
     status,
     featured,
@@ -995,12 +998,13 @@ const createProduct = catchAsync(async (req, res) => {
     status: "success",
     data: { product: productWithRelations },
   });
-});
+}));
 
 /**
  * Quản lý Products - Cập nhật sản phẩm
  */
-const updateProduct = catchAsync(async (req, res) => {
+const updateProduct = catchAsync(inventoryService.catalogMutation(async (req, res) => {
+  const transaction = require("../config/transactionContext").get("transaction");
   const { id } = req.params;
   const {
     name,
@@ -1044,7 +1048,7 @@ const updateProduct = catchAsync(async (req, res) => {
   //   req.body.hasOwnProperty("warrantyPackageIds")
   // );
 
-  const product = await Product.findByPk(id);
+  const product = await Product.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
   if (!product) {
     throw new AppError("Không tìm thấy sản phẩm", 404);
   }
@@ -1083,9 +1087,8 @@ const updateProduct = catchAsync(async (req, res) => {
   }
   if (req.body.hasOwnProperty("images")) updateData.images = images;
   if (req.body.hasOwnProperty("thumbnail")) updateData.thumbnail = thumbnail;
-  if (req.body.hasOwnProperty("inStock")) updateData.inStock = inStock;
-  if (req.body.hasOwnProperty("stockQuantity"))
-    updateData.stockQuantity = stockQuantity;
+  // Availability derives from stock; catalog does not overwrite it.
+  // Stock is edited through inventory endpoints, never from a stale catalog form.
   if (req.body.hasOwnProperty("sku")) updateData.sku = sku;
   if (req.body.hasOwnProperty("status")) updateData.status = status;
   if (req.body.hasOwnProperty("featured")) updateData.featured = featured;
@@ -1223,115 +1226,8 @@ const updateProduct = catchAsync(async (req, res) => {
     }
   }
 
-  // Xử lý variants - chỉ khi request có chứa field 'variants'
-  if (req.body.hasOwnProperty("variants") && Array.isArray(variants)) {
-    try {
-      // Xóa tất cả variants cũ
-      await ProductVariant.destroy({ where: { productId: id } });
-
-      // Tạo variants mới
-      let createdVariants = [];
-      if (variants.length > 0) {
-        // Lấy attributes để validate
-        const productAttributes = await ProductAttribute.findAll({
-          where: { productId: id },
-        });
-
-        const variantPromises = variants.map(async (variant) => {
-          // Đảm bảo variant.attributes luôn là một object
-          const variantAttributes = variant.attributes || {};
-
-          //console.log(`Processing variant: ${variant.name}`, {
-          //   price: variant.price,
-          //   stock: variant.stock,
-          //   sku: variant.sku,
-          //   attributes: variantAttributes,
-          // });
-
-          // Validate variant attributes - bỏ qua validation nếu không có thuộc tính
-          if (
-            productAttributes.length > 0 &&
-            Object.keys(variantAttributes).length > 0
-          ) {
-            try {
-              // Tạm thời bỏ qua validation để đảm bảo biến thể được tạo
-              // const isValid = validateVariantAttributes(
-              //   productAttributes,
-              //   variantAttributes
-              // );
-              // if (!isValid) {
-              //   throw new Error(
-              //     `Thuộc tính biến thể không hợp lệ cho biến thể: ${variant.name}`
-              //   );
-              // }
-            } catch (error) {
-              console.error("Lỗi khi xác thực thuộc tính biến thể:", error);
-              // Không throw error, chỉ log để tiếp tục tạo biến thể
-            }
-          }
-
-          // Generate SKU if not provided
-          const variantSku =
-            variant.sku ||
-            generateVariantSku(updatedProduct.sku, variantAttributes);
-
-          //console.log(`Creating variant with SKU: ${variantSku}`);
-
-          return await ProductVariant.create({
-            productId: id,
-            name: variant.name,
-            sku: variantSku,
-            attributes: variantAttributes,
-            price: parseFloat(variant.price) || 0,
-            stockQuantity:
-              parseInt(variant.stockQuantity ?? variant.stock) || 0,
-            images: variant.images || [],
-          });
-        });
-
-        createdVariants = await Promise.all(variantPromises);
-        changes.variants = variants.length;
-
-        const minVariantPrice = createdVariants.reduce((min, v) => {
-          const variantPrice = parseFloat(v.price);
-          if (!Number.isFinite(variantPrice)) return min;
-          return min === null ? variantPrice : Math.min(min, variantPrice);
-        }, null);
-
-        // Update product stock + denormalized min price from variants
-        const totalStock = calculateTotalStock(createdVariants);
-        await Product.update(
-          {
-            ...(minVariantPrice !== null
-              ? { price: minVariantPrice, minVariantPrice: minVariantPrice }
-              : {}),
-            isVariantProduct: true,
-            stockQuantity: totalStock,
-            inStock: totalStock > 0,
-          },
-          { where: { id } },
-        );
-      } else {
-        // If no variants, reset to product base stock
-        await Product.update(
-          { isVariantProduct: false, minVariantPrice: null },
-          { where: { id } },
-        );
-        // Chỉ cập nhật nếu stockQuantity đã được gửi trong request
-        if (req.body.hasOwnProperty("stockQuantity")) {
-          await Product.update(
-            {
-              stockQuantity: stockQuantity,
-              inStock: stockQuantity > 0,
-            },
-            { where: { id } },
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error updating variants:", error);
-      throw error;
-    }
+  if (Object.prototype.hasOwnProperty.call(req.body, "variants")) {
+    await inventoryService.saveVariants(id, variants, transaction);
   }
 
   // Xử lý specifications - chỉ khi request có chứa field 'specifications'
@@ -1464,13 +1360,16 @@ const updateProduct = catchAsync(async (req, res) => {
     status: "success",
     data: { product: productWithRelations },
   });
-});
+}));
 
 /**
  * Quản lý Products - Xóa sản phẩm
  */
 const deleteProduct = catchAsync(async (req, res) => {
   const { id } = req.params;
+  if (await require("../models/inventoryTransaction").count({ where: { productId: id } })) {
+    throw new AppError("Sản phẩm có lịch sử kho; hãy chuyển sang ngừng hoạt động thay vì xóa", 409);
+  }
   const {
     CartItem,
     OrderItem,
@@ -1887,34 +1786,8 @@ const getAllOrders = catchAsync(async (req, res) => {
  * Quản lý Orders - Cập nhật trạng thái đơn hàng
  */
 const updateOrderStatus = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { status, note } = req.body;
-
-  const validStatuses = [
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ];
-  if (!validStatuses.includes(status)) {
-    throw new AppError("Trạng thái đơn hàng không hợp lệ", 400);
-  }
-
-  const order = await Order.findByPk(id);
-  if (!order) {
-    throw new AppError("Không tìm thấy đơn hàng", 404);
-  }
-
-  const updatedOrder = await order.update({
-    status,
-    note: note || order.note,
-  });
-
-  res.status(200).json({
-    status: "success",
-    data: { order: updatedOrder },
-  });
+  const order = await inventoryService.transitionOrder(req.params.id, req.body.status, req.user, { note: req.body.note });
+  res.status(200).json({ status: "success", data: { order } });
 });
 
 /**

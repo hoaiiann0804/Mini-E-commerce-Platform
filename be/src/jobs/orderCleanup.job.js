@@ -1,4 +1,5 @@
 "use strict";
+const inventoryService = require("../services/inventory.service");
 
 /**
  * Order Cleanup Job - Tự động hoàn kho cho đơn hàng quá hạn thanh toán
@@ -116,24 +117,7 @@ const processExpiredOrder = async (expiredOrder) => {
       transaction,
     });
 
-    // Bước 4: Hoàn kho cho từng sản phẩm/variant
-    for (const item of orderItems) {
-      if (item.variantId) {
-        // Hoàn kho cho ProductVariant
-        await ProductVariant.increment("stockQuantity", {
-          by: item.quantity,
-          where: { id: item.variantId },
-          transaction,
-        });
-      } else if (item.productId) {
-        // Hoàn kho cho Product (không có variant)
-        await Product.increment("stockQuantity", {
-          by: item.quantity,
-          where: { id: item.productId },
-          transaction,
-        });
-      }
-    }
+    await inventoryService.orderMovement(lockedOrder, orderItems, "RELEASE", null, transaction, "Hoàn kho do đơn hết hạn thanh toán");
 
     // Bước 4.2: Hoàn lại lượt dùng Coupon nếu đơn hàng có áp mã
     if (lockedOrder.couponId) {

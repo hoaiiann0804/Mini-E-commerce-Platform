@@ -137,7 +137,7 @@ const confirmPayment = async (req, res, next) => {
 
       // EDGE CASE: Cleanup job đã hủy đơn (quá 15 phút)
       // Cần admin xem xét refund thủ công
-      if (order.status === "expired") {
+      if (["expired", "cancelled"].includes(order.status)) {
         await transaction.rollback();
         console.error(
           `[confirmPayment] ⚠️ CẢNH BÁO: Đơn hàng ${order.number} đã EXPIRED` +
@@ -401,7 +401,7 @@ const handlePaymentSucceeded = async (paymentIntent) => {
 
     // Bước 3: Kiểm tra đơn đã bị expired (cleanup job đã hoàn kho rồi)
     // Đây là trường hợp khách nhập thẻ chậm hơn 15 phút
-    if (order.status === "expired") {
+    if (["expired", "cancelled"].includes(order.status)) {
       await transaction.rollback();
       // TODO: Cần xử lý refund thủ công hoặc tự động
       // RỦI RO: Stripe đã trừ tiền của khách nhưng đơn hàng đã hết hạn

@@ -149,6 +149,7 @@ export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithAutoLogout,
   tagTypes: [
+    "Inventory",
     "Product",
     "Category",
     "User",
