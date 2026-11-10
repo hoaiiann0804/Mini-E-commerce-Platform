@@ -16,6 +16,7 @@ if (
         callbackURL:
           process.env.GOOGLE_CALLBACK_URL ||
           "/api/auth/google/callback",
+        proxy: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
