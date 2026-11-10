@@ -32,7 +32,14 @@ app.use(
 
 // Enable CORS
 
-const parseList = (val)=> (val || "").split(",").map((s)=>s.trim()).filter(Boolean)
+const normalizeOrigin = (val) => (val || "").trim().replace(/\/+$/, "");
+
+const parseList = (val) =>
+  (val || "")
+    .split(",")
+    .map((s) => normalizeOrigin(s))
+    .filter(Boolean);
+
 const defaultDevOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
@@ -41,19 +48,28 @@ const defaultDevOrigins = [
 ];
 
 const configuredOrigins = new Set([
- ...parseList(process.env.CORS_ORIGIN),
- ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL ]: []) ,
- ...defaultDevOrigins
+  ...parseList(process.env.CORS_ORIGIN),
+  ...(process.env.FRONTEND_URL ? [normalizeOrigin(process.env.FRONTEND_URL)] : []),
+  ...defaultDevOrigins,
 ]);
 
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (configuredOrigins.has(origin)) {
+    const cleanOrigin = normalizeOrigin(origin);
+
+    if (configuredOrigins.has(cleanOrigin)) {
       return callback(null, true);
     }
-  console.log("❌ Blocked by CORS:", origin);
-  return callback(null, false);  },
+
+    // Cho phép preview và production domains từ Vercel (*.vercel.app)
+    if (/^https:\/\/[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.vercel\.app$/.test(cleanOrigin)) {
+      return callback(null, true);
+    }
+
+    console.log("❌ Blocked by CORS:", origin);
+    return callback(null, false);
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

@@ -1,7 +1,11 @@
 const jwt = require("jsonwebtoken");
+
+const DEFAULT_ACCESS_TOKEN_EXPIRES_IN = "15m";
+const DEFAULT_REFRESH_TOKEN_EXPIRES_IN = "7d";
+
 const generateAccessToken = (user) => {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN || DEFAULT_ACCESS_TOKEN_EXPIRES_IN,
   });
 };
 
@@ -10,7 +14,8 @@ const generateRefreshToken = (user) => {
     { id: user.id, role: user.role },
     process.env.JWT_REFRESH_SECRET,
     {
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+      expiresIn:
+        process.env.JWT_REFRESH_EXPIRES_IN || DEFAULT_REFRESH_TOKEN_EXPIRES_IN,
     },
   );
 };
