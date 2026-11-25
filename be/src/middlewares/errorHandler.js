@@ -38,20 +38,13 @@ const sendErrorProd = (err, res) => {
   }
 };
 
-// Handle specific error types
-const handleCastErrorDB = (err) => {
-  const message = `Giá trị không hợp lệ: ${err.value}`;
-  return new AppError(message, 400);
-};
+// Handle invalid UUID / data format in PostgreSQL (SQLSTATE 22P02)
+const handleInvalidInputSyntaxDB = () =>
+  new AppError('Định dạng dữ liệu hoặc ID không hợp lệ.', 400);
 
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  const message = `Giá trị trùng lặp: ${value}. Vui lòng sử dụng giá trị khác!`;
-  return new AppError(message, 400);
-};
-
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
+// Handle Sequelize validation error
+const handleSequelizeValidationError = (err) => {
+  const errors = (err.errors || []).map((el) => el.message);
   const message = `Dữ liệu không hợp lệ. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
@@ -79,19 +72,18 @@ const errorHandler = (err, req, res, next) => {
 
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
-  } else if (process.env.NODE_ENV === 'production') {
+  } else {
     let error = { ...err };
+    error.name = err.name;
     error.message = err.message;
 
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError')
-      error = handleValidationErrorDB(error);
+    if (err.parent?.code === '22P02') error = handleInvalidInputSyntaxDB();
+    if (error.name === 'SequelizeValidationError')
+      error = handleSequelizeValidationError(err);
+    if (error.name === 'SequelizeUniqueConstraintError')
+      error = handleSequelizeUniqueConstraintError(err);
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
     if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
-    // Handle Sequelize unique constraint error
-    if (error.name === 'SequelizeUniqueConstraintError')
-      error = handleSequelizeUniqueConstraintError(error);
 
     sendErrorProd(error, res);
   }
