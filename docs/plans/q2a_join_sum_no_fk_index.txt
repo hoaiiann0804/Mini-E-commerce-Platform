@@ -1,0 +1,36 @@
+Limit  (cost=18167.74..18167.76 rows=10 width=88) (actual time=310.895..310.902 rows=10 loops=1)
+  Buffers: shared hit=11331
+  ->  Sort  (cost=18167.74..18223.94 rows=22480 width=88) (actual time=310.893..310.899 rows=10 loops=1)
+        Sort Key: ((sum(oi.quantity))::integer) DESC, p.avg_rating DESC, p.created_at DESC
+        Sort Method: top-N heapsort  Memory: 27kB
+        Buffers: shared hit=11331
+        ->  HashAggregate  (cost=17400.95..17681.95 rows=22480 width=88) (actual time=305.835..308.646 rows=16383 loops=1)
+              Group Key: p.id
+              Batches: 1  Memory Usage: 3857kB
+              Buffers: shared hit=11331
+              ->  Hash Join  (cost=9979.50..16913.25 rows=97540 width=88) (actual time=76.984..272.468 rows=96532 loops=1)
+                    Hash Cond: (oi.product_id = p.id)
+                    Buffers: shared hit=11331
+                    ->  Hash Join  (cost=5912.50..12504.51 rows=130169 width=20) (actual time=66.239..222.520 rows=129860 loops=1)
+                          Hash Cond: (oi.order_id = o.id)
+                          Buffers: shared hit=7920
+                          ->  Seq Scan on order_items oi  (cost=0.00..6068.24 rows=199524 width=36) (actual time=0.007..60.587 rows=199524 loops=1)
+                                Buffers: shared hit=4073
+                          ->  Hash  (cost=5097.00..5097.00 rows=65240 width=16) (actual time=66.190..66.191 rows=65098 loops=1)
+                                Buckets: 65536  Batches: 1  Memory Usage: 3564kB
+                                Buffers: shared hit=3847
+                                ->  Seq Scan on orders o  (cost=0.00..5097.00 rows=65240 width=16) (actual time=0.004..58.376 rows=65098 loops=1)
+                                      Filter: (status = 'delivered'::enum_orders_status)
+                                      Rows Removed by Filter: 34902
+                                      Buffers: shared hit=3847
+                    ->  Hash  (cost=3786.00..3786.00 rows=22480 width=84) (actual time=10.724..10.725 rows=22480 loops=1)
+                          Buckets: 32768  Batches: 1  Memory Usage: 2891kB
+                          Buffers: shared hit=3411
+                          ->  Seq Scan on products p  (cost=0.00..3786.00 rows=22480 width=84) (actual time=0.426..6.538 rows=22480 loops=1)
+                                Filter: (status = 'active'::enum_products_status)
+                                Rows Removed by Filter: 7520
+                                Buffers: shared hit=3411
+Planning:
+  Buffers: shared hit=22
+Planning Time: 0.259 ms
+Execution Time: 311.028 ms

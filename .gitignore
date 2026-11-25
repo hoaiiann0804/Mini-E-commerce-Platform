@@ -3,3 +3,6 @@
 .env
 ops/env/.env.dev
 ops/env/.env.prod
+
+# ignore personal JD / CV documents
+docs/jd/

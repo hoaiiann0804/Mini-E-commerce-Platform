@@ -1,0 +1,12 @@
+Limit  (cost=4271.78..4271.81 rows=10 width=88) (actual time=9.673..9.676 rows=10 loops=1)
+  Buffers: shared hit=3411
+  ->  Sort  (cost=4271.78..4327.98 rows=22480 width=88) (actual time=9.672..9.673 rows=10 loops=1)
+        Sort Key: sold_count DESC, avg_rating DESC, created_at DESC
+        Sort Method: top-N heapsort  Memory: 27kB
+        Buffers: shared hit=3411
+        ->  Seq Scan on products  (cost=0.00..3786.00 rows=22480 width=88) (actual time=0.507..6.224 rows=22480 loops=1)
+              Filter: (status = 'active'::enum_products_status)
+              Rows Removed by Filter: 7520
+              Buffers: shared hit=3411
+Planning Time: 0.066 ms
+Execution Time: 9.693 ms
