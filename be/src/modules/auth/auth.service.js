@@ -150,7 +150,7 @@ const forgotPassword = async (email) => {
     return;
   }
   const resetToken = generateRandomToken();
-  authRepository.updateUser(user, {
+  await authRepository.updateUser(user, {
     resetPasswordToken: resetToken,
     resetPasswordExpires: getResetPasswordTokenExpiresAt(),
   });
