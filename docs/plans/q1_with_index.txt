@@ -1,0 +1,7 @@
+Limit  (cost=0.29..5.75 rows=10 width=88) (actual time=0.013..0.024 rows=10 loops=1)
+  Buffers: shared hit=12
+  ->  Index Scan using idx_products_bestsellers_active_sort on products  (cost=0.29..12275.32 rows=22480 width=88) (actual time=0.012..0.023 rows=10 loops=1)
+        Index Cond: (status = 'active'::enum_products_status)
+        Buffers: shared hit=12
+Planning Time: 0.064 ms
+Execution Time: 0.034 ms

@@ -14,7 +14,9 @@
     "db:seed": "npx sequelize-cli db:seed:all",
     "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "import:sample": "node import-sample-data.js",
-    "import:json": "node import-json-data.js"
+    "import:json": "node import-json-data.js",
+    "seed:100k": "node scripts/seed-100k-orders.js",
+    "benchmark:bestsellers": "node scripts/benchmark-bestsellers.js"
   },
   "keywords": [
     "ecommerce",
